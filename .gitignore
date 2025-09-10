@@ -16,3 +16,6 @@
 
 # broccoli-debug
 /DEBUG/
+.aider*
+.tool-versions
+*.sh

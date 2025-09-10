@@ -1,0 +1,6 @@
+<ul>
+  {{#each @scrapes as |scrape|}}
+    <li><LinkTo @route="scrapes.show" @model={{scrape}}>Scrape #{{scrape.id}}</LinkTo></li>
+  {{/each}}
+</ul>
+<LinkTo @route="scrapes.new">New Scrape</LinkTo>

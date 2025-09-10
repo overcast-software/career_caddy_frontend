@@ -1,0 +1,6 @@
+<ul>
+  {{#each @scores as |score|}}
+    <li><LinkTo @route="scores.show" @model={{score}}>Score #{{score.id}}</LinkTo></li>
+  {{/each}}
+</ul>
+<LinkTo @route="scores.new">New Score</LinkTo>

@@ -1,0 +1,6 @@
+<ul>
+  {{#each @companies as |company|}}
+    <li><LinkTo @route="companies.show" @model={{company}}>Company #{{company.id}}</LinkTo></li>
+  {{/each}}
+</ul>
+<LinkTo @route="companies.new">New Company</LinkTo>

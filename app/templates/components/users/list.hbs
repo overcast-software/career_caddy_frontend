@@ -1,0 +1,6 @@
+<ul>
+  {{#each @users as |user|}}
+    <li><LinkTo @route="users.show" @model={{user}}>User #{{user.id}}</LinkTo></li>
+  {{/each}}
+</ul>
+<LinkTo @route="users.new">New User</LinkTo>

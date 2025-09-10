@@ -6,4 +6,85 @@ export default class Router extends EmberRouter {
   rootURL = config.rootURL;
 }
 
-Router.map(function () {});
+Router.map(function () {
+  this.route('applications', function() {
+    this.route('show', {
+      path: '/:application_id'
+    });
+    this.route('new');
+
+    this.route('edit', {
+      path: '/:application_id/edit'
+    });
+  });
+  this.route('companies', function() {
+    this.route('show', {
+      path: '/:company_id'
+    });
+    this.route('new');
+
+    this.route('edit', {
+      path: '/:company_id/edit'
+    });
+  });
+  this.route('cover-letters', function() {
+    this.route('show', {
+      path: '/:cover_letter_id'
+    });
+    this.route('new');
+
+    this.route('edit', {
+      path: '/:cover_letter_id/edit'
+    });
+  });
+  this.route('job-posts', function() {
+    this.route('show', {
+      path: '/:job_post_id'
+    });
+    this.route('new');
+
+    this.route('edit', {
+      path: '/:job_post_id/edit'
+    });
+  });
+  this.route('resumes', function() {
+    this.route('show', {
+      path: '/:resume_id'
+    });
+    this.route('new');
+
+    this.route('edit', {
+      path: '/:resume_id/edit'
+    });
+  });
+  this.route('scores', function() {
+    this.route('show', {
+      path: '/:score_id'
+    });
+    this.route('new');
+
+    this.route('edit', {
+      path: '/:score_id/edit'
+    });
+  });
+  this.route('scrapes', function() {
+    this.route('show', {
+      path: '/:scrape_id'
+    });
+    this.route('new');
+
+    this.route('edit', {
+      path: '/:scrape_id/edit'
+    });
+  });
+  this.route('users', function() {
+    this.route('show', {
+      path: '/:user_id'
+    });
+    this.route('new');
+
+    this.route('edit', {
+      path: '/:user_id/edit'
+    });
+  });
+});

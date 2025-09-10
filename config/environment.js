@@ -15,12 +15,19 @@ module.exports = function (environment) {
     },
 
     APP: {
-      // Here you can pass flags/options to your application instance
-      // when it is created
+      API_HOST: process.env.API_HOST || 'http://localhost:8000',
+      API_NAMESPACE: process.env.API_NAMESPACE || 'api/v1'
     },
   };
 
   if (environment === 'development') {
+    if (!process.env.API_HOST) {
+      ENV.APP.API_HOST = null; // use same-origin; Ember CLI proxy will forward to 8000
+    }
+    ENV.contentSecurityPolicy = {
+      // 'connect-src': "'self' http://localhost:5301 http://peertube.localhost:9000",
+      'connect-src': "'self' http://localhost:8000",
+    }
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;
