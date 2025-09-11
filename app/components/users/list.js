@@ -1,3 +1,7 @@
 import Component from '@glimmer/component';
 
-export default class UsersList extends Component {}
+export default class UsersListComponent extends Component {
+  get users() {
+    return this.args.users ?? [];
+  }
+}

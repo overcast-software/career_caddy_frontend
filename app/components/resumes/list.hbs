@@ -1,0 +1,6 @@
+{{yield}}
+<ul>
+    {{#each @resumes as |resume|}}
+        <li><LinkTo @route="resumes.show" @model={{resume}}>Resume #{{resume.id}}</LinkTo></li>
+    {{/each}}
+</ul>

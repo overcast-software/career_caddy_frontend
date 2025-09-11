@@ -1,0 +1,53 @@
+<form {{on "submit" this.onSubmit}}>
+  {{#if this.errorMessage}}
+    <p class="error">{{this.errorMessage}}</p>
+  {{/if}}
+
+  <div>
+    <label for="create-mode">Create</label>
+    <select
+      id="create-mode"
+      value={{if this.form_toggle "manual" "by-url"}}
+      {{on "change" this.onModeChange}}
+    >
+      <option value="by-url">by url</option>
+      <option value="manual">manual</option>
+    </select>
+  </div>
+
+  {{#if this.form_toggle  }}
+    <div>
+      <label for="title">Title</label>
+      <input
+        id="title"
+        type="text"
+        value={{@jobPost.title}}
+        {{on "input" (fn this.updateField "title")}}
+        required
+      />
+    </div>
+    <div>
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        value={{@jobPost.description}}
+        {{on "input" (fn this.updateField "description")}}
+        rows="8"
+      ></textarea>
+    </div>
+
+  {{else}}
+  <div>
+    <label for="url">Url</label>
+    <input
+      id="url"
+      type="text"
+      value={{@jobPost.title}}
+      {{on "input" (fn this.updateField "title")}}
+      required
+    />
+  </div>
+  {{/if}}
+
+  <button type="submit">Create Job Post</button>
+</form>

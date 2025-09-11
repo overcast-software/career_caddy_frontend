@@ -6,4 +6,14 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
     return config.APP.API_HOST || undefined;
   }
   namespace = config.APP.API_NAMESPACE;
+
+  buildURL(...args) {
+    let url = super.buildURL(...args);
+    if (url.endsWith('/')) return url;
+    if (url.includes('?')) {
+      const [base, query] = url.split('?');
+      return `${base.endsWith('/') ? base : base + '/' }?${query}`;
+    }
+    return `${url}/`;
+  }
 }

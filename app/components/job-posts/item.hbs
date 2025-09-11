@@ -1,0 +1,34 @@
+<h1>
+{{this.companyName}}
+</h1>
+<h1>
+    <LinkTo @route="job-posts.show" @model={{this.jobPost}}>{{this.jobPost.title}}</LinkTo>
+</h1>
+<p>
+{{this.jobPost.description}}
+</p>
+<label for="resume-select">Resume:</label>
+<select id="resume-select" {{on "change" this.onResumeChange}} value={{this.selectedResumeId}}>
+  <option value="">Select a resume…</option>
+  {{#each this.resumes as |resume|}}
+    <option value={{resume.id}}>
+      {{#if resume.filePath}}
+        {{resume.filePath}}
+      {{else}}
+        Resume {{resume.id}}
+      {{/if}}
+    </option>
+  {{/each}}
+</select>
+<button type="button" {{on "click" this.score}} disabled={{this.isScoreDisabled}}>Score</button>
+<button type="button" {{on "click" this.apply}}>Apply</button>
+<button type="button" {{on "click" this.previous}}>Previous</button>
+<button type="button" {{on "click" this.next}}>Next</button>
+<h3>scores:</h3>
+{{#each this.scores as |score|}}
+    <ul>
+        <li>
+            score: <LinkTo @route="scores.show" @model={{score.id}}>{{score.score}}</LinkTo>
+        </li>
+    </ul>
+{{/each}}

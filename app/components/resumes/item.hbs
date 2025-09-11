@@ -1,0 +1,7 @@
+{{yield}}
+<h1>
+    <LinkTo @route="resumes.show" @model={{@resume}}>Resume #{{@resume.id}}</LinkTo>
+    <p>
+        {{@resume.content}}
+    </p>
+</h1>
