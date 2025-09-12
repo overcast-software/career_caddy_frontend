@@ -5,6 +5,6 @@ export default class UserModel extends Model {
   @attr('string') email;
   @hasMany('resume', { async: false, inverse: null }) resumes;
   @hasMany('score', { async: false, inverse: null }) scores;
-  @hasMany('cover-letter', { async: false, inverse: null }) coverLetters;
+  @hasMany('cover-letter', { async: false, inverse: 'user' }) coverLetters;
   @hasMany('application', { async: false, inverse: null }) applications;
 }

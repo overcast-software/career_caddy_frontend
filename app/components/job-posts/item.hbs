@@ -21,6 +21,8 @@
   {{/each}}
 </select>
 <button type="button" {{on "click" this.score}} disabled={{this.isScoreDisabled}}>Score</button>
+<button type="button" {{on "click" this.summary}} disabled={{this.isScoreDisabled}}>Create resume summary</button>
+<button type="button" {{on "click" this.cover_letter}} disabled={{this.isScoreDisabled}}>Create cover letter</button>
 <button type="button" {{on "click" this.apply}}>Apply</button>
 <button type="button" {{on "click" this.previous}}>Previous</button>
 <button type="button" {{on "click" this.next}}>Next</button>
@@ -28,7 +30,8 @@
 {{#each this.scores as |score|}}
     <ul>
         <li>
-            score: <LinkTo @route="scores.show" @model={{score.id}}>{{score.score}}</LinkTo>
+            resume {{score.resume.id}}
+            scored: <LinkTo @route="scores.show" @model={{score.id}}>{{score.score}}</LinkTo>
         </li>
     </ul>
 {{/each}}

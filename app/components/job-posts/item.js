@@ -28,7 +28,6 @@ export default class JobPostsItemComponent extends Component {
     const jobPostId = this.jobPost?.id;
     if (!userId || !jobPostId) return [];
     return this.store.peekAll('score').filter((score) => {
-      console.log(score.belongsTo('jobPost').id())
       return score.belongsTo('user').id() === userId &&
              score.belongsTo('jobPost').id() === jobPostId;
     });
@@ -41,29 +40,7 @@ export default class JobPostsItemComponent extends Component {
 
   // collection helpers (used for next/previous)
   get collection() {
-    return this.args.jobPosts ?? this.args.collection ?? [];
-  }
-
-  get index() {
-    const cur = this.jobPost;
-    if (!cur) return -1;
-    return this.collection.findIndex((jp) => jp?.id === cur.id);
-  }
-
-  get hasPrevious() {
-    return this.index > 0;
-  }
-
-  get hasNext() {
-    return this.index >= 0 && this.index < this.collection.length - 1;
-  }
-
-  get previousJobPost() {
-    return this.hasPrevious ? this.collection[this.index - 1] : null;
-  }
-
-  get nextJobPost() {
-    return this.hasNext ? this.collection[this.index + 1] : null;
+    return this.store.findAll('job-post');
   }
 
   // derive an external application URL from related scrapes
@@ -76,7 +53,6 @@ export default class JobPostsItemComponent extends Component {
   get isScoreDisabled() {
     return !this.selectedResumeId;
   }
-
 
   @action
   edit() {
@@ -118,11 +94,49 @@ export default class JobPostsItemComponent extends Component {
   }
 
   @action
-  score() {
+  async score() {
     const jobPost = this.jobPost ?? this.args.jobPost;
-    if (!jobPost) return;
-    if (typeof this.args.onScore === 'function') return this.args.onScore(jobPost);
-    this.router.transitionTo('scores.new');
+    const user = this.currentUser;
+    const resumeId = this.selectedResumeId;
+
+    if (!jobPost || !user || !resumeId) return;
+
+    let resume = this.store.peekRecord('resume', resumeId);
+    if (!resume) {
+      resume = this.store.findRecord('resume', resumeId);
+    }
+
+    const newScore = this.store.createRecord('score', {
+      resume,
+      jobPost,
+      user,
+    });
+
+    try {
+      newScore.save();
+    } catch (e) {
+      // Optional: surface the error
+
+      console.error('Failed to create score', e);
+    }
+  }
+
+  @action
+  summary(){
+    const jobPost = this.jobPost ?? this.args.jobPost;
+    const user = this.currentUser;
+    const resumeId = this.selectedResumeId;
+    if (!jobPost || !user || !resumeId) return;
+    let resume = this.store.peekRecord('resume', resumeId);
+    if (!resume) {
+      resume = this.store.findRecord('resume', resumeId);
+    }
+    const newSummary = this.store.createRecord('summary', {
+      resume,
+      jobPost,
+      user
+    })
+    newSummary.save()
   }
 
   @action
@@ -133,6 +147,23 @@ export default class JobPostsItemComponent extends Component {
 
     const url = this.applicationUrl;
     if (url) window.open(url, '_blank', 'noopener');
+  }
+  @action
+  cover_letter(){
+    const jobPost = this.jobPost ?? this.args.jobPost;
+    const user = this.currentUser;
+    const resumeId = this.selectedResumeId;
+    if (!jobPost || !user || !resumeId) return;
+    let resume = this.store.peekRecord('resume', resumeId);
+    if (!resume) {
+      resume = this.store.findRecord('resume', resumeId);
+    }
+    const newCoverLetter = this.store.createRecord('cover-letter', {
+      resume,
+      jobPost,
+      user
+    })
+    newCoverLetter.save()
   }
 
   @action
