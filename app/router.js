@@ -87,5 +87,5 @@ Router.map(function () {
       path: '/:user_id/edit'
     });
   });
-  this.route('summaries');
+  this.route('summaries', function() {});
 });

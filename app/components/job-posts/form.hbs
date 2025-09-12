@@ -1,4 +1,3 @@
-<form {{on "submit" this.onSubmit}}>
   {{#if this.errorMessage}}
     <p class="error">{{this.errorMessage}}</p>
   {{/if}}
@@ -16,38 +15,72 @@
   </div>
 
   {{#if this.form_toggle  }}
-    <div>
-      <label for="title">Title</label>
-      <input
-        id="title"
-        type="text"
-        value={{@jobPost.title}}
-        {{on "input" (fn this.updateField "title")}}
-        required
-      />
-    </div>
-    <div>
-      <label for="description">Description</label>
-      <textarea
-        id="description"
-        value={{@jobPost.description}}
-        {{on "input" (fn this.updateField "description")}}
-        rows="8"
-      ></textarea>
-    </div>
+    <form {{on "submit" this.submitManual}}>
+      <div>
+        <label for="company-select">Company</label>
+        <select
+          id="company-select"
+          {{on "change" this.onCompanyChange}}
+          value={{this.selectedCompanyId}}
+          required
+        >
+          <option value="">Select a company…</option>
+          {{#each this.companies as |company|}}
+            <option value={{company.id}}>
+              {{#if company.displayName}}{{company.displayName}}{{else}}{{company.name}}{{/if}}
+            </option>
+          {{/each}}
+          <option value="__new__">Create new company…</option>
+        </select>
+      </div>
 
+      {{#if this.isCreatingNewCompany}}
+        <div>
+          <label for="new-company-name">New company name</label>
+          <input
+            id="new-company-name"
+            type="text"
+            value={{this.newCompanyName}}
+            {{on "input" this.updateNewCompanyName}}
+            required
+          />
+        </div>
+      {{/if}}
+
+      <div>
+        <label for="title">Title</label>
+        <input
+          id="title"
+          type="text"
+          value={{@jobPost.title}}
+          {{on "input" (fn this.updateField "title")}}
+          required
+        />
+      </div>
+      <div>
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          value={{@jobPost.description}}
+          {{on "input" (fn this.updateField "description")}}
+          rows="8"
+        ></textarea>
+      </div>
+
+      <button type="submit">Create Job Post</button>
+    </form>
   {{else}}
-  <div>
-    <label for="url">Url</label>
-    <input
-      id="url"
-      type="text"
-      value={{@jobPost.title}}
-      {{on "input" (fn this.updateField "title")}}
-      required
-    />
-  </div>
+    <form {{on "submit" this.submitScrape}}>
+      <div>
+        <label for="url">Url</label>
+        <input
+          id="url"
+          type="text"
+          value=""
+          {{on "change" this.updateUrl}}
+          required
+        />
+      </div>
+      <button type="submit">Scrape the page</button>
+    </form>
   {{/if}}
-
-  <button type="submit">Create Job Post</button>
-</form>

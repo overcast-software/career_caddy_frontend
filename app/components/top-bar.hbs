@@ -1,4 +1,21 @@
 {{yield}}
+<ul style="display: inline-block">
+  <li>
+    <LinkTo @route='job-posts.index'>Job posts</LinkTo>
+  </li>
+  <li>
+    <LinkTo @route='cover-letters.index'>Cover letters</LinkTo>
+  </li>
+  <li>
+    <LinkTo @route='resumes.index'>resumes</LinkTo>
+  </li>
+  <li>
+    <LinkTo @route='summaries.index'>summaries</LinkTo>
+  </li>
+  <li>
+    <LinkTo @route='scores.index'>scores</LinkTo>
+  </li>
+</ul>
 {{#if @user}}
   top-bar:
   {{@user.name}}

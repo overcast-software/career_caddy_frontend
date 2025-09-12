@@ -19,6 +19,7 @@ export default class JobPostsItemComponent extends Component {
     if (!resumes) return [];
     return resumes.toArray ? resumes.toArray() : resumes;
   }
+
   get jobPost() {
     return this.args.jobPost;
   }
@@ -39,7 +40,6 @@ export default class JobPostsItemComponent extends Component {
   }
 
   // collection helpers (used for next/previous)
-  get collection() {
     return this.store.findAll('job-post');
   }
 
