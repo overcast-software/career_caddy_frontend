@@ -1,0 +1,7 @@
+<article>
+  <h3>{{this.experience.title}} at {{this.experience.company}}</h3>
+  <p>{{this.experience.startDate}} - {{this.experience.endDate}}</p>
+  <p>{{this.experience.description}}</p>
+  <button type="button" {{on "click" this.edit}}>Edit</button>
+  <button type="button" {{on "click" this.delete}}>Delete</button>
+</article>

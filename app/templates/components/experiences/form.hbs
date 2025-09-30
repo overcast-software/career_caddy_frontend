@@ -1,0 +1,10 @@
+<form {{on "submit" this.save}}>
+  {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
+  <label>Company <input type="text" value={{this.experience.company}} {{on "input" (fn this.updateField "company")}} /></label>
+  <label>Title <input type="text" value={{this.experience.title}} {{on "input" (fn this.updateField "title")}} /></label>
+  <label>Start Date <input type="date" {{on "input" (fn this.updateField "startDate")}} /></label>
+  <label>End Date <input type="date" {{on "input" (fn this.updateField "endDate")}} /></label>
+  <label>Description <textarea {{on "input" (fn this.updateField "description")}}>{{this.experience.description}}</textarea></label>
+  <button type="submit">Save</button>
+  <button type="button" {{on "click" this.cancel}}>Cancel</button>
+</form>

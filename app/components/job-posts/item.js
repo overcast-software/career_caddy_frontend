@@ -15,9 +15,9 @@ export default class JobPostsItemComponent extends Component {
   }
 
   get resumes() {
-    const resumes = this.currentUser?.resumes;
-    if (!resumes) return [];
-    return resumes.toArray ? resumes.toArray() : resumes;
+      const userId = this.currentUser?.id;
+      if (!userId) return [];
+      return this.currentUser?.resumes;
   }
 
   get jobPost() {
@@ -37,10 +37,6 @@ export default class JobPostsItemComponent extends Component {
   get companyName() {
     const company = this.args.jobPost?.company;
     return company?.displayName ?? company?.name ?? '';
-  }
-
-  // collection helpers (used for next/previous)
-    return this.store.findAll('job-post');
   }
 
   // derive an external application URL from related scrapes
@@ -122,21 +118,41 @@ export default class JobPostsItemComponent extends Component {
   }
 
   @action
-  summary(){
+  async summary() {
     const jobPost = this.jobPost ?? this.args.jobPost;
     const user = this.currentUser;
     const resumeId = this.selectedResumeId;
     if (!jobPost || !user || !resumeId) return;
-    let resume = this.store.peekRecord('resume', resumeId);
-    if (!resume) {
-      resume = this.store.findRecord('resume', resumeId);
+
+    try {
+      // 1) Prefer the included/loaded summary already in the store (match by resume_id)
+      let existing = this.store.peekAll('summary').find((s) => {
+        return s.belongsTo('resume').id() === resumeId;
+      });
+
+      if (existing) {
+        // Navigate to summaries list (or a show route if you add one later)
+        return this.router.transitionTo('summaries.index');
+      }
+
+      // 2) If none found, create a new one
+      let resume = this.store.peekRecord('resume', resumeId);
+      if (!resume) {
+        resume = await this.store.findRecord('resume', resumeId);
+      }
+
+      const newSummary = this.store.createRecord('summary', {
+        resume,
+        jobPost,
+        user,
+      });
+
+      await newSummary.save();
+
+      this.router.transitionTo('summaries.index');
+    } catch (e) {
+      console.error('Failed to get or create summary', e);
     }
-    const newSummary = this.store.createRecord('summary', {
-      resume,
-      jobPost,
-      user
-    })
-    newSummary.save()
   }
 
   @action

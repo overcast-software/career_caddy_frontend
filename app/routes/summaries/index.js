@@ -1,10 +1,10 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
 
-export default class SummariesRoute extends Route {
+export default class SummariesIndexRoute extends Route {
   @service store;
 
   model() {
-    return this.store.findAll('summaries');
+    return this.store.findAll('summary');
   }
 }

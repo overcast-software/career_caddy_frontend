@@ -7,4 +7,12 @@ export default class ResumeModel extends Model {
   @hasMany('score', { async: false, inverse: null }) scores;
   @hasMany('cover-letter', { async: false, inverse: 'resume' }) coverLetters;
   @hasMany('application', { async: false, inverse: null }) applications;
+  @hasMany('experience', { async: true, inverse: 'resume' }) experiences;
+  @hasMany('summary', { async: false, inverse: 'resume' }) summaries;
+
+  get summary() {
+    // Find a Summary in the store that points at this resume (included via sideload)
+    const s = this.store.peekAll('summary').find((rec) => rec.belongsTo('resume').id() === this.id);
+    return s?.content ?? null;
+  }
 }

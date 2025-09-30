@@ -50,6 +50,12 @@ Router.map(function () {
   this.route('resumes', function() {
     this.route('show', {
       path: '/:resume_id'
+    }, function() {
+      this.route('experience',  function() {
+        this.route('new');
+        this.route('show', { path: '/:experience_id' });
+        this.route('edit', { path: '/:experience_id/edit' });
+      });
     });
     this.route('new');
 

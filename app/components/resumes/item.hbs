@@ -1,7 +1,18 @@
 {{yield}}
 <h1>
     <LinkTo @route="resumes.show" @model={{@resume}}>Resume #{{@resume.id}}</LinkTo>
-    <p>
-        {{@resume.content}}
-    </p>
 </h1>
+    <p>
+        {{@resume.summary}}
+        <br/>
+        {{#each @resume.experiences as |experience|}}
+            {{experience.title}}
+            <pre>
+            {{experience.content}}
+            </pre>
+        {{/each}}
+    </p>
+    <ul style='display: inline'>
+        <li>action 1</li>
+        <li>action 2</li>
+    </ul>
