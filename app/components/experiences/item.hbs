@@ -1,1 +1,8 @@
 {{yield}}
+<div class="experience">
+    {{@experience.title}}//{{@experience.company.name}}; {{@experience.location}}
+    {{format-date @experience.startDate 'MM.YYYY'}} - {{format-date @experience.endDate 'MM.YYYY'}}
+    <pre>
+        {{ @experience.content  }}
+    </pre>
+</div>

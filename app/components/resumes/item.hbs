@@ -2,17 +2,22 @@
 <h1>
     <LinkTo @route="resumes.show" @model={{@resume}}>Resume #{{@resume.id}}</LinkTo>
 </h1>
-    <p>
-        {{@resume.summary}}
-        <br/>
-        {{#each @resume.experiences as |experience|}}
-            {{experience.title}}
-            <pre>
-            {{experience.content}}
-            </pre>
-        {{/each}}
-    </p>
-    <ul style='display: inline'>
-        <li>action 1</li>
-        <li>action 2</li>
-    </ul>
+<p>
+    <h1>Summary</h1>
+    <hr/>
+    {{@resume.summary.content}}
+    <br/>
+    <h1>Experience</h1>
+    <hr/>
+    {{#each @resume.experiences as |experience|}}
+        <Experiences::Item @experience={{experience}}></Experiences::Item>
+    {{/each}}
+    <h1>Education</h1>
+    <Educations::Item @education={{@resume.education}}/>
+    <h1>Certifications</h1>
+    <Certifications::Item @certification={{@resume.certification}}/>
+</p>
+<ul style='display: inline'>
+    <li>action 1</li>
+    <li>action 2</li>
+</ul>
