@@ -13,15 +13,8 @@
     <h4 class="section-title">Descriptions</h4>
     <button type="button" class="btn" {{on "click" this.splitIntoDescriptions}}>Split from content</button>
     <ul class="desc-list editable">
-      {{#each this.orderedDescriptions as |d index|}}
-        <li class="desc-item"
-            draggable="true"
-            {{on "dragstart" (fn this.dragStart index)}}
-            {{on "dragover" (fn this.dragOver index)}}
-            {{on "drop" (fn this.drop index)}}>
-          <span class="drag-handle" aria-hidden="true">☰</span>
-          <span class="desc-text">{{d.text}}</span>
-        </li>
+      {{#each @experience.descriptions as |d|}}
+          <Description @description={{d}}></Description>
       {{/each}}
     </ul>
   </section>
