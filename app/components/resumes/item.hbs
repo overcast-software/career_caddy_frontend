@@ -2,6 +2,7 @@
 <h1>
     <LinkTo @route="resumes.show" @model={{@resume}}>Resume #{{@resume.id}}</LinkTo>
 </h1>
+<h2>{{@resume.title}}</h2>
 <p>
     <h1>Summary</h1>
     <hr/>
@@ -10,14 +11,26 @@
     <h1>Experience</h1>
     <hr/>
     {{#each @resume.experiences as |experience|}}
-        <Experiences::Item @experience={{experience}}></Experiences::Item>
+        {{#if (this.isEditingExperience experience)}}
+          <Experiences::Form @experience={{experience}} />
+        {{else}}
+          <Experiences::Item @experience={{experience}} />
+          <LinkTo
+            @route="resumes.show.experience.edit"
+            @models={{array @resume experience}}
+          >
+            Edit
+          </LinkTo>
+        {{/if}}
     {{/each}}
     <h1>Education</h1>
     <Educations::Item @education={{@resume.education}}/>
     <h1>Certifications</h1>
     <Certifications::Item @certification={{@resume.certification}}/>
 </p>
+<button type="button" {{on "click" this.submitResume}}>Send to API</button>
 <ul style='display: inline'>
     <li>action 1</li>
     <li>action 2</li>
 </ul>
+{{outlet}}

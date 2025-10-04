@@ -25,4 +25,11 @@ export default class ResumeModel extends Model {
         const cert = this.store.peekAll('certification').find((rec) => rec.belongsTo('resume').id() === this.id);
         return cert
     }
+
+  get title() {
+    const path = this.filePath;
+    if (!path) return `Resume #${this.id}`;
+    const base = path.split('/').pop();
+    return base || `Resume #${this.id}`;
+  }
 }

@@ -1,2 +1,46 @@
-<Resumes::Item @resume={{this.model}} />
-<LinkTo @route="resumes.show.experience.index" @model={{this.model}}>Experience</LinkTo>
+<div class="builder-page">
+  <div class="container">
+    <div class="builder-layout">
+      <aside class="editor-panel">
+        <div class="panel-card">
+          <div class="panel-title">Personal Information</div>
+          <p class="muted">Edit in your User profile.</p>
+        </div>
+        <div class="panel-card">
+          <div class="panel-title">Professional Summary</div>
+          {{!-- (Optional) summary editor goes here --}}
+        </div>
+        <div class="panel-card">
+          <div class="panel-title">Experience</div>
+          <div class="panel-body">
+            <div class="panel-actions">
+              <LinkTo @route="resumes.show.experience.new" @model={{this.model}} class="btn small">+ Add Experience</LinkTo>
+            </div>
+            <Experiences::List @experiences={{this.model.experiences}} />
+            {{outlet}}
+          </div>
+        </div>
+        <div class="panel-card"><div class="panel-title">Education</div></div>
+        <div class="panel-card"><div class="panel-title">Skills</div></div>
+        <div class="panel-card"><div class="panel-title">Projects</div></div>
+        <div class="panel-card"><div class="panel-title">Certifications</div></div>
+      </aside>
+      <main class="preview-panel">
+        <div class="preview-actions">
+          <div class="score muted">Resume Score: 0%</div>
+          <LinkTo
+            @route="resumes.new"
+            @query={{hash clone_from=this.model.id}}
+            class="btn"
+          >
+            Clone Resume
+          </LinkTo>
+          <button type="button" class="btn">Export PDF</button>
+        </div>
+        <div class="resume-preview">
+          <Resumes::Item @resume={{this.model}} />
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

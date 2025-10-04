@@ -4,7 +4,17 @@ import { service } from '@ember/service';
 export default class ResumesShowRoute extends Route {
   @service store;
 
-  model({ resume_id }) {
-    return this.store.findRecord('resume', resume_id);
+  async model({ resume_id }) {
+    const resume = await this.store.findRecord('resume', resume_id);
+    await resume.hasMany?.('experiences')?.load?.();
+    await resume.hasMany?.('educations')?.load?.();
+    await resume.hasMany?.('certifications')?.load?.();
+    await resume.hasMany?.('summaries')?.load?.();
+    const exps = resume.experiences;
+    for (const exp of exps?.toArray?.() ?? Array.from(exps ?? [])) {
+      await exp.hasMany?.('descriptions')?.load?.();
+      await exp.belongsTo?.('company')?.reload?.();
+    }
+    return resume;
   }
 }

@@ -1,1 +1,32 @@
-{{yield}}
+<form class="builder-form" {{on "submit" this.save}}>
+  {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
+  <input type="hidden" name="resume_id" value={{this.resumeId}} />
+  <label class="field">Company <input type="text" value={{this.experience.company.name}} disabled /></label>
+  <label class="field">Title <input type="text" value={{this.experience.title}} {{on "input" (fn this.updateField "title")}} /></label>
+  <label class="field">Location <input type="text" value={{this.experience.location}} {{on "input" (fn this.updateField "location")}} /></label>
+  <label class="field">Start Date <input type="date" value={{this.formattedStartDate}} {{on "input" (fn this.updateField "startDate")}} /></label>
+  <label class="field">End Date <input type="date" value={{this.formattedEndDate}} {{on "input" (fn this.updateField "endDate")}} /></label>
+  <label class="field">
+    <span class="field-label">Description</span>
+  </label>
+  <section class="descriptions">
+    <h4 class="section-title">Descriptions</h4>
+    <button type="button" class="btn" {{on "click" this.splitIntoDescriptions}}>Split from content</button>
+    <ul class="desc-list editable">
+      {{#each this.orderedDescriptions as |d index|}}
+        <li class="desc-item"
+            draggable="true"
+            {{on "dragstart" (fn this.dragStart index)}}
+            {{on "dragover" (fn this.dragOver index)}}
+            {{on "drop" (fn this.drop index)}}>
+          <span class="drag-handle" aria-hidden="true">☰</span>
+          <span class="desc-text">{{d.text}}</span>
+        </li>
+      {{/each}}
+    </ul>
+  </section>
+  <div class="form-actions">
+    <button type="submit" class="btn primary">Save</button>
+    <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
+  </div>
+</form>

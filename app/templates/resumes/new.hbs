@@ -1,1 +1,47 @@
-<Resumes::Form @resume={{this.model}} />
+<div class="builder-page">
+  <div class="container">
+    <div class="builder-layout">
+      <aside class="editor-panel">
+        <div class="panel-card">
+          <div class="panel-title">Personal Information</div>
+          <p class="muted">Edit in your User profile.</p>
+        </div>
+        <div class="panel-card">
+          <div class="panel-title">Professional Summary</div>
+          {{!-- (Optional) summary editor goes here --}}
+        </div>
+        <div class="panel-card">
+          <div class="panel-title">Experience</div>
+          <div class="panel-body">
+            <div class="panel-actions">
+              <button type="button" class="btn small" {{on "click" this.addExperience}}>+ Add Experience</button>
+            </div>
+            <Experiences::List @experiences={{this.model.experiences}} @allowStandaloneSave={{false}} />
+            {{outlet}}
+          </div>
+        </div>
+        <div class="panel-card"><div class="panel-title">Education</div></div>
+        <div class="panel-card"><div class="panel-title">Skills</div></div>
+        <div class="panel-card"><div class="panel-title">Projects</div></div>
+        <div class="panel-card"><div class="panel-title">Certifications</div></div>
+      </aside>
+      <main class="preview-panel">
+        <div class="preview-actions">
+          <div class="score muted">Resume Score: 0%</div>
+          <LinkTo
+            @route="resumes.new"
+            @query={{hash clone_from=this.model.id}}
+            class="btn"
+          >
+            Clone Resume
+          </LinkTo>
+          <button type="button" class="btn primary" {{on "click" this.saveAll}}>Save Resume</button>
+          <button type="button" class="btn">Export PDF</button>
+        </div>
+        <div class="resume-preview">
+          <Resumes::Item @resume={{this.model}} />
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

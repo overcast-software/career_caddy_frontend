@@ -1,22 +1,18 @@
-{{yield}}
-<ul style="display: inline-block">
-  <li>
-    <LinkTo @route='job-posts.index'>Job posts</LinkTo>
-  </li>
-  <li>
-    <LinkTo @route='cover-letters.index'>Cover letters</LinkTo>
-  </li>
-  <li>
-    <LinkTo @route='resumes.index'>resumes</LinkTo>
-  </li>
-  <li>
-    <LinkTo @route='summaries.index'>summaries</LinkTo>
-  </li>
-  <li>
-    <LinkTo @route='scores.index'>scores</LinkTo>
-  </li>
-</ul>
-{{#if @user}}
-  top-bar:
-  {{@user.name}}
-{{/if}}
+<header class="site-header">
+  <div class="container header-inner">
+    <LinkTo @route="index" class="brand">Career Caddy</LinkTo>
+    {{yield}}
+    <nav class="nav">
+      <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
+      <LinkTo @route="cover-letters.index" class="nav-link">Cover letters</LinkTo>
+      <LinkTo @route="resumes.index" class="nav-link">Resumes</LinkTo>
+      <LinkTo @route="summaries.index" class="nav-link">Summaries</LinkTo>
+      <LinkTo @route="scores.index" class="nav-link">Scores</LinkTo>
+    </nav>
+    {{#if @user}}
+      <div class="user">
+        <span class="user-name">{{@user.name}}</span>
+      </div>
+    {{/if}}
+  </div>
+</header>
