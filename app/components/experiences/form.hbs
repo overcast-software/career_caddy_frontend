@@ -13,13 +13,19 @@
     <h4 class="section-title">Descriptions</h4>
     <button type="button" class="btn" {{on "click" this.splitIntoDescriptions}}>Split from content</button>
     <ul class="desc-list editable">
-      {{#each @experience.descriptions as |d|}}
-          <Description @description={{d}}></Description>
+      {{#each @experience.descriptions as |d index|}}
+        <Description @description={{d}} @index={{index}} />
       {{/each}}
     </ul>
+    <div class="trash-drop-zone"
+         {{on "dragover" this.dragOverTrash}}
+         {{on "drop" this.dropOnTrash}}>
+      Drag here to delete
+    </div>
   </section>
   <div class="form-actions">
     <button type="submit" class="btn primary">Save</button>
     <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
+    <button type="button" class="btn" {{on "click" this.deleteExperience}}>Delete</button>
   </div>
 </form>

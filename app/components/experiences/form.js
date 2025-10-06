@@ -8,6 +8,8 @@ export default class ExperiencesFormComponent extends Component {
   @service store;
   @tracked errorMessage = null;
   @tracked dragIndex = null;
+  @tracked editingIndex = null;
+  @tracked editingDraft = '';
 
   constructor(...args) {
     super(...args);
@@ -44,6 +46,8 @@ export default class ExperiencesFormComponent extends Component {
     const arr = rel?.toArray?.() ?? Array.from(rel ?? []);
     return arr.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
+
+  isEditing = (index) => this.editingIndex === index;
 
   @action updateField(field, event) {
     if (field === 'startDate' || field === 'endDate') {
@@ -95,6 +99,65 @@ export default class ExperiencesFormComponent extends Component {
     this.dragIndex = null;
   }
 
+  @action dragOverTrash(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
+  @action async dropOnTrash(event) {
+    event.preventDefault();
+    const from = this.dragIndex;
+    this.dragIndex = null;
+    if (from === null) return;
+    const list = this.orderedDescriptions;
+    const toDelete = list[from];
+    if (!toDelete) return;
+
+    // Remove from hasMany relationship
+    const rel = await this.experience.descriptions;
+    rel?.removeObject?.(toDelete);
+
+    // Reindex remaining items
+    const remaining = (rel?.toArray?.() ?? Array.from(rel ?? [])).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    remaining.forEach((d, i) => (d.order = i));
+
+    // Persist immediately only when standalone save is allowed (Show page)
+    const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
+    const standaloneAllowed = this.args?.allowStandaloneSave !== false && !!resumeId;
+    if (standaloneAllowed) {
+      if (!toDelete.isNew) {
+        await toDelete.destroyRecord();
+      } else {
+        toDelete.deleteRecord?.();
+      }
+      await Promise.all(remaining.map((d) => d.save?.() ?? d));
+    } else {
+      // On New page: defer server ops until Save Resume
+      toDelete.deleteRecord?.();
+    }
+  }
+
+  @action async deleteExperience() {
+    try {
+      const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
+      const standaloneAllowed = this.args?.allowStandaloneSave !== false && !!resumeId;
+      const resume = this.experience?.belongsTo?.('resume')?.value?.();
+
+      if (this.experience.isNew || !standaloneAllowed) {
+        // Remove locally and let Save Resume handle persistence (if any)
+        this.experience.deleteRecord();
+        const rel = await resume?.experiences;
+        rel?.removeObject?.(this.experience);
+        return;
+      }
+
+      await this.experience.destroyRecord();
+      this.router.transitionTo('resumes.show.experience.index', resumeId);
+    } catch (e) {
+      this.errorMessage = e?.message ?? 'Failed to delete experience';
+    }
+  }
+
   @action async save(event) {
     event?.preventDefault();
     try {
@@ -121,5 +184,44 @@ export default class ExperiencesFormComponent extends Component {
     if (this.experience?.isNew) this.experience.rollbackAttributes();
     const resumeId = this.experience?.belongsTo('resume')?.id() ?? this.args.resume?.id;
     this.router.transitionTo('resumes.show.experience.index', resumeId);
+  }
+
+  @action startEditDescription(index, desc) {
+    this.editingIndex = index;
+    this.editingDraft = desc?.content ?? '';
+  }
+
+  @action updateEditingDraft(event) {
+    this.editingDraft = event.target.value;
+  }
+
+  @action async commitDescription(index, desc) {
+    // Apply changes
+    desc.content = (this.editingDraft ?? '').trim();
+    // Persist immediately only when standalone save is allowed (Show page)
+    const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
+    const standaloneAllowed = this.args?.allowStandaloneSave !== false && !!resumeId;
+    if (standaloneAllowed) {
+      if (desc.isNew || desc.hasDirtyAttributes) {
+        await desc.save();
+      }
+    }
+    this.editingIndex = null;
+    this.editingDraft = '';
+  }
+
+  @action cancelEditDescription() {
+    this.editingIndex = null;
+    this.editingDraft = '';
+  }
+
+  @action async handleDescriptionKeydown(index, desc, event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      await this.commitDescription(index, desc);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cancelEditDescription();
+    }
   }
 }

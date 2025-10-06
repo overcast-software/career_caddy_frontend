@@ -1,6 +1,0 @@
-<ul>
-  {{#each @jobPosts as |jobPost|}}
-    <li><LinkTo @route="job-posts.show" @model={{jobPost}}>Job Post #{{jobPost.id}}</LinkTo></li>
-  {{/each}}
-</ul>
-<LinkTo @route="job-posts.new">New Job Post</LinkTo>
