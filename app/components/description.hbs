@@ -1,5 +1,26 @@
-<li class="desc-item" draggable="true">
-    <span class="drag-handle" aria-hidden="true">☰</span>
-    <span class="desc-text">{{@description.content}}</span>
-    {{yield}}
+<li class="desc-item">
+  {{#if @isEditing}}
+    <textarea
+      class="desc-edit"
+      style="width: 100%; resize: none;"
+      value={{@draft}}
+      {{on "input" @onInput}}
+      {{on "keydown" @onKeydown}}
+      {{on "blur" @onCommit}}
+    ></textarea>
+  {{else}}
+    <button
+      type="button"
+      class="icon-button edit"
+      aria-label="Edit description"
+      {{on "click" @onEdit}}
+    >
+      ✎
+    </button>
+    <span class="desc-text" {{on "dblclick" @onDblClick}}>
+      {{@description.content}}
+    </span>
+  {{/if}}
+
+  {{yield}}
 </li>

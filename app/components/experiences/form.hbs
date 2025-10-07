@@ -1,4 +1,4 @@
-<form class="builder-form" {{on "submit" this.save}}>
+<form class="builder-form">
   {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
   <input type="hidden" name="resume_id" value={{this.resumeId}} />
   <label class="field">Company <input type="text" value={{this.experience.company.name}} disabled /></label>
@@ -11,20 +11,25 @@
   </label>
   <section class="descriptions">
     <h4 class="section-title">Descriptions</h4>
-    <button type="button" class="btn" {{on "click" this.splitIntoDescriptions}}>Split from content</button>
     <ul class="desc-list editable">
       {{#each @experience.descriptions as |d index|}}
-        <Description @description={{d}} @index={{index}} />
+        <Description
+          @description={{d}}
+          @index={{index}}
+
+          @onEdit={{fn this.startEditDescription index d}}
+          @onDblClick={{fn this.startEditDescription index d}}
+          @isEditing={{this.isEditing index}}
+          @draft={{this.editingDraft}}
+          @onInput={{this.updateEditingDraft}}
+          @onKeydown={{fn this.handleDescriptionKeydown index d}}
+          @onCommit={{fn this.commitDescription index d}}
+          @onCancel={{this.cancelEditDescription}}
+        />
       {{/each}}
     </ul>
-    <div class="trash-drop-zone"
-         {{on "dragover" this.dragOverTrash}}
-         {{on "drop" this.dropOnTrash}}>
-      Drag here to delete
-    </div>
   </section>
   <div class="form-actions">
-    <button type="submit" class="btn primary">Save</button>
     <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
     <button type="button" class="btn" {{on "click" this.deleteExperience}}>Delete</button>
   </div>

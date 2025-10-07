@@ -191,7 +191,7 @@
   gap: var(--space-3);
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .experience .job-header {
     flex-direction: column;
     align-items: flex-start;
@@ -420,7 +420,7 @@
   font-size: 1.05rem;
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .feature-grid { grid-template-columns: repeat(2, 1fr); }
   .testimonial-grid { grid-template-columns: 1fr; }
@@ -496,7 +496,7 @@
   font-size: 0.9rem;
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .builder-page .builder-layout {
     grid-template-columns: 1fr;
   }

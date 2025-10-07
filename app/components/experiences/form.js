@@ -7,7 +7,6 @@ export default class ExperiencesFormComponent extends Component {
   @service router;
   @service store;
   @tracked errorMessage = null;
-  @tracked dragIndex = null;
   @tracked editingIndex = null;
   @tracked editingDraft = '';
 
@@ -59,83 +58,6 @@ export default class ExperiencesFormComponent extends Component {
     }
   }
 
-  @action async splitIntoDescriptions() {
-    const content = (this.experience.content || '').trim();
-    if (!content) return;
-    const descs = await this.experience.descriptions;
-    if (descs.length > 0) return; // already split
-    const lines = content.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    lines.forEach((text, idx) => {
-      this.store.createRecord('description', {
-        content: text,
-        order: idx,
-        experience: this.experience,
-      });
-    });
-  }
-
-  @action dragStart(index, event) {
-    this.dragIndex = index;
-    event.dataTransfer.effectAllowed = 'move';
-  }
-
-  @action dragOver(_index, event) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }
-
-  @action async drop(index, event) {
-    event.preventDefault();
-    const descs = this.orderedDescriptions;
-    if (this.dragIndex === null || this.dragIndex === index) return;
-    const [moved] = descs.splice(this.dragIndex, 1);
-    descs.splice(index, 0, moved);
-    descs.forEach((d, i) => (d.order = i));
-    const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
-    const standaloneAllowed = this.args?.allowStandaloneSave !== false && !!resumeId;
-    if (standaloneAllowed) {
-      await Promise.all(descs.map((d) => d.save?.() ?? d));
-    }
-    this.dragIndex = null;
-  }
-
-  @action dragOverTrash(event) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }
-
-  @action async dropOnTrash(event) {
-    event.preventDefault();
-    const from = this.dragIndex;
-    this.dragIndex = null;
-    if (from === null) return;
-    const list = this.orderedDescriptions;
-    const toDelete = list[from];
-    if (!toDelete) return;
-
-    // Remove from hasMany relationship
-    const rel = await this.experience.descriptions;
-    rel?.removeObject?.(toDelete);
-
-    // Reindex remaining items
-    const remaining = (rel?.toArray?.() ?? Array.from(rel ?? [])).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    remaining.forEach((d, i) => (d.order = i));
-
-    // Persist immediately only when standalone save is allowed (Show page)
-    const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
-    const standaloneAllowed = this.args?.allowStandaloneSave !== false && !!resumeId;
-    if (standaloneAllowed) {
-      if (!toDelete.isNew) {
-        await toDelete.destroyRecord();
-      } else {
-        toDelete.deleteRecord?.();
-      }
-      await Promise.all(remaining.map((d) => d.save?.() ?? d));
-    } else {
-      // On New page: defer server ops until Save Resume
-      toDelete.deleteRecord?.();
-    }
-  }
 
   @action async deleteExperience() {
     try {
@@ -196,16 +118,8 @@ export default class ExperiencesFormComponent extends Component {
   }
 
   @action async commitDescription(index, desc) {
-    // Apply changes
     desc.content = (this.editingDraft ?? '').trim();
-    // Persist immediately only when standalone save is allowed (Show page)
-    const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
-    const standaloneAllowed = this.args?.allowStandaloneSave !== false && !!resumeId;
-    if (standaloneAllowed) {
-      if (desc.isNew || desc.hasDirtyAttributes) {
-        await desc.save();
-      }
-    }
+    // No persistence here; defer saving until the whole resume is saved/cloned
     this.editingIndex = null;
     this.editingDraft = '';
   }

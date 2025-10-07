@@ -6,24 +6,32 @@
           <div class="panel-title">Personal Information</div>
           <p class="muted">Edit in your User profile.</p>
         </div>
-        <div class="panel-card">
-          <div class="panel-title">Professional Summary</div>
-          {{!-- (Optional) summary editor goes here --}}
-        </div>
-        <div class="panel-card">
-          <div class="panel-title">Experience</div>
+        <Panel::Card @title="Skills">
+            <Skills::Form />
+        </Panel::Card>
+
+        <Panel::Card @title="Summary">
+           <Summary::Form @summary={{this.model.summary}}/> 
+        </Panel::Card>
+        <Panel::Card @title="Education">
+           <Educations::Form @education={{this.model.education}}/> 
+        </Panel::Card>
+        <Panel::Card @title="Projects">
+            {{!-- empty -- not in models--}}
+        </Panel::Card>
+        <Panel::Card @title="Certifications">
+            <Certifications::Form @certifications={{this.model.certifications}}/>
+        </Panel::Card>
+
+        <Panel::Card @title="Experience">
           <div class="panel-body">
             <div class="panel-actions">
               <button type="button" class="btn small" {{on "click" this.addExperience}}>+ Add Experience</button>
             </div>
             <Experiences::List @experiences={{this.model.experiences}} @allowStandaloneSave={{false}} />
-            {{outlet}}
           </div>
-        </div>
-        <div class="panel-card"><div class="panel-title">Education</div></div>
-        <div class="panel-card"><div class="panel-title">Skills</div></div>
-        <div class="panel-card"><div class="panel-title">Projects</div></div>
-        <div class="panel-card"><div class="panel-title">Certifications</div></div>
+        </Panel::Card>
+
       </aside>
       <main class="preview-panel">
         <div class="preview-actions">
