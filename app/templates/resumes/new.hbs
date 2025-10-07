@@ -2,10 +2,9 @@
   <div class="container">
     <div class="builder-layout">
       <aside class="editor-panel">
-        <div class="panel-card">
-          <div class="panel-title">Personal Information</div>
-          <p class="muted">Edit in your User profile.</p>
-        </div>
+        <Panel::Card @title="Personal Information">
+            <PersonalInformation::Form/>
+        </Panel::Card>
         <Panel::Card @title="Skills">
             <Skills::Form />
         </Panel::Card>

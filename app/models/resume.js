@@ -3,6 +3,7 @@ import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 export default class ResumeModel extends Model {
   @attr('string') content;
   @attr('string') filePath;
+  @attr('string') title;
   @belongsTo('user', { async: false, inverse: null }) user;
   @hasMany('score', { async: false, inverse: null }) scores;
   @hasMany('cover-letter', { async: false, inverse: 'resume' }) coverLetters;
@@ -26,10 +27,4 @@ export default class ResumeModel extends Model {
         return cert
     }
 
-  get title() {
-    const path = this.filePath;
-    if (!path) return `Resume #${this.id}`;
-    const base = path.split('/').pop();
-    return base || `Resume #${this.id}`;
-  }
 }

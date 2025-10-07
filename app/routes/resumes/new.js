@@ -21,6 +21,7 @@ export default class ResumesNewRoute extends Route {
     const newResume = this.store.createRecord('resume', {
       content: source.content,
       filePath: source.filePath,
+      title: source.title,
       user: source.user,
     });
 

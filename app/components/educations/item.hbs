@@ -1,2 +1,23 @@
-{{yield}}
-{{@education}}{{@education.degree}}
+<article class="education-item">
+  {{yield}}
+  <header class="edu-header">
+    {{#if @education.degree}}
+      <strong class="edu-degree">{{@education.degree}}</strong>
+    {{/if}}
+    {{#if @education.institution}}
+      <span class="edu-institution"> at {{@education.institution}}</span>
+    {{/if}}
+  </header>
+
+  <div class="edu-details">
+    {{#if @education.major}}
+      <div class="edu-major">Major: {{@education.major}}</div>
+    {{/if}}
+    {{#if @education.minor}}
+      <div class="edu-minor">Minor: {{@education.minor}}</div>
+    {{/if}}
+    {{#if @education.issueDate}}
+      <div class="edu-issue-date">Issued: {{@education.issueDate}}</div>
+    {{/if}}
+  </div>
+</article>
