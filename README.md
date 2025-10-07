@@ -18,6 +18,14 @@ You will need the following things properly installed on your computer.
 - `cd career-caddy-frontend`
 - `npm install`
 
+## Environment Variables
+
+- `OPEN_API_KEY`: API key used by the application for AI/assistant features. Set it in your shell before starting the app:
+  - macOS/Linux: `export OPEN_API_KEY="your-api-key"`
+  - Windows (PowerShell): `setx OPEN_API_KEY "your-api-key"`
+
+Make sure the terminal session has this variable available when running `npm run start` or builds.
+
 ## Running / Development
 
 - `npm run start`
