@@ -1,22 +1,17 @@
 <form class="builder-form">
   <label class="field">
-    <span class="field-label">First Name</span>
-    <input type="text" name="firstName" placeholder="First name" />
-  </label>
-
-  <label class="field">
-    <span class="field-label">Last Name</span>
-    <input type="text" name="lastName" placeholder="Last name" />
+    <span class="field-label">Name</span>
+    <input type="text" name="firstName" placeholder={{@user.name}} />
   </label>
 
   <label class="field">
     <span class="field-label">Phone</span>
-    <input type="tel" name="phone" placeholder="(555) 123-4567" />
+    <input type="tel" name="phone" placeholder="{{@user.phone}}" />
   </label>
 
   <label class="field">
     <span class="field-label">Email</span>
-    <input type="email" name="email" placeholder="you@example.com" />
+    <input type="email" name="email" placeholder={{@user.email}}/>
   </label>
 
   {{yield}}
