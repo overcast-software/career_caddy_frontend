@@ -13,6 +13,12 @@ export default class ResumesNewController extends Controller {
     if (!rel.includes(exp)) rel.pushObject(exp);
   };
 
+  addCertification = async () => {
+    const cert = this.store.createRecord('certification', { resume: this.model });
+    const rel = await this.model.certifications;
+    if (!rel.includes(cert)) rel.pushObject(cert);
+  };
+
   saveAll = async () => {
     // Save resume to obtain id first
     if (this.model.isNew) {

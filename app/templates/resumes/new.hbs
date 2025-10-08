@@ -5,9 +5,11 @@
         <Panel::Card @title="Job Title">
             <Resumes::Title::Form @resume={{this.model}}/>
         </Panel::Card>
+
         <Panel::Card @title="Personal Information">
             <PersonalInformation::Form @user={{this.model.user}}/>
         </Panel::Card>
+
         <Panel::Card @title="Skills">
             <Skills::Form />
         </Panel::Card>
@@ -15,14 +17,23 @@
         <Panel::Card @title="Summary">
            <Summary::Form @summary={{this.model.summary}}/> 
         </Panel::Card>
+
         <Panel::Card @title="Education">
            <Educations::Form @education={{this.model.education}}/> 
         </Panel::Card>
+
         <Panel::Card @title="Projects">
             {{!-- empty -- not in models--}}
         </Panel::Card>
+
         <Panel::Card @title="Certifications">
-            <Certifications::Form @certifications={{this.model.certifications}}/>
+          <div class="panel-body">
+            <div class="panel-actions">
+              <button type="button" class="btn small" {{on "click" this.addCertification}}>+ Add Certification</button>
+            </div>
+             <Certifications::Form @certification={{this.model.certification}}/>
+          </div>
+
         </Panel::Card>
 
         <Panel::Card @title="Experience">

@@ -14,17 +14,16 @@ export default class ResumeModel extends Model {
   @hasMany('certification', { async: true, inverse: 'resume' }) certifications;
 
   get summary() {
-    // Find a Summary in the store that points at this resume (included via sideload)
     const summary = this.store.peekAll('summary').find((rec) => rec.belongsTo('resume').id() === this.id);
     return summary
   }
-    get education(){
-        const edu = this.store.peekAll('education').find((rec) => rec.belongsTo('resume').id() === this.id);
-        return edu
-    }
-    get certification(){
-        const cert = this.store.peekAll('certification').find((rec) => rec.belongsTo('resume').id() === this.id);
-        return cert
-    }
+  get education(){
+    const edu = this.store.peekAll('education').find((rec) => rec.belongsTo('resume').id() === this.id);
+    return edu
+  }
+  get certification(){
+    const cert = this.store.peekAll('certification').find((rec) => rec.belongsTo('resume').id() === this.id);
+    return cert
+  }
 
 }

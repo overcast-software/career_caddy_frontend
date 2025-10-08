@@ -2,13 +2,13 @@
   {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
 
   <label class="field">Issuer
-    <input type="text" value={{this.certification.issuer}} {{on "input" (fn this.updateField "issuer")}} />
+    <input type="text" value={{@certification.issuer}} {{on "input" (fn this.updateField "issuer")}} />
   </label>
   <label class="field">Title
-    <input type="text" value={{this.certification.title}} {{on "input" (fn this.updateField "title")}} />
+    <input type="text" value={{@certification.title}} {{on "input" (fn this.updateField "title")}} />
   </label>
   <label class="field">Content
-    <textarea value={{this.certification.content}} {{on "input" (fn this.updateField "content")}} style="width: 100%; resize: none;"></textarea>
+    <textarea value={{@certification.content}} {{on "input" (fn this.updateField "content")}} style="width: 100%; resize: none;"></textarea>
   </label>
   <label class="field">Issue Date
     <input type="date" value={{this.formattedIssueDate}} {{on "input" (fn this.updateField "issueDate")}} />
