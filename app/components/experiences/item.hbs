@@ -3,6 +3,8 @@
     {{@experience.title}}//{{@experience.company.name}}; {{@experience.location}}
     {{format-date @experience.startDate 'MM.YYYY'}} - {{format-date @experience.endDate 'MM.YYYY'}}
     <pre>
-        {{ @experience.content  }}
+    {{#each @experience.descriptions as |desc|}}
+        <Description @description={{desc}}/>
+    {{/each}}
     </pre>
 </div>

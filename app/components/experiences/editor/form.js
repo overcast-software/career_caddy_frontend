@@ -3,7 +3,7 @@ import { inject as service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
-export default class ExperiencesFormComponent extends Component {
+export default class ExperiencesEditorForm extends Component {
   @service router;
   @service store;
   @tracked errorMessage = null;

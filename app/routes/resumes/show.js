@@ -10,11 +10,10 @@ export default class ResumesShowRoute extends Route {
     await resume.hasMany?.('educations')?.load?.();
     await resume.hasMany?.('certifications')?.load?.();
     await resume.hasMany?.('summaries')?.load?.();
-    const exps = resume.experiences;
-    for (const exp of exps?.toArray?.() ?? Array.from(exps ?? [])) {
-      await exp.hasMany?.('descriptions')?.load?.();
-      await exp.belongsTo?.('company')?.reload?.();
-    }
+    await resume.experiences.forEach( async (exp) => {
+        await exp.hasMany('descriptions').load();
+        await exp.belongsTo('company').reload();
+    });
     return resume;
   }
 }

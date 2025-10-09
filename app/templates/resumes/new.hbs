@@ -2,65 +2,64 @@
   <div class="container">
     <div class="builder-layout">
       <aside class="editor-panel">
-        <Panel::Card @title="Job Title">
-            <Resumes::Title::Form @resume={{this.model}}/>
-        </Panel::Card>
+          <Panel::Card @title="Job Title">
+              <Resumes::Title::Form @resume={{this.model}}/>
+          </Panel::Card>
 
-        <Panel::Card @title="Personal Information">
-            <PersonalInformation::Form @user={{this.model.user}}/>
-        </Panel::Card>
+          <Panel::Card @title="Personal Information">
+              <PersonalInformation::Form @user={{this.model.user}}/>
+          </Panel::Card>
 
-        <Panel::Card @title="Skills">
-            <Skills::Form />
-        </Panel::Card>
+          <Panel::Card @title="Skills">
+              <Skills::Form />
+          </Panel::Card>
 
-        <Panel::Card @title="Summary">
-           <Summary::Form @summary={{this.model.summary}}/> 
-        </Panel::Card>
+          <Panel::Card @title="Summary">
+              <Summary::Form @summary={{this.model.summary}}/> 
+          </Panel::Card>
 
-        <Panel::Card @title="Education">
-           <Educations::Form @education={{this.model.education}}/> 
-        </Panel::Card>
+          <Panel::Card @title="Education">
+              <Educations::Form @education={{this.model.education}}/> 
+          </Panel::Card>
 
-        <Panel::Card @title="Projects">
-            {{!-- empty -- not in models--}}
-        </Panel::Card>
+          <Panel::Card @title="Projects">
+              {{!-- empty -- not in models--}}
+          </Panel::Card>
 
-        <Panel::Card @title="Certifications">
-          <div class="panel-body">
-            <div class="panel-actions">
-              <button type="button" class="btn small" {{on "click" this.addCertification}}>+ Add Certification</button>
-            </div>
-             <Certifications::Form @certification={{this.model.certification}}/>
-          </div>
+          <Panel::Card @title="Certifications">
+              <div class="panel-body">
+                  <div class="panel-actions">
+                      <button type="button" class="btn small" {{on "click" this.addCertification}}>+ Add Certification</button>
+                  </div>
+                  <Certifications::Form @certification={{this.model.certification}}/>
+              </div>
 
-        </Panel::Card>
+          </Panel::Card>
 
-        <Panel::Card @title="Experience">
-          <div class="panel-body">
-            <div class="panel-actions">
-              <button type="button" class="btn small" {{on "click" this.addExperience}}>+ Add Experience</button>
-            </div>
-            <Experiences::List @experiences={{this.model.experiences}} @allowStandaloneSave={{false}} />
-          </div>
-        </Panel::Card>
+          <Panel::Card @title="Experience">
+              <div class="panel-body">
+                  <div class="panel-actions">
+                      <button type="button" class="btn small" {{on "click" this.addExperience}}>+ Add Experience</button>
+                  </div>
+                  <Experiences::List @experiences={{this.model.experiences}} />
+              </div>
+          </Panel::Card>
 
       </aside>
       <main class="preview-panel">
         <div class="preview-actions">
           <div class="score muted">Resume Score: 0%</div>
           <LinkTo
-            @route="resumes.new"
-            @query={{hash clone_from=this.model.id}}
-            class="btn"
+              @route="resumes.new"
+              @query={{hash clone_from=this.model.id}}
+              class="btn"
           >
-            Clone Resume
+              Clone Resume
           </LinkTo>
-          <button type="button" class="btn primary" {{on "click" this.saveAll}}>Save Resume</button>
           <button type="button" class="btn">Export PDF</button>
         </div>
         <div class="resume-preview">
-          <Resumes::Item @resume={{this.model}} />
+            <Resumes::Item @resume={{this.model}} />
         </div>
       </main>
     </div>

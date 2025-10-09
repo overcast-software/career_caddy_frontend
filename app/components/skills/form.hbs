@@ -1,13 +1,13 @@
 <form class="builder-form">
     <div class="skills-form">
-    <ul class="skills-list">
-        {{#each this.skills as |skill|}}
-        <li>
-            <span>{{skill}}</span>
-            <button type="button" {{on "click" (fn this.removeSkill skill)}} aria-label="Remove skill">×</button>
-        </li>
-        {{/each}}
-    </ul>
+        <ul class="skills-list">
+            {{#each this.skills as |skill|}}
+            <li>
+                <span>{{skill}}</span>
+                <button type="button" {{on "click" (fn this.removeSkill skill)}} aria-label="Remove skill">×</button>
+            </li>
+            {{/each}}
+        </ul>
     <div class="skills-new">
         <input type="text" placeholder="Add a skill" value={{this.newSkill}} {{on "input" this.updateNewSkill}} />
         <button type="button" {{on "click" this.addSkill}}>Add</button>

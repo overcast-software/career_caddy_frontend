@@ -1,120 +1,80 @@
 import Component from '@glimmer/component';
 import { inject as service } from '@ember/service';
 import { action } from '@ember/object';
-
 export default class ResumesItemComponent extends Component {
   @service router;
   @service store;
 
-  isEditingExperience(experience) {
-    // Add your logic here to determine if an experience is being edited
-    return false;
-  }
-
   @action
   async submitResume() {
-    try {
-        const source = this.args.resume;
-        const toArray = (rel) => rel?.toArray?.() ?? Array.from(rel ?? []);
-
-        // Ensure children are loaded from the source
-        await source.hasMany?.('experiences')?.load?.();
-        await source.hasMany?.('educations')?.load?.();
-        await source.hasMany?.('certifications')?.load?.();
-        await source.hasMany?.('summaries')?.load?.();
-
-        // 1) Create and save the new resume to obtain its ID
-        const newResume = this.store.createRecord('resume', {
-            title: source.title,
-            user: source.user
-        });
-        await newResume.save();
-
-        // 2) Clone children, associating them to the new resume before saving
-        const experienceClones = source.experiences.forEach(async (exp) => {
-            // Create experience associated to the new resume
-            const newExp = this.store.createRecord('experience', {
-                title: exp.title,
-                location: exp.location,
-                startDate: exp.startDate,
-                endDate: exp.endDate,
-                clonedId: exp.id,
-                resume: newResume,
-                company: exp.company
-            });
-            debugger
-            await newExp.save();
-
-            // Load and clone descriptions
-            await exp.hasMany?.('descriptions')?.load?.();
-            const descs = toArray(exp.descriptions);
-            if (descs.length) {
+        const source = this.args.resume; //new resume clone
+        await source.save().then(async (resume) => {
             await Promise.all(
-                descs.map((d) =>
-                this.store
-                    .createRecord('description', {
-                    content: d.content,
-                    order: d.order,
-                    experience: newExp
-                    })
-                    .save()
-                )
+                this.store.peekAll('experience').forEach(async (exp) => {
+                    if (exp.hasDirtyAttributes){
+                        console.warm('dirty')
+                        exp = await this.store.createRecord('experience',{
+                            location: exp.location,
+                            title: exp.title,
+                            summary: exp.summary,
+                            startDate: exp.startDate,
+                            endDate: exp.endDate,
+                            resume: resume,
+                            company: exp.company
+                        })
+                    } else{
+                        console.log('not dirty')
+                        exp.resume = resume;
+                    }
+                    //exp needs to know which resume
+                    //TODO need to validate this api call it's a PATCH
+                    await exp.save().then(async (e) => {
+                        // this.store.peekAll('description').forEach((d) => {
+                            // if (d.belongsTo('experience').id() === e.id){
+                            //     d.experience = e
+
+                            //     debugger
+                            //     d.save()
+                            //     // let attrs = d.serialize().data.attributes
+                            //     // attrs.experience = e.id
+                            //     // payload.descriptions.push(attrs)
+                            // }
+                            // Your logic with descriptions here
+                        // });
+                    });
+                })
             );
-            }
-        });
+        })
 
-        const educationClones = source.educations.forEach((ed) =>
-            this.store
-            .createRecord('education', {
-                degree: ed.degree,
-                issueDate: ed.issueDate,
-                institution: ed.institution,
-                major: ed.major,
-                minor: ed.minor,
-                resume: newResume
-            })
-            .save()
-        )
-
-        const certificationClones = toArray(source.certifications).map((c) =>
+        source.certifications.forEach(async (cert) =>
             this.store
             .createRecord('certification', {
-                issuer: c.issuer,
-                title: c.title,
-                content: c.content,
-                issueDate: c.issueDate,
-                resume: newResume
+                issuer: cert.issuer,
+                title: cert.title,
+                content: cert.content,
+                issueDate: cert.issueDate,
+                resume: source
             })
             .save()
         );
 
         // Clone summary if present
-        const summaryClones = toArray(source.summaries).map((s) =>
+        source.summaries.forEach((s) =>
             this.store
             .createRecord('summary', {
                 content: s.content,
                 user: s.user,
                 jobPost: s.jobPost,
-                resume: newResume
+                resume: source
             })
             .save()
         );
 
-      // 3) Wait for all child creates to complete
-      await Promise.all([
-        ...experienceClones,
-        ...educationClones,
-        ...certificationClones,
-        summaryClones
-      ].filter(Boolean));
 
       // 4) Redirect to the newly created resume
-      this.router.transitionTo('resumes.show', newResume.id);
+      this.router.transitionTo('resumes.show', source.id);
     } catch (e) {
-      // Optional: surface an error state as needed
-       
       console.error('Failed to clone resume', e);
       alert?.('Failed to clone resume.');
     }
-  }
 }

@@ -1,4 +1,7 @@
 {{yield}}
+{{!-- preview section  --}}
+<button type="button" {{on "click" this.submitResume}}>Send to API</button>
+
 <h1>{{@resume.user.name}}</h1>
 <h2>{{@resume.title}}</h2>
 <h2>{{@resume.user.email}}</h2>
@@ -6,12 +9,12 @@
 <p>
     <h1>Summary</h1>
     <hr/>
-        {{@resume.summary.content}}
+    {{@resume.summary.content}}
     <br/>
     <h1>Experience</h1>
     <hr/>
     {{#each @resume.experiences as |experience|}}
-        <Experiences::Item @experience={{experience}} />
+        {{!-- <Experiences::Item @experience={{experience}} /> --}}
     {{/each}}
     <h1>Education</h1>
     <hr/>
@@ -21,7 +24,7 @@
     <h1>Certifications</h1>
     <hr/>
     {{#each @resume.certifications as |certification|}}
-      <Certifications::Item @certification={{certification}} />
+        <Certifications::Item @certification={{certification}} />
     {{/each}}
 </p>
 <button type="button" {{on "click" this.submitResume}}>Send to API</button>
