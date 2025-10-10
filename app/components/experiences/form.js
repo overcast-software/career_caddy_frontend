@@ -67,19 +67,6 @@ export default class ExperiencesFormComponent extends Component {
   }
 
   @action async save(event) {
-    event?.preventDefault();
-    try {
-        const resumeId = this.experience.belongsTo('resume').id();
-        await this.experience.save();
-        const descs = await this.experience.descriptions;
-        const list = descs?.toArray?.() ?? Array.from(descs ?? []);
-        if (list.length) {
-            await Promise.all(list.map(d => d.save?.() ?? d));
-        }
-        this.router.transitionTo('resumes.show.experience.show', resumeId, this.experience.id);
-    } catch (e) {
-      this.errorMessage = e?.message ?? 'Failed to save experience';
-    }
   }
 
   @action cancel() {

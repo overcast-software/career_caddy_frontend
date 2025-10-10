@@ -1,6 +1,10 @@
 import ApplicationSerializer from './application';
 
 export default class ExperienceSerializer extends ApplicationSerializer {
+      attrs = {
+          descriptions: {serialize: true, embedded: 'always'}
+      }
+
     // createRecord(store, type, snapshot) {
     //     //we can detect dirty records here
     //     const data = this.serialize(snapshot, { includeId: true });

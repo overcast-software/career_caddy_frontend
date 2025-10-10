@@ -5,8 +5,6 @@ export default class ResumesNewController extends Controller {
   @service store;
   @service router;
 
-  toArray = (rel) => rel?.toArray?.() ?? Array.from(rel ?? []);
-
   addExperience = async () => {
     const exp = this.store.createRecord('experience', { resume: this.model });
     const rel = await this.model.experiences;

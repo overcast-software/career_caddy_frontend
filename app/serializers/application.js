@@ -4,11 +4,13 @@ import { singularize } from 'ember-inflector';
 const toSnakeCase = (s) =>
   s?.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/-/g, '_').toLowerCase();
 
-export default class ApplicationSerializer extends JSONAPISerializer {
+// export default class ApplicationSerializer extends JSONAPISerializer.extend(EmbeddedRecordsMixin) {
+export default class ApplicationSerializer extends JSONAPISerializer{
   modelNameFromPayloadType(payloadType) {
-    // accept plural/singular and underscores from the API, normalize to model names
     if (!payloadType) return payloadType;
-    return singularize(payloadType.replace(/_/g, '-'));
+    const normalized = singularize(payloadType.replace(/_/g, '-'));
+    if (normalized === 'experience-description') return 'description';
+    return normalized;
   }
 
   keyForAttribute(attr) {

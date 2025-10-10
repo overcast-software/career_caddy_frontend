@@ -9,26 +9,22 @@ export default class ResumesNewRoute extends Route {
     if (!clone_from) clone_from = 1;
 
 
-    await this.store.findAll("company")
-    await this.store.findAll("description")
-
     // Load source and eagerly load its relationships
-    const source = await this.store.findRecord('resume', clone_from);
-    const exp = await source.hasMany?.('experiences')?.load?.();
-    const edu = await source.hasMany?.('educations')?.load?.();
-    const cert = await source.hasMany?.('certifications')?.load?.();
-    const sum = await source.hasMany?.('summaries')?.load?.();
+    const source = await this.store.findRecord('resume', clone_from,
+                                               { include: 'experiences,educations,certification,summaries'}
+                                              );
 
+      await this.store.findAll('company')
     // Create UNSAVED cloned resume
     const newResume = this.store.createRecord('resume', {
-      content: source.content,
-      filePath: source.filePath,
-      title: source.title + " cloned",
-      user: source.user,
-      experiences: exp,
-      educations: edu,
-      certifications: cert,
-      summaries: sum
+        content: source.content,
+        filePath: source.filePath,
+        title: source.title + " cloned",
+        user: source.user,
+        experiences: await source.experiences,
+        educations: await source.educations,
+        certifications: await source.certifications,
+        summaries: await source.summaries
     });
 
     return newResume; // UNSAVED until user explicitly saves
