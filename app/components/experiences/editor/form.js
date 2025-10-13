@@ -39,8 +39,6 @@ export default class ExperiencesEditorForm extends Component {
     return arr.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
 
-  isEditing = (index) => this.editingIndex === index;
-
   @action updateField(field, event) {
     if (field === 'startDate' || field === 'endDate') {
       this.experience[field] = event.target.valueAsDate ?? null;
@@ -88,11 +86,6 @@ export default class ExperiencesEditorForm extends Component {
     this.router.transitionTo('resumes.show.experience.index', resumeId);
   }
 
-  @action startEditDescription(index, desc) {
-    this.editingIndex = index;
-    this.editingDraft = desc?.content ?? '';
-  }
-
   @action updateEditingDraft(event) {
     this.editingDraft = event.target.value;
   }
@@ -104,18 +97,5 @@ export default class ExperiencesEditorForm extends Component {
     this.editingDraft = '';
   }
 
-  @action cancelEditDescription() {
-    this.editingIndex = null;
-    this.editingDraft = '';
-  }
 
-  @action async handleDescriptionKeydown(index, desc, event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      await this.commitDescription(index, desc);
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      this.cancelEditDescription();
-    }
-  }
 }

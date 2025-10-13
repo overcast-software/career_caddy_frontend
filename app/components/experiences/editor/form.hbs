@@ -12,20 +12,8 @@
   <section class="descriptions">
     <h4 class="section-title">Descriptions</h4>
     <ul class="desc-list editable">
-      {{#each @experience.descriptions as |d index|}}
-        <Description
-          @description={{d}}
-          @index={{index}}
-
-          @onEdit={{fn this.startEditDescription index d}}
-          @onDblClick={{fn this.startEditDescription index d}}
-          @isEditing={{this.isEditing index}}
-          @draft={{this.editingDraft}}
-          @onInput={{this.updateEditingDraft}}
-          @onKeydown={{fn this.handleDescriptionKeydown index d}}
-          @onCommit={{fn this.commitDescription index d}}
-          @onCancel={{this.cancelEditDescription}}
-        />
+      {{#each @experience.descriptions as |d|}}
+          <Descriptions::Editor::Form @description={{d}} @experience={{@experience}} />
       {{/each}}
     </ul>
   </section>

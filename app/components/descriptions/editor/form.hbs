@@ -1,23 +1,24 @@
+{{yield}}
 <li class="desc-item">
-  {{#if @isEditing}}
+  {{#if this.isEditing}}
     <textarea
       class="desc-edit"
       style="width: 100%; resize: none;"
-      value={{@draft}}
-      {{on "input" @onInput}}
-      {{on "keydown" @onKeydown}}
-      {{on "blur" @onCommit}}
+      value={{@description.content}}
+        {{on "input" this.onInput}}
+        {{on "keydown" this.handleDescriptionKeydown}}
+        {{on "blur" this.commitDescription}}
     ></textarea>
   {{else}}
     <button
       type="button"
       class="icon-button edit"
       aria-label="Edit description"
-      {{on "click" @onEdit}}
+      {{on "click" this.startEditDescription}}
     >
       ✎
     </button>
-    <span class="desc-text" {{on "dblclick" @onDblClick}}>
+    <span class="desc-text" >
       {{@description.content}}
     </span>
   {{/if}}

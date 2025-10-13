@@ -12,25 +12,25 @@
   <section class="descriptions">
     <h4 class="section-title">Descriptions</h4>
     <ul class="desc-list editable">
-      {{#each @experience.descriptions as |d index|}}
-        <Description
-          @description={{d}}
-          @index={{index}}
+      {{#each this.orderedDescriptions as |d index|}}
+        <li class="desc-item">
+          <label class="field">Order
+            <input type="number" value={{d.order}} {{on "input" (fn this.updateDescriptionOrder d)}} />
+          </label>
 
-          @onEdit={{fn this.startEditDescription index d}}
-          @onDblClick={{fn this.startEditDescription index d}}
-          @isEditing={{this.isEditing index}}
-          @draft={{this.editingDraft}}
-          @onInput={{this.updateEditingDraft}}
-          @onKeydown={{fn this.handleDescriptionKeydown index d}}
-          @onCommit={{fn this.commitDescription index d}}
-          @onCancel={{this.cancelEditDescription}}
-        />
+          <label class="field">Content
+            <textarea rows="2" value={{d.content}} {{on "input" (fn this.updateDescriptionContent d)}}></textarea>
+          </label>
+
+          <button type="button" class="btn danger" {{on "click" (fn this.removeDescription d)}}>Remove</button>
+        </li>
       {{/each}}
     </ul>
+    <button type="button" class="btn small" {{on "click" this.addDescription}}>Add description</button>
   </section>
   <div class="form-actions">
     <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
     <button type="button" class="btn" {{on "click" this.deleteExperience}}>Delete</button>
+    <button type="button" class="btn primary" {{on "click" this.save}}>Save</button>
   </div>
 </form>

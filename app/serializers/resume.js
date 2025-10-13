@@ -4,9 +4,10 @@ import { EmbeddedRecordsMixin } from '@ember-data/serializer/rest';
 // const inflector = EmberInflector.inflector;
 
 
-export default class ResumeSerializer extends ApplicationSerializer.extend(EmbeddedRecordsMixin) {
-// export default class ResumeSerializer extends ApplicationSerializer {
-  isEmbeddedRecordsMixinCompatible= true
+import JSONAPISerializer from '@ember-data/serializer/json-api';
+
+
+export default class ResumeSerializer extends JSONAPISerializer.extend(EmbeddedRecordsMixin) {
   attrs = {
       user: { serialize: true, embedded: 'always' },
       scores: { serialize: true, embedded: 'always' },
@@ -18,29 +19,22 @@ export default class ResumeSerializer extends ApplicationSerializer.extend(Embed
       certifications: { serialize: true, embedded: 'always' }
   };
 
-  // Optionally, you might need to override the keyForAttribute method to customize the attribute names
-  // Example:
-  // keyForAttribute(attr) {
-  //   return attr.underscore();
-  // }
+  isEmbeddedRecordsMixinCompatible= true
 
-  // Handling the specific getters in your model
-  // Ensure the serializer knows how to include them
-  // normalize(typeClass, hash) {
+  normalize(typeClass, hash) {
+    if (hash.summary) {
+      hash.summary = this.store.normalize('summary', hash.summary);
+    }
+    if (hash.education) {
+      hash.education = this.store.normalize('education', hash.education);
+    }
+    if (hash.certification) {
+      hash.certification = this.store.normalize('certification', hash.certification);
+    }
+    if (hash.experiences) {
+      hash.experiences = this.store.normalize('experience', hash.experiences );
+    }
+   return super.normalize(typeClass, hash);
+  }
 
-  //     debugger
-  //   if (hash.summary) {
-  //     hash.summary = this.store.normalize('summary', hash.summary);
-  //   }
-  //   if (hash.education) {
-  //     hash.education = this.store.normalize('education', hash.education);
-  //   }
-  //   if (hash.certification) {
-  //     hash.certification = this.store.normalize('certification', hash.certification);
-  //   }
-  //   if (hash.experiences) {
-  //     hash.experiences = this.store.normalize('experience', hash.experiences );
-  //   }
-  //  return super.normalize(typeClass, hash);
-  // }
 }

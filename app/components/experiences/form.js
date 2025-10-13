@@ -51,7 +51,6 @@ export default class ExperiencesFormComponent extends Component {
     }
   }
 
-
   @action async deleteExperience() {
     try {
         const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
@@ -66,7 +65,49 @@ export default class ExperiencesFormComponent extends Component {
     }
   }
 
-  @action async save(event) {
+  @action addDescription() {
+    const exp = this.experience;
+    if (!exp) return;
+
+    const current = exp.descriptions;
+    const nextOrder =
+      (current?.toArray?.()?.length ??
+        (Array.isArray(current) ? current.length : 0)) + 1;
+
+    const desc = this.store.createRecord('description', {
+      content: '',
+      order: nextOrder,
+      experience: exp,
+    });
+
+    current?.pushObject?.(desc);
+  }
+
+  @action removeDescription(desc) {
+    if (!desc) return;
+    // Immediately mark for deletion and detach from relationship
+    desc.deleteRecord();
+    this.experience?.descriptions?.removeObject?.(desc);
+  }
+
+  @action updateDescriptionContent(desc, event) {
+    if (!desc) return;
+    desc.content = event?.target?.value ?? '';
+  }
+
+  @action updateDescriptionOrder(desc, event) {
+    if (!desc) return;
+    const val = Number(event?.target?.value);
+    desc.order = Number.isFinite(val) ? val : null;
+  }
+
+  @action async save() {
+    try {
+      await this.experience.save();
+      this.errorMessage = null;
+    } catch (e) {
+      this.errorMessage = e?.message ?? 'Failed to save experience';
+    }
   }
 
   @action cancel() {
@@ -75,34 +116,8 @@ export default class ExperiencesFormComponent extends Component {
     this.router.transitionTo('resumes.show.experience.index', resumeId);
   }
 
-  @action startEditDescription(index, desc) {
-    this.editingIndex = index;
-    this.editingDraft = desc?.content ?? '';
-  }
 
-  @action updateEditingDraft(event) {
-    this.editingDraft = event.target.value;
-  }
 
-  @action async commitDescription(index, desc) {
-    desc.content = (this.editingDraft ?? '').trim();
-    // No persistence here; defer saving until the whole resume is saved/cloned
-    this.editingIndex = null;
-    this.editingDraft = '';
-  }
 
-  @action cancelEditDescription() {
-    this.editingIndex = null;
-    this.editingDraft = '';
-  }
 
-  @action async handleDescriptionKeydown(index, desc, event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      await this.commitDescription(index, desc);
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      this.cancelEditDescription();
-    }
-  }
 }
