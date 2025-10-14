@@ -5,6 +5,8 @@ export default class ResumesShowRoute extends Route {
   @service store;
 
   async model({ resume_id }) {
+    await this.store.findAll('company')
+
     const resume = await this.store.findRecord('resume', resume_id);
     await resume.hasMany?.('experiences')?.load?.();
     await resume.hasMany?.('educations')?.load?.();

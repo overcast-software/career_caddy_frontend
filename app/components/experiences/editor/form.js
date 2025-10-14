@@ -9,6 +9,7 @@ export default class ExperiencesEditorForm extends Component {
   @tracked errorMessage = null;
   @tracked editingDesc = null;
   @tracked editingDraft = '';
+  @tracked isExpanded = true;
 
   get experience() {
         return this.args.experience ?? this.args.model;
@@ -73,7 +74,7 @@ export default class ExperiencesEditorForm extends Component {
         if (list.length) {
             await Promise.all(list.map(d => d.save?.() ?? d));
         }
-        this.router.transitionTo('resumes.show.experience.show', resumeId, this.experience.id);
+        this.router.transitionTo('resumes.show', resumeId, this.experience.id);
     } catch (e) {
       this.errorMessage = e?.message ?? 'Failed to save experience';
     }
@@ -87,6 +88,11 @@ export default class ExperiencesEditorForm extends Component {
 
   @action updateEditingDraft(event) {
     this.editingDraft = event.target.value;
+  }
+
+  @action
+  toggleExperience() {
+    this.isExpanded = !this.isExpanded;
   }
 
   @action async commitDescription(index, desc) {

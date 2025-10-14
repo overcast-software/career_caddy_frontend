@@ -1,8 +1,10 @@
 {{yield}}
 {{!-- preview section  --}}
-<button type="button" {{on "click" this.submitResume}}>Send to API</button>
+{{#if this.canClone}}
+  <button type="button" {{on "click" this.cloneResume}}>Clone</button>
+{{/if}}
 
-<div class="profile">
+<div class="profile" style="text-align: center;">
   <div class="name">{{@resume.user.name}}</div>
   <div class="title">{{@resume.title}}</div>
   <div class="email">{{@resume.user.email}}</div>
@@ -20,13 +22,26 @@
   {{#each @resume.experiences as |exp|}}
     <article class="experience">
       <div class="job-header">
-        <div class="job-title">{{exp.title}}</div>
+        <div class="job-title">
+          {{exp.title}}
+          <span class="job-dates" style="float: right;">
+            {{#if exp.startDate}}
+              {{#if exp.endDate}}
+                {{format-date exp.startDate "MM.YYYY"}} - {{format-date exp.endDate "MM.YYYY"}}
+              {{else}}
+                {{format-date exp.startDate "MM.YYYY"}}
+              {{/if}}
+            {{else}}
+              {{#if exp.endDate}}
+                {{format-date exp.endDate "MM.YYYY"}}
+              {{/if}}
+            {{/if}}
+          </span>
+        </div>
         <div class="job-meta">
           <span>{{exp.company.name}}</span>
           <span class="dot">•</span>
           <span>{{exp.location}}</span>
-          <span class="dot">•</span>
-          <span>{{exp.startDate}} – {{exp.endDate}}</span>
         </div>
       </div>
 
@@ -58,7 +73,7 @@
     <Certifications::Item @certification={{certification}} />
   {{/each}}
 </section>
-<button type="button" {{on "click" this.submitResume}}>Send to API</button>
+<button type="button" {{on "click" this.cloneResume}}>Send to API</button>
 <ul>
     <li>action 1</li>
     <li>action 2</li>

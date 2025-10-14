@@ -5,10 +5,15 @@ export default class ResumesItemComponent extends Component {
     @service router;
     @service store;
 
+    get canClone() {
+        return this.router.currentRouteName === 'resumes.show';
+    }
+
 
     @action
-    async submitResume() {
+    async cloneResume() {
         const source = this.args.resume;
-        await source.save()
+        await source.save();
+        this.router.transitionTo('resumes.show', source.id);
     }
 }

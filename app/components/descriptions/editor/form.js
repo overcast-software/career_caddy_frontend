@@ -8,8 +8,6 @@ export default class DescriptionsEditorForm extends Component {
 
     @service store;
 
-    @tracked draft = '';
-
     constructor(owner, args) {
         super(owner, args);
         this.draft = this.description?.content ?? '';
@@ -18,9 +16,10 @@ export default class DescriptionsEditorForm extends Component {
     get description(){
         return this.args.description
     }
-    // get experience(){
-    //     return this.args.experience
-    // }
+
+    get experience(){
+        return this.args.experience
+    }
 
     // @action updateDesc(event) {
     //     this.description.content = event.target.value
@@ -48,15 +47,11 @@ export default class DescriptionsEditorForm extends Component {
     // }
 
     @action async commitDescription() {
-        if (!this.description) return;
-        const next = (this.draft ?? '').trim();
-        if (next === (this.description.content ?? '')) return;
-        this.description.content = next;
         await this.description.save?.();
     }
 
     @action onInput(e) {
-        this.draft = e?.target?.value ?? '';
+        this.description.content = e?.target?.value ?? '';
     }
 
     @action handleDescriptionKeydown(e) {
