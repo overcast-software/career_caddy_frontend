@@ -2,31 +2,40 @@
   <div class="container">
     <div class="builder-layout">
       <aside class="editor-panel">
-          <Panel::Card @title="Job Title">
+          <Panel::Card @title="Experience" @collapsible={{true}}>
+              <div class="panel-body">
+                  <div class="panel-actions">
+                      <button type="button" class="btn small" {{on "click" this.addExperience}}>+ Add Experience</button>
+                  </div>
+                  <Experiences::List @experiences={{this.model.experiences}} />
+              </div>
+          </Panel::Card>
+
+          <Panel::Card @title="Job Title" @collapsible={{true}}>
               <Resumes::Title::Form @resume={{this.model}}/>
           </Panel::Card>
 
-          <Panel::Card @title="Personal Information">
+          <Panel::Card @title="Personal Information" @collapsible={{true}}>
               <PersonalInformation::Form @user={{this.model.user}}/>
           </Panel::Card>
 
-          <Panel::Card @title="Skills">
+          <Panel::Card @title="Skills" @collapsible={{true}}>
               <Skills::Form />
           </Panel::Card>
 
-          <Panel::Card @title="Summary">
+          <Panel::Card @title="Summary" @collapsible={{true}}>
               <Summary::Form @summary={{this.model.summary}}/>
           </Panel::Card>
 
-          <Panel::Card @title="Education">
+          <Panel::Card @title="Education" @collapsible={{true}}>
               <Educations::Form @education={{this.model.education}}/>
           </Panel::Card>
 
-          <Panel::Card @title="Projects">
+          <Panel::Card @title="Projects" @collapsible={{true}}>
               {{!-- empty -- not in models--}}
           </Panel::Card>
 
-          <Panel::Card @title="Certifications">
+          <Panel::Card @title="Certifications" @collapsible={{true}}>
               <div class="panel-body">
                   <div class="panel-actions">
                       <button type="button" class="btn small" {{on "click" this.addCertification}}>+ Add Certification</button>
@@ -36,26 +45,11 @@
 
           </Panel::Card>
 
-          <Panel::Card @title="Experience">
-              <div class="panel-body">
-                  <div class="panel-actions">
-                      <button type="button" class="btn small" {{on "click" this.addExperience}}>+ Add Experience</button>
-                  </div>
-                  <Experiences::List @experiences={{this.model.experiences}} />
-              </div>
-          </Panel::Card>
 
       </aside>
       <main class="preview-panel">
         <div class="preview-actions">
           <div class="score muted">Resume Score: 0%</div>
-          <LinkTo
-              @route="resumes.new"
-              @query={{hash clone_from=this.model.id}}
-              class="btn"
-          >
-              Clone Resume
-          </LinkTo>
           <button type="button" class="btn">Export PDF</button>
         </div>
         <div class="resume-preview">

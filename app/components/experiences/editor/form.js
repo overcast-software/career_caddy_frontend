@@ -7,7 +7,7 @@ export default class ExperiencesEditorForm extends Component {
   @service router;
   @service store;
   @tracked errorMessage = null;
-  @tracked editingIndex = null;
+  @tracked editingDesc = null;
   @tracked editingDraft = '';
 
   get experience() {
@@ -48,7 +48,6 @@ export default class ExperiencesEditorForm extends Component {
       this.experience[field] = event.target.value;
     }
   }
-
 
   @action async deleteExperience() {
     try {
@@ -95,6 +94,35 @@ export default class ExperiencesEditorForm extends Component {
     // No persistence here; defer saving until the whole resume is saved/cloned
     this.editingIndex = null;
     this.editingDraft = '';
+  }
+
+  @action addDescription() {
+    const exp = this.experience ?? this.args.experience;
+    if (!exp) return;
+
+    const current = exp.descriptions;
+    const nextOrder =
+      (current?.toArray?.()?.length ??
+        (Array.isArray(current) ? current.length : 0)) + 1;
+
+    const desc = this.store.createRecord('description', {
+      content: '',
+      order: nextOrder,
+      experience: exp,
+    });
+
+    current?.pushObject?.(desc);
+  }
+
+  @action async removeDescription(desc) {
+    if (!desc) return;
+    (this.experience ?? this.args.experience)?.descriptions?.removeObject?.(desc);
+
+    if (desc.isNew) {
+      desc.unloadRecord?.();
+    } else {
+      await desc.destroyRecord?.();
+    }
   }
 
 

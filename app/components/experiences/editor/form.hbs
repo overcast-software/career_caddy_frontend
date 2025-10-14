@@ -13,9 +13,13 @@
     <h4 class="section-title">Descriptions</h4>
     <ul class="desc-list editable">
       {{#each @experience.descriptions as |d|}}
-          <Descriptions::Editor::Form @description={{d}} @experience={{@experience}} />
+        <Descriptions::Editor::Form
+          @description={{d}}
+          @onDelete={{fn this.removeDescription d}}
+        />
       {{/each}}
     </ul>
+    <button type="button" class="btn small" {{on "click" this.addDescription}}>Add description</button>
   </section>
   <div class="form-actions">
     <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>

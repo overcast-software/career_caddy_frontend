@@ -40,6 +40,15 @@
   font: inherit;
 }
 
+.builder-form .field textarea {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+  line-height: 1.4;
+  resize: vertical;
+}
+
 .builder-form .field input[disabled] {
   color: var(--muted);
   background: #f8f8f8;
@@ -123,14 +132,14 @@
 }
 
 .desc-list.editable .desc-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border: 1px dashed var(--border);
-  border-radius: 6px;
-  background: #fafafa;
-  cursor: grab;
+  /* display: flex; */
+  /* align-items: center; */
+  /* gap: var(--space-3); */
+  /* padding: var(--space-2) var(--space-3); */
+  /* border: 1px dashed var(--border); */
+  /* border-radius: 6px; */
+  /* background: #fafafa; */
+  /* cursor: grab; */
 }
 
 .desc-list.editable .desc-item:active {
@@ -172,6 +181,15 @@
 }
 .btn.primary:hover { filter: brightness(0.95); }
 
+.btn.danger {
+  background: #fff5f5;
+  border-color: #f2b8b5;
+  color: var(--danger);
+}
+.btn.danger:hover {
+  background: #ffecec;
+}
+
 .btn.btn-link {
   padding: 0;
   background: none;
@@ -191,7 +209,7 @@
   gap: var(--space-3);
 }
 
-@media (width <= 640px) {
+@media (max-width: 640px) {
   .experience .job-header {
     flex-direction: column;
     align-items: flex-start;
@@ -201,6 +219,53 @@
   .experience .job-meta {
     font-size: 0.9rem;
   }
+}
+
+/* Builder page full-width */
+.builder-page .container {
+  max-width: none;
+  width: 100%;
+}
+
+/* Center the profile block in preview */
+.resume-preview .profile,
+.resume-preview .profile .name,
+.resume-preview .profile .title,
+.resume-preview .profile .email {
+  text-align: center;
+}
+
+/* Preview-side experience layout */
+.resume-preview .experience .job-title {
+  font-weight: 600;
+}
+.resume-preview .experience .job-meta {
+  color: var(--muted);
+}
+.resume-preview .experience .desc-list {
+  list-style: disc;
+  margin-left: 1.25rem;
+}
+
+/* Collapsible panel pattern */
+.collapsible {}
+.collapsible .collapsible-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.collapsible .collapsible-body {
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 180ms ease;
+}
+.collapsible.collapsed .collapsible-body {
+  grid-template-rows: 0fr;
+}
+.collapsible .collapsible-body > * {
+  min-height: 0; /* allow grid row to collapse */
 }
 
 /* Resume landing page styles */
@@ -420,7 +485,7 @@
   font-size: 1.05rem;
 }
 
-@media (width <= 900px) {
+@media (max-width: 900px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .feature-grid { grid-template-columns: repeat(2, 1fr); }
   .testimonial-grid { grid-template-columns: 1fr; }
@@ -496,7 +561,7 @@
   font-size: 0.9rem;
 }
 
-@media (width <= 900px) {
+@media (max-width: 900px) {
   .builder-page .builder-layout {
     grid-template-columns: 1fr;
   }
@@ -580,4 +645,32 @@
   font: inherit;
   line-height: 1.4;
   resize: vertical;
+}
+
+.input-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Collapse borders between adjacent controls */
+.input-group > * + * {
+  margin-left: -1px;
+}
+
+/* Middle control fills and has square edges to touch buttons */
+.input-group .desc-editor {
+  flex: 1;
+  border-radius: 0;
+  min-height: 40px;
+}
+
+/* Round outer corners only */
+.input-group > .btn:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+.input-group > .btn:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
 }

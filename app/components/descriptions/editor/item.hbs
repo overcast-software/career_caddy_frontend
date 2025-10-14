@@ -1,0 +1,39 @@
+
+{{yield}}
+<form >
+    {{#if this.isEditing}}
+        <li class="desc-item">
+
+            <textarea
+            class="desc-edit"
+            style="width: 100%; resize: none;"
+            value={{@description.content}}
+                {{on "input" this.onInput}}
+                {{on "keydown" this.handleDescriptionKeydown}}
+                {{on "blur" this.commitDescription}}
+            ></textarea>
+            <div class="actions">
+                <button type='button'>saves</button>
+            </div>
+        </li>
+    {{else}}
+        <li class="desc-item">
+            <label class='field'>
+           <input type="text" value={{@description.content}}/ >
+            <div class="actions">
+                <button type="button" class="btn btn-link" {{on "click" this.startEditDescription}}>✎</button>
+                <button
+                    type="button"
+                    class="btn btn-link danger"
+                    aria-label="Delete description"
+                    title="Delete"
+                    {{on "click" this.removeDescription}}
+                >
+                🗑
+                </button>
+            </div>
+            </label>
+        </li>
+
+    {{/if}}
+</form >

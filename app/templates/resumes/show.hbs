@@ -28,13 +28,9 @@
       <main class="preview-panel">
         <div class="preview-actions">
           <div class="score muted">Resume Score: 0%</div>
-          <LinkTo
-            @route="resumes.new"
-            @query={{hash clone_from=this.model.id}}
-            class="btn"
-          >
+          <button type="button" class="btn" {{on "click" this.cloneResume}}>
             Clone Resume
-          </LinkTo>
+          </button>
           <button type="button" class="btn">Export PDF</button>
         </div>
         <div class="resume-preview">

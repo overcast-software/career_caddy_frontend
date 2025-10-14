@@ -4,16 +4,13 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 
-export default class DescriptionsEditorForm extends Component {
+export default class DescriptionsEditorItem extends Component {
 
     @service store;
 
-    @tracked draft = '';
+    @tracked isEditing = false
 
-    constructor(owner, args) {
-        super(owner, args);
-        this.draft = this.description?.content ?? '';
-    }
+    draft = false
 
     get description(){
         return this.args.description
@@ -31,6 +28,10 @@ export default class DescriptionsEditorForm extends Component {
     //         .then(this.experience.removeObject(this.description))
     // }
 
+    @action startEditDescription() {
+        this.editingDraft = this.description.content ?? '';
+        this.isEditing = true;
+    }
 
     // @action cancelEditDescription() {
     //     this.editingIndex = null;
@@ -48,34 +49,8 @@ export default class DescriptionsEditorForm extends Component {
     // }
 
     @action async commitDescription() {
-        if (!this.description) return;
-        const next = (this.draft ?? '').trim();
-        if (next === (this.description.content ?? '')) return;
-        this.description.content = next;
-        await this.description.save?.();
-    }
-
-    @action onInput(e) {
-        this.draft = e?.target?.value ?? '';
-    }
-
-    @action handleDescriptionKeydown(e) {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-            e.preventDefault();
-            this.commitDescription();
-        }
-    }
-
-    @action delete() {
-        if (this.args?.onDelete) {
-            this.args.onDelete(this.description);
-            return;
-        }
-        if (this.description?.isNew) {
-            this.description.deleteRecord?.();
-        } else {
-            this.description.destroyRecord?.();
-        }
+        this.description.save()
+            .then(() => this.isEditing = false)
     }
 
     // @action async handleDescriptionKeydown(index, desc, event) {

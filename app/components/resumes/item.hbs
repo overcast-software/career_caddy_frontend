@@ -2,31 +2,62 @@
 {{!-- preview section  --}}
 <button type="button" {{on "click" this.submitResume}}>Send to API</button>
 
-<h1>{{@resume.user.name}}</h1>
-<h2>{{@resume.title}}</h2>
-<h2>{{@resume.user.email}}</h2>
+<div class="profile">
+  <div class="name">{{@resume.user.name}}</div>
+  <div class="title">{{@resume.title}}</div>
+  <div class="email">{{@resume.user.email}}</div>
+</div>
 
-<p>
-    <h1>Summary</h1>
-    <hr/>
-    {{@resume.summary.content}}
-    <br/>
-    <h1>Experience</h1>
-    <hr/>
-    {{#each @resume.experiences as |experience|}}
-        {{!-- <Experiences::Item @experience={{experience}} /> --}}
-    {{/each}}
-    <h1>Education</h1>
-    <hr/>
-    {{#each @resume.educations as |education|}}
-        <Educations::Item @education={{education}} />
-    {{/each}}
-    <h1>Certifications</h1>
-    <hr/>
-    {{#each @resume.certifications as |certification|}}
-        <Certifications::Item @certification={{certification}} />
-    {{/each}}
-</p>
+<section>
+  <h2>Summary</h2>
+  <hr/>
+  <div class="summary">{{@resume.summary.content}}</div>
+</section>
+
+<section>
+  <h2>Experience</h2>
+  <hr/>
+  {{#each @resume.experiences as |exp|}}
+    <article class="experience">
+      <div class="job-header">
+        <div class="job-title">{{exp.title}}</div>
+        <div class="job-meta">
+          <span>{{exp.company.name}}</span>
+          <span class="dot">•</span>
+          <span>{{exp.location}}</span>
+          <span class="dot">•</span>
+          <span>{{exp.startDate}} – {{exp.endDate}}</span>
+        </div>
+      </div>
+
+      {{#if exp.summary}}
+        <div class="job-summary">{{exp.summary}}</div>
+      {{/if}}
+
+      <ul class="desc-list">
+        {{#each exp.descriptions as |d|}}
+          <li class="desc-item">{{d.content}}</li>
+        {{/each}}
+      </ul>
+    </article>
+  {{/each}}
+</section>
+
+<section>
+  <h2>Education</h2>
+  <hr/>
+  {{#each @resume.educations as |education|}}
+    <Educations::Item @education={{education}} />
+  {{/each}}
+</section>
+
+<section>
+  <h2>Certifications</h2>
+  <hr/>
+  {{#each @resume.certifications as |certification|}}
+    <Certifications::Item @certification={{certification}} />
+  {{/each}}
+</section>
 <button type="button" {{on "click" this.submitResume}}>Send to API</button>
 <ul>
     <li>action 1</li>

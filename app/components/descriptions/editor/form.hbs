@@ -1,27 +1,27 @@
-{{yield}}
 <li class="desc-item">
-  {{#if this.isEditing}}
-    <textarea
-      class="desc-edit"
-      style="width: 100%; resize: none;"
-      value={{@description.content}}
-        {{on "input" this.onInput}}
-        {{on "keydown" this.handleDescriptionKeydown}}
-        {{on "blur" this.commitDescription}}
-    ></textarea>
-  {{else}}
+  <div class="input-group">
     <button
       type="button"
-      class="icon-button edit"
-      aria-label="Edit description"
-      {{on "click" this.startEditDescription}}
-    >
-      ✎
-    </button>
-    <span class="desc-text" >
-      {{@description.content}}
-    </span>
-  {{/if}}
+      class="btn danger"
+      title="Delete"
+      aria-label="Delete description"
+      {{on "click" this.delete}}
+    >🗑</button>
 
-  {{yield}}
+    <textarea
+      class="desc-editor"
+      rows="3"
+      value={{this.draft}}
+      {{on "input" this.onInput}}
+      {{on "keydown" this.handleDescriptionKeydown}}
+      {{on "blur" this.commitDescription}}
+    ></textarea>
+
+    <button
+      type="button"
+      class="btn primary"
+      {{on "click" this.commitDescription}}
+    >Save</button>
+
+  </div>
 </li>
