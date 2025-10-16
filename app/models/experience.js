@@ -8,5 +8,5 @@ export default class ExperienceModel extends Model {
   @attr('date') endDate;
   @belongsTo('resume', { async: true, inverse: 'experiences' }) resume;
   @belongsTo('company', { async: false, inverse: 'experiences' }) company;
-  @hasMany('description', { async: true, inverse: 'experience' }) descriptions;
+  @hasMany('description', { async: false, inverse: 'experience' }) descriptions;
 }
