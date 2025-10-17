@@ -36,7 +36,7 @@ export default class JobPostsItemComponent extends Component {
 
   get companyName() {
     const company = this.args.jobPost?.company;
-    return company?.displayName ?? company?.name ?? '';
+    return company.get("displayName") ?? company.name;
   }
 
   // derive an external application URL from related scrapes

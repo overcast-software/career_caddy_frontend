@@ -672,3 +672,21 @@
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
 }
+
+/* Summaries page */
+.summary-item .summary-header {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-bottom: var(--space-2);
+}
+.summary-content {
+  line-height: 1.5;
+}
+.clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

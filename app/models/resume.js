@@ -4,7 +4,7 @@ export default class ResumeModel extends Model {
   @attr('string') content;
   @attr('string') filePath;
   @attr('string') title;
-  @belongsTo('user', { async: false, inverse: null }) user;
+  @belongsTo('user', { async: true, inverse: null }) user;
   @hasMany('score', { async: false, inverse: null }) scores;
   @hasMany('cover-letter', { async: false, inverse: 'resume' }) coverLetters;
   @hasMany('application', { async: false, inverse: null }) applications;

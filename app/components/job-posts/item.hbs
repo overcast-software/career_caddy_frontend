@@ -1,37 +1,63 @@
-<h1>
-{{this.companyName}}
-</h1>
-<h1>
-    <LinkTo @route="job-posts.show" @model={{this.jobPost}}>{{this.jobPost.title}}</LinkTo>
-</h1>
-<p>
-{{this.jobPost.description}}
-</p>
-<label for="resume-select">Resume:</label>
-<select id="resume-select" {{on "change" this.onResumeChange}} value={{this.selectedResumeId}}>
-  <option value="">Select a resume…</option>
-  {{#each this.resumes as |resume|}}
-    <option value={{resume.id}}>
-      {{#if resume.filePath}}
-        {{resume.filePath}}
-      {{else}}
-        Resume {{resume.id}}
-      {{/if}}
-    </option>
-  {{/each}}
-</select>
-<button type="button" {{on "click" this.score}} disabled={{this.isScoreDisabled}}>Score</button>
-<button type="button" {{on "click" this.summary}} disabled={{this.isScoreDisabled}}>Create resume summary</button>
-<button type="button" {{on "click" this.cover_letter}} disabled={{this.isScoreDisabled}}>Create cover letter</button>
-<button type="button" {{on "click" this.apply}}>Apply</button>
-<button type="button" {{on "click" this.previous}}>Previous</button>
-<button type="button" {{on "click" this.next}}>Next</button>
-<h3>scores:</h3>
-{{#each this.scores as |score|}}
-    <ul>
-        <li>
-            resume {{score.resume.id}}
-            scored: <LinkTo @route="scores.show" @model={{score.id}}>{{score.score}}</LinkTo>
+<article class="panel-card">
+  <header class="job-post-header">
+    <h2 class="panel-title">{{this.companyName}}</h2>
+    <h1 class="job-title">
+      <LinkTo @route="job-posts.show" @model={{this.jobPost}}>
+        {{this.jobPost.title}}
+      </LinkTo>
+    </h1>
+  </header>
+<section class="job-post-description">
+  <p class="muted">
+    {{this.jobPost.description}}
+  </p>
+</section>
+<section class="job-post-controls">
+  <div>
+    <label for="resume-select">Resume</label>
+    <select
+      id="resume-select"
+      {{on "change" this.onResumeChange}}
+      value={{this.selectedResumeId}}
+    >
+      <option value="">Select a resume…</option>
+      {{#each this.resumes as |resume|}}
+        <option value={{resume.id}}>
+          {{#if resume.filePath}}
+            {{resume.filePath}}
+          {{else}}
+            Resume {{resume.id}}
+          {{/if}}
+        </option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn" {{on "click" this.score}} disabled={{this.isScoreDisabled}}>Score</button>
+    <button type="button" class="btn" {{on "click" this.summary}} disabled={{this.isScoreDisabled}}>Create resume summary</button>
+    <button type="button" class="btn" {{on "click" this.cover_letter}} disabled={{this.isScoreDisabled}}>Create cover letter</button>
+    <button type="button" class="btn primary" {{on "click" this.apply}}>Apply</button>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn" {{on "click" this.previous}}>Previous</button>
+    <button type="button" class="btn" {{on "click" this.next}}>Next</button>
+  </div>
+</section>
+<section class="job-post-scores">
+  <h3 class="section-title">Scores</h3>
+  {{#if this.scores.length}}
+    <ul class="desc-list">
+      {{#each this.scores as |score|}}
+        <li class="desc-item">
+          <span class="muted">Resume</span> {{score.resume.id}} — <span class="muted">Score:</span>
+          <LinkTo @route="scores.show" @model={{score.id}}>{{score.score}}</LinkTo>
         </li>
+      {{/each}}
     </ul>
-{{/each}}
+  {{else}}
+    <p class="muted">No scores yet</p>
+  {{/if}}
+</section>
+</article>

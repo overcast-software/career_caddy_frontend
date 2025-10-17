@@ -9,17 +9,31 @@ export default class ResumesShowController extends Controller {
   @action
   async cloneResume() {
     const source = this.model;
-    if (!source) return;
 
-    // Minimal clone: copy top-level fields; keep user association
-    const newResume = this.store.createRecord('resume', {
-      content: source.content,
-      filePath: source.filePath,
-      title: `${source.title} cloned`,
-      user: source.user
-    });
-
-    await newResume.save();
-    this.router.transitionTo('resumes.show', newResume.id);
-  }
+    // Create a shallow clone (without children) to avoid passing ManyArrays/PromiseManyArrays
+    this.store.createRecord('resume', {
+      title: source.title ? `${source.title} (Copy)` : source.title,
+      content: source.content ?? null,
+      filePath: source.filePath ?? null,
+    })
+    .save()
+    .then( (c) => {
+        console.info(c.id)
+        return Promise.all([
+            c.experiences,
+            c.certifications,
+            c.educations,
+            c.summaries,
+        ]).then(([experiences, certifications, educations, summaries]) => {
+            source.experiences.forEach( (exp) => experiences.push(exp))
+            source.certifications.forEach( (cert) => certifications.push(cert))
+            source.educations.forEach( (edu) => educations.push(edu))
+            source.summaries.forEach( (sum) => summaries.push(sum))
+            return c.save()
+        })
+    })
+    .then( (c) => {
+        this.router.transitionTo('resumes.show', c.id)
+    })
+    }
 }
