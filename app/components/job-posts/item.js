@@ -118,10 +118,17 @@ export default class JobPostsItemComponent extends Component {
   }
 
   @action
-  async summary() {
+  async createSummary() {
     const jobPost = this.jobPost ?? this.args.jobPost;
     const user = this.currentUser;
-    const resumeId = this.selectedResumeId;
+   const resumeId = this.selectedResumeId;
+
+      const resume = await this.store.peekRecord('resume', resumeId)
+      const summary = await this.store.createRecord('summary', {
+          resume,
+          jobPost: jobPost
+      })
+      summary.save()
     if (!jobPost || !user || !resumeId) return;
 
     try {
@@ -164,6 +171,7 @@ export default class JobPostsItemComponent extends Component {
     const url = this.applicationUrl;
     if (url) window.open(url, '_blank', 'noopener');
   }
+
   @action
   cover_letter(){
     const jobPost = this.jobPost ?? this.args.jobPost;
@@ -185,8 +193,5 @@ export default class JobPostsItemComponent extends Component {
   @action
   onResumeChange(event) {
     this.selectedResumeId = event.target.value;
-    if (typeof this.args.onResumeChange === 'function') {
-      this.args.onResumeChange(this.selectedResumeId);
-    }
   }
 }

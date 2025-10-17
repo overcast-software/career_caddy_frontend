@@ -1,29 +1,28 @@
 <div class="builder-page">
   <div class="container">
     <div class="builder-layout">
+
       <aside class="editor-panel">
-        <div class="panel-card">
-          <div class="panel-title">Personal Information</div>
-          <p class="muted">Edit in your User profile.</p>
-        </div>
-        <div class="panel-card">
-          <div class="panel-title">Professional Summary</div>
-          {{!-- (Optional) summary editor goes here --}}
-        </div>
-        <div class="panel-card">
-          <div class="panel-title">Experience</div>
-          <div class="panel-body">
-            <div class="panel-actions">
-              <LinkTo @route="resumes.show.experience.new" @model={{this.model}} class="btn small">+ Add Experience</LinkTo>
-            </div>
-            <Experiences::List @experiences={{this.model.experiences}} />
-            {{outlet}}
-          </div>
-        </div>
-        <div class="panel-card"><div class="panel-title">Education</div></div>
-        <div class="panel-card"><div class="panel-title">Skills</div></div>
-        <div class="panel-card"><div class="panel-title">Projects</div></div>
-        <div class="panel-card"><div class="panel-title">Certifications</div></div>
+          <Panel::Card @title="Personal Information" @collapsible={{true}}>
+              <PersonalInformation::Form @user={{this.model.user}}/>
+          </Panel::Card>
+
+          <Panel::Card @title="Summary" @collapsible={{true}}>
+              <Summary::Form @summary={{this.model.summary}}/>
+          </Panel::Card>
+
+          <Panel::Card @title="Education" @collapsible={{true}}>
+              <Educations::Form @education={{this.model.education}}/>
+          </Panel::Card>
+
+          <Panel::Card @title="Experience" @collapsible={{true}}>
+              <div class="panel-body">
+                  <div class="panel-actions">
+                      <button type="button" class="btn small" {{on "click" this.addExperience}}>+ Add Experience</button>
+                  </div>
+                  <Experiences::List @experiences={{this.model.experiences}} />
+              </div>
+          </Panel::Card>
       </aside>
       <main class="preview-panel">
         <div class="preview-actions">
@@ -33,8 +32,9 @@
           </button>
           <button type="button" class="btn">Export PDF</button>
         </div>
+
         <div class="resume-preview">
-          <Resumes::Item @resume={{this.model}} />
+            <Resumes::Item @resume={{this.model}} />
         </div>
       </main>
     </div>

@@ -28,9 +28,15 @@
                 {{/if}}
               </header>
 
-              <p class="summary-content clamp-4">
-                {{summary.content}}
-              </p>
+              {{#if summary.content}}
+                <p class="summary-content clamp-4">
+                  {{summary.content}}
+                </p>
+              {{else}}
+                <p class="summary-content clamp-4">
+                  <span class="spinner" role="status" aria-label="Loading summary content"></span>
+                </p>
+              {{/if}}
             </article>
           </li>
         {{/each}}

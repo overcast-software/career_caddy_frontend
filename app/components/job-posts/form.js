@@ -8,8 +8,7 @@ export default class JobPostsFormComponent extends Component {
   @service store;
   @tracked errorMessage = null;
   @tracked form_toggle = false; // false = "by url", true = "manual"
-  @tracked selectedCompanyId = '';
-  @tracked newCompanyName = '';
+  @tracked companyQuery = '';
 
   constructor(...args) {
     super(...args);
@@ -21,9 +20,6 @@ export default class JobPostsFormComponent extends Component {
     return this.store.peekAll('company');
   }
 
-  get isCreatingNewCompany() {
-    return this.selectedCompanyId === '__new__';
-  }
 
   @action
   onModeChange(event) {
@@ -31,13 +27,8 @@ export default class JobPostsFormComponent extends Component {
   }
 
   @action
-  onCompanyChange(event) {
-    this.selectedCompanyId = event.target.value;
-  }
-
-  @action
-  updateNewCompanyName(event) {
-    this.newCompanyName = event.target.value;
+  updateCompanyQuery(event) {
+    this.companyQuery = event.target.value;
   }
 
 
@@ -56,29 +47,24 @@ export default class JobPostsFormComponent extends Component {
     this.errorMessage = null;
 
     try {
-      // Ensure a company selection or creation choice was made
-      if (!this.selectedCompanyId) {
-        this.errorMessage = 'Please select a company or choose "Create new company".';
+      const name = this.companyQuery?.trim();
+      if (!name) {
+        this.errorMessage = 'Please enter a company name.';
         return;
       }
 
-      let companyRecord;
+      let companyRecord =
+        this.companies.find((c) => {
+          const label = (c.displayName ?? c.name ?? '').trim().toLowerCase();
+          return label === name.toLowerCase();
+        }) ?? null;
 
-      if (this.selectedCompanyId === '__new__') {
-        const name = this.newCompanyName?.trim();
-        if (!name) {
-          this.errorMessage = 'Please enter a company name.';
-          return;
-        }
+      if (!companyRecord) {
         companyRecord = this.store.createRecord('company', {
           name,
           displayName: name,
         });
         await companyRecord.save();
-      } else {
-        companyRecord =
-          this.store.peekRecord('company', this.selectedCompanyId) ||
-          (await this.store.findRecord('company', this.selectedCompanyId));
       }
 
       this.args.jobPost.company = companyRecord;

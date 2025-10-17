@@ -2,8 +2,8 @@
     <p class="error">{{this.errorMessage}}</p>
   {{/if}}
 
-  <div>
-    <label for="create-mode">Create</label>
+  <div class="field">
+    <label class="field-label" for="create-mode">Create</label>
     <select
       id="create-mode"
       value={{if this.form_toggle "manual" "by-url"}}
@@ -15,40 +15,26 @@
   </div>
 
   {{#if this.form_toggle  }}
-    <form {{on "submit" this.submitManual}}>
-      <div>
-        <label for="company-select">Company</label>
-        <select
-          id="company-select"
-          {{on "change" this.onCompanyChange}}
-          value={{this.selectedCompanyId}}
+    <form class="builder-form" {{on "submit" this.submitManual}}>
+      <div class="field">
+        <label class="field-label" for="company-autocomplete">Company</label>
+        <input
+          id="company-autocomplete"
+          type="text"
+          list="company-suggestions"
+          placeholder="Start typing a company name…"
+          {{on "input" this.updateCompanyQuery}}
           required
-        >
-          <option value="">Select a company…</option>
+        />
+        <datalist id="company-suggestions">
           {{#each this.companies as |company|}}
-            <option value={{company.id}}>
-              {{#if company.displayName}}{{company.displayName}}{{else}}{{company.name}}{{/if}}
-            </option>
+            <option value="{{if company.displayName company.displayName company.name}}"></option>
           {{/each}}
-          <option value="__new__">Create new company…</option>
-        </select>
+        </datalist>
       </div>
 
-      {{#if this.isCreatingNewCompany}}
-        <div>
-          <label for="new-company-name">New company name</label>
-          <input
-            id="new-company-name"
-            type="text"
-            value={{this.newCompanyName}}
-            {{on "input" this.updateNewCompanyName}}
-            required
-          />
-        </div>
-      {{/if}}
-
-      <div>
-        <label for="title">Title</label>
+      <div class="field">
+        <label class="field-label" for="title">Title</label>
         <input
           id="title"
           type="text"
@@ -57,8 +43,8 @@
           required
         />
       </div>
-      <div>
-        <label for="description">Description</label>
+      <div class="field">
+        <label class="field-label" for="description">Description</label>
         <textarea
           id="description"
           value={{@jobPost.description}}
@@ -67,20 +53,23 @@
         ></textarea>
       </div>
 
-      <button type="submit">Create Job Post</button>
+      <div class="form-actions">
+        <button type="submit" class="btn primary">Create Job Post</button>
+      </div>
     </form>
   {{else}}
-    <form {{on "submit" this.submitScrape}}>
-      <div>
-        <label for="url">Url</label>
+    <form class="builder-form" {{on "submit" this.submitScrape}}>
+      <div class="field">
+        <label class="field-label" for="url">Url</label>
         <input
           id="url"
           type="text"
-          value=""
           {{on "change" this.updateUrl}}
           required
         />
       </div>
-      <button type="submit">Scrape the page</button>
+      <div class="form-actions">
+        <button type="submit" class="btn primary">Scrape the page</button>
+      </div>
     </form>
   {{/if}}

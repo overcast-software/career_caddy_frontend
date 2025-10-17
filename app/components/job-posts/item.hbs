@@ -35,7 +35,7 @@
 
   <div class="actions">
     <button type="button" class="btn" {{on "click" this.score}} disabled={{this.isScoreDisabled}}>Score</button>
-    <button type="button" class="btn" {{on "click" this.summary}} disabled={{this.isScoreDisabled}}>Create resume summary</button>
+    <button type="button" class="btn" {{on "click" this.createSummary}} disabled={{this.isScoreDisabled}}>Create resume summary</button>
     <button type="button" class="btn" {{on "click" this.cover_letter}} disabled={{this.isScoreDisabled}}>Create cover letter</button>
     <button type="button" class="btn primary" {{on "click" this.apply}}>Apply</button>
   </div>

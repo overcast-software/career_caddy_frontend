@@ -4,7 +4,8 @@ export default class CoverLetterModel extends Model {
   @attr('string') content;
   @attr('date') createdAt;
   @belongsTo('user', { async: false, inverse: 'coverLetters' }) user;
-  @belongsTo('resume', { async: false, inverse: 'coverLetters' }) resume;
-  @belongsTo('job-post', { async: false, inverse: 'coverLetters' }) jobPost;
-  @belongsTo('application', { async: false, inverse: 'coverLetter' }) application;
+
+  @belongsTo('job-post', { async: true, inverse: 'coverLetters' }) jobPost;
+  @belongsTo('resume', { async: true, inverse: 'coverLetters' }) resume;
+  // @belongsTo('application', { async: false, inverse: 'coverLetter' }) application;
 }

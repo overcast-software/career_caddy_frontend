@@ -2,6 +2,22 @@
   <div class="container">
     <div class="builder-layout">
       <aside class="editor-panel">
+          <Panel::Card @title="Job Title" @collapsible={{true}}>
+              <Resumes::Title::Form @resume={{this.model}}/>
+          </Panel::Card>
+
+          <Panel::Card @title="Personal Information" @collapsible={{true}}>
+              <PersonalInformation::Form @user={{this.model.user}}/>
+          </Panel::Card>
+
+          <Panel::Card @title="Summary" @collapsible={{true}}>
+              <Summary::Form @summary={{this.model.summary}}/>
+          </Panel::Card>
+
+          <Panel::Card @title="Skills" @collapsible={{true}}>
+              <Skills::Form />
+          </Panel::Card>
+
           <Panel::Card @title="Experience" @collapsible={{true}}>
               <div class="panel-body">
                   <div class="panel-actions">
@@ -11,30 +27,6 @@
               </div>
           </Panel::Card>
 
-          <Panel::Card @title="Job Title" @collapsible={{true}}>
-              <Resumes::Title::Form @resume={{this.model}}/>
-          </Panel::Card>
-
-          <Panel::Card @title="Personal Information" @collapsible={{true}}>
-              <PersonalInformation::Form @user={{this.model.user}}/>
-          </Panel::Card>
-
-          <Panel::Card @title="Skills" @collapsible={{true}}>
-              <Skills::Form />
-          </Panel::Card>
-
-          <Panel::Card @title="Summary" @collapsible={{true}}>
-              <Summary::Form @summary={{this.model.summary}}/>
-          </Panel::Card>
-
-          <Panel::Card @title="Education" @collapsible={{true}}>
-              <Educations::Form @education={{this.model.education}}/>
-          </Panel::Card>
-
-          <Panel::Card @title="Projects" @collapsible={{true}}>
-              {{!-- empty -- not in models--}}
-          </Panel::Card>
-
           <Panel::Card @title="Certifications" @collapsible={{true}}>
               <div class="panel-body">
                   <div class="panel-actions">
@@ -42,10 +34,16 @@
                   </div>
                   <Certifications::Form @certification={{this.model.certification}}/>
               </div>
+          </Panel::Card>
 
+          <Panel::Card @title="Education" @collapsible={{true}}>
+              <Educations::Form @education={{this.model.education}}/>
           </Panel::Card>
 
 
+          <Panel::Card @title="Projects" @collapsible={{true}}>
+              {{!-- empty -- not in models--}}
+          </Panel::Card>
       </aside>
       <main class="preview-panel">
         <div class="preview-actions">

@@ -9,6 +9,6 @@ export default class JobPostModel extends Model {
   @belongsTo('company', { async: true, inverse: null }) company;
   @hasMany('score', { async: true, inverse: null }) scores;
   @hasMany('scrape', { async: false, inverse: null }) scrapes;
-  @hasMany('cover-letter', { async: false, inverse: 'jobPost' }) coverLetters;
+  @hasMany('cover-letter', { async: true, inverse: 'jobPost' }) coverLetters;
   @hasMany('application', { async: false, inverse: null }) applications;
 }
