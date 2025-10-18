@@ -1,10 +1,15 @@
 <form class="builder-form">
-    <div class="skills-form">
-        <pre>
-        <textarea type="text" placeholder="Add a skill" value={{@skill.text}} {{on "input" this.updateSkill}} />
-        </pre>
-        <div class="skills-new">
-            <button type="button" {{on "click" this.addSkill}}>Add</button>
-        </div>
+  <div class="field">
+    <label class="field-label">Skills</label>
+    <div class="input-group">
+      <textarea
+        class="desc-editor"
+        placeholder="Add a skill"
+        value={{if @skill @skill.text this.newSkill}}
+        rows={{this.lineCount}}
+        {{on "input" this.updateSkill}}
+      ></textarea>
+      <button type="button" class="btn primary" {{on "click" this.addSkill}}>Add</button>
     </div>
+  </div>
 </form>

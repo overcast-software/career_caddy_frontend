@@ -18,11 +18,9 @@
 <section>
   <h2>Skills</h2>
   <hr/>
-<pre>
-  {{#if @resume.activeSkill}}
-      {{@resume.activeSkill.text}}
-  {{/if}}
-</pre>
+{{#if @resume.activeSkill}}
+<div class="skills-block pre-wrap">{{ltrim @resume.activeSkill.text}}</div>
+{{/if}}
 </section>
 
 <section>

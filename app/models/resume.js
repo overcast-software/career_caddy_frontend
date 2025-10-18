@@ -30,4 +30,5 @@ export default class ResumeModel extends Model {
         return this.hasMany('skills').value().find( (rec) => rec.active )
     }
 
+
 }
