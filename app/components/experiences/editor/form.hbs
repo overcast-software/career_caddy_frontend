@@ -10,9 +10,18 @@
   {{#if this.isExpanded}}
   {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
   <input type="hidden" name="resume_id" value={{@experience.resumeId}} />
+
   <label class="field">Company <input type="text" value={{@experience.company.name}} disabled /></label>
-  <label class="field">Title <input type="text" value={{@experience.title}} {{on "input" (fn this.updateField "title")}} /></label>
-  <label class="field">Location <input type="text" value={{@experience.location}} {{on "input" (fn this.updateField "location")}} /></label>
+  <div class="field-row" style="display: flex; gap: 1rem;">
+
+    <label class="field" style="flex: 1">Title
+        <input type="text" value={{@experience.title}} {{on "input" (fn this.updateField "title")}} />
+    </label>
+    <label class="field" style="flex: 1">Location
+        <input type="text" value={{@experience.location}} {{on "input" (fn this.updateField "location")}} />
+    </label>
+  </div>
+
   <div class="field-row" style="display: flex; gap: 1rem;">
     <label class="field" style="flex: 1;">Start Date
       <input type="date" value={{this.formattedStartDate}} {{on "input" (fn this.updateField "startDate")}} />

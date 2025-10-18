@@ -40,6 +40,13 @@
   font: inherit;
 }
 
+.builder-form .field select {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
 .builder-form .field textarea {
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
@@ -215,7 +222,7 @@
   gap: var(--space-3);
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .experience .job-header {
     flex-direction: column;
     align-items: flex-start;
@@ -497,7 +504,7 @@
   font-size: 1.05rem;
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .feature-grid { grid-template-columns: repeat(2, 1fr); }
   .testimonial-grid { grid-template-columns: 1fr; }
@@ -575,7 +582,7 @@
 
 .pre-wrap { white-space: pre-wrap; }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .builder-page .builder-layout {
     grid-template-columns: 1fr;
   }

@@ -36,7 +36,7 @@ export default class ResumesShowController extends Controller {
       await this.model.save();
     } catch (e) {
       // Optional: surface error to the user
-      // eslint-disable-next-line no-console
+       
       console.error('Failed to save resume', e);
     }
   }

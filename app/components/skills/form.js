@@ -13,6 +13,7 @@ export default class SkillsFormComponent extends Component {
     this.newSkill = event.target.value;
   }
 
+    @action updateSkill(){}
   @action addSkill() {
     const s = (this.newSkill ?? '').trim();
     if (!s) return;
