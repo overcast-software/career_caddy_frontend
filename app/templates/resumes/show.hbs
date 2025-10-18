@@ -3,6 +3,10 @@
     <div class="builder-layout">
 
       <aside class="editor-panel">
+          <Panel::Card @title="Title" @collapsible={{false}}>
+            <Resumes::Title::Form @title="Title" @resume={{this.model}}/>
+          </Panel::Card>
+
           <Panel::Card @title="Personal Information" @collapsible={{true}}>
               <PersonalInformation::Form @user={{this.model.user}}/>
           </Panel::Card>
@@ -27,6 +31,14 @@
       <main class="preview-panel">
         <div class="preview-actions">
           <div class="score muted">Resume Score: 0%</div>
+          {{#if this.isDirty}}
+            <button type="button" class="btn" {{on "click" this.saveResume}}>
+              Save
+            </button>
+          {{/if}}
+          <button type="button" class="btn danger" {{on "click" this.deleteResume}}>
+            Delete
+          </button>
           <button type="button" class="btn" {{on "click" this.cloneResume}}>
             Clone Resume
           </button>
