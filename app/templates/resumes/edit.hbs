@@ -1,1 +1,57 @@
-<Resumes::Form @resume={{this.model}} />
+<div class="builder-page">
+  <div class="container">
+    <div class="builder-layout">
+        <aside class="editor-panel">
+            <Panel::Card @title="Title" @collapsible={{false}}>
+                <Resumes::Title::Form @title="Title" @resume={{this.model}}/>
+            </Panel::Card>
+
+            <Panel::Card @title="Personal Information" @collapsible={{true}}>
+                <PersonalInformation::Form @user={{this.model.user}}/>
+            </Panel::Card>
+
+            <Panel::Card @title="Summary" @collapsible={{true}}>
+                <Summary::Form @summary={{this.model.summary}}/>
+            </Panel::Card>
+
+            <Panel::Card @title="Skills" @collapsible={{true}}>
+                <Skills::Form @skill={{this.model.activeSkill}}/>
+            </Panel::Card>
+
+            <Panel::Card @title="Education" @collapsible={{true}}>
+                <Educations::Form @education={{this.model.education}}/>
+            </Panel::Card>
+
+            <Panel::Card @title="Experience" @collapsible={{true}}>
+                <div class="panel-body">
+                    <div class="panel-actions">
+                        <button type="button" class="btn small" {{on "click" this.addExperience}}>+ Add Experience</button>
+                    </div>
+                    <Experiences::List @experiences={{this.model.experiences}} />
+                </div>
+            </Panel::Card>
+        </aside>
+        <main class="preview-panel">
+        <div class="preview-actions">
+          <div class="score muted">Resume Score: 0%</div>
+          {{#if this.isDirty}}
+            <button type="button" class="btn" {{on "click" this.saveResume}}>
+              Save
+            </button>
+          {{/if}}
+          <button type="button" class="btn danger" {{on "click" this.deleteResume}}>
+            Delete
+          </button>
+          <button type="button" class="btn" {{on "click" this.cloneResume}}>
+            Clone Resume
+          </button>
+          <button type="button" class="btn" {{on "click" this.exportToWord}}>Export to Word</button>
+        </div>
+
+        <div class="resume-preview">
+            <Resumes::Item @resume={{this.model}} />
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

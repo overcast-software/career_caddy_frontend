@@ -222,7 +222,7 @@
   gap: var(--space-3);
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .experience .job-header {
     flex-direction: column;
     align-items: flex-start;
@@ -504,7 +504,7 @@
   font-size: 1.05rem;
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .feature-grid { grid-template-columns: repeat(2, 1fr); }
   .testimonial-grid { grid-template-columns: 1fr; }
@@ -582,7 +582,46 @@
 
 .pre-wrap { white-space: pre-wrap; }
 
-@media (max-width: 900px) {
+/* Panel card toolbar styles */
+.panel-card .toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid rgb(3 10 27 / 6%);
+  box-shadow: 0 2px 10px rgb(10 18 40 / 3%);
+  margin: 0 0 var(--space-3);
+}
+
+.panel-card .toolbar .group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 6px;
+  border-right: 1px solid rgb(3 10 27 / 4%);
+}
+
+.panel-card .toolbar .group:last-child {
+  border-right: 0;
+}
+
+.panel-card .toolbar button {
+  border: 0;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+
+.panel-card .toolbar button:focus {
+  outline: 3px solid rgb(63 126 255 / 14%);
+}
+
+@media (width <= 900px) {
   .builder-page .builder-layout {
     grid-template-columns: 1fr;
   }

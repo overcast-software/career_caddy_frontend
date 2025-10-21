@@ -2,13 +2,8 @@ import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 
-export default class ResumesShowController extends Controller {
-    @service store;
-    @service router;
-
-    get isDirty() {
-        return this.model?.isNew || this.model?.hasDirtyAttributes;
-    }
+export default class ResumesEditController extends Controller {
+    @service store
 
     @action
     async cloneResume() {
@@ -47,18 +42,8 @@ export default class ResumesShowController extends Controller {
         await this.model.destroyRecord();
         this.router.transitionTo('resumes');
     }
-
-    addExperience = async () => {
-        const exp = this.store.createRecord('experience', { resume: this.model });
-        const rel = await this.model.experiences;
-        if (!rel.includes(exp)) rel.unshiftObject(exp);
-    };
-
-    isExporting = false
-
     @action
     async exportToWord() {
-        debugger
         if (this.isExporting) return;
         this.isExporting = true;
         try {
@@ -90,9 +75,15 @@ export default class ResumesShowController extends Controller {
             } catch (_) { /* ignore */ }
         }
         } catch (e) {
-        alert?.(e?.message ?? 'Export failed');
+            alert?.(e?.message ?? 'Export failed');
         } finally {
         this.isExporting = false;
         }
     }
+
+    addExperience = async () => {
+        const exp = this.store.createRecord('experience', { resume: this.model });
+        const rel = await this.model.experiences;
+        if (!rel.includes(exp)) rel.unshiftObject(exp);
+    };
 }

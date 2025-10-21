@@ -8,6 +8,17 @@
     {{/if}}
   </div>
 
+  <nav class="toolbar" role="navigation" aria-label="Directional toolbar" {{on "click" this.handleToolbarClick}} {{on "keydown" this.handleToolbarKeydown}}>
+    <div class="group">
+      <button type="button" data-dir="left" aria-label="Left">←</button>
+      <button type="button" data-dir="right" aria-label="Right">→</button>
+    </div>
+    <div class="group">
+      <button type="button" data-dir="down" aria-label="Down">Down</button>
+      <button type="button" data-dir="up" aria-label="Up">Up</button>
+    </div>
+  </nav>
+
   {{#if @collapsible}}
     <div class="collapsible-body">
       <div>
