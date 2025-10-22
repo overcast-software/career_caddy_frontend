@@ -7,6 +7,9 @@ export default class CoverLettersItemComponent extends Component {
   @service store;
   @tracked isExporting = false;
 
+    get jobPost(){
+        return this.args.coverLetter.jobPost
+    }
   @action
   async exportToDocx() {
     if (this.isExporting) return;

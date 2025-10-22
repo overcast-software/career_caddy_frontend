@@ -1,0 +1,23 @@
+<div class="job-posts-controls">
+  <label>
+    Search:
+    <input 
+      type="text" 
+      value={{this.query}} 
+      {{on "input" this.updateQuery}}
+      placeholder="Filter job posts..."
+    />
+  </label>
+  
+  <label>
+    <input 
+      type="checkbox" 
+      checked={{this.compact}} 
+      {{on "change" this.toggleCompact}}
+    />
+    Compact view
+  </label>
+  
+  <LinkTo @route="job-posts.new">Create new</LinkTo>
+</div>
+{{yield}}

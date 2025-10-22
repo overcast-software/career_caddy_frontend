@@ -6,9 +6,10 @@ export default class JobPostModel extends Model {
   @attr('string') title;
   @attr('date') postedDate;
   @attr('date') extractionDate;
+  @attr('string') link;
   @belongsTo('company', { async: true, inverse: null }) company;
   @hasMany('score', { async: true, inverse: null }) scores;
   @hasMany('scrape', { async: false, inverse: null }) scrapes;
-  @hasMany('cover-letter', { async: true, inverse: 'jobPost' }) coverLetters;
+  @hasMany('cover-letter', { async: true, inverse: null }) coverLetters;
   @hasMany('application', { async: false, inverse: null }) applications;
 }

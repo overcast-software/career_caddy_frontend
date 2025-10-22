@@ -1,1 +1,11 @@
-<JobPosts::List @jobPosts={{this.model}} />
+<JobPosts::Controls 
+  @query={{this.query}} 
+  @compact={{this.compact}} 
+  @onFilterChange={{this.onFilterChange}} 
+  @onCompactToggle={{this.onCompactToggle}} 
+/>
+<JobPosts::List 
+  @jobPosts={{this.model}} 
+  @query={{this.query}} 
+  @compact={{this.compact}} 
+/>
