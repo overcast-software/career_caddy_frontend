@@ -1,9 +1,11 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 
 export default class ResumesEditController extends Controller {
     @service store
+    @tracked summaryIndex = 0;
 
     @action
     async cloneResume() {
@@ -86,4 +88,23 @@ export default class ResumesEditController extends Controller {
         const rel = await this.model.experiences;
         if (!rel.includes(exp)) rel.unshiftObject(exp);
     };
+
+    @action
+    updateSummaryIndex(newIndex) {
+        this.summaryIndex = newIndex;
+    }
+
+    @action
+    onSummaryDirection(dir) {
+        const list = this.model.summaries?.toArray?.() ?? Array.from(this.model.summaries ?? []);
+        const count = list.length;
+        
+        if (count < 2) return;
+        
+        if (dir === 'left') {
+            this.summaryIndex = (this.summaryIndex - 1 + count) % count;
+        } else if (dir === 'right') {
+            this.summaryIndex = (this.summaryIndex + 1) % count;
+        }
+    }
 }

@@ -1,0 +1,12 @@
+  <nav class="toolbar" role="navigation" aria-label="Directional toolbar">
+    <div class="group">
+      <button type="button" data-dir="left" aria-label="Left" {{on "click" this.leftAction}}>←</button>
+      <button type="button" data-dir="right" aria-label="Right" {{on "click" this.rightAction}}>→</button>
+    </div>
+    <div class="group">
+      <button type="button" data-dir="down" aria-label="Down" {{on "click" this.downAction}}>Down</button>
+      <button type="button" data-dir="up" aria-label="Up" {{on "click" this.upAction}}>Up</button>
+    </div>
+  </nav>
+
+{{yield}}

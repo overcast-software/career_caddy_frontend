@@ -10,8 +10,8 @@
                 <PersonalInformation::Form @user={{this.model.user}}/>
             </Panel::Card>
 
-            <Panel::Card @title="Summary" @collapsible={{true}}>
-                <Summary::Form @summary={{this.model.summary}}/>
+            <Panel::Card @title="Summary" @collapsible={{true}} @onDirection={{this.onSummaryDirection}}>
+                <Summaries::List @summaries={{this.model.summaries}} />
             </Panel::Card>
 
             <Panel::Card @title="Skills" @collapsible={{true}}>
