@@ -53,6 +53,17 @@
         ></textarea>
       </div>
 
+      <div class="field">
+        <label class="field-label" for="title">url</label>
+        <input
+          id="title"
+          type="text"
+          value={{@jobPost.title}}
+          {{on "input" (fn this.updateField "link")}}
+          required
+        />
+      </div>
+
       <div class="form-actions">
         <button type="submit" class="btn primary">Create Job Post</button>
       </div>

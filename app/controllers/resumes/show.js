@@ -58,7 +58,6 @@ export default class ResumesShowController extends Controller {
 
     @action
     async exportToWord() {
-        debugger
         if (this.isExporting) return;
         this.isExporting = true;
         try {

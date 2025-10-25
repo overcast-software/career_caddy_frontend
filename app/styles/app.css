@@ -34,6 +34,7 @@
 
 /* .builder-form .field input[type="text"], */
 .builder-form .field input {
+  width: 100%;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -41,6 +42,7 @@
 }
 
 .builder-form .field select {
+  width: 100%;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -48,6 +50,7 @@
 }
 
 .builder-form .field textarea {
+  width: 100%;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
   border-radius: 6px;

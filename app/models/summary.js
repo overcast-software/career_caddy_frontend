@@ -5,5 +5,5 @@ export default class SummaryModel extends Model {
   @attr('boolean') active;
   @belongsTo('user', { async: false, inverse: null }) user;
   @belongsTo('job-post', { async: false, inverse: null }) jobPost;
-  @belongsTo('resume', { async: false, inverse: null }) resume;
+  @belongsTo('resume', { async: false, inverse: "summaries" }) resume;
 }

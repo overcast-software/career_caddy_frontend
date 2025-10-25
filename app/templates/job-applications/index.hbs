@@ -1,0 +1,6 @@
+{{page-title "Index"}}
+{{#each this.model as |application|}}
+    {{application}}
+    <Applications::Item @data={{this.application}}/>
+{{/each}}
+{{outlet}}

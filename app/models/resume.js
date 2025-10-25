@@ -5,7 +5,7 @@ export default class ResumeModel extends Model {
     @attr('string') filePath;
     @attr('string') title;
     @belongsTo('user', { async: true, inverse: null }) user;
-    @hasMany('score', { async: false, inverse: null }) scores;
+    @hasMany('score', { async: true, inverse: null }) scores;
     @hasMany('cover-letter', { async: false, inverse: 'resume' }) coverLetters;
     @hasMany('application', { async: false, inverse: null }) applications;
     @hasMany('experience', { async: true, inverse: 'resume' }) experiences;
@@ -30,5 +30,8 @@ export default class ResumeModel extends Model {
         return this.hasMany('skills').value().find( (rec) => rec.active )
     }
 
+    get activeSummary(){
+        return this.hasMany('summaries').value().find( (rec) => rec.active )
+    }
 
 }

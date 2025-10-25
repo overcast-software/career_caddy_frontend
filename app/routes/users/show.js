@@ -4,7 +4,7 @@ import { service } from '@ember/service';
 export default class UsersShowRoute extends Route {
   @service store;
 
-  model({ user_id }) {
+  model({user_id}) {
     return this.store.findRecord('user', user_id);
   }
 }

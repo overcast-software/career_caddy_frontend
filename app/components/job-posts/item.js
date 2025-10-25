@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 
 export default class JobPostsItemComponent extends Component {
   @service router;
@@ -24,15 +24,19 @@ export default class JobPostsItemComponent extends Component {
     return this.args.jobPost;
   }
 
-  get scores() {
-    const userId = this.currentUser?.id;
-    const jobPostId = this.jobPost?.id;
-    if (!userId || !jobPostId) return [];
-    return this.store.peekAll('score').filter((score) => {
-      return score.belongsTo('user').id() === userId &&
-             score.belongsTo('jobPost').id() === jobPostId;
-    });
-  }
+    @action async derp(){
+        this.jobPost.hasMany('coverLetters').value().forEach((x)=>console.log(x) )
+    }
+  // get scores() {
+  //   const userId = this.currentUser?.id;
+  //   const jobPostId = this.jobPost?.id;
+  //     debugger
+  //   if (!userId || !jobPostId) return [];
+  //   return this.store.peekAll('score').filter((score) => {
+  //     return score.belongsTo('user').id() === userId &&
+  //            score.belongsTo('jobPost').id() === jobPostId;
+  //   });
+  // }
 
   get companyName() {
     const company = this.args.jobPost?.company;

@@ -7,7 +7,7 @@ export default class Router extends EmberRouter {
 }
 
 Router.map(function () {
-  this.route('applications', function() {
+  this.route('job-applications', function() {
     this.route('show', {
       path: '/:application_id'
     });
@@ -40,6 +40,10 @@ Router.map(function () {
   this.route('job-posts', function() {
     this.route('show', {
       path: '/:job_post_id'
+    }, function() {
+      this.route('job-application', function() {
+        this.route('new');
+      });
     });
     this.route('new');
 
@@ -94,4 +98,5 @@ Router.map(function () {
     });
   });
   this.route('summaries', function() {});
+
 });

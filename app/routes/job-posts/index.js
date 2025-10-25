@@ -7,7 +7,7 @@ export default class JobPostsIndexRoute extends Route {
     await this.store.findRecord('user', 1);
     await this.store.findAll('resume');
 
-    const jobPosts = this.store.findAll('job-post');
-    return jobPosts
+      const jobPosts = this.store.findAll('job-post', {include: 'scores,cover-letters,company'});
+      return jobPosts
   }
 }
