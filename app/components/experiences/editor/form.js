@@ -10,6 +10,12 @@ export default class ExperiencesEditorForm extends Component {
   @tracked editingDesc = null;
   @tracked editingDraft = '';
   @tracked isExpanded = true;
+  @tracked currentlyWorking = false;
+
+  constructor() {
+    super(...arguments);
+    this.currentlyWorking = !this.experience?.endDate;
+  }
 
   get experience() {
         return this.args.experience ?? this.args.model;
@@ -42,6 +48,9 @@ export default class ExperiencesEditorForm extends Component {
 
   @action updateField(field, event) {
     if (field === 'startDate' || field === 'endDate') {
+      if (field === 'endDate' && this.currentlyWorking) {
+        return; // no-op when currently working
+      }
       this.experience[field] = event.target.valueAsDate ?? null;
     } else if (field === 'content' && event?.target?.isContentEditable) {
       this.experience.content = event.target.innerHTML;
@@ -67,6 +76,9 @@ export default class ExperiencesEditorForm extends Component {
   @action async save(event) {
     event?.preventDefault();
     try {
+        if (this.currentlyWorking) {
+          this.experience.endDate = null;
+        }
         const resumeId = this.experience.belongsTo('resume').id();
         await this.experience.save();
         const descs = await this.experience.descriptions;
@@ -131,5 +143,12 @@ export default class ExperiencesEditorForm extends Component {
     }
   }
 
+  @action toggleCurrentlyWorking(event) {
+    const checked = event.target.checked;
+    this.currentlyWorking = checked;
+    if (checked) {
+      this.experience.endDate = null;
+    }
+  }
 
 }

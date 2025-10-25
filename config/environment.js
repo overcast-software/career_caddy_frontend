@@ -16,7 +16,12 @@ module.exports = function (environment) {
 
     APP: {
       API_HOST: process.env.API_HOST || 'http://localhost:8000',
-      API_NAMESPACE: process.env.API_NAMESPACE || 'api/v1'
+      API_NAMESPACE: process.env.API_NAMESPACE || 'api/v1',
+      HEALTHCHECK_PATH: '/healthcheck',
+      AUTH: {
+        TOKEN_PATH: 'token/',
+        REFRESH_PATH: 'token/refresh/'
+      }
     },
   };
 

@@ -3,35 +3,26 @@ import { inject as service } from '@ember/service';
 
 export default class ApplicationRoute extends Route {
   @service store;
+  @service router;
+  @service health;
+  @service session;
 
-  model() {
-      // const application = this.store.createRecord('application', { appliedAt: new Date(), status: 'applied' });
-      // const usersPromise = this.store.findAll('user');
-      // const jobPostsPromise = this.store.findAll('job-post');
-      // const resumesPromise = this.store.findAll('resume');
-      // const coverLetterPromise = this.store.findAll('cover-letter');
-      // const scorePromise = this.store.findAll('score');
-      // const companyPromise = this.store.findAll('company');
+  async beforeModel(transition) {
+    // Skip health check for setup and login routes
+    const routeName = transition.to?.name;
+    if (routeName === 'setup' || routeName === 'login') {
+      return;
+    }
 
-      // return Promise.all([
-      //     usersPromise,
-      //     jobPostsPromise,
-      //     resumesPromise,
-      //     coverLetterPromise,
-      //     scorePromise,
-      //     companyPromise
-      // ]).then(
-      //   ([users, jobPosts, resumes, coverLetters, scores, companies]) => ({
-      //     application,
-      //     users,
-      //     jobPosts,
-      //     resumes,
-      //     coverLetters,
-      //     scores,
-      //     companies
-      //   })
-      // );
+    const ok = await this.health.ensureHealthy();
+    if (!ok) {
+        this.router.transitionTo('setup');
+        return;
+    }
 
-    return this.store.findRecord('user', 1);
+    // Enforce authentication for protected routes
+    if (routeName !== 'index' && !this.session.isAuthenticated) {
+      this.router.transitionTo('login');
+    }
   }
 }

@@ -27,9 +27,14 @@
       <input type="date" value={{this.formattedStartDate}} {{on "input" (fn this.updateField "startDate")}} />
     </label>
     <label class="field" style="flex: 1;">End Date
-      <input type="date" value={{this.formattedEndDate}} {{on "input" (fn this.updateField "endDate")}} />
+      <input type="date" value={{this.formattedEndDate}} {{on "input" (fn this.updateField "endDate")}} disabled={{this.currentlyWorking}} />
+      {{#if this.currentlyWorking}}<small style="color: #666;">Present</small>{{/if}}
     </label>
   </div>
+  <label class="field">
+    <input type="checkbox" checked={{this.currentlyWorking}} {{on "change" this.toggleCurrentlyWorking}} />
+    I currently work here
+  </label>
   <label class="field">
     <span class="field-label">Description</span>
   </label>

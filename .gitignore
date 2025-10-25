@@ -19,3 +19,4 @@
 .aider*
 .tool-versions
 *.sh
+*package-lock.json

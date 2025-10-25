@@ -10,10 +10,10 @@
       <LinkTo @route="scores.index" class="nav-link">Scores</LinkTo>
       <LinkTo @route="job-applications.index" class="nav-link">Applications</LinkTo>
     </nav>
-    {{#if @user}}
-      <div class="user">
-        <span class="user-name">{{@user.name}}</span>
-      </div>
+    {{#if this.session.isAuthenticated}}
+        <a {{on "click" this.invalidateSession}}>Logout</a>
+    {{else}}
+        <LinkTo @route="login">Login</LinkTo>
     {{/if}}
   </div>
 </header>
