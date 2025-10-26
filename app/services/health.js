@@ -14,7 +14,7 @@ export default class HealthService extends Service {
       const apiHost = config.APP.API_HOST;
       const apiNamespace = config.APP.API_NAMESPACE;
       const healthcheckPath = config.APP.HEALTHCHECK_PATH;
-      
+
       let url;
       if (apiHost) {
         // Remove trailing slash from apiHost and leading slash from apiNamespace if present
@@ -40,7 +40,7 @@ export default class HealthService extends Service {
 
       const data = await response.json();
       const isHealthy = data.healthy === true;
-      
+
       if (isHealthy) {
         sessionStorage.setItem('cc:healthy', 'true');
         return true;

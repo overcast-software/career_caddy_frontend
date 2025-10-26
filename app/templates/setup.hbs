@@ -24,6 +24,16 @@
       <input type="tel" value={{this.model.phone}} {{on "input" this.updatePhone}} />
     </label>
 
+    <label class="field">
+      Username
+      <input type="text" value={{this.model.username}} {{on "input" this.updateUsername}} autocomplete="username" />
+    </label>
+
+    <label class="field">
+      Password
+      <input type="password" value={{this.model.password}} {{on "input" this.updatePassword}} autocomplete="new-password" />
+    </label>
+
     <div class="form-actions">
       <button type="submit" class="btn primary" disabled={{this.saving}}>
         {{if this.saving "Setting up..." "Save"}}

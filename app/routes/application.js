@@ -1,11 +1,16 @@
 import Route from '@ember/routing/route';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 
 export default class ApplicationRoute extends Route {
-  @service store;
-  @service router;
-  @service health;
-  @service session;
+    @service store;
+    @service currentUser
+    @service router;
+    @service health;
+    @service session;
+    healthy = false
+    get unhealthy() {
+        return !this.healthy
+    }
 
   async beforeModel(transition) {
     // Skip health check for setup and login routes
@@ -23,6 +28,18 @@ export default class ApplicationRoute extends Route {
     // Enforce authentication for protected routes
     if (routeName !== 'index' && !this.session.isAuthenticated) {
       this.router.transitionTo('login');
+    }
+
+    this.healthy=true
+    return this._loadCurrentUser();
+  }
+
+  async _loadCurrentUser() {
+    try {
+      await this.currentUser.load();
+    } catch(err) {
+      console.log(err)
+      // await this.session.invalidate();
     }
   }
 }

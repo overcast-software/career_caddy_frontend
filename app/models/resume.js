@@ -14,10 +14,6 @@ export default class ResumeModel extends Model {
     @hasMany('certification', { async: true, inverse: 'resume' }) certifications;
     @hasMany('skill', { async: true, inverse: 'resume' }) skills;
 
-    get summary() {
-        const summary = this.store.peekAll('summary').find((rec) => rec.belongsTo('resume').id() === this.id);
-        return summary
-    }
     get education(){
         const edu = this.store.peekAll('education').find((rec) => rec.belongsTo('resume').id() === this.id);
         return edu

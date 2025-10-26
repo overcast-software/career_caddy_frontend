@@ -15,29 +15,31 @@ module.exports = function (environment) {
     },
 
     APP: {
-      API_HOST: process.env.API_HOST || 'http://localhost:8000',
-      API_NAMESPACE: process.env.API_NAMESPACE || 'api/v1',
+      API_HOST: null,
+      API_NAMESPACE: 'api/v1',
       HEALTHCHECK_PATH: '/healthcheck',
       AUTH: {
         TOKEN_PATH: 'token/',
-        REFRESH_PATH: 'token/refresh/'
+        REFRESH_PATH: 'token/refresh/',
+        REGISTER_PATH: 'auth/register/',
+        BOOTSTRAP_PATH: 'users/bootstrap-superuser/'
+
       }
     },
   };
 
   if (environment === 'development') {
-    if (!process.env.API_HOST) {
+    if (process.env.API_HOST) {
+      ENV.APP.API_HOST = process.env.API_HOST;
+    } else {
       ENV.APP.API_HOST = null; // use same-origin; Ember CLI proxy will forward to 8000
     }
-    ENV.contentSecurityPolicy = {
-      // 'connect-src': "'self' http://localhost:5301 http://peertube.localhost:9000",
-      'connect-src': "'self' http://localhost:8000",
+    if (process.env.API_NAMESPACE) {
+      ENV.APP.API_NAMESPACE = process.env.API_NAMESPACE;
     }
-    // ENV.APP.LOG_RESOLVER = true;
-    // ENV.APP.LOG_ACTIVE_GENERATION = true;
-    // ENV.APP.LOG_TRANSITIONS = true;
-    // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
-    // ENV.APP.LOG_VIEW_LOOKUPS = true;
+    ENV.contentSecurityPolicy = {
+      'connect-src': "'self' http://localhost:8000",
+    };
   }
 
   if (environment === 'test') {

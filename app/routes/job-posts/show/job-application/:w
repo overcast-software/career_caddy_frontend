@@ -12,7 +12,6 @@ export default class JobPostsShowJobApplicationNewRoute extends Route {
         const resumesPromise = this.store.findAll('resume');
         const coverLetterPromise = this.store.findAll('cover-letter');
 
-        debugger
         return Promise.all([applicationPromise, usersPromise, jobPostPromise, resumesPromise, coverLetterPromise]).then(
             ([application, users, jobPost, resumes, coverLetters]) => ({
                 application,

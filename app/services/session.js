@@ -23,15 +23,23 @@ export default class SessionService extends Service {
   }
 
   get baseUrl() {
-    const host = config.APP.API_HOST || '';
-    const namespace = config.APP.API_NAMESPACE;
+    const host = (config.APP.API_HOST || '').replace(/\/+$/, '');
+    const namespace = (config.APP.API_NAMESPACE || 'api/v1').replace(/^\/+|\/+$/g, '');
     return `${host}/${namespace}/`;
+  }
+
+  get authConfig() {
+    return config.APP.AUTH || {
+      TOKEN_PATH: 'token/',
+      REFRESH_PATH: 'token/refresh/',
+      REGISTER_PATH: 'auth/register/'
+    };
   }
 
   loadFromStorage() {
     const accessToken = localStorage.getItem('cc:jwt:access');
     const refreshToken = localStorage.getItem('cc:jwt:refresh');
-    
+
     if (accessToken && refreshToken) {
       try {
         const exp = this.decodeExp(accessToken);
@@ -44,7 +52,7 @@ export default class SessionService extends Service {
           this.clearStorage();
         }
       } catch (error) {
-        this.clearStorage();
+        this.clearStorage();    //
       }
     }
   }
@@ -92,8 +100,28 @@ export default class SessionService extends Service {
     return Math.floor(Date.now() / 1000);
   }
 
+  async register(userData) {
+    const url = `${this.baseUrl}${this.authConfig.BOOTSTRAP_PATH}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      const errorObj = new Error(error.detail || error.message || 'Registration failed');
+      errorObj.status = response.status;
+      throw errorObj;
+    }
+
+    return await response.json();
+  }
+
   async login(username, password) {
-    const url = `${this.baseUrl}${config.APP.AUTH.TOKEN_PATH}`;
+    const url = `${this.baseUrl}${this.authConfig.TOKEN_PATH}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -133,7 +161,7 @@ export default class SessionService extends Service {
   }
 
   async _performRefresh() {
-    const url = `${this.baseUrl}${config.APP.AUTH.REFRESH_PATH}`;
+    const url = `${this.baseUrl}${this.authConfig.REFRESH_PATH}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {

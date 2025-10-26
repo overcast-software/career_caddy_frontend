@@ -1,7 +1,6 @@
 <header class="site-header">
   <div class="container header-inner">
     <LinkTo @route="index" class="brand">Career Caddy</LinkTo>
-    {{yield}}
     <nav class="nav">
       <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
       <LinkTo @route="cover-letters.index" class="nav-link">Cover letters</LinkTo>
@@ -10,8 +9,8 @@
       <LinkTo @route="scores.index" class="nav-link">Scores</LinkTo>
       <LinkTo @route="job-applications.index" class="nav-link">Applications</LinkTo>
     </nav>
-    {{#if this.session.isAuthenticated}}
-        <a {{on "click" this.invalidateSession}}>Logout</a>
+    {{#if @session.isAuthenticated}}
+        <LinkTo @route='logout'>Logout</LinkTo>
     {{else}}
         <LinkTo @route="login">Login</LinkTo>
     {{/if}}
