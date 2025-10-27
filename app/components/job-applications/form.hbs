@@ -1,40 +1,31 @@
 <div class="builder-form">
   <div class="field">
     <div class="field-label">User</div>
-    <select {{on "change" (fn this.updateRelation "user")}}>
-      <option value="">
-        Select a user...
-      </option>
-      {{#each @data.users as |user|}}
-        <option value={{user.id}}>
-          {{user.name}}
-        </option>
-      {{/each}}
-    </select>
+   <input value={{this.currentUser.user.name}} disabled="true"/>
   </div>
 
   <div class="field">
     <div class="field-label">Job Post</div>
-    <input type="text" value={{@data.jobPost.company.name}} disabled="true"/>
+    <input type="text" value={{@jobPost.title}} disabled="true"/>
   </div>
 
   <div class="field">
     <div class="field-label">Resume</div>
-    <select {{on "change" (fn this.updateRelation "resume")}}>
+    <select {{on "change" (fn this.updateResume)}}>
       <option value="" disabled={{if @data.application.resume "" "disabled"}} selected={{unless @data.application.resume "selected"}}>
         Select a resume...
       </option>
-      {{#each @data.resumes as |resume|}}
-        <option value={{resume.id}}>
-          {{resume.title}}
-        </option>
-      {{/each}}
+    {{#each this.currentUser.user.resumes as |resume|}}
+            <option value={{resume.id}}>
+            {{resume.title}}
+            </option>
+    {{/each}}
     </select>
   </div>
 
   <div class="field">
     <div class="field-label">Cover Letter</div>
-    <select {{on "change" (fn this.updateRelation "coverLetter")}}>
+    <select {{on "change" (fn this.updateCoverLetter)}}>
       <option value="" disabled={{if @data.application.coverLetter "" "disabled"}} selected={{unless @data.application.coverLetter "selected"}}>
         Select a cover letter...
       </option>
@@ -43,6 +34,11 @@
           {{coverLetter.id}} {{coverLetter.company}}
         </option>
       {{/each}}
+    {{#each this.currentUser.user.coverLetters as |coverLetter|}}
+            <option value={{coverLetter.id}}>
+                {{coverLetter.createdAt}}
+            </option>
+    {{/each}}
     </select>
   </div>
 

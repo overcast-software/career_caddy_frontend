@@ -27,11 +27,24 @@ export default class SetupController extends Controller {
             return;
         }
         
+        if (!this.model.firstName || this.model.firstName.trim() === '') {
+            this.errorMessage = 'First name is required';
+            this.saving = false;
+            return;
+        }
+        
+        if (!this.model.lastName || this.model.lastName.trim() === '') {
+            this.errorMessage = 'Last name is required';
+            this.saving = false;
+            return;
+        }
+        
         try {
             await this.session.register({
                 username: this.model.username,
                 email: this.model.email,
-                name: this.model.name,
+                first_name: this.model.firstName,
+                last_name: this.model.lastName,
                 phone: this.model.phone,
                 password: this.model.password
             });
@@ -49,8 +62,11 @@ export default class SetupController extends Controller {
         }
     }
 
-    @action updateName(event){
-        this.model.name = event.target.value
+    @action updateFirstName(event){
+        this.model.firstName = event.target.value
+    }
+    @action updateLastName(event){
+        this.model.lastName = event.target.value
     }
     @action updateEmail(event){
         this.model.email  = event.target.value

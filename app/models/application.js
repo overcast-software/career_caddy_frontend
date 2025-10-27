@@ -5,8 +5,8 @@ export default class ApplicationModel extends Model {
   @attr('string') status;
   @attr('string') trackingUrl;
   @attr('string') notes;
-  @belongsTo('user', { async: false, inverse: null }) user;
-  @belongsTo('job-post', { async: false, inverse: 'applications' }) jobPost;
-  @belongsTo('resume', { async: false, inverse: null }) resume;
-  @belongsTo('cover-letter', { async: false, inverse: 'applications' }) coverLetter;
+  @belongsTo('user', { async: true, inverse: 'applications' }) user;
+  @belongsTo('job-post', { async: true, inverse: 'applications' }) jobPost;
+  @belongsTo('resume', { async: true, inverse: 'applications' }) resume;
+  @belongsTo('cover-letter', { async: true, inverse: 'application' }) coverLetter;
 }

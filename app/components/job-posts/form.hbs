@@ -3,34 +3,13 @@
   {{/if}}
 
   <div class="field">
-    <label class="field-label" for="create-mode">Create</label>
-    <select
-      id="create-mode"
-      value={{if this.form_toggle "manual" "by-url"}}
-      {{on "change" this.onModeChange}}
-    >
-      <option value="by-url">by url</option>
-      <option value="manual">manual</option>
-    </select>
+      <LinkTo @route='job-posts.scrape'>scrape</LinkTo>
   </div>
 
-  {{#if this.form_toggle  }}
-    <form class="builder-form" {{on "submit" this.submitManual}}>
+    <form class="builder-form" {{on "submit" this.submitEdit}}>
       <div class="field">
         <label class="field-label" for="company-autocomplete">Company</label>
-        <input
-          id="company-autocomplete"
-          type="text"
-          list="company-suggestions"
-          placeholder="Start typing a company name…"
-          {{on "input" this.updateCompanyQuery}}
-          required
-        />
-        <datalist id="company-suggestions">
-          {{#each this.companies as |company|}}
-            <option value="{{if company.displayName company.displayName company.name}}"></option>
-          {{/each}}
-        </datalist>
+        <input id="company" type="text" value={{@jobPost.company.name}}/>
       </div>
 
       <div class="field">
@@ -54,11 +33,11 @@
       </div>
 
       <div class="field">
-        <label class="field-label" for="title">url</label>
+        <label class="field-label" for="url">url</label>
         <input
           id="title"
           type="text"
-          value={{@jobPost.title}}
+          value={{@jobPost.url}}
           {{on "input" (fn this.updateField "link")}}
           required
         />
@@ -68,19 +47,3 @@
         <button type="submit" class="btn primary">Create Job Post</button>
       </div>
     </form>
-  {{else}}
-    <form class="builder-form" {{on "submit" this.submitScrape}}>
-      <div class="field">
-        <label class="field-label" for="url">Url</label>
-        <input
-          id="url"
-          type="text"
-          {{on "change" this.updateUrl}}
-          required
-        />
-      </div>
-      <div class="form-actions">
-        <button type="submit" class="btn primary">Scrape the page</button>
-      </div>
-    </form>
-  {{/if}}

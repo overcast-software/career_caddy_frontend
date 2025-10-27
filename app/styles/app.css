@@ -225,7 +225,39 @@
   gap: var(--space-3);
 }
 
+/* Two-column builder form variant */
+.builder-form.two-col {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  align-items: flex-start;
+}
+
+.builder-form.two-col .field {
+  flex: 1 1 calc(50% - var(--space-5));
+  min-width: 300px;
+}
+
+.builder-form.two-col .form-actions {
+  flex: 1 0 100%;
+}
+
+/* Compact inputs within two-column builder forms */
+.builder-form.two-col .field input,
+.builder-form.two-col .field select,
+.builder-form.two-col .field textarea {
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.95rem;
+  border-radius: 4px;
+  margin: 0 var(--space-1);
+  width: calc(100% - (var(--space-1) * 2));
+}
+
 @media (width <= 640px) {
+  .builder-form.two-col .field {
+    flex-basis: 100%;
+  }
+
   .experience .job-header {
     flex-direction: column;
     align-items: flex-start;
@@ -495,6 +527,20 @@
   justify-content: center;
   gap: var(--space-3);
   margin-top: var(--space-4);
+}
+
+.landing-page {
+  background-image: url('/images/ian_finnis.webp');
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+  min-height: 50vh;
+}
+
+.disclaimer {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: var(--space-3);
 }
 
 .hint {

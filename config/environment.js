@@ -24,6 +24,11 @@ module.exports = function (environment) {
         REGISTER_PATH: 'auth/register/',
         BOOTSTRAP_PATH: 'users/bootstrap-superuser/'
 
+      },
+      PUBLIC_LINKS: {
+        aboutUrl: 'https://github.com/your-org/career-caddy#about',
+        docsUrl: 'https://github.com/your-org/career-caddy/wiki',
+        githubUrl: 'https://github.com/your-org/career-caddy'
       }
     },
   };

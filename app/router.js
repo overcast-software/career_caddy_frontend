@@ -44,11 +44,12 @@ Router.map(function () {
     this.route('show', {
       path: '/:job_post_id'
     }, function() {
-      this.route('job-application', function() {
+      this.route('job-applications', function() {
         this.route('new');
       });
     });
     this.route('new');
+    this.route('scrape');
 
     this.route('edit', {
       path: '/:job_post_id/edit'

@@ -4,6 +4,8 @@ import { action } from '@ember/object';
 
 export default class ApplicationsForm extends Component {
   @service store;
+    @service session;
+  @service currentUser;
 
   get statuses() {
     return ['applied', 'in-review', 'interview', 'offer', 'rejected', 'withdrawn'];
@@ -26,6 +28,14 @@ export default class ApplicationsForm extends Component {
     }
   }
 
+  @action updateResume(event){
+    let resume = this.store.peekRecord('resume', event.target.value)
+    this.args.application.resume = resume
+  }
+  @action updateCoverLetter(event){
+    let coverLetter = this.store.peekRecord('cover-letter', event.target.value)
+    this.args.application.coverLetter = coverLetter
+  }
   @action
   async updateRelation(field, event) {
     const fieldToType = {

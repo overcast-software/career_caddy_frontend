@@ -42,7 +42,7 @@
     <button type="button" class="btn" {{on "click" this.createSummary}} disabled={{this.isScoreDisabled}}>Create resume summary</button>
     <button type="button" class="btn" {{on "click" this.cover_letter}} disabled={{this.isScoreDisabled}}>Create cover letter</button>
     <button type="button" class="btn primary" {{on "click" this.apply}}>
-        <LinkTo @route='job-posts.show.job-application.new' @model={{@jobPost}}>
+        <LinkTo @route='job-posts.show.job-applications.new' @model={{@jobPost}}>
         Apply
         </LinkTo>
     </button>

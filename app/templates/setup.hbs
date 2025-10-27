@@ -8,39 +8,48 @@
     <div class="error">{{this.errorMessage}}</div>
   {{/if}}
 
-  <form {{on "submit" this.save}}>
+  <form class="builder-form two-col" {{on "submit" this.save}}>
     <label class="field">
-      Name
-      <input type="text" value={{this.model.name}} {{on "input" this.updateName}}  />
+      <span class="field-label">First name</span>
+      <input type="text" value={{this.model.firstName}} {{on "input" this.updateFirstName}}  />
     </label>
 
     <label class="field">
-      Email
+      <span class="field-label">Last name</span>
+      <input type="text" value={{this.model.lastName}} {{on "input" this.updateLastName}}  />
+    </label>
+
+    <label class="field">
+      <span class="field-label">Email</span>
       <input type="email" value={{this.model.email}} {{on "input" this.updateEmail}}  />
     </label>
 
     <label class="field">
-      Phone
+      <span class="field-label">Phone</span>
       <input type="tel" value={{this.model.phone}} {{on "input" this.updatePhone}} />
     </label>
 
     <label class="field">
-      Username
+      <span class="field-label">Username</span>
       <input type="text" value={{this.model.username}} {{on "input" this.updateUsername}} autocomplete="username" />
     </label>
 
     <label class="field">
-      Password
+      <span class="field-label">Password</span>
       <input type="password" value={{this.model.password}} {{on "input" this.updatePassword}} autocomplete="new-password" />
     </label>
 
     <div class="form-actions">
-      <button type="submit" class="btn primary" disabled={{this.saving}}>
+      <button type="submit" class="btn primary lg" disabled={{this.saving}}>
         {{if this.saving "Setting up..." "Save"}}
       </button>
-      <button type="button" class="btn" {{on "click" this.cancel}} disabled={{this.saving}}>
+      <button type="button" class="btn lg" {{on "click" this.cancel}} disabled={{this.saving}}>
         Cancel
       </button>
     </div>
   </form>
+
+  <p class="disclaimer">
+    Note: The details you enter here may be used to prefill your resume.
+  </p>
 </div>
