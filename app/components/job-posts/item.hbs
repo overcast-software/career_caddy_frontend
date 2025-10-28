@@ -36,7 +36,6 @@
       {{/each}}
     </select>
   </div>
-
   <div class="actions">
     <button type="button" class="btn" {{on "click" this.score}} disabled={{this.isScoreDisabled}}>Score</button>
     <button type="button" class="btn" {{on "click" this.createSummary}} disabled={{this.isScoreDisabled}}>Create resume summary</button>
@@ -46,11 +45,6 @@
         Apply
         </LinkTo>
     </button>
-  </div>
-
-  <div class="actions">
-    <button type="button" class="btn" {{on "click" this.previous}}>Previous</button>
-    <button type="button" class="btn" {{on "click" this.next}}>Next</button>
   </div>
 </section>
 <section class="job-post-scores">

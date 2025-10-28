@@ -8,20 +8,22 @@ export default class JobPostsShowController extends Controller {
     @tracked data = null;
     @tracked loading = true;
     @tracked error = null;
+    @tracked application = null;
+    @tracked resumes = null;
+    @tracked users = null;
+    @tracked coverLetters = null;
 
     constructor() {
         super(...arguments);
         this.loadData();
     }
 
-    get derp() { return 'derp controller' }
     async loadData() {
         try {
             this.loading = true;
             this.error = null;
 
             const jobPost = this.model;
-            const application = this.store.createRecord('application');
 
             const [resumes, users, coverLetters] = await Promise.all([
                 this.store.findAll('resume'),
@@ -29,7 +31,15 @@ export default class JobPostsShowController extends Controller {
                 this.store.findAll('cover-letter')
             ]);
 
-            this.data = { jobPost, coverLetters, application, resumes, users };
+            this.application = this.store.createRecord('application', {
+                jobPost,
+                status: 'applied'
+            });
+            this.resumes = resumes;
+            this.users = users;
+            this.coverLetters = coverLetters;
+
+            this.data = { jobPost, coverLetters, application: this.application, resumes, users };
         } catch (err) {
             this.error = err;
         } finally {

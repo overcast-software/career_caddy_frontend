@@ -78,22 +78,6 @@ export default class JobPostsItemComponent extends Component {
   }
 
   @action
-  previous() {
-    const target = this.previousJobPost;
-    if (!target) return;
-    if (typeof this.args.onPrevious === 'function') return this.args.onPrevious(target);
-    if (target.id) this.router.transitionTo('job-posts.show', target.id);
-  }
-
-  @action
-  next() {
-    const target = this.nextJobPost;
-    if (!target) return;
-    if (typeof this.args.onNext === 'function') return this.args.onNext(target);
-    if (target.id) this.router.transitionTo('job-posts.show', target.id);
-  }
-
-  @action
   async score() {
     const jobPost = this.jobPost ?? this.args.jobPost;
     const user = this.currentUser;
