@@ -1,0 +1,35 @@
+<section class="job-post-controls">
+  <div>
+    <label for="resume-select">Select a resume: </label>
+    <select
+      id="resume-select"
+      {{on "change" this.onResumeChange}}
+      value={{this.selectedResumeId}}
+    >
+      <option value="">None</option>
+      {{#each @resumes as |resume|}}
+        <option value={{resume.id}}>
+          {{#if resume.filePath}}
+            {{resume.filePath}}
+          {{else}}
+            {{resume.title}}
+          {{/if}}
+        </option>
+      {{/each}}
+    </select>
+  </div>
+  {{#if this.selectedResumeId}}
+    <div class="actions">
+        <button type="button" class="btn" {{on "click" this.scoreResume}} >Score resume against job post</button>
+        <button type="button" class="btn" {{on "click" this.createSummary}} >Create new resume summary</button>
+        <button type="button" class="btn" {{on "click" this.createCoverLetter}}>Create cover letter</button>
+        <button type="button" class="btn primary">
+            <LinkTo @route='job-posts.show.job-applications.new' @model={{@jobPost}}>
+                Apply
+            </LinkTo>
+        </button>
+        </div>
+ {{/if}}
+
+</section>
+{{yield}}

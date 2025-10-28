@@ -6,6 +6,7 @@ export default class JobPostsIndexController extends Controller {
   @tracked query = '';
   @tracked compact = false;
 
+  showControls = false;
   @action
   onFilterChange({ query }) {
     this.query = query ?? '';

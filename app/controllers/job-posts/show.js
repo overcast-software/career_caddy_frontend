@@ -13,6 +13,7 @@ export default class JobPostsShowController extends Controller {
     @tracked users = null;
     @tracked coverLetters = null;
 
+    showControls = true;
     constructor() {
         super(...arguments);
         this.loadData();

@@ -16,59 +16,19 @@
     {{@jobPost.description}}
   </p>
 </section>
-<section class="job-post-controls">
-  <div>
-    <label for="resume-select">Resume</label>
-    <select
-      id="resume-select"
-      {{on "change" this.onResumeChange}}
-      value={{this.selectedResumeId}}
-    >
-      <option value="">Select a resume…</option>
-      {{#each this.resumes as |resume|}}
-        <option value={{resume.id}}>
-          {{#if resume.filePath}}
-            {{resume.filePath}}
-          {{else}}
-            Resume {{resume.title}}
-          {{/if}}
-        </option>
-      {{/each}}
-    </select>
-  </div>
-  <div class="actions">
-    <button type="button" class="btn" {{on "click" this.score}} disabled={{this.isScoreDisabled}}>Score</button>
-    <button type="button" class="btn" {{on "click" this.createSummary}} disabled={{this.isScoreDisabled}}>Create resume summary</button>
-    <button type="button" class="btn" {{on "click" this.cover_letter}} disabled={{this.isScoreDisabled}}>Create cover letter</button>
-    <button type="button" class="btn primary" {{on "click" this.apply}}>
-        <LinkTo @route='job-posts.show.job-applications.new' @model={{@jobPost}}>
-        Apply
-        </LinkTo>
-    </button>
-  </div>
-</section>
 <section class="job-post-scores">
   <h3 class="section-title">Scores</h3>
     <ul class="desc-list">
       {{#each @jobPost.scores as |score|}}
         <li class="desc-item">
           <span class="muted">Resume</span> {{score.resume.title}} — <span class="muted">Score:</span>
-          <LinkTo @route="scores.show" @model={{score.id}}>{{score.score}}</LinkTo>
+          <LinkTo @route="scores.show" @model={{score}}>{{score.score}}</LinkTo>
         </li>
       {{/each}}
     </ul>
 </section>
-<section class="job-post-cover-letters">
-    <h3 class="section-title"><LinkTo @route='cover-letters.index'>Cover Letters</LinkTo></h3>
 
-    <button type="button" {{on 'click' this.derp}}>derp</button>
-    <ul class="desc-list">
-      {{#each @jobPost.coverLetters as |coverLetter|}}
-        <li class="desc-item">
-            <span class="muted">Resume</span> {{coverLetter.resume.title}}<span class="muted">Score:</span>
-            <LinkTo @route='cover-letters.show' @model={{coverLetter}}>cover letter</LinkTo>
-        </li>
-      {{/each}}
-    </ul>
-</section>
+{{#if @showControls}}
+  <JobPosts::Actions @jobPost={{@jobPost}} @resumes={{this.loggedInUser.resumes}}/>
+{{/if}}
 </article>

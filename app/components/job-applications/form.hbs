@@ -11,7 +11,7 @@
 
   <div class="field">
     <div class="field-label">Resume</div>
-    <select {{on "change" (fn this.updateResume)}}>
+    <select {{on "change" this.updateResume}}>
       <option value="" disabled={{if @data.application.resume "" "disabled"}} selected={{unless @data.application.resume "selected"}}>
         Select a resume...
       </option>
@@ -25,7 +25,7 @@
 
   <div class="field">
     <div class="field-label">Cover Letter</div>
-    <select {{on "change" (fn this.updateCoverLetter)}}>
+    <select {{on "change" this.updateCoverLetter}}>
       <option value="" disabled={{if @data.application.coverLetter "" "disabled"}} selected={{unless @data.application.coverLetter "selected"}}>
         Select a cover letter...
       </option>

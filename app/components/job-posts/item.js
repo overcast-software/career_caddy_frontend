@@ -6,12 +6,13 @@ import { service } from '@ember/service';
 export default class JobPostsItemComponent extends Component {
   @service router;
   @service store;
+  @service currentUser
 
   @tracked selectedResumeId = null;
 
-  get currentUser() {
+  get loggedInUser() {
     // Prefer @user if passed; otherwise use the already-loaded application user
-    return this.args.user ?? this.store.peekRecord('user', 1);
+    return this.currentUser.user
   }
 
   get resumes() {
@@ -27,16 +28,6 @@ export default class JobPostsItemComponent extends Component {
     @action async derp(){
         this.jobPost.hasMany('coverLetters').value().forEach((x)=>console.log(x) )
     }
-  // get scores() {
-  //   const userId = this.currentUser?.id;
-  //   const jobPostId = this.jobPost?.id;
-  //     debugger
-  //   if (!userId || !jobPostId) return [];
-  //   return this.store.peekAll('score').filter((score) => {
-  //     return score.belongsTo('user').id() === userId &&
-  //            score.belongsTo('jobPost').id() === jobPostId;
-  //   });
-  // }
 
   get companyName() {
     const company = this.args.jobPost?.company;
@@ -48,10 +39,6 @@ export default class JobPostsItemComponent extends Component {
     const scrapes = this.jobPost?.scrapes;
     const first = scrapes?.objectAt ? scrapes.objectAt(0) : Array.isArray(scrapes) ? scrapes[0] : null;
     return first?.externalLink ?? first?.url ?? null;
-  }
-
-  get isScoreDisabled() {
-    return !this.selectedResumeId;
   }
 
   @action
@@ -77,109 +64,12 @@ export default class JobPostsItemComponent extends Component {
     }
   }
 
-  @action
-  async score() {
-    const jobPost = this.jobPost ?? this.args.jobPost;
-    const user = this.currentUser;
-    const resumeId = this.selectedResumeId;
-
-    if (!jobPost || !user || !resumeId) return;
-
-    let resume = this.store.peekRecord('resume', resumeId);
-    if (!resume) {
-      resume = this.store.findRecord('resume', resumeId);
-    }
-
-    const newScore = this.store.createRecord('score', {
-      resume,
-      jobPost,
-      user,
-    });
-
-    try {
-      newScore.save();
-    } catch (e) {
-      // Optional: surface the error
-
-      console.error('Failed to create score', e);
-    }
-  }
-
-  @action
-  async createSummary() {
-    const jobPost = this.jobPost ?? this.args.jobPost;
-    const user = this.currentUser;
-   const resumeId = this.selectedResumeId;
-
-      const resume = await this.store.peekRecord('resume', resumeId)
-      const summary = await this.store.createRecord('summary', {
-          resume,
-          jobPost: jobPost
-      })
-      summary.save()
-    if (!jobPost || !user || !resumeId) return;
-
-    try {
-      // 1) Prefer the included/loaded summary already in the store (match by resume_id)
-      let existing = this.store.peekAll('summary').find((s) => {
-        return s.belongsTo('resume').id() === resumeId;
-      });
-
-      if (existing) {
-        // Navigate to summaries list (or a show route if you add one later)
-        return this.router.transitionTo('summaries.index');
-      }
-
-      // 2) If none found, create a new one
-      let resume = this.store.peekRecord('resume', resumeId);
-      if (!resume) {
-        resume = await this.store.findRecord('resume', resumeId);
-      }
-
-      const newSummary = this.store.createRecord('summary', {
-        resume,
-        jobPost,
-        user,
-      });
-
-      await newSummary.save();
-
-      this.router.transitionTo('summaries.index');
-    } catch (e) {
-      console.error('Failed to get or create summary', e);
-    }
-  }
-
-  @action
-  apply() {
-    const jobPost = this.jobPost ?? this.args.jobPost;
-    if (!jobPost) return;
-    if (typeof this.args.onApply === 'function') return this.args.onApply(jobPost);
-
-    const url = this.applicationUrl;
-    if (url) window.open(url, '_blank', 'noopener');
-  }
-
-  @action
-  cover_letter(){
-    const jobPost = this.jobPost ?? this.args.jobPost;
-    const user = this.currentUser;
-    const resumeId = this.selectedResumeId;
-    if (!jobPost || !user || !resumeId) return;
-    let resume = this.store.peekRecord('resume', resumeId);
-    if (!resume) {
-      resume = this.store.findRecord('resume', resumeId);
-    }
-    const newCoverLetter = this.store.createRecord('cover-letter', {
-      resume,
-      jobPost,
-      user
-    })
-    newCoverLetter.save()
-  }
 
   @action
   onResumeChange(event) {
     this.selectedResumeId = event.target.value;
   }
+
+
+
 }
