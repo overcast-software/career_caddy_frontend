@@ -13,4 +13,5 @@ export default class JobPostModel extends Model {
   @hasMany('cover-letter', { async: true, inverse: 'jobPost' }) coverLetters;
   // @belongsTo('cover-letter', { async: true, inverse: 'job' }) letter;
   @hasMany('application', { async: true, inverse: "jobPost" }) applications;
+  @hasMany('summary', { async: true, inverse: "jobPost" }) summaries;
 }

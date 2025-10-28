@@ -5,6 +5,6 @@ export default class SummariesRoute extends Route {
   @service store;
 
   model() {
-    return this.store.findAll('summary');
+    return this.store.findAll('summary', {include: 'job-post'});
   }
 }
