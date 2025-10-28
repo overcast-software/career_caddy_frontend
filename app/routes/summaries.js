@@ -3,8 +3,9 @@ import { service } from '@ember/service';
 
 export default class SummariesRoute extends Route {
   @service store;
+  @service currentUser;
 
   model() {
-    return this.store.query('summary', {include: 'job-post', sort: '-id'});
+    return this.currentUser.user.summaries
   }
 }
