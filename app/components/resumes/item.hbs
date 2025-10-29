@@ -1,9 +1,4 @@
 {{yield}}
-{{!-- preview section  --}}
-{{#if this.canClone}}
-  <button type="button" {{on "click" this.cloneResume}}>Clone</button>
-{{/if}}
-
 <div class="profile" style="text-align: center;">
   <div class="name">{{@resume.user.name}}</div>
   <div class="title">{{@resume.title}}</div>
@@ -19,7 +14,7 @@
   <h2>Skills</h2>
   <hr/>
 {{#if @resume.activeSkill}}
-<div class="skills-block pre-wrap">{{ltrim @resume.activeSkill.text}}</div>
+    <div class="skills-block pre-wrap">{{ltrim @resume.activeSkill.text}}</div>
 {{/if}}
 </section>
 
@@ -57,8 +52,8 @@
       {{/if}}
 
       <ul class="desc-list">
-        {{#each exp.descriptions as |d|}}
-          <li class="desc-item">{{d.content}}</li>
+        {{#each exp.descriptions as |desc|}}
+          <li class="desc-item">{{desc.content}}</li>
         {{/each}}
       </ul>
     </article>
@@ -81,7 +76,6 @@
     <Certifications::Item @certification={{certification}} />
   {{/each}}
 </section>
-<button type="button" {{on "click" this.cloneResume}}>Send to API</button>
 <ul>
     <li>action 1</li>
     <li>action 2</li>

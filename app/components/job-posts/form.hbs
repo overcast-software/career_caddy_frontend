@@ -37,13 +37,13 @@
         <input
           id="title"
           type="text"
-          value={{@jobPost.url}}
+          value={{@jobPost.link}}
           {{on "input" (fn this.updateField "link")}}
           required
         />
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn primary">Create Job Post</button>
+        <button type="submit" class="btn primary">Save</button>
       </div>
     </form>

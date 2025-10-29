@@ -9,8 +9,8 @@
       <option value="">None</option>
       {{#each @resumes as |resume|}}
         <option value={{resume.id}}>
-          {{#if resume.filePath}}
-            {{resume.filePath}}
+          {{#if resume.name}}
+            {{resume.name}}
           {{else}}
             {{resume.title}}
           {{/if}}

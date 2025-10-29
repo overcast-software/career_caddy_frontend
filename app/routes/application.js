@@ -42,4 +42,7 @@ export default class ApplicationRoute extends Route {
       // await this.session.invalidate();
     }
   }
+  model(){
+    this.currentUser.user.resumes
+  }
 }

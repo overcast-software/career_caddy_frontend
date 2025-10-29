@@ -101,6 +101,15 @@ Router.map(function () {
       path: '/:user_id/edit'
     });
   });
-  this.route('summaries', function() {});
+  this.route('summaries', function() {
 
+    this.route('show', {
+      path: '/:summary_id'
+    });
+    this.route('new');
+
+    this.route('edit', {
+      path: '/:summary_id/edit'
+    });
+  })
 });

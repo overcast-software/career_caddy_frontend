@@ -3,7 +3,7 @@
     <div class="builder-layout">
       <main class="preview-panel">
         <div class="preview-actions">
-          <div class="score muted">Resume Score: 0%</div>
+
           {{#if this.isDirty}}
             <button type="button" class="btn" {{on "click" this.saveResume}}>
               Save
@@ -21,8 +21,10 @@
           <button type="button" class="btn" {{on "click" this.exportToWord}}>Export to Word</button>
         </div>
 
+        <p><h3>name</h3>{{ this.model.name }}</p>
+        <p><h3>notes</h3>{{this.model.notes}}</p>
         <div class="resume-preview">
-            <Resumes::Item @resume={{this.model}} />
+          <Resumes::Item @resume={{this.model}} />
         </div>
       </main>
     </div>
