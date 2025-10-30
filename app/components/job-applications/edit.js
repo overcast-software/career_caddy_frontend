@@ -21,7 +21,7 @@ export default class JobApplicationsEdit extends Component {
       this.jobApplication.coverLetter = null;
       return;
     }
-
+    
     let coverLetter = this.store.peekRecord('cover-letter', id);
     if (!coverLetter) {
       coverLetter = this.store.findRecord('cover-letter', id);
@@ -39,7 +39,7 @@ export default class JobApplicationsEdit extends Component {
       this.jobApplication.resume = null;
       return;
     }
-
+    
     let resume = this.store.peekRecord('resume', id);
     if (!resume) {
       resume = this.store.findRecord('resume', id);
