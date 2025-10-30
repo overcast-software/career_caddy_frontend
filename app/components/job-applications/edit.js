@@ -1,6 +1,8 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
+
+import ArrayProxy from '@ember/array/proxy';
 export default class JobApplicationsEdit extends Component {
   @service store;
   @service currentUser;
@@ -13,19 +15,77 @@ export default class JobApplicationsEdit extends Component {
   get jobApplication(){
     return this.args.jobApplication
   }
-  @action updateCoverLetter(){}
-  @action saveApplication(){}
-  @action updateResume(){}
+  @action updateCoverLetter(event) {
+    const id = event.target.value;
+    if (id === '') {
+      this.jobApplication.coverLetter = null;
+      return;
+    }
+
+    let coverLetter = this.store.peekRecord('cover-letter', id);
+    if (!coverLetter) {
+      coverLetter = this.store.findRecord('cover-letter', id);
+    }
+    this.jobApplication.coverLetter = coverLetter;
+  }
+
+  @action async saveApplication() {
+    await this.jobApplication.save();
+  }
+
+  @action updateResume(event) {
+    const id = event.target.value;
+    if (id === '') {
+      this.jobApplication.resume = null;
+      return;
+    }
+
+    let resume = this.store.peekRecord('resume', id);
+    if (!resume) {
+      resume = this.store.findRecord('resume', id);
+    }
+    this.jobApplication.resume = resume;
+  }
+
   @action updateField(field, event) {
-    if (field === 'issueDate') {
-      this.certification[field] = event.target.valueAsDate ?? null;
+    if (field === 'appliedAt') {
+      this.jobApplication[field] = event.target.valueAsDate ?? null;
     } else {
-      this.certification[field] = event.target.value;
+      this.jobApplication[field] = event.target.value;
     }
   }
 
   get jobPostAtCompany(){
-    const jobPost = this.jobApplication.belongsTo('jobPost').value()
-    return  `${jobPost.title} at ${jobPost.company.get('name')}`
+    const jobPost = this.jobApplication.belongsTo('jobPost').value();
+    const company = jobPost?.belongsTo('company')?.value();
+    if (!jobPost) return '';
+    if (!company) return jobPost.title;
+    return `${jobPost.title} at ${company.name}`;
+  }
+
+  get resumeOptions(){
+    const resumes = this.user.resumes.then((resumes) => resumes.filter((r) => r.id != this.jobApplication.resume.id))
+    return resumes
+    // return resumes.filter((r) => r.id != this.jobApplication.resume.id)
+  }
+
+  get coverLetterOptions(){
+    return this.user.coverLetters.filter((cl) => cl.id != this.jobApplication.coverLetter.id)
+  }
+
+  get statusOptions(){
+    const fun = this.statuses.filter((s) => s != this.jobApplication.status)
+    return fun
+  }
+  get selectedCoverLetterId() {
+    return this.args.jobApplication?.belongsTo('coverLetter')?.id() ?? '';
+  }
+
+  get selectedStatus() {
+    return this.args.jobApplication?.status ?? '';
+  }
+
+  get statuses() {
+    return ['Applied', 'Interviewing', 'Rejected', 'Offer', 'Withdrawn'];
   }
 }

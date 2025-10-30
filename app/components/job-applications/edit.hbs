@@ -1,10 +1,5 @@
 <div class="builder-form">
   <div class="field">
-    <div class="field-label">User</div>
-   <input value={{this.user.name}} disabled="true"/>
-  </div>
-
-  <div class="field">
     <div class="field-label">Job Post</div>
     <input type="text" value={{this.jobPostAtCompany}} disabled="true"/>
   </div>
@@ -12,12 +7,12 @@
   <div class="field">
     <div class="field-label">Resume</div>
     <select {{on "change" this.updateResume}}>
-      <option value="" disabled={{if @jobApplication.resume "" "disabled"}} selected={{unless @data.application.resume "selected"}}>
-        Select a resume...
+      <option value="" selected="selected">
+        {{this.jobApplication.resume.name}}
       </option>
-    {{#each this.user.resumes as |resume|}}
+    {{#each this.resumeOptions as |resume|}}
             <option value={{resume.id}}>
-            {{resume.title}}
+                {{resume.name}}
             </option>
     {{/each}}
     </select>
@@ -26,19 +21,14 @@
   <div class="field">
     <div class="field-label">Cover Letter</div>
     <select {{on "change" this.updateCoverLetter}}>
-      <option value="" disabled={{if @jobApplication.coverLetter "" "disabled"}} selected={{unless @jobApplication.coverLetter "selected"}}>
-        Select a cover letter...
+      <option value={{this.jobApplication.coverLetter.id}} >
+        {{this.jobApplication.coverLetter.id}} - {{format-date this.jobApplication.coverLetter.createdAt}}
       </option>
-      {{#each this.user.coverLetters as |coverLetter|}}
-        <option value={{coverLetter.id}}>
-          {{coverLetter.id}} {{coverLetter.company}}
-        </option>
-      {{/each}}
-    {{#each this.user.coverLetters as |coverLetter|}}
+      {{#each this.coverLetterOptions as |coverLetter|}}
             <option value={{coverLetter.id}}>
-                {{coverLetter.createdAt}}
+                {{coverLetter.id}} - {{format-date coverLetter.createdAt}}
             </option>
-    {{/each}}
+      {{/each}}
     </select>
   </div>
 
@@ -50,8 +40,8 @@
   <div class="field">
     <div class="field-label">Status</div>
     <select {{on "change" (fn this.updateField "status")}}>
-      <option value="">Select status...</option>
-      {{#each this.statuses as |status|}}
+      <option value="">{{@jobApplication.status}}</option>
+      {{#each this.statusOptions as |status|}}
         <option value={{status}} selected={{this.isStatusSelected status}}>
           {{status}}
         </option>
@@ -61,7 +51,7 @@
 
   <div class="field">
     <div class="field-label">Tracking URL</div>
-    <input type="url" value={{unless @data.application.trackingUrl @data.jobPost.link}} {{on "input" (fn this.updateField "trackingUrl")}}>
+    <input type="url" value={{@jobApplication.trackingUrl}} {{on "input" (fn this.updateField "trackingUrl")}}>
   </div>
 
   <div class="field">
