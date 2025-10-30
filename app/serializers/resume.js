@@ -1,5 +1,5 @@
 import ApplicationSerializer from './application';
-import EmbeddedRecordsMixin from 'ember-data/serializers/embedded-records-mixin';
+import { EmbeddedRecordsMixin } from '@ember-data/serializer/rest';
 // import EmberInflector from 'ember-inflector';
 // const inflector = EmberInflector.inflector;
 

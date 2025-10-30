@@ -20,8 +20,6 @@ export default class JobPostsScrapeController extends Controller {
         console.log("url", this.url)
         let scrape = this.store.createRecord("scrape", {url: this.url})
         scrape.save()
-      }else{
-        debugger
       }
     } catch (e) {
       this.errorMessage = e?.errors?.[0]?.detail || e?.message || 'Failed to create job post';

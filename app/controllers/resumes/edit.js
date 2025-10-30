@@ -74,7 +74,7 @@ export default class ResumesEditController extends Controller {
             try {
             const data = await resp.json();
             if (data?.url) window.location.assign(data.url);
-            } catch (_) { /* ignore */ }
+            } catch  { /* ignore */ }
         }
         } catch (e) {
             alert?.(e?.message ?? 'Export failed');
