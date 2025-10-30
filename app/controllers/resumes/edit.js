@@ -89,6 +89,10 @@ export default class ResumesEditController extends Controller {
         if (!rel.includes(exp)) rel.unshiftObject(exp);
     };
 
+    get isDirty() {
+        return this.model?.isNew || this.model?.hasDirtyAttributes;
+    }
+
     @action
     updateSummaryIndex(newIndex) {
         this.summaryIndex = newIndex;
