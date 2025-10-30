@@ -43,6 +43,8 @@ export default class ApplicationRoute extends Route {
     }
   }
   model(){
-    this.currentUser.user.resumes
+      if (this.currentUser.user){
+        this.currentUser.user.resumes
+      }
   }
 }
