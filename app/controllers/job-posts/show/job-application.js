@@ -5,16 +5,14 @@ export default class JobPostsShowJobApplicationController extends Controller {
     @service store;
     get data(){
         let data = {}
-        debugger
-        console.log(this.router.model)
-        const coverLetters = this.store.peekAll('cover-letter', {jobPost: this.model})
-        data.model.coverLetters = coverLetters
-        const application = this.createRecord('application')
-        const resumes = this.findAll("resume")
+        const coverLetters = this.store.peekAll('cover-letter').filter(cl => cl.jobPost === this.model)
+        data.coverLetters = coverLetters
+        const application = this.store.createRecord('application')
+        const resumes = this.store.peekAll("resume")
         data.jobPosts = this.model
         data.application = application
         data.resumes = resumes
-        data.users = this.findAll("user")
+        data.users = this.store.peekAll("user")
 
         return data
     }

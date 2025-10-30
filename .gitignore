@@ -19,4 +19,4 @@
 .aider*
 .tool-versions
 *.sh
-*package-lock.json
+# CI/CD needs package-lock.json

@@ -24,16 +24,21 @@ export default class SessionService extends Service {
 
   get baseUrl() {
     const host = (config.APP.API_HOST || '').replace(/\/+$/, '');
-    const namespace = (config.APP.API_NAMESPACE || 'api/v1').replace(/^\/+|\/+$/g, '');
+    const namespace = (config.APP.API_NAMESPACE || 'api/v1').replace(
+      /^\/+|\/+$/g,
+      '',
+    );
     return `${host}/${namespace}/`;
   }
 
   get authConfig() {
-    return config.APP.AUTH || {
-      TOKEN_PATH: 'token/',
-      REFRESH_PATH: 'token/refresh/',
-      REGISTER_PATH: 'auth/register/'
-    };
+    return (
+      config.APP.AUTH || {
+        TOKEN_PATH: 'token/',
+        REFRESH_PATH: 'token/refresh/',
+        REGISTER_PATH: 'auth/register/',
+      }
+    );
   }
 
   loadFromStorage() {
@@ -52,7 +57,7 @@ export default class SessionService extends Service {
           this.clearStorage();
         }
       } catch (error) {
-        this.clearStorage();    //
+        this.clearStorage(); //
       }
     }
   }
@@ -92,7 +97,9 @@ export default class SessionService extends Service {
 
   decodeExp(token) {
     const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    const decoded = JSON.parse(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
+    );
     return decoded.exp;
   }
 
@@ -112,7 +119,9 @@ export default class SessionService extends Service {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      const errorObj = new Error(error.detail || error.message || 'Registration failed');
+      const errorObj = new Error(
+        error.detail || error.message || 'Registration failed',
+      );
       errorObj.status = response.status;
       throw errorObj;
     }

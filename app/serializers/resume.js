@@ -1,13 +1,10 @@
 import ApplicationSerializer from './application';
-import { EmbeddedRecordsMixin } from '@ember-data/serializer/rest';
+import EmbeddedRecordsMixin from 'ember-data/serializers/embedded-records-mixin';
 // import EmberInflector from 'ember-inflector';
 // const inflector = EmberInflector.inflector;
 
 
-import JSONAPISerializer from '@ember-data/serializer/json-api';
-
-
-export default class ResumeSerializer extends JSONAPISerializer.extend(EmbeddedRecordsMixin) {
+export default class ResumeSerializer extends ApplicationSerializer.extend(EmbeddedRecordsMixin) {
   attrs = {
       user: { serialize: true, embedded: 'always' },
       scores: { serialize: true, embedded: 'always' },
