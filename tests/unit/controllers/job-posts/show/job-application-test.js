@@ -7,7 +7,7 @@ module('Unit | Controller | job-posts/show/job-application', function (hooks) {
   // TODO: Replace this with your real tests.
   test('it exists', function (assert) {
     let controller = this.owner.lookup(
-      'controller:job-posts/show/job-application'
+      'controller:job-posts/show/job-application',
     );
     assert.ok(controller);
   });

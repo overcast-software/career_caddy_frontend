@@ -11,6 +11,6 @@ export default class JobPostModel extends Model {
   @hasMany('score', { async: true, inverse: 'jobPost' }) scores;
   @hasMany('scrape', { async: false, inverse: 'jobPost' }) scrapes;
   @hasMany('cover-letter', { async: true, inverse: 'jobPost' }) coverLetters;
-  @hasMany('application', { async: true, inverse: "jobPost" }) applications;
-  @hasMany('summary', { async: true, inverse: "jobPost" }) summaries;
+  @hasMany('application', { async: true, inverse: 'jobPost' }) applications;
+  @hasMany('summary', { async: true, inverse: 'jobPost' }) summaries;
 }

@@ -18,11 +18,11 @@ export default class ExperiencesEditorForm extends Component {
   }
 
   get experience() {
-        return this.args.experience ?? this.args.model;
+    return this.args.experience ?? this.args.model;
   }
 
   get resumeId() {
-      return this.experience.resume.id
+    return this.experience.resume.id;
   }
 
   get formattedStartDate() {
@@ -61,32 +61,32 @@ export default class ExperiencesEditorForm extends Component {
 
   @action async deleteExperience() {
     try {
-        const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
-        const resume = this.experience?.belongsTo?.('resume')?.value?.();
+      const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
+      const resume = this.experience?.belongsTo?.('resume')?.value?.();
 
-        resume.removeObject(this.experience);
+      resume.removeObject(this.experience);
 
-        await this.experience.destroyRecord();
-        this.router.transitionTo('resumes.show.experience.index', resumeId);
+      await this.experience.destroyRecord();
+      this.router.transitionTo('resumes.show.experience.index', resumeId);
     } catch (e) {
-        this.errorMessage = e?.message ?? 'Failed to delete experience';
+      this.errorMessage = e?.message ?? 'Failed to delete experience';
     }
   }
 
   @action async save(event) {
     event?.preventDefault();
     try {
-        if (this.currentlyWorking) {
-          this.experience.endDate = null;
-        }
-        const resumeId = this.experience.belongsTo('resume').id();
-        await this.experience.save();
-        const descs = await this.experience.descriptions;
-        const list = descs?.toArray?.() ?? Array.from(descs ?? []);
-        if (list.length) {
-            await Promise.all(list.map(d => d.save?.() ?? d));
-        }
-        this.router.transitionTo('resumes.show', resumeId, this.experience.id);
+      if (this.currentlyWorking) {
+        this.experience.endDate = null;
+      }
+      const resumeId = this.experience.belongsTo('resume').id();
+      await this.experience.save();
+      const descs = await this.experience.descriptions;
+      const list = descs?.toArray?.() ?? Array.from(descs ?? []);
+      if (list.length) {
+        await Promise.all(list.map((d) => d.save?.() ?? d));
+      }
+      this.router.transitionTo('resumes.show', resumeId, this.experience.id);
     } catch (e) {
       this.errorMessage = e?.message ?? 'Failed to save experience';
     }
@@ -94,7 +94,8 @@ export default class ExperiencesEditorForm extends Component {
 
   @action cancel() {
     if (this.experience?.isNew) this.experience.rollbackAttributes();
-    const resumeId = this.experience?.belongsTo('resume')?.id() ?? this.args.resume?.id;
+    const resumeId =
+      this.experience?.belongsTo('resume')?.id() ?? this.args.resume?.id;
     this.router.transitionTo('resumes.show.experience.index', resumeId);
   }
 
@@ -134,7 +135,9 @@ export default class ExperiencesEditorForm extends Component {
 
   @action async removeDescription(desc) {
     if (!desc) return;
-    (this.experience ?? this.args.experience)?.descriptions?.removeObject?.(desc);
+    (this.experience ?? this.args.experience)?.descriptions?.removeObject?.(
+      desc,
+    );
 
     if (desc.isNew) {
       desc.unloadRecord?.();
@@ -150,5 +153,4 @@ export default class ExperiencesEditorForm extends Component {
       this.experience.endDate = null;
     }
   }
-
 }

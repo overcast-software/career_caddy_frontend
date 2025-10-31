@@ -3,11 +3,11 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 
 export default class JobPostsScrapeController extends Controller {
-  @service store
+  @service store;
 
   @action
-  updateUrl(event){
-    this.url = event.target.value
+  updateUrl(event) {
+    this.url = event.target.value;
   }
 
   @action
@@ -16,13 +16,14 @@ export default class JobPostsScrapeController extends Controller {
     this.errorMessage = null;
 
     try {
-      if ( this.url ) {
-        console.log("url", this.url)
-        let scrape = this.store.createRecord("scrape", {url: this.url})
-        scrape.save()
+      if (this.url) {
+        console.log('url', this.url);
+        let scrape = this.store.createRecord('scrape', { url: this.url });
+        scrape.save();
       }
     } catch (e) {
-      this.errorMessage = e?.errors?.[0]?.detail || e?.message || 'Failed to create job post';
+      this.errorMessage =
+        e?.errors?.[0]?.detail || e?.message || 'Failed to create job post';
     }
   }
 }

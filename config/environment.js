@@ -22,14 +22,13 @@ module.exports = function (environment) {
         TOKEN_PATH: 'token/',
         REFRESH_PATH: 'token/refresh/',
         REGISTER_PATH: 'auth/register/',
-        BOOTSTRAP_PATH: 'users/bootstrap-superuser/'
-
+        BOOTSTRAP_PATH: 'users/bootstrap-superuser/',
       },
       PUBLIC_LINKS: {
         aboutUrl: 'https://github.com/your-org/career-caddy#about',
         docsUrl: 'https://github.com/your-org/career-caddy/wiki',
-        githubUrl: 'https://github.com/your-org/career-caddy'
-      }
+        githubUrl: 'https://github.com/your-org/career-caddy',
+      },
     },
   };
 

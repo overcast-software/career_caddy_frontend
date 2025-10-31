@@ -9,9 +9,9 @@ module(
     // TODO: Replace this with your real tests.
     test('it exists', function (assert) {
       let controller = this.owner.lookup(
-        'controller:job-posts/show/job-application/new'
+        'controller:job-posts/show/job-application/new',
       );
       assert.ok(controller);
     });
-  }
+  },
 );

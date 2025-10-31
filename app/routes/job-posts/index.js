@@ -4,7 +4,9 @@ import { service } from '@ember/service';
 export default class JobPostsIndexRoute extends Route {
   @service store;
   async model() {
-      const jobPosts = this.store.findAll('job-post', {include: 'scores,cover-letters,company'});
-      return jobPosts
+    const jobPosts = this.store.findAll('job-post', {
+      include: 'scores,cover-letters,company',
+    });
+    return jobPosts;
   }
 }

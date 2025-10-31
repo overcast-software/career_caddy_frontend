@@ -10,7 +10,9 @@ export default class SkillsFormComponent extends Component {
   }
 
   get lineCount() {
-    const value = this.args.skill ? (this.args.skill.text ?? '') : (this.newSkill ?? '');
+    const value = this.args.skill
+      ? (this.args.skill.text ?? '')
+      : (this.newSkill ?? '');
     return Math.max(1, String(value).split('\n').length);
   }
 
@@ -36,7 +38,9 @@ export default class SkillsFormComponent extends Component {
   }
   @action addSkill() {
     // prefer the current source of truth
-    let s = this.args.skill ? (this.args.skill.text ?? '') : (this.newSkill ?? '');
+    let s = this.args.skill
+      ? (this.args.skill.text ?? '')
+      : (this.newSkill ?? '');
     // left-trim only (per requirement)
     s = s.replace(/^\s+/, '').trimEnd ? s.replace(/^\s+/, '') : s; // ensure only left trim
     if (!s) return;

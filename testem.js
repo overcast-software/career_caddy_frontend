@@ -20,11 +20,7 @@ module.exports = {
       ].filter(Boolean),
     },
     Firefox: {
-      ci: [
-        '-headless',
-        '-width=1440',
-        '-height=900',
-      ],
+      ci: ['-headless', '-width=1440', '-height=900'],
     },
   },
 };

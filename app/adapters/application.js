@@ -22,7 +22,11 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
     try {
       return await super.ajax(url, method, options);
     } catch (error) {
-      if (error.status === 401 && this.session.refreshToken && !options._retried) {
+      if (
+        error.status === 401 &&
+        this.session.refreshToken &&
+        !options._retried
+      ) {
         await this.session.refresh();
         options._retried = true;
         return await super.ajax(url, method, options);
@@ -39,7 +43,7 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
     if (url.endsWith('/')) return url;
     if (url.includes('?')) {
       const [base, query] = url.split('?');
-      return `${base.endsWith('/') ? base : base + '/' }?${query}`;
+      return `${base.endsWith('/') ? base : base + '/'}?${query}`;
     }
     return `${url}/`;
   }

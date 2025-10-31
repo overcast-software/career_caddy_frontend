@@ -17,7 +17,7 @@ export default class LoginController extends Controller {
     try {
       await this.session.login(this.username, this.password);
       this.router.transitionTo('resumes.index');
-    } catch(error) {
+    } catch (error) {
       this.errorMessage = error.message || 'Login failed';
     }
   }

@@ -1,13 +1,13 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
-import { action } from "@ember/object";
+import { action } from '@ember/object';
 
 export default class ApplicationController extends Controller {
-    @service session;
-    @service currentUser;
+  @service session;
+  @service currentUser;
 
-    @action
-    invalidateSession() {
-        this.session.invalidate();
-    }
+  @action
+  invalidateSession() {
+    this.session.invalidate();
+  }
 }

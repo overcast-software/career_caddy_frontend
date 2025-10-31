@@ -57,7 +57,7 @@ export default class SessionService extends Service {
           this.clearStorage();
         }
       } catch (error) {
-        console.log(error)
+        console.log(error);
         this.clearStorage(); //
       }
     }
