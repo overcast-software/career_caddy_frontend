@@ -13,7 +13,11 @@
     <label class="field-label" for={{this.resumeSelectId}}>Resume</label>
     <select id={{this.resumeSelectId}} {{on "change" this.updateResume}}>
       <option value="" selected="selected">
-        {{this.jobApplication.resume.name}}
+        {{#if this.jobApplication.resume}}
+          {{this.jobApplication.resume.name}}
+        {{else}}
+          Select a resume
+        {{/if}}
       </option>
       {{#each this.resumeOptions as |resume|}}
         <option value={{resume.id}}>
@@ -29,10 +33,14 @@
       id={{this.coverLetterSelectId}}
       {{on "change" this.updateCoverLetter}}
     >
-      <option value={{this.jobApplication.coverLetter.id}}>
-        {{this.jobApplication.coverLetter.id}}
-        -
-        {{format-date this.jobApplication.coverLetter.createdAt}}
+      <option value="{{if this.jobApplication.coverLetter this.jobApplication.coverLetter.id ''}}">
+        {{#if this.jobApplication.coverLetter}}
+          {{this.jobApplication.coverLetter.id}}
+          -
+          {{format-date this.jobApplication.coverLetter.createdAt}}
+        {{else}}
+          Select a cover letter
+        {{/if}}
       </option>
       {{#each this.coverLetterOptions as |coverLetter|}}
         <option value={{coverLetter.id}}>
@@ -62,7 +70,7 @@
     >
       <option value="">{{@jobApplication.status}}</option>
       {{#each this.statusOptions as |status|}}
-        <option value={{status}} selected={{this.isStatusSelected status}}>
+        <option value={{status}}>
           {{status}}
         </option>
       {{/each}}

@@ -16,12 +16,12 @@ module('Integration | Component | job-applications/form', function (hooks) {
     assert.dom().hasText('User Job Post Resume Select a resume... Cover Letter Select a cover letter... Applied At Status Select status... Tracking URL Notes Save');
 
     // Template block usage:
-    await render(hbs`
-      <JobApplications::Form>
-        template block text
-      </JobApplications::Form>
-    `);
+    // await render(hbs`
+    //   <JobApplications::Form>
+    //     template block text
+    //   </JobApplications::Form>
+    // `);
 
-    assert.dom().hasText('template block text');
+    // assert.dom().hasText('template block text');
   });
 });

@@ -3,6 +3,14 @@ import {
   setupRenderingTest as upstreamSetupRenderingTest,
   setupTest as upstreamSetupTest,
 } from 'ember-qunit';
+import Service from '@ember/service';
+
+class StubCurrentUser extends Service {
+  user = {
+    resumes: [],
+    coverLetters: [],
+  };
+}
 
 // This file exists to provide wrappers around ember-qunit's
 // test setup functions. This way, you can easily extend the setup that is
@@ -10,6 +18,10 @@ import {
 
 function setupApplicationTest(hooks, options) {
   upstreamSetupApplicationTest(hooks, options);
+
+  hooks.beforeEach(function () {
+    this.owner.register('service:current-user', StubCurrentUser);
+  });
 
   // Additional setup for application tests can be done here.
   //
@@ -29,6 +41,10 @@ function setupApplicationTest(hooks, options) {
 
 function setupRenderingTest(hooks, options) {
   upstreamSetupRenderingTest(hooks, options);
+
+  hooks.beforeEach(function () {
+    this.owner.register('service:current-user', StubCurrentUser);
+  });
 
   // Additional setup for rendering tests can be done here.
 }

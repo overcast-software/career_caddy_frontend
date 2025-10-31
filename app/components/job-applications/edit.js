@@ -65,16 +65,30 @@ export default class JobApplicationsEdit extends Component {
   }
 
   get resumeOptions() {
-    const resumes = this.user.resumes.then((resumes) =>
-      resumes.filter((r) => r.id != this.jobApplication.resume.id),
-    );
-    return resumes;
-    // return resumes.filter((r) => r.id != this.jobApplication.resume.id)
+    const resumes = this.user?.resumes;
+    let resumeArray = [];
+
+    if (resumes?.toArray) {
+      resumeArray = resumes.toArray();
+    } else if (Array.isArray(resumes)) {
+      resumeArray = resumes;
+    }
+
+    return resumeArray.filter((r) => r.id !== this.jobApplication?.resume?.id);
   }
 
   get coverLetterOptions() {
-    return this.user.coverLetters.filter(
-      (cl) => cl.id != this.jobApplication.coverLetter.id,
+    const coverLetters = this.user?.coverLetters;
+    let coverLetterArray = [];
+
+    if (coverLetters?.toArray) {
+      coverLetterArray = coverLetters.toArray();
+    } else if (Array.isArray(coverLetters)) {
+      coverLetterArray = coverLetters;
+    }
+
+    return coverLetterArray.filter(
+      (cl) => cl.id !== this.jobApplication?.coverLetter?.id,
     );
   }
 
@@ -84,14 +98,6 @@ export default class JobApplicationsEdit extends Component {
   }
   get selectedCoverLetterId() {
     return this.args.jobApplication?.belongsTo('coverLetter')?.id() ?? '';
-  }
-
-  get selectedStatus() {
-    return this.args.jobApplication?.status ?? '';
-  }
-
-  isStatusSelected(status) {
-    return status === this.selectedStatus;
   }
 
   get statuses() {
