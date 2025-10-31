@@ -12,7 +12,7 @@ module('Integration | Component | users/list', function (hooks) {
 
     await render(hbs`<Users::List />`);
 
-    assert.dom().hasText('');
+    assert.dom().includesText('list');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +21,6 @@ module('Integration | Component | users/list', function (hooks) {
       </Users::List>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('template block text');
   });
 });

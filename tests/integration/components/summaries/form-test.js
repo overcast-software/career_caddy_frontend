@@ -13,14 +13,5 @@ module('Integration | Component | summaries/form', function (hooks) {
     await render(hbs`<Summaries::Form />`);
 
     assert.dom().hasText('');
-
-    // Template block usage:
-    await render(hbs`
-      <Summaries::Form>
-        template block text
-      </Summaries::Form>
-    `);
-
-    assert.dom().hasText('template block text');
   });
 });

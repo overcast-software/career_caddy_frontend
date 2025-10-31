@@ -10,10 +10,40 @@ module('Integration | Component | job-applications/form', function (hooks) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    this.set("errorMessage", null)
-    await render(hbs`<JobApplications::Form />`);
+    this.set("errorMessage", null);
+    this.set('noop', () => {});
+    this.set('jobApplication', {
+      resume: null,
+      coverLetter: null,
+      status: '',
+      trackingUrl: '',
+      notes: '',
+    });
 
-    assert.dom().hasText('User Job Post Resume Select a resume... Cover Letter Select a cover letter... Applied At Status Select status... Tracking URL Notes Save');
+    await render(hbs`<JobApplications::Form 
+      @jobApplication={{this.jobApplication}}
+      @onSave={{this.noop}}
+      @onCancel={{this.noop}}
+      @onResumeChange={{this.noop}}
+      @onCoverLetterChange={{this.noop}}
+      @onStatusChange={{this.noop}}
+      @onAppliedAtChange={{this.noop}}
+      @onTrackingUrlChange={{this.noop}}
+      @onNotesChange={{this.noop}}
+    />`);
+
+    assert.dom().includesText('User');
+    assert.dom().includesText('Job Post');
+    assert.dom().includesText('Resume');
+    assert.dom().includesText('Select a resume');
+    assert.dom().includesText('Cover Letter');
+    assert.dom().includesText('Select a cover letter');
+    assert.dom().includesText('Applied At');
+    assert.dom().includesText('Status');
+    assert.dom().includesText('Select status');
+    assert.dom().includesText('Tracking URL');
+    assert.dom().includesText('Notes');
+    assert.dom().includesText('Save');
 
     // Template block usage:
     // await render(hbs`

@@ -67,26 +67,26 @@ export default class JobApplicationsEdit extends Component {
   get resumeOptions() {
     const resumes = this.user?.resumes;
     let resumeArray = [];
-
+    
     if (resumes?.toArray) {
       resumeArray = resumes.toArray();
     } else if (Array.isArray(resumes)) {
       resumeArray = resumes;
     }
-
+    
     return resumeArray.filter((r) => r.id !== this.jobApplication?.resume?.id);
   }
 
   get coverLetterOptions() {
     const coverLetters = this.user?.coverLetters;
     let coverLetterArray = [];
-
+    
     if (coverLetters?.toArray) {
       coverLetterArray = coverLetters.toArray();
     } else if (Array.isArray(coverLetters)) {
       coverLetterArray = coverLetters;
     }
-
+    
     return coverLetterArray.filter(
       (cl) => cl.id !== this.jobApplication?.coverLetter?.id,
     );

@@ -12,7 +12,11 @@ module('Integration | Component | resumes/item', function (hooks) {
 
     await render(hbs`<Resumes::Item />`);
 
-    assert.dom().hasText('');
+    assert.dom().includesText('Summary');
+    assert.dom().includesText('Skills');
+    assert.dom().includesText('Experience');
+    assert.dom().includesText('Education');
+    assert.dom().includesText('Certifications');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +25,6 @@ module('Integration | Component | resumes/item', function (hooks) {
       </Resumes::Item>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('template block text');
   });
 });

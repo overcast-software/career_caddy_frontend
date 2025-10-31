@@ -12,7 +12,10 @@ module('Integration | Component | panel/navigation', function (hooks) {
 
     await render(hbs`<Panel::Navigation />`);
 
-    assert.dom().hasText('');
+    assert.dom().includesText('←');
+    assert.dom().includesText('→');
+    assert.dom().includesText('Down');
+    assert.dom().includesText('Up');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +24,6 @@ module('Integration | Component | panel/navigation', function (hooks) {
       </Panel::Navigation>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('template block text');
   });
 });

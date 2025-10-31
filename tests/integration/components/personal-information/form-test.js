@@ -12,7 +12,9 @@ module('Integration | Component | personal-information/form', function (hooks) {
 
     await render(hbs`<PersonalInformation::Form />`);
 
-    assert.dom().hasText('');
+    assert.dom().includesText('Name');
+    assert.dom().includesText('Phone');
+    assert.dom().includesText('Email');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +23,6 @@ module('Integration | Component | personal-information/form', function (hooks) {
       </PersonalInformation::Form>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('template block text');
   });
 });

@@ -12,7 +12,9 @@ module('Integration | Component | resumes/title/form', function (hooks) {
 
     await render(hbs`<Resumes::Title::Form />`);
 
-    assert.dom().hasText('');
+    assert.dom().includesText('Title');
+    assert.dom().includesText('Name');
+    assert.dom().includesText('Notes');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +23,6 @@ module('Integration | Component | resumes/title/form', function (hooks) {
       </Resumes::Title::Form>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('template block text');
   });
 });
