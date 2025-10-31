@@ -8,20 +8,38 @@
         <LinkTo @route="resumes.index" class="nav-link">Resumes</LinkTo>
         <LinkTo @route="summaries.index" class="nav-link">Summaries</LinkTo>
         <LinkTo @route="scores.index" class="nav-link">Scores</LinkTo>
-        <LinkTo @route="job-applications.index" class="nav-link">Applications</LinkTo>
+        <LinkTo
+          @route="job-applications.index"
+          class="nav-link"
+        >Applications</LinkTo>
       </nav>
     {{else}}
       <nav class="nav" aria-label="loggedout">
         <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
-        <a href={{this.aboutUrl}} class="nav-link" target="_blank" rel="noopener noreferrer">About</a>
-        <a href={{this.docsUrl}} class="nav-link" target="_blank" rel="noopener noreferrer">Docs</a>
-        <a href={{this.githubUrl}} class="nav-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a
+          href={{this.aboutUrl}}
+          class="nav-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >About</a>
+        <a
+          href={{this.docsUrl}}
+          class="nav-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Docs</a>
+        <a
+          href={{this.githubUrl}}
+          class="nav-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >GitHub</a>
       </nav>
     {{/if}}
     {{#if @session.isAuthenticated}}
-        <LinkTo @route='logout'>Logout</LinkTo>
+      <LinkTo @route="logout">Logout</LinkTo>
     {{else}}
-        <LinkTo @route="login">Login</LinkTo>
+      <LinkTo @route="login">Login</LinkTo>
     {{/if}}
   </div>
 </header>

@@ -1,6 +1,7 @@
 <ul>
   {{#each @coverLetters as |coverLetter|}}
-    <li><LinkTo @route="cover-letters.show" @model={{coverLetter}}>Cover Letter #{{coverLetter.id}}</LinkTo></li>
+    <li><LinkTo @route="cover-letters.show" @model={{coverLetter}}>Cover Letter
+        #{{coverLetter.id}}</LinkTo></li>
   {{/each}}
 </ul>
 <LinkTo @route="cover-letters.new">New Cover Letter</LinkTo>

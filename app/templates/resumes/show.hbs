@@ -9,19 +9,27 @@
               Save
             </button>
           {{/if}}
-          <button type="button" class="btn" >
-              <LinkTo @route="resumes.edit" @model={{this.model}}>Edit</LinkTo>
+          <button type="button" class="btn">
+            <LinkTo @route="resumes.edit" @model={{this.model}}>Edit</LinkTo>
           </button>
-          <button type="button" class="btn danger" {{on "click" this.deleteResume}}>
+          <button
+            type="button"
+            class="btn danger"
+            {{on "click" this.deleteResume}}
+          >
             Delete
           </button>
           <button type="button" class="btn" {{on "click" this.cloneResume}}>
             Clone Resume
           </button>
-          <button type="button" class="btn" {{on "click" this.exportToWord}}>Export to Word</button>
+          <button
+            type="button"
+            class="btn"
+            {{on "click" this.exportToWord}}
+          >Export to Word</button>
         </div>
 
-        <p><h3>name</h3>{{ this.model.name }}</p>
+        <p><h3>name</h3>{{this.model.name}}</p>
         <p><h3>notes</h3>{{this.model.notes}}</p>
         <div class="resume-preview">
           <Resumes::Item @resume={{this.model}} />

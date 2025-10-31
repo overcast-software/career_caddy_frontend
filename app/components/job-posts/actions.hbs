@@ -20,16 +20,25 @@
   </div>
   {{#if this.selectedResumeId}}
     <div class="actions">
-        <button type="button" class="btn" {{on "click" this.scoreResume}} >Score resume against job post</button>
-        <button type="button" class="btn" {{on "click" this.createSummary}} >Create new resume summary</button>
-        <button type="button" class="btn" {{on "click" this.createCoverLetter}}>Create cover letter</button>
-        <button type="button" class="btn primary">
-            <LinkTo @route='job-posts.show.job-applications.new' @model={{@jobPost}}>
-                Apply
-            </LinkTo>
-        </button>
-        </div>
- {{/if}}
+      <button type="button" class="btn" {{on "click" this.scoreResume}}>Score
+        resume against job post</button>
+      <button type="button" class="btn" {{on "click" this.createSummary}}>Create
+        new resume summary</button>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" this.createCoverLetter}}
+      >Create cover letter</button>
+      <button type="button" class="btn primary">
+        <LinkTo
+          @route="job-posts.show.job-applications.new"
+          @model={{@jobPost}}
+        >
+          Apply
+        </LinkTo>
+      </button>
+    </div>
+  {{/if}}
 
 </section>
 {{yield}}

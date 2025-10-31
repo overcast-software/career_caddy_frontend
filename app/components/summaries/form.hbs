@@ -1,11 +1,11 @@
-  <div class="summaries-carousel">
-    <div class="summaries-viewport">
-      <div class="summaries-track" >
-        {{#each @summaries as |summary|}}
-            {{summary}}
-            yo
-            <Summary::Form @summary={{summary}}/>
-        {{/each}}
-      </div>
+<div class="summaries-carousel">
+  <div class="summaries-viewport">
+    <div class="summaries-track">
+      {{#each @summaries as |summary|}}
+        {{summary}}
+        yo
+        <Summary::Form @summary={{summary}} />
+      {{/each}}
     </div>
   </div>
+</div>

@@ -8,17 +8,29 @@
       <div class="error">{{this.errorMessage}}</div>
     {{/if}}
 
-    {{!-- app/templates/login.hbs --}}
+    {{! app/templates/login.hbs }}
     <form {{on "submit" this.login}}>
-    <label for="username">Username</label>
-    <input id='username' placeholder="Enter Username" value={{this.username}} {{on "change" this.updateUsername}}>
-    <label for="password">Password</label>
-    <input id='password' type="password" placeholder="Enter Password" value={{this.password}} {{on "change" this.updatePassword}}>
-    <button type="submit">Login</button>
+      <label for="username">Username</label>
+      <input
+        id="username"
+        placeholder="Enter Username"
+        value={{this.username}}
+        {{on "change" this.updateUsername}}
+      />
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter Password"
+        value={{this.password}}
+        {{on "change" this.updatePassword}}
+      />
+      <button type="submit">Login</button>
     </form>
 
     <p>
-      Need to set up the app? <LinkTo @route="setup">Initial Setup</LinkTo>
+      Need to set up the app?
+      <LinkTo @route="setup">Initial Setup</LinkTo>
     </p>
   </div>
 </div>

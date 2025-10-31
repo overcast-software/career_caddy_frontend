@@ -1,5 +1,5 @@
-<div class="job-posts-list {{if @compact "is-compact"}}">
+<div class="job-posts-list {{if @compact 'is-compact'}}">
   {{#each this.jobPosts as |jobPost|}}
-    <JobPosts::Item @jobPost={{jobPost}}/>
+    <JobPosts::Item @jobPost={{jobPost}} />
   {{/each}}
 </div>

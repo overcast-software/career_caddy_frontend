@@ -1,36 +1,43 @@
 <article class="panel-card">
-    <header class="job-post-header">
-        <h2 class="panel-title">{{@jobPost.company.name}}</h2>
+  <header class="job-post-header">
+    <h2 class="panel-title">{{@jobPost.company.name}}</h2>
 
-            <LinkTo @route="job-posts.edit" @model={{@jobPost}}>Edit</LinkTo>
-        <h1 class="job-title">
-            <LinkTo @route="job-posts.show" @model={{@jobPost}}>
-                {{@jobPost.title}}
-            </LinkTo>
-            {{#if @jobPost.link}}
-                --
-                <a href="{{@jobPost.link}}">external</a>
-            {{/if}}
-        </h1>
-    </header>
-    <section class="job-post-description">
-        <p class="muted">
-            {{truncate @jobPost.description}}
-        </p>
-    </section>
-    <section class="job-post-scores">
-        <h3 class="section-title">Scores</h3> <p class="muted">one score per resume</p>
-        <ul class="desc-list">
-            {{#each @jobPost.scores as |score|}}
-                <li class="desc-item">
-                    <span class="muted">Resume</span> {{score.resume.title}} — <span class="muted">Score:</span>
-                    <LinkTo @route="scores.show" @model={{score}}>{{score.score}}</LinkTo>
-                </li>
-            {{/each}}
-        </ul>
-    </section>
+    <LinkTo @route="job-posts.edit" @model={{@jobPost}}>Edit</LinkTo>
+    <h1 class="job-title">
+      <LinkTo @route="job-posts.show" @model={{@jobPost}}>
+        {{@jobPost.title}}
+      </LinkTo>
+      {{#if @jobPost.link}}
+        --
+        <a href="{{@jobPost.link}}">external</a>
+      {{/if}}
+    </h1>
+  </header>
+  <section class="job-post-description">
+    <p class="muted">
+      {{truncate @jobPost.description}}
+    </p>
+  </section>
+  <section class="job-post-scores">
+    <h3 class="section-title">Scores</h3>
+    <p class="muted">one score per resume</p>
+    <ul class="desc-list">
+      {{#each @jobPost.scores as |score|}}
+        <li class="desc-item">
+          <span class="muted">Resume</span>
+          {{score.resume.title}}
+          —
+          <span class="muted">Score:</span>
+          <LinkTo @route="scores.show" @model={{score}}>{{score.score}}</LinkTo>
+        </li>
+      {{/each}}
+    </ul>
+  </section>
 
-    {{#if @showControls}}
-        <JobPosts::Actions @jobPost={{@jobPost}} @resumes={{this.loggedInUser.resumes}}/>
-    {{/if}}
+  {{#if @showControls}}
+    <JobPosts::Actions
+      @jobPost={{@jobPost}}
+      @resumes={{this.loggedInUser.resumes}}
+    />
+  {{/if}}
 </article>

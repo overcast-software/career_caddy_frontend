@@ -1,13 +1,20 @@
-<div class="panel-card {{if @collapsible "collapsible"}} {{if this.collapsed "collapsed"}}">
+<div
+  class="panel-card
+    {{if @collapsible 'collapsible'}}
+    {{if this.collapsed 'collapsed'}}"
+>
   <div class="collapsible-head">
     <div class="panel-title">{{@title}}</div>
     {{#if @collapsible}}
-      <button type="button" class="btn small" {{on "click" this.toggleCollapsed}}>
+      <button
+        type="button"
+        class="btn small"
+        {{on "click" this.toggleCollapsed}}
+      >
         {{if this.collapsed "Expand" "Collapse"}}
       </button>
     {{/if}}
   </div>
-
 
   {{#if @collapsible}}
     <div class="collapsible-body">

@@ -150,9 +150,9 @@
   padding: 0;
 }
 
-.desc-edit{
-   width: 100%;
-   resize: none;
+.desc-edit {
+  width: 100%;
+  resize: none;
 }
 
 .desc-list .desc-item {
@@ -193,7 +193,9 @@
   user-select: none;
 }
 
-.rich-text p { margin: 0 0 var(--space-2); }
+.rich-text p {
+  margin: 0 0 var(--space-2);
+}
 
 .actions {
   display: flex;
@@ -213,14 +215,18 @@
   font: inherit;
   cursor: pointer;
 }
-.btn:hover { background: #f1f1f1; }
+.btn:hover {
+  background: #f1f1f1;
+}
 
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
-.btn.primary:hover { filter: brightness(0.95); }
+.btn.primary:hover {
+  filter: brightness(0.95);
+}
 
 .btn.danger {
   background: #fff5f5;
@@ -238,7 +244,9 @@
   border: none;
   color: var(--accent);
 }
-.btn.btn-link.danger { color: var(--danger); }
+.btn.btn-link.danger {
+  color: var(--danger);
+}
 
 .descriptions {
   margin-top: var(--space-4);
@@ -324,7 +332,8 @@
 }
 
 /* Collapsible panel pattern */
-.collapsible {}
+.collapsible {
+}
 
 .collapsible .collapsible-head {
   display: flex;
@@ -354,8 +363,12 @@
   margin: 0 auto;
   padding: 0 var(--space-6);
 }
-.nowrap { white-space: nowrap; }
-.text-center { text-align: center; }
+.nowrap {
+  white-space: nowrap;
+}
+.text-center {
+  text-align: center;
+}
 
 .hero {
   padding: 72px 0 48px;
@@ -386,7 +399,9 @@
   font-size: 1.05rem;
   margin: 0 0 var(--space-4);
 }
-.hero-cta { margin-bottom: var(--space-4); }
+.hero-cta {
+  margin-bottom: var(--space-4);
+}
 
 .hero-features {
   display: flex;
@@ -557,7 +572,7 @@
 }
 
 .landing-page {
-  background-image: url('/images/ian_finnis.webp');
+  background-image: url("/images/ian_finnis.webp");
   background-size: cover;
   background-position: top;
   background-repeat: no-repeat;
@@ -581,10 +596,19 @@
 }
 
 @media (max-width: 900px) {
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .feature-grid { grid-template-columns: repeat(2, 1fr); }
-  .testimonial-grid { grid-template-columns: 1fr; }
-  .hero-features { flex-wrap: wrap; gap: var(--space-3); }
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .testimonial-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-features {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
 }
 
 /* Builder side-by-side layout */
@@ -649,14 +673,18 @@
   border-radius: var(--radius);
   padding: var(--space-5);
 }
-.muted { color: var(--muted); }
+.muted {
+  color: var(--muted);
+}
 
 .btn.small {
   padding: 6px 10px;
   font-size: 0.9rem;
 }
 
-.pre-wrap { white-space: pre-wrap; }
+.pre-wrap {
+  white-space: pre-wrap;
+}
 
 /* Panel card toolbar styles */
 .panel-card .toolbar {

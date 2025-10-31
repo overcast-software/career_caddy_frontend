@@ -1,6 +1,9 @@
 <form class="builder-form">
   <div class="field">
-    <label class="field-label" for={{concat (guid-for this) "-skill-input"}}>Skills</label>
+    <label
+      class="field-label"
+      for={{concat (guid-for this) "-skill-input"}}
+    >Skills</label>
     <div class="input-group">
       <textarea
         class="desc-editor"
@@ -10,7 +13,11 @@
         id={{concat (guid-for this) "-skill-input"}}
         {{on "input" this.updateSkill}}
       ></textarea>
-      <button type="button" class="btn primary" {{on "click" this.addSkill}}>Add</button>
+      <button
+        type="button"
+        class="btn primary"
+        {{on "click" this.addSkill}}
+      >Add</button>
     </div>
   </div>
 </form>

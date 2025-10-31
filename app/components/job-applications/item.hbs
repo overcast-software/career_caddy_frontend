@@ -1,7 +1,9 @@
 <div class="builder-form">
   <div class="field">
     <div class="field-label">Job Post</div>
-    {{@jobApplication.jobPost.title}} at {{@jobApplication.jobPost.company.name}}
+    {{@jobApplication.jobPost.title}}
+    at
+    {{@jobApplication.jobPost.company.name}}
   </div>
 
   <div class="field">
@@ -35,11 +37,15 @@
   <div class="field">
     <div class="field-label">Tracking URL</div>
     {{#if @jobApplication.trackingUrl}}
-      <a href={{@jobApplication.trackingUrl}} target="_blank" rel="noopener noreferrer">{{@jobApplication.trackingUrl}}</a>
+      <a
+        href={{@jobApplication.trackingUrl}}
+        target="_blank"
+        rel="noopener noreferrer"
+      >{{@jobApplication.trackingUrl}}</a>
     {{else}}
       -
     {{/if}}
- </div>
+  </div>
 
   <div class="field">
     <div class="field-label">Notes</div>
