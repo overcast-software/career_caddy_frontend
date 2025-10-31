@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
+import { guidFor } from '@ember/object/internals';
 
 import ArrayProxy from '@ember/array/proxy';
 export default class JobApplicationsEdit extends Component {
@@ -87,5 +88,37 @@ export default class JobApplicationsEdit extends Component {
 
   get statuses() {
     return ['Applied', 'Interviewing', 'Rejected', 'Offer', 'Withdrawn'];
+  }
+
+  get baseId() {
+    return `job-applications-edit-${guidFor(this)}`;
+  }
+
+  get jobPostInputId() {
+    return `${this.baseId}-job-post`;
+  }
+
+  get resumeSelectId() {
+    return `${this.baseId}-resume`;
+  }
+
+  get coverLetterSelectId() {
+    return `${this.baseId}-cover-letter`;
+  }
+
+  get appliedAtInputId() {
+    return `${this.baseId}-applied-at`;
+  }
+
+  get statusSelectId() {
+    return `${this.baseId}-status`;
+  }
+
+  get trackingUrlInputId() {
+    return `${this.baseId}-tracking-url`;
+  }
+
+  get notesTextareaId() {
+    return `${this.baseId}-notes`;
   }
 }

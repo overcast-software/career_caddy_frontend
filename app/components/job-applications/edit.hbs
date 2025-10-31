@@ -1,45 +1,65 @@
 <div class="builder-form">
   <div class="field">
-    <div class="field-label">Job Post</div>
-    <input type="text" value={{this.jobPostAtCompany}} disabled="true"/>
+    <label class="field-label" for={{this.jobPostInputId}}>Job Post</label>
+    <input
+      type="text"
+      id={{this.jobPostInputId}}
+      value={{this.jobPostAtCompany}}
+      disabled="true"
+    />
   </div>
 
   <div class="field">
-    <div class="field-label">Resume</div>
-    <select {{on "change" this.updateResume}}>
+    <label class="field-label" for={{this.resumeSelectId}}>Resume</label>
+    <select id={{this.resumeSelectId}} {{on "change" this.updateResume}}>
       <option value="" selected="selected">
         {{this.jobApplication.resume.name}}
       </option>
-    {{#each this.resumeOptions as |resume|}}
-            <option value={{resume.id}}>
-                {{resume.name}}
-            </option>
-    {{/each}}
-    </select>
-  </div>
-
-  <div class="field">
-    <div class="field-label">Cover Letter</div>
-    <select {{on "change" this.updateCoverLetter}}>
-      <option value={{this.jobApplication.coverLetter.id}} >
-        {{this.jobApplication.coverLetter.id}} - {{format-date this.jobApplication.coverLetter.createdAt}}
-      </option>
-      {{#each this.coverLetterOptions as |coverLetter|}}
-            <option value={{coverLetter.id}}>
-                {{coverLetter.id}} - {{format-date coverLetter.createdAt}}
-            </option>
+      {{#each this.resumeOptions as |resume|}}
+        <option value={{resume.id}}>
+          {{resume.name}}
+        </option>
       {{/each}}
     </select>
   </div>
 
   <div class="field">
-    <div class="field-label">Applied At</div>
-    <input type="date" value={{format-date @jobApplication.appliedAt}} {{on "change" (fn this.updateField "appliedAt")}}>
+    <label class="field-label" for={{this.coverLetterSelectId}}>Cover Letter</label>
+    <select
+      id={{this.coverLetterSelectId}}
+      {{on "change" this.updateCoverLetter}}
+    >
+      <option value={{this.jobApplication.coverLetter.id}}>
+        {{this.jobApplication.coverLetter.id}}
+        -
+        {{format-date this.jobApplication.coverLetter.createdAt}}
+      </option>
+      {{#each this.coverLetterOptions as |coverLetter|}}
+        <option value={{coverLetter.id}}>
+          {{coverLetter.id}}
+          -
+          {{format-date coverLetter.createdAt}}
+        </option>
+      {{/each}}
+    </select>
   </div>
 
   <div class="field">
-    <div class="field-label">Status</div>
-    <select {{on "change" (fn this.updateField "status")}}>
+    <label class="field-label" for={{this.appliedAtInputId}}>Applied At</label>
+    <input
+      type="date"
+      id={{this.appliedAtInputId}}
+      value={{format-date @jobApplication.appliedAt}}
+      {{on "change" (fn this.updateField "appliedAt")}}
+    />
+  </div>
+
+  <div class="field">
+    <label class="field-label" for={{this.statusSelectId}}>Status</label>
+    <select
+      id={{this.statusSelectId}}
+      {{on "change" (fn this.updateField "status")}}
+    >
       <option value="">{{@jobApplication.status}}</option>
       {{#each this.statusOptions as |status|}}
         <option value={{status}} selected={{this.isStatusSelected status}}>
@@ -50,17 +70,30 @@
   </div>
 
   <div class="field">
-    <div class="field-label">Tracking URL</div>
-    <input type="url" value={{@jobApplication.trackingUrl}} {{on "input" (fn this.updateField "trackingUrl")}}>
+    <label class="field-label" for={{this.trackingUrlInputId}}>Tracking URL</label>
+    <input
+      type="url"
+      id={{this.trackingUrlInputId}}
+      value={{@jobApplication.trackingUrl}}
+      {{on "input" (fn this.updateField "trackingUrl")}}
+    />
   </div>
 
   <div class="field">
-    <div class="field-label">Notes</div>
-    <textarea value={{@jobApplication.notes}} {{on "input" (fn this.updateField "notes")}}></textarea>
+    <label class="field-label" for={{this.notesTextareaId}}>Notes</label>
+    <textarea
+      id={{this.notesTextareaId}}
+      value={{@jobApplication.notes}}
+      {{on "input" (fn this.updateField "notes")}}
+    ></textarea>
   </div>
 
   <div class="form-actions">
     {{yield}}
   </div>
-  <button type="button" class="btn" {{on 'click' this.saveApplication}}>Save</button>
+  <button
+    type="button"
+    class="btn"
+    {{on "click" this.saveApplication}}
+  >Save</button>
 </div>

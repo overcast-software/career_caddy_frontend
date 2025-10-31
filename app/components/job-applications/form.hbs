@@ -1,54 +1,67 @@
 <div class="builder-form">
-  <div class="field">
-    <div class="field-label">User</div>
-   <input value={{this.currentUser.user.name}} disabled="true"/>
-  </div>
+  <label class="field">
+    <span class="field-label">User</span>
+    <input value={{this.currentUser.user.name}} disabled />
+  </label>
 
-  <div class="field">
-    <div class="field-label">Job Post</div>
-    <input type="text" value={{@jobPost.title}} disabled="true"/>
-  </div>
+  <label class="field">
+    <span class="field-label">Job Post</span>
+    <input type="text" value={{@jobPost.title}} disabled />
+  </label>
 
-  <div class="field">
-    <div class="field-label">Resume</div>
+  <label class="field">
+    <span class="field-label">Resume</span>
     <select {{on "change" this.updateResume}}>
-      <option value="" disabled={{if @data.application.resume "" "disabled"}} selected={{unless @data.application.resume "selected"}}>
+      <option
+        value=""
+        disabled={{if @data.application.resume "" "disabled"}}
+        selected={{unless @data.application.resume "selected"}}
+      >
         Select a resume...
       </option>
-    {{#each this.currentUser.user.resumes as |resume|}}
-            <option value={{resume.id}}>
-            {{resume.name}}
-            </option>
-    {{/each}}
+      {{#each this.currentUser.user.resumes as |resume|}}
+        <option value={{resume.id}}>
+          {{resume.name}}
+        </option>
+      {{/each}}
     </select>
-  </div>
+  </label>
 
-  <div class="field">
-    <div class="field-label">Cover Letter</div>
+  <label class="field">
+    <span class="field-label">Cover Letter</span>
     <select {{on "change" this.updateCoverLetter}}>
-      <option value="" disabled={{if @data.application.coverLetter "" "disabled"}} selected={{unless @data.application.coverLetter "selected"}}>
+      <option
+        value=""
+        disabled={{if @data.application.coverLetter "" "disabled"}}
+        selected={{unless @data.application.coverLetter "selected"}}
+      >
         Select a cover letter...
       </option>
       {{#each @data.coverLetters as |coverLetter|}}
         <option value={{coverLetter.id}}>
-          {{coverLetter.id}} {{coverLetter.company}}
+          {{coverLetter.id}}
+          {{coverLetter.company}}
         </option>
       {{/each}}
-    {{#each this.currentUser.user.coverLetters as |coverLetter|}}
-            <option value={{coverLetter.id}}>
-                {{coverLetter.createdAt}}
-            </option>
-    {{/each}}
+      {{#each this.currentUser.user.coverLetters as |coverLetter|}}
+        <option value={{coverLetter.id}}>
+          {{coverLetter.createdAt}}
+        </option>
+      {{/each}}
     </select>
-  </div>
+  </label>
 
-  <div class="field">
-    <div class="field-label">Applied At</div>
-    <input type="date" value={{format-date @data.application.appliedAt}} {{on "change" (fn this.updateField "appliedAt")}}>
-  </div>
+  <label class="field">
+    <span class="field-label">Applied At</span>
+    <input
+      type="date"
+      value={{format-date @data.application.appliedAt}}
+      {{on "change" (fn this.updateField "appliedAt")}}
+    />
+  </label>
 
-  <div class="field">
-    <div class="field-label">Status</div>
+  <label class="field">
+    <span class="field-label">Status</span>
     <select {{on "change" (fn this.updateField "status")}}>
       <option value="">Select status...</option>
       {{#each this.statuses as |status|}}
@@ -57,20 +70,31 @@
         </option>
       {{/each}}
     </select>
-  </div>
+  </label>
 
-  <div class="field">
-    <div class="field-label">Tracking URL</div>
-    <input type="url" value={{unless @data.application.trackingUrl @data.jobPost.link}} {{on "input" (fn this.updateField "trackingUrl")}}>
-  </div>
+  <label class="field">
+    <span class="field-label">Tracking URL</span>
+    <input
+      type="url"
+      value={{unless @data.application.trackingUrl @data.jobPost.link}}
+      {{on "input" (fn this.updateField "trackingUrl")}}
+    />
+  </label>
 
-  <div class="field">
-    <div class="field-label">Notes</div>
-    <textarea value={{@data.application.notes}} {{on "input" (fn this.updateField "notes")}}></textarea>
-  </div>
+  <label class="field">
+    <span class="field-label">Notes</span>
+    <textarea
+      value={{@data.application.notes}}
+      {{on "input" (fn this.updateField "notes")}}
+    ></textarea>
+  </label>
 
   <div class="form-actions">
     {{yield}}
   </div>
-  <button type="button" class="btn" {{on 'click' this.saveApplication}}>Save</button>
+  <button
+    type="button"
+    class="btn"
+    {{on "click" this.saveApplication}}
+  >Save</button>
 </div>

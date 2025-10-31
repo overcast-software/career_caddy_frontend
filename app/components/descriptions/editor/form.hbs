@@ -12,6 +12,7 @@
       class="desc-editor"
       rows="3"
       value={{this.draft}}
+      id={{concat (guid-for this) "-desc-input"}}
       {{on "input" this.onInput}}
       {{on "keydown" this.handleDescriptionKeydown}}
       {{on "blur" this.commitDescription}}

@@ -92,7 +92,7 @@ export default class ResumesEditController extends Controller {
     get isDirty() {
         return this.model?.isNew || this.model?.hasDirtyAttributes;
     }
-
+ 
     @action
     updateSummaryIndex(newIndex) {
         this.summaryIndex = newIndex;
