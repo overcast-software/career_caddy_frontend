@@ -10,17 +10,21 @@ module('Integration | Component | certifications/form', function (hooks) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`<Certifications::Form />`);
+    this.certification = {};
+    await render(
+      hbs`<Certifications::Form @certification={{this.certification}}/>`,
+    );
 
-    assert.dom().hasText('');
+    assert.dom().hasText('Issuer Title Content Issue Date');
 
     // Template block usage:
-    await render(hbs`
-      <Certifications::Form>
-        template block text
-      </Certifications::Form>
-    `);
+    // There is no yield
+    // await render(hbs`
+    //   <Certifications::Form>
+    //     template block text
+    //   </Certifications::Form>
+    // `);
 
-    assert.dom().hasText('template block text');
+    // assert.dom().hasText('Issuer Title Content Issue Date');
   });
 });

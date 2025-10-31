@@ -12,7 +12,7 @@ module('Integration | Component | certifications/item', function (hooks) {
 
     await render(hbs`<Certifications::Item />`);
 
-    assert.dom().hasText('');
+    assert.dom().hasText('--');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +21,6 @@ module('Integration | Component | certifications/item', function (hooks) {
       </Certifications::Item>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().hasText('template block text --');
   });
 });

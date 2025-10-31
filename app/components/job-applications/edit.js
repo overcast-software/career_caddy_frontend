@@ -90,6 +90,10 @@ export default class JobApplicationsEdit extends Component {
     return this.args.jobApplication?.status ?? '';
   }
 
+  isStatusSelected(status) {
+    return status === this.selectedStatus;
+  }
+
   get statuses() {
     return ['Applied', 'Interviewing', 'Rejected', 'Offer', 'Withdrawn'];
   }

@@ -1,16 +1,13 @@
 <form class="builder-form">
   <div class="field">
-    <label
-      class="field-label"
-      for={{concat (guid-for this) "-skill-input"}}
-    >Skills</label>
+    <label class="field-label">Skills</label>
     <div class="input-group">
       <textarea
         class="desc-editor"
         placeholder="Add a skill"
+        aria-label="add-skil"
         value={{if @skill @skill.text this.newSkill}}
         rows={{this.lineCount}}
-        id={{concat (guid-for this) "-skill-input"}}
         {{on "input" this.updateSkill}}
       ></textarea>
       <button

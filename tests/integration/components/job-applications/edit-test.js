@@ -2,25 +2,36 @@ import { module, test } from 'qunit';
 import { setupRenderingTest } from 'career-caddy-frontend/tests/helpers';
 import { render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
+import Service from '@ember/service';
 
 module('Integration | Component | job-applications/edit', function (hooks) {
   setupRenderingTest(hooks);
 
   test('it renders', async function (assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
+    class StubCurrentUser extends Service {
+      user = {
+        resumes: Promise.resolve([{ id: 'r2', name: 'Other Resume' }]),
+        coverLetters: [],
+      };
+    }
 
-    await render(hbs`<JobApplications::Edit />`);
+    this.owner.register('service:current-user', StubCurrentUser);
 
-    assert.dom().hasText('');
+    this.set('jobApplication', {
+      resume: { id: 'r1', name: 'Primary Resume' },
+      coverLetter: { id: 'cl1', createdAt: new Date() },
+      status: '',
+      trackingUrl: '',
+      notes: '',
+      belongsTo() {
+        return { value() {} };
+      },
+    });
 
-    // Template block usage:
-    await render(hbs`
-      <JobApplications::Edit>
-        template block text
-      </JobApplications::Edit>
-    `);
+    await render(
+      hbs`<JobApplications::Edit @jobApplication={{this.jobApplication}}/>`,
+    );
 
-    assert.dom().hasText('template block text');
+    assert.dom().hasText('Job Post Resume');
   });
 });

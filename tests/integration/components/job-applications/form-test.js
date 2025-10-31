@@ -10,9 +10,10 @@ module('Integration | Component | job-applications/form', function (hooks) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
+    this.set("errorMessage", null)
     await render(hbs`<JobApplications::Form />`);
 
-    assert.dom().hasText('');
+    assert.dom().hasText('User Job Post Resume Select a resume... Cover Letter Select a cover letter... Applied At Status Select status... Tracking URL Notes Save');
 
     // Template block usage:
     await render(hbs`

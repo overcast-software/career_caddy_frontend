@@ -12,15 +12,6 @@ module('Integration | Component | descriptions/editor/item', function (hooks) {
 
     await render(hbs`<Descriptions::Editor::Item />`);
 
-    assert.dom().hasText('');
-
-    // Template block usage:
-    await render(hbs`
-      <Descriptions::Editor::Item>
-        template block text
-      </Descriptions::Editor::Item>
-    `);
-
-    assert.dom().hasText('template block text');
+    assert.dom().hasText('🗑');
   });
 });
