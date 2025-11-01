@@ -12,7 +12,9 @@ module('Integration | Component | experiences/list', function (hooks) {
 
     await render(hbs`<Experiences::List />`);
 
-    assert.dom().hasText('No experiences yet. Use "+ Add Experience" to create one.');
+    assert
+      .dom()
+      .hasText('No experiences yet. Use "+ Add Experience" to create one.');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +23,8 @@ module('Integration | Component | experiences/list', function (hooks) {
       </Experiences::List>
     `);
 
-    assert.dom().hasText('No experiences yet. Use "+ Add Experience" to create one.');
+    assert
+      .dom()
+      .hasText('No experiences yet. Use "+ Add Experience" to create one.');
   });
 });

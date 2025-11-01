@@ -13,11 +13,7 @@
     <label class="field-label" for={{this.resumeSelectId}}>Resume</label>
     <select id={{this.resumeSelectId}} {{on "change" this.updateResume}}>
       <option value="" selected="selected">
-        {{#if this.jobApplication.resume}}
-          {{this.jobApplication.resume.name}}
-        {{else}}
-          Select a resume
-        {{/if}}
+        {{this.jobApplication.resume.name}}
       </option>
       {{#each this.resumeOptions as |resume|}}
         <option value={{resume.id}}>
@@ -33,14 +29,10 @@
       id={{this.coverLetterSelectId}}
       {{on "change" this.updateCoverLetter}}
     >
-      <option value="{{if this.jobApplication.coverLetter this.jobApplication.coverLetter.id ''}}">
-        {{#if this.jobApplication.coverLetter}}
-          {{this.jobApplication.coverLetter.id}}
-          -
-          {{format-date this.jobApplication.coverLetter.createdAt}}
-        {{else}}
-          Select a cover letter
-        {{/if}}
+      <option value={{this.jobApplication.coverLetter.id}}>
+        {{this.jobApplication.coverLetter.id}}
+        -
+        {{format-date this.jobApplication.coverLetter.createdAt}}
       </option>
       {{#each this.coverLetterOptions as |coverLetter|}}
         <option value={{coverLetter.id}}>
@@ -89,6 +81,7 @@
 
   <div class="field">
     <label class="field-label" for={{this.notesTextareaId}}>Notes</label>
+
     <textarea
       id={{this.notesTextareaId}}
       value={{@jobApplication.notes}}

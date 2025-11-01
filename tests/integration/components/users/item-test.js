@@ -17,20 +17,15 @@ module('Integration | Component | users/item', function (hooks) {
       email: 'john@example.com',
     });
 
-    await render(hbs`<Users::Item 
-      @user={{this.user}}
-      @onEdit={{this.noop}}
-      @onDelete={{this.noop}}
-      @onPromote={{this.noop}}
-    />`);
+    await render(hbs`<Users::Item @user={{this.user}} />`);
 
-    assert.dom().includesText('John');
-    assert.dom().includesText('Doe');
-    assert.dom().includesText('john@example.com');
+    assert.dom('[data-test-user-first-name]').hasText('John');
+    assert.dom('[data-test-user-last-name]').hasText('Doe');
+    assert.dom('[data-test-user-email]').hasText('john@example.com');
 
     // Template block usage:
     await render(hbs`
-      <Users::Item @user={{this.user}} @onEdit={{this.noop}} @onDelete={{this.noop}} @onPromote={{this.noop}}>
+      <Users::Item @user={{this.user}} >
         template block text
       </Users::Item>
     `);

@@ -1,5 +1,7 @@
+<div class="user-info">
+  <span data-test-user-first-name>{{@user.firstName}}</span>
+  <span data-test-user-last-name>{{@user.lastName}}</span>
+  <span data-test-user-email>{{@user.email}}</span>
+</div>
+
 {{yield}}
-<button type="button" {{on "click" this.previous}}>Previous</button>
-<button type="button" {{on "click" this.next}}>Next</button>
-<button type="button" {{on "click" this.score}}>Score</button>
-<button type="button" {{on "click" this.apply}}>Apply</button>
