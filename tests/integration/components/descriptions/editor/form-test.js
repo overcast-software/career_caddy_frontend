@@ -12,15 +12,8 @@ module('Integration | Component | descriptions/editor/form', function (hooks) {
 
     await render(hbs`<Descriptions::Editor::Form />`);
 
-    assert.dom().hasText('');
+    assert.dom().hasText('🗑 Save');
 
     // Template block usage:
-    await render(hbs`
-      <Descriptions::Editor::Form>
-        template block text
-      </Descriptions::Editor::Form>
-    `);
-
-    assert.dom().hasText('template block text');
   });
 });

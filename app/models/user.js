@@ -12,6 +12,8 @@ export default class UserModel extends Model {
   @hasMany('score', { async: true, inverse: 'user' }) scores;
   @hasMany('cover-letter', { async: false, inverse: 'user' }) coverLetters;
   @hasMany('application', { async: true, inverse: 'user' }) applications;
-  @hasMany('summary',{ async: true, inverse: 'user' } ) summaries;
-  get name(){ return `${this.firstName} ${this.lastName}` }
+  @hasMany('summary', { async: true, inverse: 'user' }) summaries;
+  get name() {
+    return `${this.firstName} ${this.lastName}`;
+  }
 }

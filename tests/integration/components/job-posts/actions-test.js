@@ -12,7 +12,7 @@ module('Integration | Component | job-posts/actions', function (hooks) {
 
     await render(hbs`<JobPosts::Actions />`);
 
-    assert.dom().hasText('');
+    assert.dom().includesText('Select a resume');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +21,6 @@ module('Integration | Component | job-posts/actions', function (hooks) {
       </JobPosts::Actions>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('template block text');
   });
 });

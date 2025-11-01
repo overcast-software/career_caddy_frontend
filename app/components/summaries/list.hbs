@@ -1,12 +1,12 @@
-  <Panel::Navigation @left={{this.selectPrevious}} @right={{this.selectNext}} />
-  <div class="summaries-carousel">
-    <div class="summaries-viewport">
-      <div class="summaries-track">
-        {{#each @summaries as |summary|}}
-          {{#if summary.active}}
-            <Summary::Form @summary={{summary}} />
-          {{/if}}
-        {{/each}}
-      </div>
+<Panel::Navigation @left={{this.selectPrevious}} @right={{this.selectNext}} />
+<div class="summaries-carousel">
+  <div class="summaries-viewport">
+    <div class="summaries-track">
+      {{#each @summaries as |summary|}}
+        {{#if summary.active}}
+          <Summary::Form @summary={{summary}} />
+        {{/if}}
+      {{/each}}
     </div>
   </div>
+</div>

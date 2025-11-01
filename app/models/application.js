@@ -8,5 +8,6 @@ export default class ApplicationModel extends Model {
   @belongsTo('user', { async: true, inverse: 'applications' }) user;
   @belongsTo('job-post', { async: true, inverse: 'applications' }) jobPost;
   @belongsTo('resume', { async: true, inverse: 'applications' }) resume;
-  @belongsTo('cover-letter', { async: true, inverse: 'application' }) coverLetter;
+  @belongsTo('cover-letter', { async: true, inverse: 'application' })
+  coverLetter;
 }

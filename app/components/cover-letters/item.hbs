@@ -1,19 +1,30 @@
 <article class="panel-card">
-    <h3 class="panel-title">Cover Letter</h3>
-    <p class="text-muted">for resume: {{@coverLetter.resume.name}}</p>
-    <p class="text-muted">
-        for jobpost: <LinkTo @route="job-posts.show" @model={{@coverLetter.jobPost}}>{{@coverLetter.jobPost.title}}</LinkTo>
-        at <LinkTo @route="companies.show" @model={{@coverLetter.jobPost.company}}>{{this.jobPost.company.name}}</LinkTo>
-    </p>
-    <div class="panel-actions">
-      <button type="button" {{on "click" this.exportToDocx}} disabled={{this.isExporting}}>
-        {{if this.isExporting "Exporting…" "Export to DOCX"}}
-      </button>
+  <h3 class="panel-title">Cover Letter</h3>
+  <p class="text-muted">for resume: {{@coverLetter.resume.name}}</p>
+  <p class="text-muted">
+    for jobpost:
+    <LinkTo
+      @route="job-posts.show"
+      @model={{@coverLetter.jobPost}}
+    >{{@coverLetter.jobPost.title}}</LinkTo>
+    at
+    <LinkTo
+      @route="companies.show"
+      @model={{@coverLetter.jobPost.company}}
+    >{{this.jobPost.company.name}}</LinkTo>
+  </p>
+  <div class="panel-actions">
+    <button
+      type="button"
+      {{on "click" this.exportToDocx}}
+      disabled={{this.isExporting}}
+    >
+      {{if this.isExporting "Exporting…" "Export to DOCX"}}
+    </button>
+  </div>
+  <div class="panel-body">
+    <div class="rich-text pre-wrap">
+      {{@coverLetter.content}}
     </div>
-    <div class="panel-body">
-        <div class="rich-text pre-wrap">
-            {{@coverLetter.content}}
-        </div>
-    </div>
+  </div>
 </article>
-{{yield}}

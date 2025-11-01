@@ -6,9 +6,9 @@ export default class ResumesNewRoute extends Route {
 
   async model() {
     // Load source and eagerly load its relationships
-    await this.store.findAll('company')
+    await this.store.findAll('company');
     // Create UNSAVED cloned resume
-      const newResume = this.store.createRecord()
+    const newResume = this.store.createRecord('resume');
 
     return newResume; // UNSAVED until user explicitly saves
   }

@@ -20,7 +20,6 @@ export default class JobPostsFormComponent extends Component {
     return this.store.peekAll('company');
   }
 
-
   @action
   onModeChange(event) {
     this.form_toggle = event.target.value === 'manual';
@@ -31,14 +30,14 @@ export default class JobPostsFormComponent extends Component {
     this.args.jobPost[field] = event.target.value;
   }
   @action
-  updateUrl(event){
-    this.url = event.target.value
+  updateUrl(event) {
+    this.url = event.target.value;
   }
 
   @action
   async submitEdit(event) {
     event.preventDefault();
     this.errorMessage = null;
-    this.args.jobPost.save()
+    this.args.jobPost.save();
   }
 }

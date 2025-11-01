@@ -2,18 +2,18 @@ import Route from '@ember/routing/route';
 import { service } from '@ember/service';
 
 export default class JobPostsShowJobApplicationNewRoute extends Route {
-    @service store;
-    async model(){
+  @service store;
 
-        const { job_post_id } = this.paramsFor('job-posts.show');
-        const applicationPromise = this.store.createRecord('application', { appliedAt: new Date(), status: 'applied' });
-        const jobPostPromise = this.store.findRecord('job-post', job_post_id);
+  @service currentUser;
+  async model() {
+    const { job_post_id } = this.paramsFor('job-posts.show');
+    const jobPost = await this.store.peekRecord('job-post', job_post_id);
+    const jobApplication = await this.store.createRecord('application', {
+      appliedAt: new Date(),
+      status: 'applied',
+    });
 
-        return Promise.all([applicationPromise, jobPostPromise]).then(
-            ([application, jobPost]) => ({
-                application,
-                jobPost
-            })
-        );
-    }
+    jobApplication.jobPost = jobPost;
+    return jobApplication;
+  }
 }

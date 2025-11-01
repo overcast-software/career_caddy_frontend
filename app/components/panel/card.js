@@ -21,7 +21,7 @@ export default class PanelCardComponent extends Component {
   handleToolbarClick(event) {
     const button = event.target.closest('[data-dir]');
     if (!button) return;
-    
+
     event.preventDefault();
     const dir = button.dataset.dir;
     this.triggerDirection(dir, event.currentTarget);
@@ -33,9 +33,9 @@ export default class PanelCardComponent extends Component {
       ArrowUp: 'up',
       ArrowDown: 'down',
       ArrowLeft: 'left',
-      ArrowRight: 'right'
+      ArrowRight: 'right',
     };
-    
+
     if (keyMap[event.key]) {
       event.preventDefault();
       this.triggerDirection(keyMap[event.key], event.currentTarget);
@@ -47,10 +47,12 @@ export default class PanelCardComponent extends Component {
     if (typeof this.args.onDirection === 'function') {
       this.args.onDirection(dir);
     }
-    
-    anchorEl.dispatchEvent(new CustomEvent('direction', { 
-      detail: { dir }, 
-      bubbles: true 
-    }));
+
+    anchorEl.dispatchEvent(
+      new CustomEvent('direction', {
+        detail: { dir },
+        bubbles: true,
+      }),
+    );
   }
 }

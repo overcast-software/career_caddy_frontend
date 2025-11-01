@@ -11,39 +11,70 @@
   <form class="builder-form two-col" {{on "submit" this.save}}>
     <label class="field">
       <span class="field-label">First name</span>
-      <input type="text" value={{this.model.firstName}} {{on "input" this.updateFirstName}}  />
+      <input
+        type="text"
+        value={{this.model.firstName}}
+        {{on "input" this.updateFirstName}}
+      />
     </label>
 
     <label class="field">
       <span class="field-label">Last name</span>
-      <input type="text" value={{this.model.lastName}} {{on "input" this.updateLastName}}  />
+      <input
+        type="text"
+        value={{this.model.lastName}}
+        {{on "input" this.updateLastName}}
+      />
     </label>
 
     <label class="field">
       <span class="field-label">Email</span>
-      <input type="email" value={{this.model.email}} {{on "input" this.updateEmail}}  />
+      <input
+        type="email"
+        value={{this.model.email}}
+        {{on "input" this.updateEmail}}
+      />
     </label>
 
     <label class="field">
       <span class="field-label">Phone</span>
-      <input type="tel" value={{this.model.phone}} {{on "input" this.updatePhone}} />
+      <input
+        type="tel"
+        value={{this.model.phone}}
+        {{on "input" this.updatePhone}}
+      />
     </label>
 
     <label class="field">
       <span class="field-label">Username</span>
-      <input type="text" value={{this.model.username}} {{on "input" this.updateUsername}} autocomplete="username" />
+      <input
+        type="text"
+        value={{this.model.username}}
+        {{on "input" this.updateUsername}}
+        autocomplete="username"
+      />
     </label>
 
     <label class="field">
       <span class="field-label">Password</span>
-      <input type="password" value={{this.model.password}} {{on "input" this.updatePassword}} autocomplete="new-password" />
+      <input
+        type="password"
+        value={{this.model.password}}
+        {{on "input" this.updatePassword}}
+        autocomplete="new-password"
+      />
     </label>
 
     <div class="form-actions">
       <button type="submit" class="btn primary lg" disabled={{this.saving}}>
         {{if this.saving "Setting up..." "Save"}}
       </button>
-      <button type="button" class="btn lg" {{on "click" this.cancel}} disabled={{this.saving}}>
+      <button
+        type="button"
+        class="btn lg"
+        {{on "click" this.cancel}}
+        disabled={{this.saving}}
+      >
         Cancel
       </button>
     </div>

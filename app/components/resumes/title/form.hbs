@@ -1,15 +1,30 @@
 <form class="builder-form">
-    <label class="field">
-        <span class="field-label">Title</span>
-        <input type="text" name="Title" value={{@resume.title}} {{on "input" this.updateTitle}}/>
-    </label>
-    <label class="field">
-        <span class="field-label">Name</span>
-        <input type="text" name="Title" value={{@resume.name}} {{on "input" this.updateName}}/>
-    </label>
-    <label class="field">
-        <span class="field-label">Notes</span>
-        <input type="text" name="Title" value={{@resume.notes}} {{on "input" this.updateNotes}}/>
-    </label>
+  <label class="field">
+    <span class="field-label">Title</span>
+    <input
+      type="text"
+      name="Title"
+      value={{@resume.title}}
+      {{on "input" this.updateTitle}}
+    />
+  </label>
+  <label class="field">
+    <span class="field-label">Name</span>
+    <input
+      type="text"
+      name="Title"
+      value={{@resume.name}}
+      {{on "input" this.updateName}}
+    />
+  </label>
+  <label class="field">
+    <span class="field-label">Notes</span>
+    <input
+      type="text"
+      name="Title"
+      value={{@resume.notes}}
+      {{on "input" this.updateNotes}}
+    />
+  </label>
 </form>
 {{yield}}

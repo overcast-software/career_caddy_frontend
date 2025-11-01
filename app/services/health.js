@@ -30,7 +30,7 @@ export default class HealthService extends Service {
       }
 
       const response = await fetch(url, {
-        credentials: 'same-origin'
+        credentials: 'same-origin',
       });
 
       if (!response.ok) {

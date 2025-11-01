@@ -1,34 +1,38 @@
 {{yield}}
-    <li class="desc-item">
-        <article class="summary-item">
-            <header class="summary-header">
-            {{#if @summary.jobPost}}
-                <span class="muted">Job:</span>
-                <LinkTo @route="job-posts.show" @model={{@summary.jobPost}}>
-                {{@summary.jobPost.title}}
-                </LinkTo>
-            {{/if}}
+<li class="desc-item">
+  <article class="summary-item">
+    <header class="summary-header">
+      {{#if @summary.jobPost}}
+        <span class="muted">Job:</span>
+        <LinkTo @route="job-posts.show" @model={{@summary.jobPost}}>
+          {{@summary.jobPost.title}}
+        </LinkTo>
+      {{/if}}
 
-            {{#if @summary.resume}}
-                <span class="muted">Resume:</span>
-                <LinkTo @route="resumes.show" @model={{@summary.resume}}>
-                    {{#if @summary.resume.name}}
-                        {{@summary.resume.name}}
-                    {{else}}
-                        {{@summary.resume.title}}
-                    {{/if}}
-                </LinkTo>
-            {{/if}}
-            </header>
+      {{#if @summary.resume}}
+        <span class="muted">Resume:</span>
+        <LinkTo @route="resumes.show" @model={{@summary.resume}}>
+          {{#if @summary.resume.name}}
+            {{@summary.resume.name}}
+          {{else}}
+            {{@summary.resume.title}}
+          {{/if}}
+        </LinkTo>
+      {{/if}}
+    </header>
 
-            {{#if @summary.content}}
-            <p class="summary-content clamp-4">
-                {{@summary.content}}
-            </p>
-            {{else}}
-            <p class="summary-content clamp-4">
-                <span class="spinner" role="status" aria-label="Loading summary content"></span>
-            </p>
-            {{/if}}
-        </article>
-    </li>
+    {{#if @summary.content}}
+      <p class="summary-content clamp-4">
+        {{@summary.content}}
+      </p>
+    {{else}}
+      <p class="summary-content clamp-4">
+        <span
+          class="spinner"
+          role="status"
+          aria-label="Loading summary content"
+        ></span>
+      </p>
+    {{/if}}
+  </article>
+</li>

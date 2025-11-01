@@ -1,5 +1,5 @@
 {{yield}}
-<div class="profile" style="text-align: center;">
+<div class="profile text-center">
   <div class="name">{{@resume.user.name}}</div>
   <div class="title">{{@resume.title}}</div>
   <div class="email">{{@resume.user.email}}</div>
@@ -7,29 +7,31 @@
 
 <section>
   <h2>Summary</h2>
-  <hr/>
+  <hr />
   <div class="summary">{{@resume.activeSummary.content}}</div>
 </section>
 <section>
   <h2>Skills</h2>
-  <hr/>
-{{#if @resume.activeSkill}}
+  <hr />
+  {{#if @resume.activeSkill}}
     <div class="skills-block pre-wrap">{{ltrim @resume.activeSkill.text}}</div>
-{{/if}}
+  {{/if}}
 </section>
 
 <section>
   <h2>Experience</h2>
-  <hr/>
+  <hr />
   {{#each @resume.experiences as |exp|}}
     <article class="experience">
       <div class="job-header">
         <div class="job-title">
           {{exp.title}}
-          <span class="job-dates" style="float: right;">
+          <span class="job-dates">
             {{#if exp.startDate}}
               {{#if exp.endDate}}
-                {{format-date exp.startDate "MM.YYYY"}} - {{format-date exp.endDate "MM.YYYY"}}
+                {{format-date exp.startDate "MM.YYYY"}}
+                -
+                {{format-date exp.endDate "MM.YYYY"}}
               {{else}}
                 {{format-date exp.startDate "MM.YYYY"}}
               {{/if}}
@@ -60,10 +62,9 @@
   {{/each}}
 </section>
 
-
 <section>
   <h2>Education</h2>
-  <hr/>
+  <hr />
   {{#each @resume.educations as |education|}}
     <Educations::Item @education={{education}} />
   {{/each}}
@@ -71,13 +72,12 @@
 
 <section>
   <h2>Certifications</h2>
-  <hr/>
+  <hr />
   {{#each @resume.certifications as |certification|}}
     <Certifications::Item @certification={{certification}} />
   {{/each}}
 </section>
 <ul>
-    <li>action 1</li>
-    <li>action 2</li>
+  <li>action 1</li>
+  <li>action 2</li>
 </ul>
-{{outlet}}

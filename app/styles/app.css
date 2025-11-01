@@ -59,6 +59,10 @@
   resize: vertical;
 }
 
+.builder-form .field .certification-content-textarea {
+  resize: none;
+}
+
 .builder-form .field input[disabled] {
   color: var(--muted);
   background: #f8f8f8;
@@ -68,6 +72,19 @@
   font-size: 0.9rem;
   color: var(--muted);
   letter-spacing: 0.02em;
+}
+
+.builder-form .field-row {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.builder-form .field-row .field {
+  flex: 1;
+}
+
+.present-indicator {
+  color: #666;
 }
 
 .wysiwyg {
@@ -109,6 +126,10 @@
   color: var(--text);
 }
 
+.experience .job-title .job-dates {
+  float: right;
+}
+
 .experience .job-meta {
   display: flex;
   clear: both;
@@ -127,6 +148,11 @@
   list-style: disc;
   margin: 0 0 var(--space-4) 1.25rem;
   padding: 0;
+}
+
+.desc-edit {
+  width: 100%;
+  resize: none;
 }
 
 .desc-list .desc-item {
@@ -167,7 +193,9 @@
   user-select: none;
 }
 
-.rich-text p { margin: 0 0 var(--space-2); }
+.rich-text p {
+  margin: 0 0 var(--space-2);
+}
 
 .actions {
   display: flex;
@@ -187,14 +215,20 @@
   font: inherit;
   cursor: pointer;
 }
-.btn:hover { background: #f1f1f1; }
+
+.btn:hover {
+  background: #f1f1f1;
+}
 
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
-.btn.primary:hover { filter: brightness(0.95); }
+
+.btn.primary:hover {
+  filter: brightness(0.95);
+}
 
 .btn.danger {
   background: #fff5f5;
@@ -212,7 +246,10 @@
   border: none;
   color: var(--accent);
 }
-.btn.btn-link.danger { color: var(--danger); }
+
+.btn.btn-link.danger {
+  color: var(--danger);
+}
 
 .descriptions {
   margin-top: var(--space-4);
@@ -269,10 +306,20 @@
   }
 }
 
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
 /* Builder page full-width */
 .builder-page .container {
   max-width: none;
   width: 100%;
+}
+
+.testimonial-card .name {
+  font-weight: 600;
 }
 
 /* Center the profile block in preview */
@@ -297,9 +344,6 @@
   margin-left: 1.25rem;
 }
 
-/* Collapsible panel pattern */
-.collapsible {}
-
 .collapsible .collapsible-head {
   display: flex;
   align-items: center;
@@ -318,17 +362,22 @@
   grid-template-rows: 0fr;
 }
 
+.input-group > * + * {
+  margin-left: -1px;
+}
+
 .collapsible .collapsible-body > * {
   min-height: 0; /* allow grid row to collapse */
 }
 
 /* Resume landing page styles */
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 var(--space-6);
+.nowrap {
+  white-space: nowrap;
 }
-.nowrap { white-space: nowrap; }
+
+.text-center {
+  text-align: center;
+}
 
 .hero {
   padding: 72px 0 48px;
@@ -359,7 +408,10 @@
   font-size: 1.05rem;
   margin: 0 0 var(--space-4);
 }
-.hero-cta { margin-bottom: var(--space-4); }
+
+.hero-cta {
+  margin-bottom: var(--space-4);
+}
 
 .hero-features {
   display: flex;
@@ -501,10 +553,6 @@
   font-weight: 700;
 }
 
-.testimonial-card .name {
-  font-weight: 600;
-}
-
 .testimonial-card .role {
   color: var(--muted);
   font-size: 0.95rem;
@@ -530,7 +578,7 @@
 }
 
 .landing-page {
-  background-image: url('/images/ian_finnis.webp');
+  background-image: url("/images/ian_finnis.webp");
   background-size: cover;
   background-position: top;
   background-repeat: no-repeat;
@@ -554,10 +602,22 @@
 }
 
 @media (width <= 900px) {
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .feature-grid { grid-template-columns: repeat(2, 1fr); }
-  .testimonial-grid { grid-template-columns: 1fr; }
-  .hero-features { flex-wrap: wrap; gap: var(--space-3); }
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .testimonial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-features {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
 }
 
 /* Builder side-by-side layout */
@@ -569,17 +629,22 @@
   align-items: start;
 }
 
-.builder-page .builder-layout > .editor-panel,
-.builder-page .builder-layout > .preview-panel {
-  min-width: 0;
-}
-
 .editor-panel {
   position: sticky;
   top: 16px;
   display: grid;
   gap: var(--space-4);
   align-self: start;
+}
+
+.preview-panel {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.builder-page .builder-layout > .editor-panel,
+.builder-page .builder-layout > .preview-panel {
+  min-width: 0;
 }
 
 .panel-card {
@@ -605,11 +670,6 @@
   justify-content: flex-end;
 }
 
-.preview-panel {
-  display: grid;
-  gap: var(--space-4);
-}
-
 .preview-actions {
   display: flex;
   align-items: center;
@@ -622,14 +682,19 @@
   border-radius: var(--radius);
   padding: var(--space-5);
 }
-.muted { color: var(--muted); }
+
+.muted {
+  color: var(--muted);
+}
 
 .btn.small {
   padding: 6px 10px;
   font-size: 0.9rem;
 }
 
-.pre-wrap { white-space: pre-wrap; }
+.pre-wrap {
+  white-space: pre-wrap;
+}
 
 /* Panel card toolbar styles */
 .panel-card .toolbar {
@@ -762,12 +827,6 @@
   width: 100%;
 }
 
-/* Collapse borders between adjacent controls */
-.input-group > * + * {
-  margin-left: -1px;
-}
-
-/* Middle control fills and has square edges to touch buttons */
 .input-group .desc-editor {
   flex: 1;
   border-radius: 0;

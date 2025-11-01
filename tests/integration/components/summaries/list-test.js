@@ -12,15 +12,9 @@ module('Integration | Component | summaries/list', function (hooks) {
 
     await render(hbs`<Summaries::List />`);
 
-    assert.dom().hasText('');
-
-    // Template block usage:
-    await render(hbs`
-      <Summaries::List>
-        template block text
-      </Summaries::List>
-    `);
-
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('←');
+    assert.dom().includesText('→');
+    assert.dom().includesText('Down');
+    assert.dom().includesText('Up');
   });
 });

@@ -12,8 +12,8 @@
       class="desc-editor"
       rows="3"
       value={{this.draft}}
+      aria-label="description"
       {{on "input" this.onInput}}
-      {{on "keydown" this.handleDescriptionKeydown}}
       {{on "blur" this.commitDescription}}
     ></textarea>
 

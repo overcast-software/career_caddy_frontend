@@ -5,11 +5,16 @@
       <textarea
         class="desc-editor"
         placeholder="Add a skill"
+        aria-label="add-skil"
         value={{if @skill @skill.text this.newSkill}}
         rows={{this.lineCount}}
         {{on "input" this.updateSkill}}
       ></textarea>
-      <button type="button" class="btn primary" {{on "click" this.addSkill}}>Add</button>
+      <button
+        type="button"
+        class="btn primary"
+        {{on "click" this.addSkill}}
+      >Add</button>
     </div>
   </div>
 </form>

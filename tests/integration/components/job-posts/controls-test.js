@@ -12,7 +12,9 @@ module('Integration | Component | job-posts/controls', function (hooks) {
 
     await render(hbs`<JobPosts::Controls />`);
 
-    assert.dom().hasText('');
+    assert.dom().includesText('Search:');
+    assert.dom().includesText('Compact view');
+    assert.dom().includesText('Create new');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +23,6 @@ module('Integration | Component | job-posts/controls', function (hooks) {
       </JobPosts::Controls>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('template block text');
   });
 });

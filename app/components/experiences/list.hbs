@@ -1,6 +1,7 @@
 {{#if @experiences.length}}
   {{#each @experiences as |exp|}}
     <Experiences::Editor::Form @experience={{exp}} />
+    {{yield}}
   {{/each}}
 {{else}}
   <p class="muted">No experiences yet. Use "+ Add Experience" to create one.</p>

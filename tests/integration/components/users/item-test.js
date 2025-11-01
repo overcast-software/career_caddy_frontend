@@ -10,17 +10,26 @@ module('Integration | Component | users/item', function (hooks) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`<Users::Item />`);
+    this.set('noop', () => {});
+    this.set('user', {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@example.com',
+    });
 
-    assert.dom().hasText('');
+    await render(hbs`<Users::Item @user={{this.user}} />`);
+
+    assert.dom('[data-test-user-first-name]').hasText('John');
+    assert.dom('[data-test-user-last-name]').hasText('Doe');
+    assert.dom('[data-test-user-email]').hasText('john@example.com');
 
     // Template block usage:
     await render(hbs`
-      <Users::Item>
+      <Users::Item @user={{this.user}} >
         template block text
       </Users::Item>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('template block text');
   });
 });

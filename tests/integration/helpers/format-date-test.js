@@ -10,7 +10,7 @@ module('Integration | Helper | format-date', function (hooks) {
   test('it renders', async function (assert) {
     this.set('inputValue', '1234');
 
-    await render(hbs`{{format-date this.inputValue}}`);
+    await render(hbs`{{format-date this.inputValue 'YYYY'}}`);
 
     assert.dom().hasText('1234');
   });

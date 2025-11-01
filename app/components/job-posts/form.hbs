@@ -1,49 +1,49 @@
-  {{#if this.errorMessage}}
-    <p class="error">{{this.errorMessage}}</p>
-  {{/if}}
+{{#if this.errorMessage}}
+  <p class="error">{{this.errorMessage}}</p>
+{{/if}}
 
+<div class="field">
+  <LinkTo @route="job-posts.scrape">scrape</LinkTo>
+</div>
+
+<form class="builder-form" {{on "submit" this.submitEdit}}>
   <div class="field">
-      <LinkTo @route='job-posts.scrape'>scrape</LinkTo>
+    <label class="field-label" for="company-autocomplete">Company</label>
+    <input id="company" type="text" value={{@jobPost.company.name}} />
   </div>
 
-    <form class="builder-form" {{on "submit" this.submitEdit}}>
-      <div class="field">
-        <label class="field-label" for="company-autocomplete">Company</label>
-        <input id="company" type="text" value={{@jobPost.company.name}}/>
-      </div>
+  <div class="field">
+    <label class="field-label" for="title">Title</label>
+    <input
+      id="title"
+      type="text"
+      value={{@jobPost.title}}
+      {{on "input" (fn this.updateField "title")}}
+      required
+    />
+  </div>
+  <div class="field">
+    <label class="field-label" for="description">Description</label>
+    <textarea
+      id="description"
+      value={{@jobPost.description}}
+      {{on "input" (fn this.updateField "description")}}
+      rows="8"
+    ></textarea>
+  </div>
 
-      <div class="field">
-        <label class="field-label" for="title">Title</label>
-        <input
-          id="title"
-          type="text"
-          value={{@jobPost.title}}
-          {{on "input" (fn this.updateField "title")}}
-          required
-        />
-      </div>
-      <div class="field">
-        <label class="field-label" for="description">Description</label>
-        <textarea
-          id="description"
-          value={{@jobPost.description}}
-          {{on "input" (fn this.updateField "description")}}
-          rows="8"
-        ></textarea>
-      </div>
+  <div class="field">
+    <label class="field-label" for="url">url</label>
+    <input
+      id="url"
+      type="text"
+      value={{@jobPost.link}}
+      {{on "input" (fn this.updateField "link")}}
+      required
+    />
+  </div>
 
-      <div class="field">
-        <label class="field-label" for="url">url</label>
-        <input
-          id="title"
-          type="text"
-          value={{@jobPost.link}}
-          {{on "input" (fn this.updateField "link")}}
-          required
-        />
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn primary">Save</button>
-      </div>
-    </form>
+  <div class="form-actions">
+    <button type="submit" class="btn primary">Save</button>
+  </div>
+</form>

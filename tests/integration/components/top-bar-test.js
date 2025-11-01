@@ -12,15 +12,11 @@ module('Integration | Component | top-bar', function (hooks) {
 
     await render(hbs`<TopBar />`);
 
-    assert.dom().hasText('');
-
-    // Template block usage:
-    await render(hbs`
-      <TopBar>
-        template block text
-      </TopBar>
-    `);
-
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('Career Caddy');
+    assert.dom().includesText('Job posts');
+    assert.dom().includesText('About');
+    assert.dom().includesText('Docs');
+    assert.dom().includesText('GitHub');
+    assert.dom().includesText('Login');
   });
 });
