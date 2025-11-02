@@ -98,21 +98,21 @@ jobs:
           port: ${{ secrets.DEPLOY_SSH_PORT != '' && secrets.DEPLOY_SSH_PORT || '22' }}
           script: |
             if [ -n "${{ secrets.GHCR_PULL_USER }}" ] && [ -n "${{ secrets.GHCR_PULL_TOKEN }}" ]; then
-              docker login ghcr.io -u ${{ secrets.GHCR_PULL_USER }} -p ${{ secrets.GHCR_PULL_TOKEN }}
+              echo "${{ secrets.GHCR_PULL_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_PULL_USER }}" --password-stdin
             else
               echo "Skipping GHCR login - credentials not provided"
             fi
             echo "IMAGE_REPO=${{ env.IMAGE_REPO }}" > ${{ secrets.DEPLOY_APP_DIR }}/.env
             echo "IMAGE_TAG=${{ github.sha }}" >> ${{ secrets.DEPLOY_APP_DIR }}/.env
             cd ${{ secrets.DEPLOY_APP_DIR }}
-            if command -v "docker compose" >/dev/null 2>&1; then
+            if docker compose version >/dev/null 2>&1; then
               docker compose pull
               docker compose up -d --remove-orphans
-            elif command -v "docker-compose" >/dev/null 2>&1; then
+            elif command -v docker-compose >/dev/null 2>&1; then
               docker-compose pull
               docker-compose up -d --remove-orphans
             else
-              echo "Error: Neither 'docker compose' nor 'docker-compose' found"
+              echo "Error: Docker Compose not found"
               exit 1
             fi
             docker image prune -f
