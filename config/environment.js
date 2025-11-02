@@ -41,8 +41,17 @@ module.exports = function (environment) {
     if (process.env.API_NAMESPACE) {
       ENV.APP.API_NAMESPACE = process.env.API_NAMESPACE;
     }
+
+    // Build CSP connect-src dynamically
+    let connectSrc = "'self'";
+    if (ENV.APP.API_HOST) {
+      connectSrc += ` ${ENV.APP.API_HOST}`;
+    } else {
+      connectSrc += ' http://localhost:8000';
+    }
+
     ENV.contentSecurityPolicy = {
-      'connect-src': "'self' http://localhost:8000",
+      'connect-src': connectSrc,
     };
   }
 
@@ -59,9 +68,19 @@ module.exports = function (environment) {
   }
 
   if (environment === 'production') {
-    ENV.APP.API_HOST = 'https://api.careercaddy.online';
+    ENV.APP.API_HOST = process.env.API_HOST || null;
+    if (process.env.API_NAMESPACE) {
+      ENV.APP.API_NAMESPACE = process.env.API_NAMESPACE;
+    }
+
+    // Build CSP connect-src dynamically
+    let connectSrc = "'self'";
+    if (ENV.APP.API_HOST) {
+      connectSrc += ` ${ENV.APP.API_HOST}`;
+    }
+
     ENV.contentSecurityPolicy = {
-      'connect-src': "'self' https://api.careercaddy.online",
+      'connect-src': connectSrc,
     };
   }
 

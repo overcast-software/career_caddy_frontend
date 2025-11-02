@@ -23,8 +23,8 @@ export default class SessionService extends Service {
   }
 
   get baseUrl() {
-    const host = (config.APP.API_HOST || '').replace(/\/+$/, '');
-    const namespace = (config.APP.API_NAMESPACE || 'api/v1').replace(
+    const host = (config.APP.API_HOST ?? '').replace(/\/+$/, '');
+    const namespace = (config.APP.API_NAMESPACE ?? 'api/v1').replace(
       /^\/+|\/+$/g,
       '',
     );
