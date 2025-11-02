@@ -3,8 +3,9 @@ import { service } from '@ember/service';
 
 export default class ScoresIndexRoute extends Route {
   @service store;
+  @service currentUser;
 
-  model() {
-    return this.store.findAll('score');
+  async model() {
+    return await this.currentUser.user.scores
   }
 }

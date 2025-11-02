@@ -59,7 +59,10 @@ module.exports = function (environment) {
   }
 
   if (environment === 'production') {
-    // here you can enable a production-specific feature
+    ENV.APP.API_HOST = 'https://api.careercaddy.online';
+    ENV.contentSecurityPolicy = {
+      'connect-src': "'self' https://api.careercaddy.online",
+    };
   }
 
   return ENV;

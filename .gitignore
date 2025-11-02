@@ -20,3 +20,9 @@
 .tool-versions
 *.sh
 # CI/CD needs package-lock.json
+
+# Docker overrides
+docker-compose.override.yml
+
+# Local Caddy configs
+infra/caddy/*.local.caddy

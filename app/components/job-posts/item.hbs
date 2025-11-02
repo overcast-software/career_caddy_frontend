@@ -25,7 +25,7 @@
       {{#each @jobPost.scores as |score|}}
         <li class="desc-item">
           <span class="muted">Resume</span>
-          {{score.resume.title}}
+          {{score.resume.name}}
           —
           <span class="muted">Score:</span>
           <LinkTo @route="scores.show" @model={{score}}>{{score.score}}</LinkTo>

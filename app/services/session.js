@@ -37,6 +37,7 @@ export default class SessionService extends Service {
         TOKEN_PATH: 'token/',
         REFRESH_PATH: 'token/refresh/',
         REGISTER_PATH: 'auth/register/',
+        BOOTSTRAP_PATH: 'users/bootstrap-superuser/',
       }
     );
   }
@@ -109,7 +110,7 @@ export default class SessionService extends Service {
   }
 
   async register(userData) {
-    const url = `${this.baseUrl}${this.authConfig.BOOTSTRAP_PATH}`;
+    const url = `${this.baseUrl}${this.authConfig.REGISTER_PATH}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -122,6 +123,28 @@ export default class SessionService extends Service {
       const error = await response.json().catch(() => ({}));
       const errorObj = new Error(
         error.detail || error.message || 'Registration failed',
+      );
+      errorObj.status = response.status;
+      throw errorObj;
+    }
+
+    return await response.json();
+  }
+
+  async bootstrapSuperuser(userData) {
+    const url = `${this.baseUrl}${this.authConfig.BOOTSTRAP_PATH}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      const errorObj = new Error(
+        error.detail || error.message || 'Bootstrap failed',
       );
       errorObj.status = response.status;
       throw errorObj;
