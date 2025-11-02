@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  cc-frontend:
+    image: ${IMAGE_REPO}:${IMAGE_TAG}
+    ports:
+      - "127.0.0.1:8087:80"
+    restart: unless-stopped
