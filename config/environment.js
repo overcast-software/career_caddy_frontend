@@ -68,7 +68,7 @@ module.exports = function (environment) {
   }
 
   if (environment === 'production') {
-    ENV.APP.API_HOST = process.env.API_HOST || 'https://api.careercaddy.online';
+    ENV.APP.API_HOST = null; // use same-origin; Nginx will proxy to API
     if (process.env.API_NAMESPACE) {
       ENV.APP.API_NAMESPACE = process.env.API_NAMESPACE;
     }
