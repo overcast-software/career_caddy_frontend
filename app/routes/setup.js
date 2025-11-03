@@ -14,7 +14,8 @@ export default class SetupRoute extends Route {
 
   model() {
     return {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       phone: '',
       username: '',

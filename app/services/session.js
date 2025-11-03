@@ -136,16 +136,21 @@ export default class SessionService extends Service {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
       },
-      body: JSON.stringify(userData),
+      body: JSON.stringify({
+        data: {
+          type: 'users',
+          attributes: userData,
+        },
+      }),
     });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      const errorObj = new Error(
-        error.detail || error.message || 'Bootstrap failed',
-      );
+      const errorMessage = error.errors?.[0]?.detail || error.detail || error.message || 'Bootstrap failed';
+      const errorObj = new Error(errorMessage);
       errorObj.status = response.status;
       throw errorObj;
     }

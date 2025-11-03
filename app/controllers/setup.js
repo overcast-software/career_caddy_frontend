@@ -40,7 +40,7 @@ export default class SetupController extends Controller {
     }
 
     try {
-      await this.session.register({
+      await this.session.bootstrapSuperuser({
         username: this.model.username,
         email: this.model.email,
         first_name: this.model.firstName,
@@ -50,6 +50,7 @@ export default class SetupController extends Controller {
       });
       this.model.password = null;
       this.health.setHealthy(true);
+      this.health.setBootstrapOpen(false);
       this.router.transitionTo('login');
     } catch (error) {
       if (error.status === 409) {
