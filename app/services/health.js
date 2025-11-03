@@ -1,11 +1,19 @@
 import Service from '@ember/service';
+import { tracked } from '@glimmer/tracking';
 import config from 'career-caddy-frontend/config/environment';
 
 export default class HealthService extends Service {
+  @tracked bootstrapOpen = false;
   lastError = null;
 
   async ensureHealthy() {
     const cached = sessionStorage.getItem('cc:healthy');
+    const cachedBootstrap = sessionStorage.getItem('cc:bootstrap-open');
+    
+    if (cachedBootstrap !== null) {
+      this.bootstrapOpen = cachedBootstrap === 'true';
+    }
+    
     if (cached === 'true') {
       return true;
     }
@@ -40,6 +48,10 @@ export default class HealthService extends Service {
 
       const data = await response.json();
       const isHealthy = data.healthy === true;
+      const bootstrapOpen = data.bootstrap_open === true;
+
+      this.bootstrapOpen = bootstrapOpen;
+      sessionStorage.setItem('cc:bootstrap-open', bootstrapOpen ? 'true' : 'false');
 
       if (isHealthy) {
         sessionStorage.setItem('cc:healthy', 'true');
@@ -50,6 +62,8 @@ export default class HealthService extends Service {
       }
     } catch (error) {
       this.lastError = error.message || 'Failed to reach API';
+      this.bootstrapOpen = false;
+      sessionStorage.setItem('cc:bootstrap-open', 'false');
       return false;
     }
   }
@@ -60,5 +74,10 @@ export default class HealthService extends Service {
     } else {
       sessionStorage.removeItem('cc:healthy');
     }
+  }
+
+  setBootstrapOpen(value) {
+    this.bootstrapOpen = value;
+    sessionStorage.setItem('cc:bootstrap-open', value ? 'true' : 'false');
   }
 }

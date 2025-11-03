@@ -20,7 +20,7 @@ export default class ApplicationRoute extends Route {
     }
 
     const ok = await this.health.ensureHealthy();
-    if (!ok) {
+    if (!ok || this.health.bootstrapOpen) {
       this.router.transitionTo('setup');
       return;
     }

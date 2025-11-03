@@ -7,7 +7,7 @@ export default class SetupRoute extends Route {
 
   async beforeModel() {
     const healthy = await this.health.ensureHealthy();
-    if (healthy) {
+    if (healthy && !this.health.bootstrapOpen) {
       this.router.transitionTo('index');
     }
   }
