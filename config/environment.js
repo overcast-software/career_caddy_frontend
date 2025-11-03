@@ -68,7 +68,7 @@ module.exports = function (environment) {
   }
 
   if (environment === 'production') {
-    ENV.APP.API_HOST = process.env.API_HOST || null;
+    ENV.APP.API_HOST = process.env.API_HOST || 'https://api.careercaddy.online';
     if (process.env.API_NAMESPACE) {
       ENV.APP.API_NAMESPACE = process.env.API_NAMESPACE;
     }

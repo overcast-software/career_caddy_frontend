@@ -13,7 +13,7 @@ RUN npm ci
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN EMBER_ENV=production npm run build
 
 # Stage 2: Serve
 FROM nginx:alpine
