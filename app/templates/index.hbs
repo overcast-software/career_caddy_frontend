@@ -1,21 +1,5 @@
-{{page-title "Career Caddy"}}
-<div class="container">
-  <div class="landing-page">
     {{#if this.session.isAuthenticated}}
-      <h1>Welcome to Career Caddy, {{this.currentUser.user.firstName}}</h1>
+        <h1>Welcome to Career Caddy, {{this.currentUser.user.firstName}}</h1>
     {{else}}
-      <h1>Welcome to Career Caddy, loser</h1>
+        <h1>Welcome to Career Caddy</h1>
     {{/if}}
-    <p>Your personal career management assistant</p>
-
-    <div class="landing-actions">
-      <LinkTo @route="resumes.index" class="btn primary">Get Started</LinkTo>
-      {{#unless this.session.isAuthenticated}}
-        <LinkTo @route="login" class="btn">Login</LinkTo>
-      {{/unless}}
-      {{#if this.unhealthy}}
-        <LinkTo @route="setup" class="btn secondary">Initial Setup</LinkTo>
-      {{/if}}
-    </div>
-  </div>
-</div>
