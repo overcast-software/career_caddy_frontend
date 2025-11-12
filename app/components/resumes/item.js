@@ -1,6 +1,5 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
-import { A } from '@ember/array';
 import ArrayProxy from '@ember/array/proxy';
 
 export default class ResumesItemComponent extends Component {

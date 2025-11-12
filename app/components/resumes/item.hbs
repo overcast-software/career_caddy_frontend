@@ -14,14 +14,11 @@
     <h2>Skills</h2>
     <hr />
     {{#each-in this.groupedSkillsMap as |group skills|}}
-      <div class="skills-row" style="display: inline-flex; align-items: baseline; flex-wrap: wrap;">
-        <div class="skills-group-title" style="margin-right: 0.1rem;">{{group}}:</div>
-        <style>
-          .skills-row .skills-list > li:not(:last-child)::after { content: ", "; }
-        </style>
-        <ul class="skills-list" style="list-style: none; padding: 0; margin: 0; display: contents;">
+      <div class="skills-row">
+        <div class="skills-group-title">{{group}}:</div>
+        <ul class="skills-list">
           {{#each skills as |skill|}}
-            <li class="skills-block pre-wrap" style="margin: 0; padding: 0; display: inline;">{{skill.text}}</li>
+            <li class="skills-block pre-wrap">{{skill.text}}</li>
           {{/each}}
         </ul>
       </div>

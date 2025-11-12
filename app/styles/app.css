@@ -881,6 +881,34 @@
   font: inherit;
 }
 
+/* Skills list styles */
+.skills-row {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.skills-group-title {
+  margin-right: 0.1rem;
+}
+
+.skills-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: contents;
+}
+
+.skills-row .skills-list > li:not(:last-child)::after {
+  content: ", ";
+}
+
+.skills-list .skills-block {
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+
 /* Upload form styles */
 .visually-hidden {
   position: absolute !important;
@@ -901,7 +929,9 @@
   background: #fafafa;
   text-align: center;
   color: var(--muted);
-  transition: background 140ms ease, border-color 140ms ease;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease;
   cursor: pointer;
 }
 

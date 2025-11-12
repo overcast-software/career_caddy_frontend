@@ -20,7 +20,7 @@ export default class ResumesIndexController extends Controller {
         try {
           await this.session.refresh();
           token = this.session.accessToken;
-        } catch (_) {
+        } catch {
           // proceed without token; server may reject with 401
         }
       }
