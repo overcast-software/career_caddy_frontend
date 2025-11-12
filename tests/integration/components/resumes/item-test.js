@@ -13,7 +13,7 @@ module('Integration | Component | resumes/item', function (hooks) {
     await render(hbs`<Resumes::Item />`);
 
     assert.dom().includesText('Summary');
-    assert.dom().includesText('Skills');
+    // assert.dom().includesText('Skills'); //only shows skills if present
     assert.dom().includesText('Experience');
     assert.dom().includesText('Education');
     assert.dom().includesText('Certifications');

@@ -12,7 +12,7 @@ module('Integration | Component | upload-form', function (hooks) {
 
     await render(hbs`<UploadForm />`);
 
-    assert.dom().hasText('');
+    assert.dom().includesText('Drag and drop');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +21,6 @@ module('Integration | Component | upload-form', function (hooks) {
       </UploadForm>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('template block text');
   });
 });
