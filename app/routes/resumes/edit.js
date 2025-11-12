@@ -8,6 +8,6 @@ export default class ResumesEditRoute extends Route {
     const resume = this.store.findRecord('resume', resume_id, {
       include: 'user,skill,experience,education,certification,summary',
     });
-    return resume
+    return resume;
   }
 }

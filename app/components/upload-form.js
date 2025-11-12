@@ -4,7 +4,9 @@ import { guidFor } from '@ember/object/internals';
 
 export default class UploadForm extends Component {
   get accept() {
-    return this.args.accept ?? 'application/pdf,.pdf,.doc,.docx,.txt,text/plain';
+    return (
+      this.args.accept ?? 'application/pdf,.pdf,.doc,.docx,.txt,text/plain'
+    );
   }
 
   get inputId() {
@@ -16,12 +18,12 @@ export default class UploadForm extends Component {
   }
 
   @action onInputChange(queue, event) {
-    let file = event.target?.files[0]
+    let file = event.target?.files[0];
     //clear out all the files
-    for (let f of queue.files){
-      queue.remove(f)
+    for (let f of queue.files) {
+      queue.remove(f);
     }
-    queue.add(file)
+    queue.add(file);
     // Allow selecting the same file repeatedly
     event.target.value = '';
   }
