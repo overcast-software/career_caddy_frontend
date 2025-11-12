@@ -9,11 +9,11 @@ export default class HealthService extends Service {
   async ensureHealthy() {
     const cached = sessionStorage.getItem('cc:healthy');
     const cachedBootstrap = sessionStorage.getItem('cc:bootstrap-open');
-    
+
     if (cachedBootstrap !== null) {
       this.bootstrapOpen = cachedBootstrap === 'true';
     }
-    
+
     if (cached === 'true') {
       return true;
     }
@@ -51,7 +51,10 @@ export default class HealthService extends Service {
       const bootstrapOpen = data.bootstrap_open === true;
 
       this.bootstrapOpen = bootstrapOpen;
-      sessionStorage.setItem('cc:bootstrap-open', bootstrapOpen ? 'true' : 'false');
+      sessionStorage.setItem(
+        'cc:bootstrap-open',
+        bootstrapOpen ? 'true' : 'false',
+      );
 
       if (isHealthy) {
         sessionStorage.setItem('cc:healthy', 'true');

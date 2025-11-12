@@ -10,13 +10,25 @@
   <hr />
   <div class="summary">{{@resume.activeSummary.content}}</div>
 </section>
-<section>
-  <h2>Skills</h2>
-  <hr />
-  {{#if @resume.activeSkill}}
-    <div class="skills-block pre-wrap">{{ltrim @resume.activeSkill.text}}</div>
-  {{/if}}
-</section>
+{{#if this.hasSkills}}
+  <section>
+    <h2>Skills</h2>
+    <hr />
+    {{#each-in this.groupedSkillsMap as |group skills|}}
+      <div class="skills-row" style="display: inline-flex; align-items: baseline; flex-wrap: wrap;">
+        <div class="skills-group-title" style="margin-right: 0.1rem;">{{group}}:</div>
+        <style>
+          .skills-row .skills-list > li:not(:last-child)::after { content: ", "; }
+        </style>
+        <ul class="skills-list" style="list-style: none; padding: 0; margin: 0; display: contents;">
+          {{#each skills as |skill|}}
+            <li class="skills-block pre-wrap" style="margin: 0; padding: 0; display: inline;">{{skill.text}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/each-in}}
+  </section>
+{{/if}}
 
 <section>
   <h2>Experience</h2>
