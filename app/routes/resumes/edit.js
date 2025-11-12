@@ -5,6 +5,9 @@ export default class ResumesEditRoute extends Route {
   @service store;
 
   model({ resume_id }) {
-    return this.store.findRecord('resume', resume_id);
+    const resume = this.store.findRecord('resume', resume_id, {
+      include: 'user,skill,experience,education,certification,summary',
+    });
+    return resume;
   }
 }

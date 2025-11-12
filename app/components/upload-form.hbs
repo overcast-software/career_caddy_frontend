@@ -1,0 +1,50 @@
+{{#let (file-queue name="resumes") as |queue|}}
+  <FileDropzone @queue={{queue}} as |dropzone|>
+    <div class="upload-zone {{if dropzone.active 'dragging'}}">
+      <input
+        class="visually-hidden"
+        id={{this.inputId}}
+        type="file"
+        accept={{this.accept}}
+        {{on "change" (fn this.onInputChange queue)}}
+      />
+      {{#if queue.files.length}}
+        <div class="upload-selected">
+          {{#each queue.files as |file|}}
+            <div class="upload-file">
+              <div class="upload-file-name">{{file.name}}</div>
+              <div class="muted">{{file.progress}}%</div>
+            </div>
+          {{/each}}
+          <div class="actions">
+            <button
+              type="button"
+              class="btn primary small"
+              {{on "click" (fn this.handleFiles queue.files)}}
+            >
+              Upload
+            </button>
+          </div>
+        </div>
+      {{else}}
+        <div class="upload-prompt">
+          {{#if dropzone.active}}
+            <div class="upload-title">Drop to upload</div>
+          {{else if dropzone.supported}}
+            <div class="upload-title">Drag and drop your resume</div>
+            <div class="muted">or</div>
+            <label for={{this.inputId}} class="btn primary">Browse yo files</label>
+            <div class="hint">Accepted: DOCX. Max 5 MB.</div>
+          {{else}}
+            <div class="muted">
+              Your browser does not support drag and drop. Use the Browse
+              button.
+            </div>
+            <label for={{this.inputId}} class="btn primary">Browse files</label>
+          {{/if}}
+        </div>
+      {{/if}}
+    </div>
+  </FileDropzone>
+{{/let}}
+{{yield}}

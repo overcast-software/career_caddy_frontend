@@ -1,1 +1,10 @@
-<Resumes::List @resumes={{this.model}} />
+{{#if this.noResumes}}
+  no resumes
+  <UploadForm @onUpload={{this.ingestResume}} />
+{{else}}
+  {{#if this.model}}
+    <Resumes::List @resumes={{this.model}} />
+  {{else}}
+    loading
+  {{/if}}
+{{/if}}

@@ -136,7 +136,7 @@ export default class SessionService extends Service {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Accept': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json',
         'Content-Type': 'application/vnd.api+json',
       },
       body: JSON.stringify({
@@ -149,7 +149,11 @@ export default class SessionService extends Service {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      const errorMessage = error.errors?.[0]?.detail || error.detail || error.message || 'Bootstrap failed';
+      const errorMessage =
+        error.errors?.[0]?.detail ||
+        error.detail ||
+        error.message ||
+        'Bootstrap failed';
       const errorObj = new Error(errorMessage);
       errorObj.status = response.status;
       throw errorObj;

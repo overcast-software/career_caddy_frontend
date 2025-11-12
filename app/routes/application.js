@@ -43,7 +43,10 @@ export default class ApplicationRoute extends Route {
     }
   }
   model() {
-    if (this.session.isAuthenticated) {
+    if (
+      this.session.isAuthenticated &&
+      this.session.currentUser?.user?.resumes
+    ) {
       this.currentUser.user.resumes;
     }
   }

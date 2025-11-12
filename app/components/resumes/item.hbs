@@ -1,6 +1,5 @@
-{{yield}}
 <div class="profile text-center">
-  <div class="name">{{@resume.user.name}}</div>
+  <div class="name">{{@resume.name}}</div>
   <div class="title">{{@resume.title}}</div>
   <div class="email">{{@resume.user.email}}</div>
 </div>
@@ -10,13 +9,22 @@
   <hr />
   <div class="summary">{{@resume.activeSummary.content}}</div>
 </section>
-<section>
-  <h2>Skills</h2>
-  <hr />
-  {{#if @resume.activeSkill}}
-    <div class="skills-block pre-wrap">{{ltrim @resume.activeSkill.text}}</div>
-  {{/if}}
-</section>
+{{#if this.hasSkills}}
+  <section>
+    <h2>Skills</h2>
+    <hr />
+    {{#each-in this.groupedSkillsMap as |group skills|}}
+      <div class="skills-row">
+        <div class="skills-group-title">{{group}}:</div>
+        <ul class="skills-list">
+          {{#each skills as |skill|}}
+            <li class="skills-block pre-wrap">{{skill.text}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/each-in}}
+  </section>
+{{/if}}
 
 <section>
   <h2>Experience</h2>
@@ -77,7 +85,5 @@
     <Certifications::Item @certification={{certification}} />
   {{/each}}
 </section>
-<ul>
-  <li>action 1</li>
-  <li>action 2</li>
-</ul>
+
+{{yield}}
