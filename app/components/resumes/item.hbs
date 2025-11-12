@@ -1,6 +1,5 @@
-{{yield}}
 <div class="profile text-center">
-  <div class="name">{{@resume.user.name}}</div>
+  <div class="name">{{@resume.name}}</div>
   <div class="title">{{@resume.title}}</div>
   <div class="email">{{@resume.user.email}}</div>
 </div>
@@ -89,7 +88,5 @@
     <Certifications::Item @certification={{certification}} />
   {{/each}}
 </section>
-<ul>
-  <li>action 1</li>
-  <li>action 2</li>
-</ul>
+
+{{yield}}
