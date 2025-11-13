@@ -1,20 +1,49 @@
-<form class="builder-form">
+<div class="builder-form">
   <div class="field">
-    <label class="field-label">Skills</label>
-    <div class="input-group">
-      <textarea
-        class="desc-editor"
-        placeholder="Add a skill"
-        aria-label="add-skil"
-        value={{if @skill @skill.text this.newSkill}}
-        rows={{this.lineCount}}
-        {{on "input" this.updateSkill}}
-      ></textarea>
-      <button
-        type="button"
-        class="btn primary"
-        {{on "click" this.addSkill}}
-      >Add</button>
+
+    <div class="skill-groups">
+      {{#each-in this.groupedSkillsMap as |group skills|}}
+        <div class="skill-group">
+          <div class="group-title">{{group}}</div>
+          <div class="tags">
+            {{#each skills as |skill|}}
+              <div class="skill-tag">
+                <span
+                  type="button"
+                  class="tag-remove"
+                  {{on "click" (fn this.removeSkill skill)}}
+                >x</span>
+                <span class="tag-text">{{skill.text}}</span>
+              </div>
+            {{/each}}
+          </div>
+        </div>
+      {{/each-in}}
+    </div>
+
+    <div class="add-row">
+      <input
+        type="text"
+        class="add-text"
+        placeholder="Skill (e.g., JavaScript)"
+        value={{this.newSkillText}}
+        {{on "input" this.updateNewSkillText}}
+      />
+      <div class="type-and-add">
+        <input
+          type="text"
+          class="add-type"
+          placeholder="Type (e.g., Languages, Tools)"
+          value={{this.newSkillType}}
+          {{on "input" this.updateNewSkillType}}
+        />
+        <button
+          type="button"
+          class="btn primary"
+          disabled={{this.newSkillText.length}}
+          {{on "click" this.addSkill}}
+        >Add</button>
+      </div>
     </div>
   </div>
-</form>
+</div>
