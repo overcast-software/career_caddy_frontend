@@ -84,6 +84,7 @@ Router.map(function () {
     this.route('edit', {
       path: '/:resume_id/edit',
     });
+    this.route('import');
   });
   this.route('scores', function () {
     this.route('show', {

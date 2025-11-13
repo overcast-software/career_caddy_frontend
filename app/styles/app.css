@@ -17,6 +17,7 @@
   --space-5: 20px;
   --space-6: 24px;
 }
+
 .skill-tag {
   pointer-events: auto;
   background-color: #EFF4FF;
@@ -34,6 +35,7 @@
   margin-bottom: 6px;
   border-radius: 12px;
 }
+
 .tag-remove{
     display: inline-flex;
     align-items: center;
@@ -49,6 +51,7 @@
     cursor: pointer;
     pointer-events: auto;
 }
+
 .builder-form {
   display: grid;
   gap: var(--space-5);
@@ -323,7 +326,7 @@
   width: calc(100% - (var(--space-1) * 2));
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .builder-form.two-col .field {
     flex-basis: 100%;
   }
@@ -634,7 +637,7 @@
   font-size: 1.05rem;
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -768,7 +771,7 @@
   outline: 3px solid rgb(63 126 255 / 14%);
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .builder-page .builder-layout {
     grid-template-columns: 1fr;
   }

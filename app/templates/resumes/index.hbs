@@ -1,7 +1,7 @@
 {{#if this.noResumes}}
   no resumes
-  <UploadForm @onUpload={{this.ingestResume}} />
 {{else}}
+  <UploadForm @onUpload={{this.ingestResume}} />
   {{#if this.model}}
     <Resumes::List @resumes={{this.model}} />
   {{else}}
