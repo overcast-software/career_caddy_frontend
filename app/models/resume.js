@@ -28,13 +28,6 @@ export default class ResumeModel extends Model {
       .find((rec) => rec.belongsTo('resume').id() === this.id);
     return cert;
   }
-  get activeSkill() {
-    return this.hasMany('skills')
-      .value()
-      .find((rec) => rec.active);
-    // return this.store.find('skill').find( (rec) => rec.active )
-    // return this.skills.then( (skills) => skills.find( (rec) => rec.active) )
-  }
 
   get activeSummary() {
     return this.hasMany('summaries')

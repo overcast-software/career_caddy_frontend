@@ -17,7 +17,38 @@
   --space-5: 20px;
   --space-6: 24px;
 }
-
+.skill-tag {
+  pointer-events: auto;
+  background-color: #EFF4FF;
+  border: none;
+  color: #2557D6;
+  padding: 3px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 6px;
+  margin-left: 0;
+  margin-bottom: 6px;
+  border-radius: 12px;
+}
+.tag-remove{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #eaf2fb;
+    color: #2557D6;
+    font-size: 12px;
+    line-height: 1;
+    border: 1px solid #d2e4f9;
+    cursor: pointer;
+    pointer-events: auto;
+}
 .builder-form {
   display: grid;
   gap: var(--space-5);
@@ -28,8 +59,10 @@
 }
 
 .builder-form .field {
-  display: grid;
-  gap: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 /* .builder-form .field input[type="text"], */
@@ -290,7 +323,7 @@
   width: calc(100% - (var(--space-1) * 2));
 }
 
-@media (width <= 640px) {
+@media (max-width: 640px) {
   .builder-form.two-col .field {
     flex-basis: 100%;
   }
@@ -601,7 +634,7 @@
   font-size: 1.05rem;
 }
 
-@media (width <= 900px) {
+@media (max-width: 900px) {
   .grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -735,7 +768,7 @@
   outline: 3px solid rgb(63 126 255 / 14%);
 }
 
-@media (width <= 900px) {
+@media (max-width: 900px) {
   .builder-page .builder-layout {
     grid-template-columns: 1fr;
   }
@@ -907,6 +940,37 @@
   margin: 0;
   padding: 0;
   display: inline;
+}
+
+/* Skills add row layout */
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.add-row .add-text {
+  flex: 1 1 300px;
+  min-width: 240px;
+}
+
+.add-row .type-and-add {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 1 auto;
+  white-space: nowrap;
+}
+
+.add-row .type-and-add .add-type {
+  flex: 1 1 180px;
+  min-width: 140px;
+}
+
+.add-row .type-and-add .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 /* Upload form styles */

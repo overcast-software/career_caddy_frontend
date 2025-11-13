@@ -2,6 +2,8 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+// import { A } from '@ember/array';
+import ArrayProxy from '@ember/array/proxy';
 
 export default class JobPostsFormComponent extends Component {
   @service router;
@@ -9,12 +11,6 @@ export default class JobPostsFormComponent extends Component {
   @tracked errorMessage = null;
   @tracked form_toggle = false; // false = "by url", true = "manual"
   @tracked companyQuery = '';
-
-  constructor(...args) {
-    super(...args);
-    // Preload companies so the dropdown has options
-    // this.store.findAll('company');
-  }
 
   get companies() {
     return this.store.peekAll('company');
@@ -38,6 +34,24 @@ export default class JobPostsFormComponent extends Component {
   async submitEdit(event) {
     event.preventDefault();
     this.errorMessage = null;
-    this.args.jobPost.save();
+    const companyName = event.target.elements['company'].value;
+    let company = this.companies.find( company => company.name == companyName )
+    if (!company) {
+      company = await this.store
+        .createRecord('company', { name: companyName })
+        .save();
+      this.args.jobPost.company = company;
+      this.args.jobPost.save()
+    } else {
+      this.args.jobPost.company = company
+      this.args.jobPost.save()
+    }
+  }
+  @action
+  async submitDelete(event) {
+    event.preventDefault();
+    this.args.jobPost
+      .destroyRecord()
+      .then(() => this.router.transitionTo('job-posts.index'));
   }
 }

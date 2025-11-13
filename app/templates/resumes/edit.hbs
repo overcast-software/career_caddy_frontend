@@ -19,7 +19,7 @@
         </Panel::Card>
 
         <Panel::Card @title="Skills" @collapsible={{true}}>
-          <Skills::Form @skill={{this.model.activeSkill}} />
+          <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
         </Panel::Card>
 
         <Panel::Card @title="Education" @collapsible={{true}}>
