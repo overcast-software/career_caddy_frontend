@@ -25,9 +25,10 @@ export default class ResumesIndexController extends Controller {
         }
       }
 
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const url = `${this.session.baseUrl}resumes/ingest/`;
+      const headers = this.session.authorizationHeader ? { Authorization: this.session.authorizationHeader } : {};
       const response = await new UploadFile(file).upload({
-        url: 'http://localhost:8000/api/v1/resumes/ingest/',
+        url,
         headers,
       });
 
