@@ -1,0 +1,8 @@
+<br />
+{{#if this.model.length}}
+  {{#each this.model as |jobPost|}}
+    <JobPosts::Item @jobPost={{jobPost}} />
+  {{/each}}
+{{else}}
+  no job posts for this company
+{{/if}}

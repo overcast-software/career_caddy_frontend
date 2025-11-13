@@ -4,6 +4,6 @@ export default class CompanyModel extends Model {
   @attr('string') name;
   @attr('string') displayName;
   @hasMany('job-post', { async: true, inverse: 'company' }) jobPosts;
-  @hasMany('scrape', { async: false, inverse: null }) scrapes;
+  @hasMany('scrape', { async: false, inverse: 'company' }) scrapes;
   @hasMany('experience', { async: true, inverse: 'company' }) experiences;
 }

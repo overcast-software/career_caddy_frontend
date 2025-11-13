@@ -21,9 +21,15 @@ Router.map(function () {
     });
   });
   this.route('companies', function () {
-    this.route('show', {
-      path: '/:company_id',
-    });
+    this.route(
+      'show',
+      {
+        path: '/:company_id',
+      },
+      function () {
+        this.route('job-posts', this.route('show'));
+      },
+    );
     this.route('new');
 
     this.route('edit', {

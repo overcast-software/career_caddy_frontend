@@ -1,1 +1,3 @@
-<Companies::Item @company={{this.model}} />
+{{this.model.name}}
+<LinkTo @route="companies.show.job-posts" @model={{this.model}}>Job Posts</LinkTo>
+{{outlet}}
