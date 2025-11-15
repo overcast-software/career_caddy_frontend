@@ -1,6 +1,5 @@
 <div class="builder-page">
   <Menus::SubnavBar>
-    <div class="score muted">Resume Score: 0%</div>
     <div class="submenu-buttons">
       {{#if this.isDirty}}
         <button type="button" class="btn" {{on "click" this.saveResume}}>
@@ -33,19 +32,26 @@
         </Panel::Card>
 
         <Panel::Card @title="Personal Information" @collapsible={{true}}>
-          <PersonalInformation::Form @user={{this.model.user}} />
+            <PersonalInformation::Form @user={{this.model.user}} />
         </Panel::Card>
 
-        <Panel::Card
-          @title="Summary"
-          @collapsible={{true}}
-          @onDirection={{this.onSummaryDirection}}
-        >
-          <Summaries::List @summaries={{this.model.summaries}} />
+        <Panel::Card @title="Summary" @collapsible={{true}} >
+            <:top as |panel|>
+                <Panel::Navigation
+                    @recordArray={{this.model.summaries}}
+                    @collapsible={{true}}
+                    @collapsed={{panel.collapsed}}
+                    @toggleCollapsed={{panel.toggleCollapsed}}
+                >
+                </Panel::Navigation>
+            </:top>
+            <:default>
+              <Summaries::List @summaries={{this.model.summaries}} />
+            </:default>
         </Panel::Card>
 
         <Panel::Card @title="Skills" @collapsible={{true}}>
-          <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
+            <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
         </Panel::Card>
 
         <Panel::Card @title="Education" @collapsible={{true}}>
@@ -53,16 +59,23 @@
         </Panel::Card>
 
         <Panel::Card @title="Experience" @collapsible={{true}}>
-          <div class="panel-body">
-            <div class="panel-actions">
-              <button
-                type="button"
-                class="btn small"
-                {{on "click" this.addExperience}}
-              >+ Add Experience</button>
-            </div>
-            <Experiences::List @experiences={{this.model.experiences}} />
-          </div>
+            <:top as |panel|>
+                <Panel::Navigation
+                    @collapsible={{true}}
+                    @collapsed={{panel.collapsed}}
+                    @toggleCollapsed={{panel.toggleCollapsed}}
+                >
+                <button
+                    type="button"
+                    class="btn small"
+                    {{on "click" this.addExperience}}
+                >+ Add Experience</button>
+                </Panel::Navigation>
+            </:top>
+
+            <:default>
+              <Experiences::List @experiences={{this.model.experiences}} />
+            </:default>
         </Panel::Card>
       </aside>
       <main class="preview-panel">

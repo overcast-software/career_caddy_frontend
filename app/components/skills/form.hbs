@@ -21,7 +21,7 @@
       {{/each-in}}
     </div>
 
-    <div class="add-row">
+    <div class="personal-info-inline add-row">
       <input
         type="text"
         class="add-text"
@@ -29,21 +29,19 @@
         value={{this.newSkillText}}
         {{on "input" this.updateNewSkillText}}
       />
-      <div class="type-and-add">
-        <input
-          type="text"
-          class="add-type"
-          placeholder="Type (e.g., Languages, Tools)"
-          value={{this.newSkillType}}
-          {{on "input" this.updateNewSkillType}}
-        />
-        <button
-          type="button"
-          class="btn primary"
-          disabled={{this.newSkillText.length}}
-          {{on "click" this.addSkill}}
-        >Add</button>
-      </div>
+      <input
+        type="text"
+        class="add-type"
+        placeholder="Type (e.g., Languages, Tools)"
+        value={{this.newSkillType}}
+        {{on "input" this.updateNewSkillType}}
+      />
+      <button
+        type="button"
+        class="btn primary"
+        disabled={{this.newSkillText.length}}
+        {{on "click" this.addSkill}}
+      >Add</button>
     </div>
   </div>
 </div>

@@ -5,14 +5,16 @@
 >
   <div class="collapsible-head">
     <div class="panel-title">{{@title}}</div>
-    {{#if @collapsible}}
-      <button
-        type="button"
-        class="btn small"
-        {{on "click" this.toggleCollapsed}}
-      >
-        {{if this.collapsed "Expand" "Collapse"}}
-      </button>
+    {{#if (has-block "top")}}
+      <div class="panel-actions">
+        {{yield
+          (hash
+            collapsed=this.collapsed
+            toggleCollapsed=this.toggleCollapsed
+          )
+          to="top"
+        }}
+      </div>
     {{/if}}
   </div>
 
