@@ -5,6 +5,7 @@ import { action } from '@ember/object';
 export default class ResumesShowController extends Controller {
   @service store;
   @service router;
+  @service session;
 
   get isDirty() {
     return this.model?.isNew || this.model?.hasDirtyAttributes;
@@ -33,20 +34,16 @@ export default class ResumesShowController extends Controller {
 
   @action
   async saveResume() {
-    try {
-      await this.model.save();
-    } catch (e) {
-      // Optional: surface error to the user
-
-      console.error('Failed to save resume', e);
-    }
+    this.model.save()
   }
 
   @action
   async deleteResume() {
     if (!confirm('Delete this resume? This cannot be undone.')) return;
     await this.model.destroyRecord();
-    this.router.transitionTo('resumes');
+    this.router.transitionTo('resumes').then(() => {
+      window.location.reload();
+    });
   }
 
   addExperience = async () => {
@@ -68,7 +65,15 @@ export default class ResumesShowController extends Controller {
       const base = adapter.buildURL('resume', id); // e.g. /api/v1/resume/1/
       const url = `${base}export`; // -> /api/v1/resume/1/export
 
-      const resp = await fetch(url, { method: 'GET', credentials: 'include' });
+      const headers = {};
+      if (this.session.authorizationHeader) {
+        headers['Authorization'] = this.session.authorizationHeader;
+      }
+      const resp = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        headers,
+      });
       if (!resp.ok) throw new Error(`Export failed (${resp.status})`);
 
       // If the API returns the docx file, trigger a download

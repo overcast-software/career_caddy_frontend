@@ -42,12 +42,4 @@ export default class ApplicationRoute extends Route {
       // await this.session.invalidate();
     }
   }
-  model() {
-    if (
-      this.session.isAuthenticated &&
-      this.session.currentUser?.user?.resumes
-    ) {
-      this.currentUser.user.resumes;
-    }
-  }
 }

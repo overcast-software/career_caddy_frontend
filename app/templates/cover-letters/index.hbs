@@ -1,1 +1,5 @@
-<CoverLetters::List @coverLetters={{this.model}} />
+<Menus::SubnavBar>
+  <p>Cover letters index</p>
+</Menus::SubnavBar>
+<CoverLetters::List @coverLetters={{this.model.coverLetters}} />
+{{outlet}}

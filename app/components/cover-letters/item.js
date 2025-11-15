@@ -8,8 +8,17 @@ export default class CoverLettersItemComponent extends Component {
   @tracked isExporting = false;
 
   get jobPost() {
-    return this.args.coverLetter.jobPost;
+    return this.args.coverLetter.belongsTo('job-post').value();
   }
+
+  get resume() {
+    return this.args.coverLetter.get('resume.name');
+  }
+
+  get company() {
+    return this.args.coverLetter.get('job-post.company');
+  }
+
   @action
   async exportToDocx() {
     if (this.isExporting) return;

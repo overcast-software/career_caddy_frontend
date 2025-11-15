@@ -35,16 +35,16 @@ export default class JobPostsFormComponent extends Component {
     event.preventDefault();
     this.errorMessage = null;
     const companyName = event.target.elements['company'].value;
-    let company = this.companies.find( company => company.name == companyName )
+    let company = this.companies.find((company) => company.name == companyName);
     if (!company) {
       company = await this.store
         .createRecord('company', { name: companyName })
         .save();
       this.args.jobPost.company = company;
-      this.args.jobPost.save()
+      this.args.jobPost.save();
     } else {
-      this.args.jobPost.company = company
-      this.args.jobPost.save()
+      this.args.jobPost.company = company;
+      this.args.jobPost.save();
     }
   }
   @action

@@ -2,7 +2,6 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { guidFor } from '@ember/object/internals';
-import ArrayProxy from '@ember/array/proxy';
 export default class JobApplicationsEdit extends Component {
   @service store;
   @service currentUser;

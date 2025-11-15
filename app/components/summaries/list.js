@@ -7,11 +7,16 @@ export default class SummariesList extends Component {
   @tracked lastDirection = '';
 
   get activeSummaryIndex() {
-    return this.args.summaries.findIndex((sum) => sum.active);
+    return ArrayProxy.create({ content: this.args.summaries.content }).indexOf(
+      this.activeSummary,
+    );
   }
 
   get activeSummary() {
-    return this.args.summaries.find((sum) => sum.active);
+    const summary = ArrayProxy.create({
+      content: this.args.summaries.content,
+    }).findBy('active');
+    return summary;
   }
 
   @action
@@ -23,7 +28,7 @@ export default class SummariesList extends Component {
       newIndex = length - 1;
     }
     const summariesProxies = ArrayProxy.create({
-      content: this.args.summaries,
+      content: this.args.summaries.content,
     });
     const oldSummary = summariesProxies.objectAt(currIndex);
     const newSummary = summariesProxies.objectAt(newIndex);
@@ -38,7 +43,7 @@ export default class SummariesList extends Component {
     const currIndex = this.activeSummaryIndex;
     const newIndex = (currIndex + 1) % length;
     const summariesProxies = ArrayProxy.create({
-      content: this.args.summaries,
+      content: this.args.summaries.content,
     });
     const oldSummary = summariesProxies.objectAt(currIndex);
     const newSummary = summariesProxies.objectAt(newIndex);
