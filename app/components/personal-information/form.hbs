@@ -1,7 +1,9 @@
 <form class="builder-form">
-  <div class="personal-info-inline">
+
+  <div class="field-row">
+
     <label class="field">
-      <span class="field-row field-label">Name</span>
+      <span class="field-label">Name</span>
       <input
         type="text"
         name="name"
@@ -9,27 +11,27 @@
         {{on "input" this.updateName}}
       />
     </label>
-
     <label class="field">
-      <span class="field-label">Phone</span>
-      <input
-        type="tel"
-        name="phone"
-        value={{@user.phone}}
-        {{on "input" this.updatePhone}}
-      />
-    </label>
-
-    <label class="field">
-      <span class="field-label">Email</span>
-      <input
-        type="email"
-        name="email"
-        value={{@user.email}}
-        {{on "input" this.updateEmail}}
-      />
+    <span class="field-label">Phone</span>
+    <input
+      type="tel"
+      name="phone"
+      value={{@user.phone}}
+      {{on "input" this.updatePhone}}
+    />
     </label>
   </div>
+
+  <label class="field">
+    <span class="field-label">Email</span>
+    <input
+      type="email"
+      name="email"
+      value={{@user.email}}
+      {{on "input" this.updateEmail}}
+    />
+  </label>
+
 
   {{yield}}
 </form>

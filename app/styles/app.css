@@ -18,6 +18,11 @@
   --space-6: 24px;
 }
 
+/* Apply border-box sizing globally to ensure inputs don't overflow their parent, especially on mobile */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 .skill-tag {
   pointer-events: auto;
   background-color: #EFF4FF;
@@ -117,6 +122,10 @@
 
 .builder-form .field-row .field {
   flex: 1;
+}
+
+.builder-form .field-row .field:last-child {
+  align-items: flex-end;
 }
 
 .present-indicator {
@@ -297,6 +306,13 @@ a.btn:active {
   color: var(--danger);
 }
 
+.btn .icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
 .descriptions {
   margin-top: var(--space-4);
   display: grid;
@@ -339,6 +355,8 @@ a.btn:active {
 @media (width <= 640px) {
   .builder-form.two-col .field {
     flex-basis: 100%;
+    min-width: 0;
+    width: 100%;
   }
 
   .experience .job-header {
@@ -359,9 +377,19 @@ a.btn:active {
 }
 
 /* Builder page full-width */
+.builder-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .builder-page .container {
-  max-width: none;
+  max-width: 90%;
   width: 100%;
+  margin: 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
 }
 
 .testimonial-card .name {
@@ -678,7 +706,6 @@ a.btn:active {
 .editor-panel {
   position: sticky;
   top: 16px;
-  display: grid;
   gap: var(--space-4);
   align-self: start;
 }
@@ -788,6 +815,30 @@ a.btn:active {
 
   .editor-panel {
     position: static;
+  }
+}
+
+@media (min-width: 1024px) {
+  .builder-page .container {
+    overflow: hidden;
+  }
+
+  .builder-page .builder-layout {
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+
+  .editor-panel,
+  .preview-panel {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    position: static; /* override sticky on large screens */
+  }
+
+  .preview-panel {
+    padding-right: var(--space-4);
   }
 }
 
@@ -1055,24 +1106,50 @@ a.btn:active {
   color: var(--text);
   word-break: break-word;
 }
-.personal-info-inline {
-  display: flex;
-  gap: 16px;
-  align-items: flex-end;
-  flex-wrap: nowrap;
+
+@media (width <= 900px) {
+
+    .input-group {
+        display: block
+    }
 }
 
-.personal-info-inline .field {
-  flex: 1 1 0;
-  min-width: 0;
-}
+@media (width <= 900px) {
+  .builder-form .field {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.personal-info-inline input {
-  width: 100%;
-}
+  /* Stack rowed fields on small screens */
+  .builder-form .field-row {
+    flex-direction: column;
+  }
 
-@media (max-width: 600px) {
-  .personal-info-inline {
-    flex-wrap: wrap;
+  /* Ensure each field in the row takes full width when stacked */
+  .builder-form .field-row .field,
+  .builder-form .field-row label.field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .builder-form .field label,
+  .builder-form .field .field-label {
+    display: block;
+    width: 100%;
+    margin-bottom: var(--space-2);
+  }
+
+  .builder-form .field input,
+  .builder-form .field select,
+  .builder-form .field textarea {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .builder-form.two-col .field input,
+  .builder-form.two-col .field select,
+  .builder-form.two-col .field textarea {
+    width: 100%;
+    margin: 0;
   }
 }
