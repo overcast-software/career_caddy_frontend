@@ -9,29 +9,11 @@ export default class ResumeModel extends Model {
   @belongsTo('user', { async: true, inverse: 'resumes' }) user;
   @hasMany('score', { async: true, inverse: 'resume' }) scores;
   @hasMany('cover-letter', { async: true, inverse: 'resume' }) coverLetters;
-  @hasMany('application', { async: true, inverse: 'resume' }) applications;
+  @hasMany('job-application', { async: true, inverse: 'resume' })
+  jobApplications;
   @hasMany('experience', { async: true, inverse: 'resume' }) experiences;
   @hasMany('education', { async: true, inverse: 'resume' }) educations;
   @hasMany('summary', { async: true, inverse: 'resume' }) summaries;
   @hasMany('certification', { async: true, inverse: 'resume' }) certifications;
   @hasMany('skill', { async: true, inverse: 'resume' }) skills;
-
-  get education() {
-    const edu = this.store
-      .peekAll('education')
-      .find((rec) => rec.belongsTo('resume').id() === this.id);
-    return edu;
-  }
-  get certification() {
-    const cert = this.store
-      .peekAll('certification')
-      .find((rec) => rec.belongsTo('resume').id() === this.id);
-    return cert;
-  }
-
-  get activeSummary() {
-    return this.hasMany('summaries')
-      .value()
-      .find((rec) => rec.active);
-  }
 }

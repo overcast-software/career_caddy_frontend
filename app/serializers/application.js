@@ -12,16 +12,11 @@ export default class ApplicationSerializer extends JSONAPISerializer {
   modelNameFromPayloadType(payloadType) {
     if (!payloadType) return payloadType;
     const normalized = singularize(payloadType.replace(/_/g, '-'));
-    if (normalized === 'experience-description') return 'description';
     return normalized;
   }
 
   keyForAttribute(attr) {
     return toSnakeCase(attr);
-  }
-
-  keyForRelationship(key) {
-    return toSnakeCase(key);
   }
 
   serializeAttribute(snapshot, json, key, attribute) {

@@ -1,0 +1,84 @@
+{{yield}}
+<div class="builder-form">
+  <div class="field">
+    <label class="field-label" >Job post:</label>
+    <select >
+      {{#each @jobPosts as |jobPost|}}
+        <option>{{jobPost.title}} at {{jobPost.company.name}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="field">
+    <label class="field-label" >Resume to use:</label>
+    <select {{on "change" this.updateResume}}>
+      {{#each @resumes as |resume|}}
+        <option value={{resume.id}}>
+          {{resume.name}}
+        </option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="field">
+    <label class="field-label" >Cover Letter</label>
+    <select {{on "change" this.updateCoverLetter}} >
+      {{#each @coverLetters as |coverLetter|}}
+        <option value={{coverLetter.id}}>
+          cover letter {{coverLetter.id}} - written on {{format-date coverLetter.createdAt}}
+        </option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="field">
+    <label class="field-label" >Applied At</label>
+    <input
+      type="date"
+      value={{format-date @jobApplication.appliedAt}}
+      {{on "change" (fn this.updateField "appliedAt")}}
+    />
+  </div>
+
+  <div class="field">
+    <label class="field-label" >Status</label>
+    <select
+      {{on "change" (fn this.updateField "status")}}
+    >
+      <option value="">{{@jobApplication.status}}</option>
+      {{#each this.statusOptions as |status|}}
+        <option value={{status}}>
+          {{status}}
+        </option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="field">
+    <label class="field-label" >Tracking URL</label>
+    <input
+      type="url"
+      value={{@jobApplication.trackingUrl}}
+      {{on "input" (fn this.updateField "trackingUrl")}}
+    />
+  </div>
+
+  <div class="field">
+    <label class="field-label" >Notes</label>
+
+    <textarea
+      id={{this.notesTextareaId}}
+      value={{@jobApplication.notes}}
+      {{on "input" (fn this.updateField "notes")}}
+    ></textarea>
+  </div>
+
+  <div class="form-actions">
+    {{yield}}
+  </div>
+  <button
+    type="button"
+    class="btn"
+    {{on "click" this.saveApplication}}
+  >Save</button>
+</div>

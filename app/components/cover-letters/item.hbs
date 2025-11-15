@@ -1,6 +1,6 @@
 <article class="panel-card">
   <h3 class="panel-title">Cover Letter</h3>
-  <p class="text-muted">for resume: {{@coverLetter.resume.name}}</p>
+  <p class="text-muted">for resume: <LinkTo @route="resumes.show" @model={{@coverLetter.resume}}>{{@coverLetter.resume.name}}</LinkTo></p>
   <p class="text-muted">
     for jobpost:
     <LinkTo
@@ -11,7 +11,7 @@
     <LinkTo
       @route="companies.show"
       @model={{@coverLetter.jobPost.company}}
-    >{{this.jobPost.company.name}}</LinkTo>
+    >{{@coverLetter.jobPost.company.name}}</LinkTo>
   </p>
   <div class="panel-actions">
     <button

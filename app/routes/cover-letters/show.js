@@ -8,10 +8,10 @@ export default class CoverLettersShowRoute extends Route {
     const coverLetter = await this.store.findRecord(
       'cover-letter',
       cover_letter_id,
-      { include: 'job-post' },
+      { reload: true, include: 'job-post,job-post.company,resume' },
     );
-    const jobPost = await this.store.peekAll('job-post', 1)[0];
-    coverLetter.jobPost = jobPost;
+    await coverLetter.jobPost;
+    // await coverLetter.resume
     return coverLetter;
   }
 }

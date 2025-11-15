@@ -56,7 +56,7 @@ export default class SkillsFormComponent extends Component {
       const rec = this.store.createRecord('skill', {
         text,
         skillType: typeRaw || null,
-        resume: this.args.resume
+        resume: this.args.resume,
       });
 
       await rec.save();

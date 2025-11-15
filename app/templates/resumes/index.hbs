@@ -1,7 +1,6 @@
 {{#if this.noResumes}}
-  no resumes
+  <p>no resumes <LinkTo @route='resumes.import'>import</LinkTo> one to start.</p>
 {{else}}
-  <UploadForm @onUpload={{this.ingestResume}} />
   {{#if this.model}}
     <Resumes::List @resumes={{this.model}} />
   {{else}}

@@ -7,12 +7,16 @@ export default class SummariesList extends Component {
   @tracked lastDirection = '';
 
   get activeSummaryIndex() {
-    return ArrayProxy.create({content: this.args.summaries.content}).indexOf(this.activeSummary)
+    return ArrayProxy.create({ content: this.args.summaries.content }).indexOf(
+      this.activeSummary,
+    );
   }
 
   get activeSummary() {
-    const summary = ArrayProxy.create({content: this.args.summaries.content}).findBy('active');
-    return summary
+    const summary = ArrayProxy.create({
+      content: this.args.summaries.content,
+    }).findBy('active');
+    return summary;
   }
 
   @action

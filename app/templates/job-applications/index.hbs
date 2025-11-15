@@ -1,5 +1,10 @@
 {{page-title "Index"}}
+{{#if this.model.length}}
 {{#each this.model as |jobApplication|}}
   <JobApplications::Item @jobApplication={{jobApplication}} />
 {{/each}}
+{{else}}
+<p>no applications yet</p>
+<LinkTo @route="job-applications.new">create new</LinkTo>
+{{/if}}
 {{outlet}}

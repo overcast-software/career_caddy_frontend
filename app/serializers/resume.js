@@ -7,10 +7,11 @@ export default class ResumeSerializer extends ApplicationSerializer.extend(
   EmbeddedRecordsMixin,
 ) {
   attrs = {
+    // these are for saving an entire resume and it's dependencies
     user: { serialize: true, embedded: 'always' },
     scores: { serialize: true, embedded: 'always' },
     coverLetters: { serialize: true, embedded: 'always' },
-    applications: { serialize: true, embedded: 'always' },
+    jobApplications: { serialize: true, embedded: 'always' },
     experiences: { serialize: true, embedded: 'always' },
     educations: { serialize: true, embedded: 'always' },
     summaries: { serialize: true, embedded: 'always' },
