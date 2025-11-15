@@ -8,32 +8,38 @@
       {{on "input" (fn this.updateField "institution")}}
     />
   </label>
-  <label class="field">Degree
-    <input
-      type="text"
-      value={{this.education.degree}}
-      {{on "input" (fn this.updateField "degree")}}
-    />
-  </label>
-  <label class="field">Major
-    <input
-      type="text"
-      value={{this.education.major}}
-      {{on "input" (fn this.updateField "major")}}
-    />
-  </label>
-  <label class="field">Minor
-    <input
-      type="text"
-      value={{this.education.minor}}
-      {{on "input" (fn this.updateField "minor")}}
-    />
-  </label>
-  <label class="field">Issue Date
-    <input
-      type="date"
-      value={{this.formattedIssueDate}}
-      {{on "input" (fn this.updateField "issueDate")}}
-    />
-  </label>
+
+  <div class="personal-info-inline">
+    <label class="field">Issue Date
+      <input
+        type="date"
+        value={{this.formattedIssueDate}}
+        {{on "input" (fn this.updateField "issueDate")}}
+      />
+    </label>
+    <label class="field">Degree
+      <input
+        type="text"
+        value={{this.education.degree}}
+        {{on "input" (fn this.updateField "degree")}}
+      />
+    </label>
+  </div>
+
+  <div class="personal-info-inline">
+    <label class="field">Major
+      <input
+        type="text"
+        value={{this.education.major}}
+        {{on "input" (fn this.updateField "major")}}
+      />
+    </label>
+    <label class="field">Minor
+      <input
+        type="text"
+        value={{this.education.minor}}
+        {{on "input" (fn this.updateField "minor")}}
+      />
+    </label>
+  </div>
 </form>

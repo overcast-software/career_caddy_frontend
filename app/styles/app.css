@@ -1055,3 +1055,24 @@ a.btn:active {
   color: var(--text);
   word-break: break-word;
 }
+.personal-info-inline {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+}
+
+.personal-info-inline .field {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.personal-info-inline input {
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .personal-info-inline {
+    flex-wrap: wrap;
+  }
+}

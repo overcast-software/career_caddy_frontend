@@ -1,33 +1,35 @@
 <form class="builder-form">
-  <label class="field">
-    <span class="field-label">Name</span>
-    <input
-      type="text"
-      name="name"
-      value={{@user.name}}
-      {{on "input" this.updateName}}
-    />
-  </label>
+  <div class="personal-info-inline">
+    <label class="field">
+      <span class="field-row field-label">Name</span>
+      <input
+        type="text"
+        name="name"
+        value={{@user.name}}
+        {{on "input" this.updateName}}
+      />
+    </label>
 
-  <label class="field">
-    <span class="field-label">Phone</span>
-    <input
-      type="tel"
-      name="phone"
-      value={{@user.phone}}
-      {{on "input" this.updatePhone}}
-    />
-  </label>
+    <label class="field">
+      <span class="field-label">Phone</span>
+      <input
+        type="tel"
+        name="phone"
+        value={{@user.phone}}
+        {{on "input" this.updatePhone}}
+      />
+    </label>
 
-  <label class="field">
-    <span class="field-label">Email</span>
-    <input
-      type="email"
-      name="email"
-      value={{@user.email}}
-      {{on "input" this.updateEmail}}
-    />
-  </label>
+    <label class="field">
+      <span class="field-label">Email</span>
+      <input
+        type="email"
+        name="email"
+        value={{@user.email}}
+        {{on "input" this.updateEmail}}
+      />
+    </label>
+  </div>
 
   {{yield}}
 </form>
