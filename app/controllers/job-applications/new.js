@@ -14,5 +14,15 @@ export default class JobApplicationsNewController extends Controller {
     return this.store.peekAll('cover-letter');
   }
 
-  @action honk(){ this.flashMessages.success("honk")}
+  @action clearMessages(){
+    console.log("derp")
+    this.flashMessages.clearMessages()
+  }
+  @action honk() {
+    this.flashMessages.clearMessages()
+    this.flashMessages.success('honk honk', {
+      showProgress: true,
+      sticky: true
+    });
+  }
 }

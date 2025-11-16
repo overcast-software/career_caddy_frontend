@@ -43,8 +43,12 @@ export default class JobApplicationsNew extends Component {
   }
 
   @action honk() {
-    this.flashMessages.success('honk');
+    this.flashMessages.success('honk honk', {
+      showProgress: true,
+      sticky: true
+    });
   }
+
   get jobApplication() {
     return this.args.jobApplication;
   }

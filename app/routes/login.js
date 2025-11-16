@@ -7,7 +7,7 @@ export default class LoginRoute extends Route {
 
   beforeModel() {
     if (this.session.isAuthenticated) {
-      this.router.transitionTo('resumes.index');
+      this.router.transitionTo('job-posts.index');
     }
   }
 }

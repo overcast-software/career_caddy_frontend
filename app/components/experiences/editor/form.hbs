@@ -13,83 +13,90 @@
 
     <label class="field">Company
       <input type="text" value={{@experience.company.name}} disabled /></label>
-    <div class="field-row">
+      <div class="field-row">
 
-      <label class="field">Title
-        <input
-          type="text"
-          value={{@experience.title}}
-          {{on "input" (fn this.updateField "title")}}
-        />
-      </label>
-      <label class="field">Location
-        <input
-          type="text"
-          value={{@experience.location}}
-          {{on "input" (fn this.updateField "location")}}
-        />
-      </label>
-    </div>
-
-    <div class="field-row">
-      <label class="field">Start Date
-        <input
-          type="date"
-          value={{this.formattedStartDate}}
-          {{on "input" (fn this.updateField "startDate")}}
-        />
-      </label>
-      <label class="field">End Date
-        <input
-          type="date"
-          value={{this.formattedEndDate}}
-          {{on "input" (fn this.updateField "endDate")}}
-          disabled={{this.currentlyWorking}}
-        />
-        {{#if this.currentlyWorking}}<small
-            class="present-indicator"
-          >Present</small>{{/if}}
-      </label>
-    </div>
-    <label class="field">
-      <input
-        type="checkbox"
-        checked={{this.currentlyWorking}}
-        {{on "change" this.toggleCurrentlyWorking}}
-      />
-      I currently work here
-    </label>
-    <label class="field">
-      <span class="field-label">Description</span>
-    </label>
-    <section class="descriptions">
-      <h4 class="section-title">Descriptions</h4>
-      <ul class="desc-list editable">
-        {{#each @experience.descriptions as |d|}}
-          <Descriptions::Editor::Form
-            @description={{d}}
-            @onDelete={{fn this.removeDescription d}}
+        <label class="field">Title
+          <input
+            type="text"
+            value={{@experience.title}}
+            {{on "input" (fn this.updateField "title")}}
           />
-        {{/each}}
-      </ul>
-      <button
-        type="button"
-        class="btn small"
-        {{on "click" this.addDescription}}
-      >Add description</button>
-    </section>
-    <div class="form-actions">
-      <button type="submit" class="btn primary">Save</button>
-      <button
-        type="button"
-        class="btn"
-        {{on "click" this.cancel}}
-      >Cancel</button>
-      <button
-        type="button"
-        class="btn"
-        {{on "click" this.deleteExperience}}
-      >Delete</button>
-    </div>
+        </label>
+        <label class="field">Location
+          <input
+            type="text"
+            value={{@experience.location}}
+            {{on "input" (fn this.updateField "location")}}
+          />
+        </label>
+      </div>
+
+      <div class="field-row">
+        <label class="field">Start Date
+          <input
+            type="date"
+            value={{this.formattedStartDate}}
+            {{on "input" (fn this.updateField "startDate")}}
+          />
+        </label>
+        {{#if this.currentlyWorking}}
+          <label class="field">End Date
+            <input
+              type="text"
+              value="Present"
+              disabled={{this.currentlyWorking}}
+            />
+          </label>
+        {{else}}
+          <label class="field">End Date
+            <input
+              type="date"
+              value={{this.formattedEndDate}}
+              {{on "input" (fn this.updateField "endDate")}}
+              disabled={{this.currentlyWorking}}
+            />
+          </label>
+        {{/if}}
+      </div>
+      <label >
+        <input
+          type="checkbox"
+          checked={{this.currentlyWorking}}
+          {{on "change" this.toggleCurrentlyWorking}}
+        />
+        I currently work here
+      </label>
+      <label class="field">
+        <span class="field-label">Description</span>
+      </label>
+      <section class="descriptions">
+        <h4 class="section-title">Descriptions</h4>
+        <ul class="desc-list editable">
+          {{#each @experience.descriptions as |d|}}
+            <Descriptions::Editor::Form
+              @description={{d}}
+              @onDelete={{fn this.removeDescription d}}
+            />
+          {{/each}}
+        </ul>
+        <button
+          type="button"
+          class="btn small"
+          {{on "click" this.addDescription}}
+        >Add description</button>
+      </section>
+      <div class="form-actions">
+        <button type="submit" class="btn primary">Save</button>
+        <button
+          type="button"
+          class="btn"
+          {{on "click" this.cancel}}
+        >Cancel</button>
+        <button
+          type="button"
+          class="btn"
+          {{on "click" this.deleteExperience}}
+        >Delete</button>
+      </div>
   {{/if}}
 </form>

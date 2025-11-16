@@ -1,14 +1,14 @@
 {{page-title "Career Caddy"}}
 <header class="app-sticky-header">
   <TopBar @session={{this.session}} @user={{this.currentUser}} />
-  <div class="container">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
+  <div class='app-sticky-header' style="display: block;  height: 19px;background-color: #c8effa">
+    {{#each this.flashMessages.queue as |flash|}}
+      <FlashMessage @flash={{flash}} @messageStyle='foundation'/>
+    {{/each}}
   </div>
 </header>
 <MainApplication>
-{{outlet}}
+  {{outlet}}
 </MainApplication>
 <footer>
   copyelft 2025
