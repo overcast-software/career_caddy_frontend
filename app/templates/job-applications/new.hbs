@@ -1,8 +1,10 @@
 {{page-title 'New Application'}}
 
-<JobApplications::New
-  @jobApplication={{this.model}}
-  @jobPosts={{this.jobPosts}}
-  @resumes={{this.resumes}}
-  @coverLetters={{this.coverLetters}}
-/>
+<div class="container">
+  <JobApplications::New
+    @jobApplication={{this.model}}
+    @jobPosts={{this.jobPosts}}
+    @resumes={{this.resumes}}
+    @coverLetters={{this.coverLetters}}
+  />
+</div>

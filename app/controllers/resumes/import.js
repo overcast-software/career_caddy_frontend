@@ -7,7 +7,6 @@ export default class ResumesImportController extends Controller {
   @service session;
   @action
   async ingestResume(file) {
-    debugger;
     try {
       let token = this.session?.accessToken;
       if (!token && this.session?.refreshToken) {

@@ -1,3 +1,6 @@
+{{#each this.flashMessages.queue as |flash|}}
+  <FlashMessage @flash={{flash}} />
+{{/each}}
 {{#if this.noResumes}}
   <p>no resumes <LinkTo @route='resumes.import'>import</LinkTo> one to start.</p>
 {{else}}

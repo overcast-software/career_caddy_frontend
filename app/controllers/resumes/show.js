@@ -5,6 +5,7 @@ import { action } from '@ember/object';
 export default class ResumesShowController extends Controller {
   @service store;
   @service router;
+  @service flashMessages;
   @service session;
 
   get isDirty() {
@@ -35,7 +36,10 @@ export default class ResumesShowController extends Controller {
   @action
   async saveResume() {
     this.model.save()
+        .then(()=> this.flashMessages.success("saved"))
+        .then(()=> this.router.transitionTo("resume.show", this.model.id))
   }
+
 
   @action
   async deleteResume() {

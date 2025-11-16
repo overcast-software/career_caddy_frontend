@@ -1,6 +1,10 @@
 <Menus::SubnavBar>
   <LinkTo @route="job-posts.edit" class="btn" @model={{this.model}}>Edit</LinkTo>
 </Menus::SubnavBar>
+{{#if this.errorMessage}}
+  <p class="error">{{this.errorMessage}}</p>
+{{/if}}
+
 <JobPosts::Item
   @showControls={{this.showControls}}
   @jobPost={{this.model}}

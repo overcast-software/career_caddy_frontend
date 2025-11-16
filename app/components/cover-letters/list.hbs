@@ -1,16 +1,6 @@
 <ul>
-
-        <span class="loader"></span>
+  <span class="loader"></span>
   {{#each @coverLetters as |coverLetter|}}
-    <li>
-        <LinkTo
-            @route="cover-letters.show"
-            @model={{coverLetter}}>
-            Cover Letter #{{coverLetter.id}}
-        </LinkTo>
-        for job post: <u>{{coverLetter.jobPost.title}}</u> created at {{format-date coverLetter.createdAt}}
-    </li>
-        <span class="loader"></span>
+    <CoverLetters::Compact @coverLetter={{coverLetter}}/>
   {{/each}}
 </ul>
-<LinkTo @route="cover-letters.new">New Cover Letter</LinkTo>

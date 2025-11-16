@@ -2,7 +2,7 @@
 <div class='container'>
   <ul>
     {{#each @resumes as |resume|}}
-      <li><LinkTo @route="resumes.show" @model={{resume}}>Resume #{{resume.name}}</LinkTo></li>
+      <Resumes::Compact @resume={{resume}}/>
     {{/each}}
   </ul>
   {{yield}}

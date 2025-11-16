@@ -1,0 +1,15 @@
+{{yield}}
+<article class="panel-card">
+  <h3 >
+    Resume
+    <LinkTo @route="resumes.show" @model={{@resume}}>
+      {{@resume.name}}
+    </LinkTo>
+  </h3>
+
+  <p>
+    Used in {{@resume.jobApplications.length}} job appliations
+  </p>
+  <LinkTo @route="resumes.edit" @model={{@resume}} class='btn'>Edit</LinkTo>
+</article>
+{{yield}}

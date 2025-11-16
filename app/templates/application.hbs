@@ -1,3 +1,6 @@
 {{page-title "Career Caddy"}}
 <TopBar @session={{this.session}} @user={{this.currentUser}} />
+{{#each this.flashMessages.queue as |flash|}}
+  <FlashMessage @flash={{flash}} />
+{{/each}}
 {{outlet}}

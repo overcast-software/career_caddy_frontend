@@ -1,17 +1,15 @@
 <article class="panel-card">
-  <header class="job-post-header">
-    <h2 class="panel-title">{{@jobPost.company.name}}</h2>
+  <h2 class="panel-title">{{@jobPost.company.name}}</h2>
 
-    <h1 class="job-title">
-      <LinkTo @route="job-posts.show" @model={{@jobPost}}>
-        {{@jobPost.title}}
-      </LinkTo>
-      {{#if @jobPost.link}}
-        --
-        <a href="{{@jobPost.link}}">external</a>
-      {{/if}}
-    </h1>
-  </header>
+  <h1 class="job-title">
+    <LinkTo @route="job-posts.show" @model={{@jobPost}}>
+      {{@jobPost.title}}
+    </LinkTo>
+    {{#if @jobPost.link}}
+      --
+      <a href="{{@jobPost.link}}">external</a>
+    {{/if}}
+  </h1>
   <section class="job-post-description">
     <p class="muted">
       {{truncate @jobPost.description}}

@@ -2,7 +2,7 @@
 <div class="builder-form">
   <div class="field">
     <label class="field-label" >Job post:</label>
-    <select >
+    <select>
       {{#each @jobPosts as |jobPost|}}
         <option>{{jobPost.title}} at {{jobPost.company.name}}</option>
       {{/each}}
