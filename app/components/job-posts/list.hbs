@@ -1,5 +1,7 @@
-<div class="job-posts-list {{if @compact 'is-compact'}}">
   {{#each this.jobPosts as |jobPost|}}
-    <JobPosts::Item @jobPost={{jobPost}} />
+    {{#if @compact}}
+        <JobPosts::Item @jobPost={{jobPost}} />
+    {{else}}
+        <JobPosts::Compact @jobPost={{jobPost}}/>
+    {{/if}}
   {{/each}}
-</div>

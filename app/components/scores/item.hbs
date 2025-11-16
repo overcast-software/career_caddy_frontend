@@ -1,22 +1,24 @@
 {{yield}}
 <h1>
-  score:
-  {{@score.score}}
+  job-post:
+  <LinkTo
+    @route="job-posts.show"
+    @model={{@score.jobPost}}
+  >{{@score.jobPost.title}}</LinkTo>
 </h1>
 <h1>
   resume:
   <LinkTo
     @route="resumes.show"
     @model={{@score.resume}}
-  >{{@score.resume.id}}</LinkTo>
+  >{{@score.resume.name}}</LinkTo>
+  at
+  <LinkTo @route="companies.show" @model={{@score.jobPost.company}}>{{@score.jobPost.company.name}}</LinkTo>
 </h1>
 <h1>
-  job-post:
-  <LinkTo
-    @route="job-posts.show"
-    @model={{@score.jobPost}}
-  >{{@score.jobPost.id}}</LinkTo>
+  score:
+  {{@score.score}}
 </h1>
-<p>
+<pre>
   {{@score.explanation}}
-</p>
+</pre>

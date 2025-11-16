@@ -1,89 +1,91 @@
-<div class="profile text-center">
-  <div class="name">{{@resume.user.name}}</div>
-  <div class="title">{{@resume.title}}</div>
-  <div class="email">{{@resume.user.email}}</div>
-</div>
+<div class="resume-content">
+  <div class="profile text-center">
+    <div class="name">{{@resume.user.name}}</div>
+    <div class="title">{{@resume.title}}</div>
+    <div class="email">{{@resume.user.email}}</div>
+  </div>
 
-<section>
-  <h2>Summary</h2>
-  <hr />
-  <div class="summary">{{@resume.activeSummary.content}}</div>
-</section>
-{{#if this.hasSkills}}
   <section>
-    <h2>Skills</h2>
+    <h2>Summary</h2>
     <hr />
-    {{#each-in this.groupedSkillsMap as |group skills|}}
-      <div class="skills-row">
-        <div class="skills-group-title">{{group}}:</div>
-        <ul class="skills-list">
-          {{#each skills as |skill|}}
-            <li class="skills-block pre-wrap">{{skill.text}}</li>
+    <div class="summary">{{@resume.activeSummary.content}}</div>
+  </section>
+  {{#if this.hasSkills}}
+    <section>
+      <h2>Skills</h2>
+      <hr />
+      {{#each-in this.groupedSkillsMap as |group skills|}}
+        <div class="skills-row">
+          <div class="skills-group-title">{{group}}:</div>
+          <ul class="skills-list">
+            {{#each skills as |skill|}}
+              <li class="skills-block pre-wrap">{{skill.text}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/each-in}}
+    </section>
+  {{/if}}
+
+  <section>
+    <h2>Experience</h2>
+    <hr />
+    {{#each @resume.experiences as |exp|}}
+      <article class="experience">
+        <div class="job-header">
+          <div class="job-title">
+            {{exp.title}}
+            <span class="job-dates">
+              {{#if exp.startDate}}
+                {{#if exp.endDate}}
+                  {{format-date exp.startDate "MM.YYYY"}}
+                  -
+                  {{format-date exp.endDate "MM.YYYY"}}
+                {{else}}
+                  {{format-date exp.startDate "MM.YYYY"}}
+                {{/if}}
+              {{else}}
+                {{#if exp.endDate}}
+                  {{format-date exp.endDate "MM.YYYY"}}
+                {{/if}}
+              {{/if}}
+            </span>
+          </div>
+          <div class="job-meta">
+            <span>{{exp.company.name}}</span>
+            <span class="dot">•</span>
+            <span>{{exp.location}}</span>
+          </div>
+        </div>
+
+        {{#if exp.summary}}
+          <div class="job-summary">{{exp.summary}}</div>
+        {{/if}}
+
+        <ul class="desc-list">
+          {{#each exp.descriptions as |desc|}}
+            <li class="desc-item">{{desc.content}}</li>
           {{/each}}
         </ul>
-      </div>
-    {{/each-in}}
+      </article>
+    {{/each}}
   </section>
-{{/if}}
 
-<section>
-  <h2>Experience</h2>
-  <hr />
-  {{#each @resume.experiences as |exp|}}
-    <article class="experience">
-      <div class="job-header">
-        <div class="job-title">
-          {{exp.title}}
-          <span class="job-dates">
-            {{#if exp.startDate}}
-              {{#if exp.endDate}}
-                {{format-date exp.startDate "MM.YYYY"}}
-                -
-                {{format-date exp.endDate "MM.YYYY"}}
-              {{else}}
-                {{format-date exp.startDate "MM.YYYY"}}
-              {{/if}}
-            {{else}}
-              {{#if exp.endDate}}
-                {{format-date exp.endDate "MM.YYYY"}}
-              {{/if}}
-            {{/if}}
-          </span>
-        </div>
-        <div class="job-meta">
-          <span>{{exp.company.name}}</span>
-          <span class="dot">•</span>
-          <span>{{exp.location}}</span>
-        </div>
-      </div>
+  <section>
+    <h2>Education</h2>
+    <hr />
+    {{#each @resume.educations as |education|}}
+      <Educations::Item @education={{education}} />
+    {{/each}}
+  </section>
 
-      {{#if exp.summary}}
-        <div class="job-summary">{{exp.summary}}</div>
-      {{/if}}
+  <section>
+    <h2>Certifications</h2>
+    <hr />
+    {{#each @resume.certifications as |certification|}}
+      <Certifications::Item @certification={{certification}} />
+    {{/each}}
+  </section>
 
-      <ul class="desc-list">
-        {{#each exp.descriptions as |desc|}}
-          <li class="desc-item">{{desc.content}}</li>
-        {{/each}}
-      </ul>
-    </article>
-  {{/each}}
-</section>
-
-<section>
-  <h2>Education</h2>
-  <hr />
-  {{#each @resume.educations as |education|}}
-    <Educations::Item @education={{education}} />
-  {{/each}}
-</section>
-
-<section>
-  <h2>Certifications</h2>
-  <hr />
-  {{#each @resume.certifications as |certification|}}
-    <Certifications::Item @certification={{certification}} />
-  {{/each}}
-</section>
-
-{{yield}}
+  {{yield}}
+</div>

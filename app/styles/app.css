@@ -268,7 +268,7 @@ a.btn:visited,
 a.btn:hover,
 a.btn:active {
   text-decoration: none;
-  color: inherit;
+  color: (--muted);
 }
 
 .btn:hover {
@@ -692,6 +692,56 @@ a.btn:active {
     flex-wrap: wrap;
     gap: var(--space-3);
   }
+
+  .builder-page .builder-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-panel {
+    position: static;
+  }
+
+  .input-group {
+    display: block;
+  }
+
+  .builder-form .field {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Stack rowed fields on small screens */
+  .builder-form .field-row {
+    flex-direction: column;
+  }
+
+  /* Ensure each field in the row takes full width when stacked */
+  .builder-form .field-row .field,
+  .builder-form .field-row label.field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .builder-form .field label,
+  .builder-form .field .field-label {
+    display: block;
+    width: 100%;
+    margin-bottom: var(--space-2);
+  }
+
+  .builder-form .field input,
+  .builder-form .field select,
+  .builder-form .field textarea {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .builder-form.two-col .field input,
+  .builder-form.two-col .field select,
+  .builder-form.two-col .field textarea {
+    width: 100%;
+    margin: 0;
+  }
 }
 
 /* Builder side-by-side layout */
@@ -756,6 +806,11 @@ a.btn:active {
   padding: var(--space-5);
 }
 
+.resume-content {
+  width: 90%;
+  margin: 0 auto;
+}
+
 .muted {
   color: var(--muted);
 }
@@ -808,17 +863,7 @@ a.btn:active {
   outline: 3px solid rgb(63 126 255 / 14%);
 }
 
-@media (width <= 900px) {
-  .builder-page .builder-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .editor-panel {
-    position: static;
-  }
-}
-
-@media (min-width: 1024px) {
+@media (width >= 901px) {
   .builder-page .container {
     overflow: hidden;
   }
@@ -839,6 +884,15 @@ a.btn:active {
 
   .preview-panel {
     padding-right: var(--space-4);
+  }
+
+  .input-group > .btn {
+    border-radius: 0;
+  }
+
+  .input-group > .btn:last-child {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
   }
 }
 
@@ -899,22 +953,76 @@ a.btn:active {
 
 /* Submenu styles */
 .submenu {
-  background: #fff;
-  border-bottom: 1px solid var(--border);
+  background: #f5f6f8;
+  border-bottom: 1px solid #e1e5ea;
+  width: 100%;
 }
 
 .submenu-inner {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: 8px 0;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 8px var(--space-6);
 }
 
 .submenu-buttons {
-  margin-left: auto;
+  /* margin-left: auto; */
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+/* Make submenu buttons more like navigation links */
+.submenu-buttons .btn {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.submenu-buttons .btn:hover {
+  background: rgb(3 10 27 / 6%);
+  color: var(--text);
+}
+
+.submenu-buttons .btn.is-active,
+.submenu-buttons .btn[aria-current="page"] {
+  background: #e9eef5;
+  color: var(--text);
+}
+
+/* Tone down "primary" buttons inside submenu to feel like nav */
+.submenu-buttons .btn.primary {
+  background: transparent;
+  border: 0;
+  color: var(--accent);
+}
+
+.submenu-buttons .btn.primary:hover {
+  background: rgb(10 102 194 / 10%);
+}
+
+/* Inline fields for submenu meta */
+.submenu-field {
+  display: inline-block;
+  white-space: normal;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.submenu-label {
+  font-weight: 600;
+  margin-right: 6px;
+  color: var(--text);
+}
+
+.submenu-value {
+  color: var(--muted);
 }
 
 .trash-drop-zone {
@@ -950,16 +1058,6 @@ a.btn:active {
   min-height: 40px;
 }
 
-/* Round outer corners only */
-.input-group > .btn:first-child {
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
-}
-
-.input-group > .btn:last-child {
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
-}
 
 /* Summaries page */
 .summary-item .summary-header {
@@ -1105,51 +1203,4 @@ a.btn:active {
   font-weight: 600;
   color: var(--text);
   word-break: break-word;
-}
-
-@media (width <= 900px) {
-
-    .input-group {
-        display: block
-    }
-}
-
-@media (width <= 900px) {
-  .builder-form .field {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  /* Stack rowed fields on small screens */
-  .builder-form .field-row {
-    flex-direction: column;
-  }
-
-  /* Ensure each field in the row takes full width when stacked */
-  .builder-form .field-row .field,
-  .builder-form .field-row label.field {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .builder-form .field label,
-  .builder-form .field .field-label {
-    display: block;
-    width: 100%;
-    margin-bottom: var(--space-2);
-  }
-
-  .builder-form .field input,
-  .builder-form .field select,
-  .builder-form .field textarea {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .builder-form.two-col .field input,
-  .builder-form.two-col .field select,
-  .builder-form.two-col .field textarea {
-    width: 100%;
-    margin: 0;
-  }
 }

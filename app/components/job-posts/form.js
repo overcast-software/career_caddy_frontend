@@ -44,7 +44,8 @@ export default class JobPostsFormComponent extends Component {
       this.args.jobPost.save();
     } else {
       this.args.jobPost.company = company;
-      this.args.jobPost.save();
+      this.args.jobPost.save()
+          .then(() => this.router.transitionTo('job-posts.index'));
     }
   }
   @action

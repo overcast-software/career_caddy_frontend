@@ -4,8 +4,10 @@
   @onFilterChange={{this.onFilterChange}}
   @onCompactToggle={{this.onCompactToggle}}
 />
-<JobPosts::List
-  @jobPosts={{this.model}}
-  @query={{this.query}}
-  @compact={{this.compact}}
-/>
+<div class='container'>
+  <JobPosts::List
+    @jobPosts={{this.model}}
+    @query={{this.query}}
+    @compact={{this.compact}}
+  />
+</div>
