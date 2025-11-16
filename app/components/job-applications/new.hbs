@@ -2,16 +2,20 @@
 <div class="builder-form">
   <div class="field">
     <label class="field-label" >Job post:</label>
-    <select>
+    <select value={{@jobApplication.jobPost.id}} {{on "change" this.updateJobPost}}>
+      <option value="">Select a job post…</option>
       {{#each @jobPosts as |jobPost|}}
-        <option>{{jobPost.title}} at {{jobPost.company.name}}</option>
+        <option value={{jobPost.id}}>{{jobPost.title}} at {{jobPost.company.name}}</option>
       {{/each}}
     </select>
+    {{#if this.errorMessage}}
+      <div class="error-message">{{this.errorMessage}}</div>
+    {{/if}}
   </div>
 
   <div class="field">
     <label class="field-label" >Resume to use:</label>
-    <select {{on "change" this.updateResume}}>
+    <select value={{@jobApplication.resume.id}} {{on "change" this.updateResume}}>
       {{#each @resumes as |resume|}}
         <option value={{resume.id}}>
           {{resume.name}}
@@ -22,7 +26,7 @@
 
   <div class="field">
     <label class="field-label" >Cover Letter</label>
-    <select {{on "change" this.updateCoverLetter}} >
+    <select value={{@jobApplication.coverLetter.id}} {{on "change" this.updateCoverLetter}} >
       {{#each @coverLetters as |coverLetter|}}
         <option value={{coverLetter.id}}>
           cover letter {{coverLetter.id}} - written on {{format-date coverLetter.createdAt}}
@@ -32,20 +36,11 @@
   </div>
 
   <div class="field">
-    <label class="field-label" >Applied At</label>
-    <input
-      type="date"
-      value={{format-date @jobApplication.appliedAt}}
-      {{on "change" (fn this.updateField "appliedAt")}}
-    />
-  </div>
-
-  <div class="field">
     <label class="field-label" >Status</label>
     <select
-      {{on "change" (fn this.updateField "status")}}
+      value={{@jobApplication.status}}
+      {{on "change" this.updateStatus}}
     >
-      <option value="">{{@jobApplication.status}}</option>
       {{#each this.statusOptions as |status|}}
         <option value={{status}}>
           {{status}}
@@ -53,6 +48,16 @@
       {{/each}}
     </select>
   </div>
+  {{#if this.showAppliedAt}}
+    <div class="field">
+      <label class="field-label" >Applied At</label>
+      <input
+        type="date"
+        value={{format-date @jobApplication.appliedAt}}
+        {{on "change" (fn this.updateField "appliedAt")}}
+      />
+    </div>
+  {{/if}}
 
   <div class="field">
     <label class="field-label" >Tracking URL</label>
@@ -79,6 +84,7 @@
   <button
     type="button"
     class="btn"
+    disabled={{not this.canSave}}
     {{on "click" this.saveApplication}}
   >Save</button>
 </div>

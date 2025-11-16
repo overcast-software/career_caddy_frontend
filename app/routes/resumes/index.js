@@ -5,6 +5,6 @@ export default class ResumesIndexRoute extends Route {
   @service store;
 
   model() {
-    return this.store.findAll('resume', { reload: true });
+    return this.store.findAll('resume');
   }
 }
