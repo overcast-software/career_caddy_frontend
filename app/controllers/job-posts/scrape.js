@@ -4,6 +4,7 @@ import { service } from '@ember/service';
 
 export default class JobPostsScrapeController extends Controller {
   @service store;
+  @service flashMessages;
 
   @action
   updateUrl(event) {
@@ -11,19 +12,12 @@ export default class JobPostsScrapeController extends Controller {
   }
 
   @action
-  async submitScrape(event) {
+  submitScrape(event) {
     event.preventDefault();
-    this.errorMessage = null;
-
-    try {
-      if (this.url) {
-        console.log('url', this.url);
-        let scrape = this.store.createRecord('scrape', { url: this.url });
-        scrape.save();
-      }
-    } catch (e) {
-      this.errorMessage =
-        e?.errors?.[0]?.detail || e?.message || 'Failed to create job post';
-    }
+    let scrape = this.store.createRecord('scrape', { url: this.url });
+    scrape.save().catch((error) => {
+      this.flashMessages.clearMessages();
+      this.flashMessages.warning(error?.errors[0]?.detail || 'fucked');
+    });
   }
 }

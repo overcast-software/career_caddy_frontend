@@ -5,7 +5,7 @@ export default class JobApplicationsNewRoute extends Route {
   async model() {
     this.store.findAll('job-post', { reload: true });
     this.store.findAll('resume', { reload: true });
-    this.store.findAll('cover-letter', { reload: true });
+    this.store.findAll('cover-letter');
     return this.store.createRecord('job-application');
   }
 }
