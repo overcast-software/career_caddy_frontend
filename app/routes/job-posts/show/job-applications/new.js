@@ -7,13 +7,11 @@ export default class JobPostsShowJobApplicationNewRoute extends Route {
   @service currentUser;
   async model() {
     const { job_post_id } = this.paramsFor('job-posts.show');
-    const jobPost = await this.store.peekRecord('job-post', job_post_id);
-    const jobApplication = await this.store.createRecord('job-application', {
+    const jobApplication = this.store.createRecord('job-application', {
       appliedAt: new Date(),
       status: 'applied',
     });
-
-    jobApplication.jobPost = jobPost;
-    return jobApplication;
+    jobApplication.jobPost = this.store.peekRecord('job-post', job_post_id);
+    return jobApplication
   }
 }

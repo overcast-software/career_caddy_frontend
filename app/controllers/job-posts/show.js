@@ -11,9 +11,5 @@ export default class JobPostsShowController extends Controller {
   @tracked resumes = null;
   @tracked users = null;
   @tracked coverLetters = null;
-
   showControls = true;
-  constructor() {
-    super(...arguments);
-  }
 }
