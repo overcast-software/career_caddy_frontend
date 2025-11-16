@@ -1,9 +1,11 @@
-<form class="builder-form" {{on "submit" this.submitScrape}}>
-  <div class="field">
-    <label class="field-label" for="url">Url</label>
-    <input id="url" type="text" {{on "change" this.updateUrl}} required />
-  </div>
-  <div class="form-actions">
-    <button type="submit" class="btn primary">Scrape the page</button>
-  </div>
-</form>
+<div class='container'>
+  <form class="builder-form" {{on "submit" this.submitScrape}}>
+    <div class="field">
+      <label class="field-label" for="url">Url</label>
+      <input id="url" type="text" {{on "change" this.updateUrl}} required />
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn primary">Scrape the page</button>
+    </div>
+  </form>
+</div>

@@ -1,6 +1,12 @@
 {{page-title "Career Caddy"}}
-<TopBar @session={{this.session}} @user={{this.currentUser}} />
-{{#each this.flashMessages.queue as |flash|}}
-  <FlashMessage @flash={{flash}} />
-{{/each}}
+<header class="app-sticky-header">
+  <TopBar @session={{this.session}} @user={{this.currentUser}} />
+  <div class="container">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+  </div>
+</header>
 {{outlet}}
+
+<p>footer</p>

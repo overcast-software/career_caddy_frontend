@@ -1,5 +1,10 @@
 {{page-title 'New Application'}}
 
+<Menus::SubnavBar>
+  <button {{on 'click' this.honk}}>honk</button>
+
+  <span class='loader'></span>
+</Menus::SubnavBar>
 <div class="container">
   <JobApplications::New
     @jobApplication={{this.model}}
@@ -8,3 +13,4 @@
     @coverLetters={{this.coverLetters}}
   />
 </div>
+{{outlet}}

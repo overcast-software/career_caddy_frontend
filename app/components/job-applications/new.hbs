@@ -1,4 +1,3 @@
-{{yield}}
 <div class="builder-form">
   <div class="field">
     <label class="field-label" >Job post:</label>
@@ -84,7 +83,16 @@
   <button
     type="button"
     class="btn"
-    disabled={{not this.canSave}}
+    disabled={{this.cantSave}}
     {{on "click" this.saveApplication}}
   >Save</button>
+  <button
+    type="button"
+    class="btn"
+    disabled={{this.cantSave}}
+    {{on "click" this.honk}}
+  >Honk</button>
+
 </div>
+
+{{yield}}

@@ -1,27 +1,40 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-
+import { service } from '@ember/service';
 export default class JobApplicationsNew extends Component {
-  @tracked showAppliedAt = false
-  @tracked errorMessage = null
+  @tracked showAppliedAt = false;
+  @tracked errorMessage = null;
+  @service flashMessages;
 
   constructor() {
     super(...arguments);
     const app = this.args.jobApplication;
 
     // Default Job Post: if none selected and exactly one option available, select it
-    if (!app.jobPost && Array.isArray(this.args.jobPosts) && this.args.jobPosts.length === 1) {
+    if (
+      !app.jobPost &&
+      Array.isArray(this.args.jobPosts) &&
+      this.args.jobPosts.length === 1
+    ) {
       app.jobPost = this.args.jobPosts[0];
     }
 
     // Default Resume: if none selected and options available, select first
-    if (!app.resume && Array.isArray(this.args.resumes) && this.args.resumes.length > 0) {
+    if (
+      !app.resume &&
+      Array.isArray(this.args.resumes) &&
+      this.args.resumes.length > 0
+    ) {
       app.resume = this.args.resumes[0];
     }
 
     // Default Cover Letter: if none selected and options available, select first
-    if (!app.coverLetter && Array.isArray(this.args.coverLetters) && this.args.coverLetters.length > 0) {
+    if (
+      !app.coverLetter &&
+      Array.isArray(this.args.coverLetters) &&
+      this.args.coverLetters.length > 0
+    ) {
       app.coverLetter = this.args.coverLetters[0];
     }
 
@@ -29,8 +42,11 @@ export default class JobApplicationsNew extends Component {
     this.toggleAppliedAt();
   }
 
+  @action honk() {
+    this.flashMessages.success('honk');
+  }
   get jobApplication() {
-    return this.args.jobApplication
+    return this.args.jobApplication;
   }
 
   get statuses() {
@@ -61,31 +77,35 @@ export default class JobApplicationsNew extends Component {
   }
 
   get statusOptions() {
-    return this.statuses
+    return this.statuses;
   }
 
   get canSave() {
-    return Boolean(this.jobApplication?.jobPost?.id)
+    return Boolean(this.jobApplication?.jobPost?.id);
+  }
+
+  get cantSave(){
+    return !this.canSave
   }
 
   toggleAppliedAt() {
-    this.showAppliedAt = this.jobApplication.status === 'Applied'
+    this.showAppliedAt = this.jobApplication.status === 'Applied';
   }
 
   @action async saveApplication() {
     if (!this.jobApplication?.jobPost || !this.jobApplication.jobPost.id) {
-      this.errorMessage = "Please select a job post before saving.";
+      this.errorMessage = 'Please select a job post before saving.';
       return;
     }
-    
+
     this.errorMessage = null;
     await this.args.jobApplication.save();
   }
 
   @action updateStatus(event) {
     const status = event?.target?.value ?? '';
-    this.jobApplication.status = status
-    this.toggleAppliedAt()
+    this.jobApplication.status = status;
+    this.toggleAppliedAt();
   }
 
   @action updateCoverLetter(event) {
