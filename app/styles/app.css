@@ -436,9 +436,16 @@ a.btn:active {
 
 }
 
+
 .main.container{
     margin: 5em;
     clear: both;
+}
+
+.main.container.builder-page{
+    margin: 5em;
+    clear: both;
+    max-width: 90%;
 }
 
 footer{
@@ -953,6 +960,14 @@ pre {
     l4-2 1s linear infinite alternate;
 }
 
+.loader.top-bar{
+    font-size: 1em;
+}
+
+.loader.top-bar::after{
+    border: 1px solid grey;
+}
+
 @keyframes l4-0 {
   0%,
   30% {
@@ -1379,4 +1394,9 @@ pre {
   z-index: 1000;
   background: white;
   width: 100%;
+}
+
+.sandtrap{
+    background-color: #e0dc99;
+    padding: 2em;
 }

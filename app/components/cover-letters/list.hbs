@@ -1,6 +1,11 @@
 <ul>
-  <span class="loader"></span>
   {{#each @coverLetters as |coverLetter|}}
-    <CoverLetters::Compact @coverLetter={{coverLetter}}/>
+    {{#if coverLetter.isSaving}}
+      <Panel::Card @sandtrap={{true}}>
+        <span class="loader"></span>
+      </Panel::Card>
+    {{else}}
+      <CoverLetters::Compact @coverLetter={{coverLetter}}/>
+    {{/if}}
   {{/each}}
 </ul>

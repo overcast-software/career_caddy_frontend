@@ -1,7 +1,8 @@
   {{#each this.jobPosts as |jobPost|}}
     {{#if @compact}}
-        <JobPosts::Compact @jobPost={{jobPost}}/>
+        <JobPosts::Compact @jobPost={{jobPost}} @showLoading={{@showLoading}} />
     {{else}}
-        <JobPosts::Item @jobPost={{jobPost}} />
+        <!-- // probably don't need showLoading here since we require the show path -->
+        <JobPosts::Item @jobPost={{jobPost}} @showLoading={{@showLoading}} />
     {{/if}}
   {{/each}}

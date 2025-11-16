@@ -3,11 +3,13 @@
   @compact={{this.compact}}
   @onFilterChange={{this.onFilterChange}}
   @onCompactToggle={{this.onCompactToggle}}
+  @showLoading={{this.showLoading}} // not implemented
 />
 <div class='main container'>
   <JobPosts::List
     @jobPosts={{this.model}}
     @query={{this.query}}
     @compact={{this.compact}}
+    @showLoading={{this.showLoading}}
   />
 </div>

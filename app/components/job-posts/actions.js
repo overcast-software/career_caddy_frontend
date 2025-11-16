@@ -6,8 +6,9 @@ export default class JobPostsActions extends Component {
   @service store;
   @service currentUser;
   @service router;
+  @service flashMessages;
   @tracked selectedResumeId = null;
-
+  @tracked coverLetterInProgress = false;
   @action
   onResumeChange(event) {
     this.selectedResumeId = event.target.value;
@@ -47,7 +48,14 @@ export default class JobPostsActions extends Component {
       jobPost,
       user,
     });
-    newCoverLetter.save();
+    this.flashMessages.info('creating new cover letter');
+    this.coverLetterInProgress = true;
+    newCoverLetter
+      .save()
+      .then(() => {
+        this.flashMessages.success('finished');
+      })
+      .catch((error) => console.log(error) & this.flashMessages.alert(error));
   }
 
   @action

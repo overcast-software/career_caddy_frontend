@@ -22,7 +22,6 @@ export default class JobApplicationsNewController extends Controller {
     this.flashMessages.clearMessages()
     this.flashMessages.success('honk honk', {
       showProgress: true,
-      sticky: true
     });
   }
 }

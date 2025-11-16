@@ -1,7 +1,8 @@
 <div
   class="panel-card
-    {{if @collapsible 'collapsible'}}
-    {{if this.collapsed 'collapsed'}}"
+         {{if @collapsible 'collapsible'}}
+         {{if this.collapsed 'collapsed'}}
+         {{if @sandtrap 'sandtrap'}}"
 >
   <div class="collapsible-head">
     <div class="panel-title">{{@title}}</div>
@@ -9,8 +10,8 @@
       <div class="panel-actions">
         {{yield
           (hash
-            collapsed=this.collapsed
-            toggleCollapsed=this.toggleCollapsed
+          collapsed=this.collapsed
+          toggleCollapsed=this.toggleCollapsed
           )
           to="top"
         }}

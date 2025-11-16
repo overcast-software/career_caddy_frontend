@@ -26,9 +26,11 @@ export default class JobPostsListComponent extends Component {
     }
 
     // Sort by date (newest first)
-    console.log("search result length:", filteredList.length)
     filteredList.sortBy('postedDate')
 
     return filteredList;
+  }
+  toggleShowLoading(){
+    this.args.showLoading = !this.args.showLoading
   }
 }
