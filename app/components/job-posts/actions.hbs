@@ -29,14 +29,13 @@
         class="btn"
         {{on "click" this.createCoverLetter}}
       >Create cover letter</button>
-      <button type="button" class="btn primary">
         <LinkTo
           @route="job-posts.show.job-applications.new"
           @model={{@jobPost}}
+          class='btn'
         >
           Apply
         </LinkTo>
-      </button>
     </div>
   {{/if}}
 

@@ -5,8 +5,10 @@
   <p class="error">{{this.errorMessage}}</p>
 {{/if}}
 
+<div class='main container'>
 <JobPosts::Item
   @showControls={{this.showControls}}
   @jobPost={{this.model}}
 />
 {{outlet}}
+</div>
