@@ -4,10 +4,12 @@ import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 export default class JobPostsActions extends Component {
   @service store;
+  @service router;
   @service currentUser;
   @service router;
+  @service flashMessages;
   @tracked selectedResumeId = null;
-
+  @tracked coverLetterInProgress = false;
   @action
   onResumeChange(event) {
     this.selectedResumeId = event.target.value;
@@ -47,7 +49,14 @@ export default class JobPostsActions extends Component {
       jobPost,
       user,
     });
-    newCoverLetter.save();
+    this.flashMessages.info('creating new cover letter');
+    this.coverLetterInProgress = true;
+    newCoverLetter
+      .save()
+      .then(() => {
+        this.flashMessages.success('finished');
+      })
+      .catch((error) => console.log(error) & this.flashMessages.alert(error));
   }
 
   @action
@@ -70,5 +79,10 @@ export default class JobPostsActions extends Component {
     } catch (e) {
       console.error('Failed to create score', e);
     }
+  }
+
+  @action
+  goToApply(){
+    this.router.transitionTo('job-applications.new', {queryParams: {jobId: this.args.jobPost.id}})
   }
 }

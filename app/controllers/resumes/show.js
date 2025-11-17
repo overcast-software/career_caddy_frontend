@@ -5,6 +5,7 @@ import { action } from '@ember/object';
 export default class ResumesShowController extends Controller {
   @service store;
   @service router;
+  @service flashMessages;
   @service session;
 
   get isDirty() {
@@ -20,13 +21,15 @@ export default class ResumesShowController extends Controller {
         user,
         title: source.title ? `${source.title} (Copy)` : source.title,
         content: source.content ?? null,
+        skills: source.skills ?? null,
         filePath: source.filePath ?? null,
-        educations: source.hasMany('educations').value(),
-        experiences: source.hasMany('experiences').value(),
-        certifications: source.hasMany('certifications').value(),
-        summaries: source.hasMany('summaries').value(),
+        educations: source.educations,
+        experiences: source.experiences,
+        certifications: source.certifications,
+        summaries: source.summaries
       })
       .save()
+      .then(() => this.flashMessages.success('resume successfully cloned'))
       .then((c) => {
         this.router.transitionTo('resumes.show', c.id);
       });
@@ -35,7 +38,10 @@ export default class ResumesShowController extends Controller {
   @action
   async saveResume() {
     this.model.save()
+        .then(()=> this.flashMessages.success("saved"))
+        .then(()=> this.router.transitionTo("resume.show", this.model.id))
   }
+
 
   @action
   async deleteResume() {

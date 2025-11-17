@@ -6,6 +6,7 @@ import { tracked } from '@glimmer/tracking';
 export default class ExperiencesEditorForm extends Component {
   @service router;
   @service store;
+  @service flashMessages
   @tracked errorMessage = null;
   @tracked editingDesc = null;
   @tracked editingDraft = '';
@@ -79,14 +80,20 @@ export default class ExperiencesEditorForm extends Component {
       if (this.currentlyWorking) {
         this.experience.endDate = null;
       }
-      const resumeId = this.experience.belongsTo('resume').id();
       await this.experience.save();
-      const descs = await this.experience.descriptions;
-      const list = descs?.toArray?.() ?? Array.from(descs ?? []);
-      if (list.length) {
-        await Promise.all(list.map((d) => d.save?.() ?? d));
-      }
-      this.router.transitionTo('resumes.show', resumeId, this.experience.id);
+      // XXX this might be redundant
+      // check the PATCH to see what comes across
+      this.experience.descriptions
+          .then((descriptions)=> {
+            Promise.all(descriptions.map((d) => d.save()));
+          })
+          .then( () => {
+            this.flashMessages.success("saved experience")
+          })
+          .catch( (error ) => {
+            this.flashMessages.error(error)
+          })
+      // what is this doing?
     } catch (e) {
       this.errorMessage = e?.message ?? 'Failed to save experience';
     }

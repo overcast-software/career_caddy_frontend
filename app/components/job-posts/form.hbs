@@ -1,11 +1,3 @@
-{{#if this.errorMessage}}
-  <p class="error">{{this.errorMessage}}</p>
-{{/if}}
-
-<div class="field">
-  <LinkTo @route="job-posts.scrape">scrape</LinkTo>
-</div>
-
 <form class="builder-form" {{on "submit" this.submitEdit}}>
   <div class="field">
     <label class="field-label" for="company-autocomplete">Company</label>

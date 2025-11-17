@@ -1,8 +1,20 @@
 {{page-title 'New Application'}}
 
-<JobApplications::New
-  @jobApplication={{this.model}}
-  @jobPosts={{this.jobPosts}}
-  @resumes={{this.resumes}}
-  @coverLetters={{this.coverLetters}}
-/>
+<Menus::SubnavBar>
+  <button type="button" {{on 'click' this.honk}}>honk</button>
+
+  <br/>
+  <span class='loader'></span>
+</Menus::SubnavBar>
+
+<div class="main container">
+  {{log this.model}}
+  <JobApplications::New
+    @jobApplication={{this.model.jobApplication}}
+    @jobPosts={{this.model.jobPosts}}
+    @jobPost={{this.model.jobPost}}
+    @resumes={{this.resumes}}
+    @coverLetters={{this.coverLetters}}
+  />
+</div>
+{{outlet}}

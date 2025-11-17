@@ -1,75 +1,88 @@
-<div class="builder-page">
-  <Menus::SubnavBar>
-    <div class="score muted">Resume Score: 0%</div>
-    <div class="submenu-buttons">
-      {{#if this.isDirty}}
-        <button type="button" class="btn" {{on "click" this.saveResume}}>
-          Save
-        </button>
-      {{/if}}
-      <button
-        type="button"
-        class="btn danger"
-        {{on "click" this.deleteResume}}
-      >
-        Delete
+<Menus::SubnavBar>
+  <div class="submenu-buttons">
+    {{#if this.isDirty}}
+      <button type="button" class="btn" {{on "click" this.saveResume}}>
+        Save
       </button>
-      <button type="button" class="btn" {{on "click" this.cloneResume}}>
-        Clone Resume
-      </button>
-      <button
-        type="button"
-        class="btn"
-        {{on "click" this.exportToWord}}
-      >Export to Word</button>
-    </div>
-  </Menus::SubnavBar>
+    {{/if}}
+    <button
+      type="button"
+      class="btn danger"
+      {{on "click" this.deleteResume}}
+    >
+      Delete
+    </button>
+    <button type="button" class="btn" {{on "click" this.cloneResume}}>
+      Clone Resume
+    </button>
+    <button type="button" class="btn">
+      <LinkTo @route='resumes.show' @model={{this.model}} class="btn">Preview</LinkTo>
+    </button>
+    <button
+      type="button"
+      class="btn"
+      {{on "click" this.exportToWord}}
+    >Export to Word</button>
+  </div>
+</Menus::SubnavBar>
+<div class="main container builder-page">
+  <div class="builder-layout">
+    <aside class="editor-panel">
+      <Panel::Card @title="Title" @collapsible={{false}}>
+        <Resumes::Title::Form @title="Title" @resume={{this.model}} />
+      </Panel::Card>
 
-  <div class="container">
-    <div class="builder-layout">
-      <aside class="editor-panel">
-        <Panel::Card @title="Title" @collapsible={{false}}>
-          <Resumes::Title::Form @title="Title" @resume={{this.model}} />
-        </Panel::Card>
+      <Panel::Card @title="Personal Information" @collapsible={{true}}>
+        <PersonalInformation::Form @user={{this.model.user}} />
+      </Panel::Card>
 
-        <Panel::Card @title="Personal Information" @collapsible={{true}}>
-          <PersonalInformation::Form @user={{this.model.user}} />
-        </Panel::Card>
-
-        <Panel::Card
-          @title="Summary"
-          @collapsible={{true}}
-          @onDirection={{this.onSummaryDirection}}
-        >
+      <Panel::Card @title="Summary" @collapsible={{true}} >
+        <:top as |panel|>
+          <Panel::Navigation
+            @recordArray={{this.model.summaries}}
+            @collapsible={{true}}
+            @collapsed={{panel.collapsed}}
+            @toggleCollapsed={{panel.toggleCollapsed}}
+          >
+          </Panel::Navigation>
+        </:top>
+        <:default>
           <Summaries::List @summaries={{this.model.summaries}} />
-        </Panel::Card>
+        </:default>
+      </Panel::Card>
 
-        <Panel::Card @title="Skills" @collapsible={{true}}>
-          <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
-        </Panel::Card>
+      <Panel::Card @title="Skills" @collapsible={{true}}>
+        <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
+      </Panel::Card>
 
-        <Panel::Card @title="Education" @collapsible={{true}}>
-          <Educations::Form @education={{this.model.education}} />
-        </Panel::Card>
+      <Panel::Card @title="Education" @collapsible={{true}}>
+        <Educations::Form @education={{this.model.education}} />
+      </Panel::Card>
 
-        <Panel::Card @title="Experience" @collapsible={{true}}>
-          <div class="panel-body">
-            <div class="panel-actions">
-              <button
-                type="button"
-                class="btn small"
-                {{on "click" this.addExperience}}
-              >+ Add Experience</button>
-            </div>
-            <Experiences::List @experiences={{this.model.experiences}} />
-          </div>
-        </Panel::Card>
-      </aside>
-      <main class="preview-panel">
-        <div class="resume-preview">
-          <Resumes::Item @resume={{this.model}} />
-        </div>
-      </main>
-    </div>
+      <Panel::Card @title="Experience" @collapsible={{true}}>
+        <:top as |panel|>
+          <Panel::Navigation
+            @collapsible={{true}}
+            @collapsed={{panel.collapsed}}
+            @toggleCollapsed={{panel.toggleCollapsed}}
+          >
+            <button
+              type="button"
+              class="btn small"
+              {{on "click" this.addExperience}}
+            >+ Add Experience</button>
+          </Panel::Navigation>
+        </:top>
+
+        <:default>
+          <Experiences::List @experiences={{this.model.experiences}} />
+        </:default>
+      </Panel::Card>
+    </aside>
+    <main class="preview-panel">
+      <div class="resume-preview">
+        <Resumes::Item @resume={{this.model}} />
+      </div>
+    </main>
   </div>
 </div>

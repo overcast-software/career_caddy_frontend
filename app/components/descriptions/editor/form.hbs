@@ -1,12 +1,5 @@
 <li class="desc-item">
   <div class="input-group">
-    <button
-      type="button"
-      class="btn danger"
-      title="Delete"
-      aria-label="Delete description"
-      {{on "click" this.delete}}
-    >🗑</button>
 
     <textarea
       class="desc-editor"
@@ -20,8 +13,16 @@
     <button
       type="button"
       class="btn primary"
+      title="Save"
+      aria-label="Save description"
       {{on "click" this.commitDescription}}
-    >Save</button>
-
+    >💾</button>
+    <button
+      type="button"
+      class="btn danger"
+      title="Delete"
+      aria-label="Delete description"
+      {{on "click" this.delete}}
+    >🗑</button>
   </div>
 </li>

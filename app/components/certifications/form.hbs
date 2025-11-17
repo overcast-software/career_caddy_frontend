@@ -1,29 +1,27 @@
 <form class="builder-form">
   {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
+  <label class="field-row field">Issuer
+    <input
+      type="text"
+      value={{@certification.issuer}}
+      {{on "input" (fn this.updateField "issuer")}}
+    />
+  </label>
+  <label class="field-row field">Title
+    <input
+      type="text"
+      value={{@certification.title}}
+      {{on "input" (fn this.updateField "title")}}
+    />
+  </label>
+  <label class="field">Issue Date
+    <input
+      type="date"
+      value={{this.formattedIssueDate}}
+      {{on "input" (fn this.updateField "issueDate")}}
+    />
+  </label>
 
-  <div class="personal-info-inline">
-    <label class="field-row field">Issuer
-      <input
-        type="text"
-        value={{@certification.issuer}}
-        {{on "input" (fn this.updateField "issuer")}}
-      />
-    </label>
-    <label class="field-row field">Title
-      <input
-        type="text"
-        value={{@certification.title}}
-        {{on "input" (fn this.updateField "title")}}
-      />
-    </label>
-    <label class="field">Issue Date
-      <input
-        type="date"
-        value={{this.formattedIssueDate}}
-        {{on "input" (fn this.updateField "issueDate")}}
-      />
-    </label>
-  </div>
 
   <label class="field">Content
     <textarea

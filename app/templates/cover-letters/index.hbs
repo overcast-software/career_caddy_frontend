@@ -1,5 +1,7 @@
 <Menus::SubnavBar>
-  <p>Cover letters index</p>
+  <LinkTo @route="cover-letters.new" class='btn'>New Cover Letter</LinkTo>
 </Menus::SubnavBar>
-<CoverLetters::List @coverLetters={{this.model.coverLetters}} />
-{{outlet}}
+<div class="main container">
+  <CoverLetters::List @coverLetters={{this.model}} />
+  {{outlet}}
+</div>

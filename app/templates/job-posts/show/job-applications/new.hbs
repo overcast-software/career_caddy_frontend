@@ -1,2 +1,8 @@
 {{page-title "New Application"}}
-<JobApplications::Edit @jobApplication={{this.model}} />
+<div class="container">
+  <JobApplications::Edit
+    @jobApplication={{this.model}}
+    @resume={{this.jobPostResume}}
+    @resumeSetter={{this.resumeSetter}}
+  />
+</div>

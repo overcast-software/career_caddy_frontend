@@ -11,6 +11,7 @@ export default class JobPostsFormComponent extends Component {
   @tracked errorMessage = null;
   @tracked form_toggle = false; // false = "by url", true = "manual"
   @tracked companyQuery = '';
+  @service flashMessages;
 
   get companies() {
     return this.store.peekAll('company');
@@ -44,7 +45,11 @@ export default class JobPostsFormComponent extends Component {
       this.args.jobPost.save();
     } else {
       this.args.jobPost.company = company;
-      this.args.jobPost.save();
+      this.args.jobPost
+        .save()
+        .then(() => this.flashMessages.add({message: 'Saved the job post'}))
+        .then(() => this.router.transitionTo('job-posts.index'))
+        .catch(() => this.flashMessages.danger('Problem in saving job post.'));
     }
   }
   @action
@@ -52,6 +57,8 @@ export default class JobPostsFormComponent extends Component {
     event.preventDefault();
     this.args.jobPost
       .destroyRecord()
-      .then(() => this.router.transitionTo('job-posts.index'));
+      .then(() => this.router.transitionTo('job-posts.index'))
+      .then(() => this.flashMessages.success('Saved the job post'))
+      .catch(() => this.flashMessages.danger('Problem in saving job post.'));
   }
 }

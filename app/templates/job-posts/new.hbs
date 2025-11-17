@@ -1,1 +1,7 @@
-<JobPosts::Form @jobPost={{this.model}} />
+<Menus::SubnavBar>
+  <LinkTo @route="job-posts.scrape" class='btn'>scrape</LinkTo>
+</Menus::SubnavBar>
+
+<div class='main container'>
+  <JobPosts::Form @jobPost={{this.model}} />
+</div>

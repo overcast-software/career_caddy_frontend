@@ -1,8 +1,10 @@
 import Component from '@glimmer/component';
+import ArrayProxy from '@ember/array/proxy';
 
 export default class JobPostsListComponent extends Component {
   get jobPosts() {
-    const list = Array.from(this.args.jobPosts ?? []);
+
+    const list = ArrayProxy.create({content: this.args.jobPosts})
 
     // Filter if query is provided
     const q = (this.args.query ?? '').trim().toLowerCase();
@@ -11,10 +13,10 @@ export default class JobPostsListComponent extends Component {
     if (q) {
       filteredList = list.filter((jobPost) => {
         const searchableText = [
-          jobPost.title ?? '',
-          jobPost.description ?? '',
-          jobPost.company?.displayName ?? '',
-          jobPost.company?.name ?? '',
+          jobPost.get("title"),
+          jobPost.get('description'),
+          jobPost.get('company.displayName'),
+          jobPost.get('company.name'),
         ]
           .join(' ')
           .toLowerCase();
@@ -24,10 +26,11 @@ export default class JobPostsListComponent extends Component {
     }
 
     // Sort by date (newest first)
-    const dateFor = (jp) =>
-      jp.postedDate ?? jp.extractionDate ?? jp.createdAt ?? new Date(0);
-    filteredList.sort((a, b) => dateFor(b) - dateFor(a));
+    filteredList.sortBy('postedDate')
 
     return filteredList;
+  }
+  toggleShowLoading(){
+    this.args.showLoading = !this.args.showLoading
   }
 }

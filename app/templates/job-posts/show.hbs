@@ -1,5 +1,21 @@
-<JobPosts::Item
-  @showControls={{this.showControls}}
-  @jobPost={{this.model}}
-/>
-{{outlet}}
+<Menus::SubnavBar>
+  <LinkTo
+    @route="job-posts.edit"
+    class="btn"
+    @model={{this.model}}
+  >Edit</LinkTo>
+</Menus::SubnavBar>
+{{#if this.errorMessage}}
+  <p class="error">{{this.errorMessage}}</p>
+{{/if}}
+
+<div class="main container">
+  <JobPosts::Item
+    @showControls={{this.showControls}}
+    @jobPost={{this.model}}
+    @showLoading={{this.showLoading}}
+    @resumeSetter={{this.resumeSetter}}
+    @resume={{this.model.resume}}
+  />
+  {{outlet}}
+</div>

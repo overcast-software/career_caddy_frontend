@@ -1,10 +1,13 @@
-{{page-title "Index"}}
-{{#if this.model.length}}
-{{#each this.model as |jobApplication|}}
-  <JobApplications::Item @jobApplication={{jobApplication}} />
-{{/each}}
-{{else}}
-<p>no applications yet</p>
-<LinkTo @route="job-applications.new">create new</LinkTo>
-{{/if}}
-{{outlet}}
+{{page-title "Applications"}}
+
+<Menus::SubnavBar>
+    <LinkTo @route="job-applications.new" class='btn'>New Application</LinkTo>
+</Menus::SubnavBar>
+<div class="container">
+  {{#if this.model.length}}
+    <JobApplications::List @jobApplications={{this.model}}/>
+  {{else}}
+      <p>no applications yet</p>
+  {{/if}}
+  {{outlet}}
+</div>

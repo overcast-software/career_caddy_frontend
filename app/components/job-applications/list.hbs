@@ -1,6 +1,6 @@
+
 <ul>
   {{#each @applications as |application|}}
     <li><LinkTo @route="applications.show" @model={{application}}>Application #{{application.id}}</LinkTo></li>
   {{/each}}
 </ul>
-<LinkTo @route="applications.new">New Application</LinkTo>

@@ -1,6 +1,7 @@
-{{yield}}
-<ul>
-  {{#each @resumes as |resume|}}
-    <li><LinkTo @route="resumes.show" @model={{resume}}>Resume #{{resume.id}}</LinkTo></li>
-  {{/each}}
-</ul>
+{{page-title "Resumes"}}
+<div class='main container'>
+    {{#each @resumes as |resume|}}
+      <Resumes::Compact @resume={{resume}}/>
+    {{/each}}
+  {{yield}}
+</div>

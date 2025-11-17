@@ -21,15 +21,17 @@
       {{/each-in}}
     </div>
 
-    <div class="add-row">
-      <input
-        type="text"
-        class="add-text"
-        placeholder="Skill (e.g., JavaScript)"
-        value={{this.newSkillText}}
-        {{on "input" this.updateNewSkillText}}
-      />
-      <div class="type-and-add">
+    <div class="input-group">
+      <label class="field">
+        <input
+          type="text"
+          class="add-text"
+          placeholder="Skill (e.g., JavaScript)"
+          value={{this.newSkillText}}
+          {{on "input" this.updateNewSkillText}}
+        />
+      </label>
+      <label class="field">
         <input
           type="text"
           class="add-type"
@@ -37,13 +39,13 @@
           value={{this.newSkillType}}
           {{on "input" this.updateNewSkillType}}
         />
+      </label>
         <button
           type="button"
           class="btn primary"
           disabled={{this.newSkillText.length}}
           {{on "click" this.addSkill}}
         >Add</button>
-      </div>
     </div>
   </div>
 </div>

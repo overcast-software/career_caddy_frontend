@@ -29,14 +29,9 @@
       id={{this.coverLetterSelectId}}
       {{on "change" this.updateCoverLetter}}
     >
-      <option value={{this.jobApplication.coverLetter.id}}>
-        {{this.jobApplication.coverLetter.id}}
-        -
-        {{format-date this.jobApplication.coverLetter.createdAt}}
-      </option>
       {{#each this.coverLetterOptions as |coverLetter|}}
         <option value={{coverLetter.id}}>
-          {{coverLetter.id}}
+          cover letter for {{coverLetter.jobPost.title}}
           -
           {{format-date coverLetter.createdAt}}
         </option>

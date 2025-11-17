@@ -18,30 +18,6 @@ export default class DescriptionsEditorForm extends Component {
     return this.args.experience;
   }
 
-  // @action updateDesc(event) {
-  //     this.description.content = event.target.value
-  // }
-
-  // @action deleteDesc() {
-  //     this.description.destroyRecord()
-  //         .then(this.experience.removeObject(this.description))
-  // }
-
-  // @action cancelEditDescription() {
-  //     this.editingIndex = null;
-  //     this.editingDraft = '';
-  // }
-
-  // @action async handleDescriptionKeydown(index, desc, event) {
-  //     if (event.key === 'Enter' && !event.shiftKey) {
-  //     event.preventDefault();
-  //     await this.commitDescription(index, desc);
-  //     } else if (event.key === 'Escape') {
-  //     event.preventDefault();
-  //     this.cancelEditDescription();
-  //     }
-  // }
-
   @action async commitDescription() {
     await this.description.save?.();
   }
@@ -68,27 +44,4 @@ export default class DescriptionsEditorForm extends Component {
       this.description.destroyRecord?.();
     }
   }
-
-  // @action async handleDescriptionKeydown(index, desc, event) {
-  //     if (event.key === 'Enter' && !event.shiftKey) {
-  //     event.preventDefault();
-  //     await this.commitDescription(index, desc);
-  //     } else if (event.key === 'Escape') {
-  //     event.preventDefault();
-  //     this.cancelEditDescription();
-  //     }
-  // }
-
-  // @action onInput(){
-  //     debugger
-  // }
-
-  // @action cancelEditDescription() {
-  //     this.editingIndex = null;
-  //     this.editingDraft = '';
-  // }
-
-  // @action updateEditingDraft(event) {
-  //     this.editingDraft = event.target.value;
-  // }
 }

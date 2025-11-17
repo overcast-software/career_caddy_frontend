@@ -1,6 +1,7 @@
 <ul>
   {{#each @scores as |score|}}
-    <li><LinkTo @route="scores.show" @model={{score}}>Score #{{score.id}}</LinkTo></li>
+        <Panel::Card @title={{score.jobPost.title}} @collapsible={{false}}>
+          <h3>Score: <LinkTo @route="scores.show" @model={{score}}>{{score.score}}</LinkTo></h3>
+        </Panel::Card>
   {{/each}}
 </ul>
-<LinkTo @route="scores.new">New Score</LinkTo>

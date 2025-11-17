@@ -1,11 +1,13 @@
 {{page-title "Career Caddy"}}
-<div class="container">
-  <div class="landing-page">
+<Menus::SubnavBar>
     {{#if this.session.isAuthenticated}}
-      <h1>Welcome to Career Caddy, {{this.currentUser.user.firstName}}</h1>
+      <h3 style='margin-top:0px'>Welcome to Career Caddy, {{this.currentUser.user.firstName}}</h3>
     {{else}}
-      <h1>Welcome to Career Caddy</h1>
+      <h2>Welcome to Career Caddy</h2>
     {{/if}}
+</Menus::SubnavBar>
+<div class='landing-page'>
+  <br/>
     <p>Your personal career management assistant</p>
 
     <div class="landing-actions">
@@ -17,5 +19,4 @@
         <LinkTo @route="setup" class="btn secondary">Initial Setup</LinkTo>
       {{/if}}
     </div>
-  </div>
 </div>

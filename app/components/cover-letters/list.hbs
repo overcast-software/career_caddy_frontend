@@ -1,16 +1,11 @@
 <ul>
-
-        <span class="loader"></span>
   {{#each @coverLetters as |coverLetter|}}
-    <li>
-        <LinkTo
-            @route="cover-letters.show"
-            @model={{coverLetter}}>
-            Cover Letter #{{coverLetter.id}}
-        </LinkTo>
-        for job post: <u>{{coverLetter.jobPost.title}}</u> created at {{format-date coverLetter.createdAt}}
-    </li>
+    {{#if coverLetter.isSaving}}
+      <Panel::Card @sandtrap={{true}}>
         <span class="loader"></span>
+      </Panel::Card>
+    {{else}}
+      <CoverLetters::Compact @coverLetter={{coverLetter}}/>
+    {{/if}}
   {{/each}}
 </ul>
-<LinkTo @route="cover-letters.new">New Cover Letter</LinkTo>

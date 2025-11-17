@@ -5,6 +5,8 @@ import { service } from '@ember/service';
 
 export default class CoverLettersItemComponent extends Component {
   @service store;
+  @service session;
+  @service flashMessages
   @tracked isExporting = false;
 
   get jobPost() {
@@ -21,7 +23,7 @@ export default class CoverLettersItemComponent extends Component {
 
   @action
   async exportToDocx() {
-    if (this.isExporting) return;
+    if (this.isExporting) this.flashMessages.warn("already exporting. calm down.");
     this.isExporting = true;
     try {
       const id = this.args.coverLetter.id;
@@ -30,7 +32,11 @@ export default class CoverLettersItemComponent extends Component {
       const base = adapter.buildURL('cover-letter', id); // e.g. /api/v1/cover-letters/1/
       const url = `${base}export`; // -> /api/v1/cover-letters/1/export
 
-      const resp = await fetch(url, { method: 'GET', credentials: 'include' });
+      const headers = {};
+      if (this.session.authorizationHeader) {
+        headers['Authorization'] = this.session.authorizationHeader;
+      }
+      const resp = await fetch(url, { method: 'GET', credentials: 'include', headers, });
       if (!resp.ok) throw new Error(`Export failed (${resp.status})`);
 
       // If the API returns the docx file, trigger a download
@@ -59,7 +65,7 @@ export default class CoverLettersItemComponent extends Component {
         }
       }
     } catch (e) {
-      alert?.(e?.message ?? 'Export failed');
+         this.flashMessages.danger(e)
     } finally {
       this.isExporting = false;
     }

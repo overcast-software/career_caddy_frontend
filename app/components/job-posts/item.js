@@ -11,25 +11,11 @@ export default class JobPostsItemComponent extends Component {
   @tracked selectedResumeId = null;
 
   get loggedInUser() {
-    // Prefer @user if passed; otherwise use the already-loaded application user
     return this.currentUser.user;
-  }
-
-  get resumes() {
-    const userId = this.currentUser?.id;
-    if (!userId) return [];
-    return this.currentUser?.resumes;
   }
 
   get jobPost() {
     return this.args.jobPost;
-  }
-
-  @action async derp() {
-    this.jobPost
-      .hasMany('coverLetters')
-      .value()
-      .forEach((x) => console.log(x));
   }
 
   get companyName() {
@@ -74,5 +60,9 @@ export default class JobPostsItemComponent extends Component {
   @action
   onResumeChange(event) {
     this.selectedResumeId = event.target.value;
+  }
+
+  toggleLoading(){
+    this.args.showLoading = !this.args.showLoading
   }
 }

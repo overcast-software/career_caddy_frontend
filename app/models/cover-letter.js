@@ -6,7 +6,7 @@ export default class CoverLetterModel extends Model {
   @belongsTo('user', { async: false, inverse: 'coverLetters' }) user;
   @belongsTo('job-post', { async: true, inverse: 'coverLetters' }) jobPost;
   @belongsTo('resume', { async: true, inverse: 'coverLetters' }) resume;
-  @belongsTo('application', { async: true, inverse: 'coverLetters' })
+  @belongsTo('job-application', { async: true, inverse: 'coverLetters' })
   jobApplication;
   get derp() {
     return 'derp';

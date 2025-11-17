@@ -1,7 +1,7 @@
 <header class="site-header">
   <div class="container header-inner">
     <LinkTo @route="index" class="brand">Career Caddy</LinkTo>
-    {{#if @session.isAuthenticated}}
+    {{#if this.authed}}
       <nav class="nav" aria-label="loggedin">
         <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
         <LinkTo @route="cover-letters.index" class="nav-link">Cover letters</LinkTo>
@@ -12,6 +12,9 @@
           @route="job-applications.index"
           class="nav-link"
         >Applications</LinkTo>
+        {{#if @showLoading}}
+            <span class="loader top-bar"></span>
+        {{/if}}
       </nav>
     {{else}}
       <nav class="nav" aria-label="loggedout">
@@ -36,10 +39,11 @@
         >GitHub</a>
       </nav>
     {{/if}}
-    {{#if @session.isAuthenticated}}
+    {{#if this.authed}}
       <LinkTo @route="logout">Logout</LinkTo>
     {{else}}
       <LinkTo @route="login">Login</LinkTo>
     {{/if}}
   </div>
+  {{yield to="subnav"}}
 </header>

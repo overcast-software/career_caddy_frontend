@@ -4,6 +4,7 @@ import config from 'career-caddy-frontend/config/environment';
 
 export default class ApplicationAdapter extends JSONAPIAdapter {
   @service session;
+  @service flashMessages;
   @service router;
 
   get host() {
