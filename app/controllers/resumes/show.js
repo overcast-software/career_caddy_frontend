@@ -21,13 +21,15 @@ export default class ResumesShowController extends Controller {
         user,
         title: source.title ? `${source.title} (Copy)` : source.title,
         content: source.content ?? null,
+        skills: source.skills ?? null,
         filePath: source.filePath ?? null,
-        educations: source.hasMany('educations').value(),
-        experiences: source.hasMany('experiences').value(),
-        certifications: source.hasMany('certifications').value(),
-        summaries: source.hasMany('summaries').value(),
+        educations: source.educations,
+        experiences: source.experiences,
+        certifications: source.certifications,
+        summaries: source.summaries
       })
       .save()
+      .then(() => this.flashMessages.success('resume successfully cloned'))
       .then((c) => {
         this.router.transitionTo('resumes.show', c.id);
       });

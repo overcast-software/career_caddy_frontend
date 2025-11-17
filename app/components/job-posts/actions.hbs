@@ -29,13 +29,13 @@
         class="btn"
         {{on "click" this.createCoverLetter}}
       >Create cover letter</button>
-        <LinkTo
-          @route="job-posts.show.job-applications.new"
-          @model={{@jobPost}}
-          class='btn'
-        >
-          Apply
-        </LinkTo>
+      <LinkTo
+        @route="job-applications.new"
+        @query={{hash jobId=@jobPost.id}}
+        class="btn"
+      >
+        Apply
+      </LinkTo>
     </div>
   {{/if}}
 

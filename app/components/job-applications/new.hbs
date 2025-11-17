@@ -1,12 +1,16 @@
 <div class="builder-form">
   <div class="field">
     <label class="field-label" >Job post:</label>
-    <select value={{@jobApplication.jobPost.id}} {{on "change" this.updateJobPost}}>
-      <option value="">Select a job post…</option>
-      {{#each @jobPosts as |jobPost|}}
-        <option value={{jobPost.id}}>{{jobPost.title}} at {{jobPost.company.name}}</option>
-      {{/each}}
-    </select>
+    {{#if @jobPost}}
+      <input type='text' value={{@jobPost.title}} >
+    {{else}}
+      <select value={{@jobApplication.jobPost.id}} {{on "change" this.updateJobPost}}>
+        <option value="">Select a job post…</option>
+        {{#each @jobPosts as |jobPost|}}
+          <option value={{jobPost.id}}>{{jobPost.title}} at {{jobPost.company.name}}</option>
+        {{/each}}
+      </select>
+    {{/if}}
   </div>
 
   <div class="field">
@@ -83,13 +87,6 @@
     disabled={{this.cantSave}}
     {{on "click" this.saveApplication}}
   >Save</button>
-  <button
-    type="button"
-    class="btn"
-    disabled={{this.cantSave}}
-    {{on "click" this.honk}}
-  >Honk</button>
-
 </div>
 
 {{yield}}

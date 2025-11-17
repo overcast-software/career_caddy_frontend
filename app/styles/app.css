@@ -449,10 +449,10 @@ a.btn:active {
 
 }
 
-
 .main.container{
     margin: 5em;
     clear: both;
+    padding-bottom: 5em;
 }
 
 .main.container.builder-page{
@@ -468,6 +468,7 @@ footer{
     bottom: 0;
     left: 0;
     padding: 1em;
+    z-index: 15;
     align-content: center;
     background-color: #6e533f;
 
@@ -1090,7 +1091,8 @@ pre {
 
 /* Top bar styles */
 .site-header {
-  position: sticky;
+  position: fixed;
+  display: block;
   top: 0;
   background: #fff;
   border-bottom: 1px solid var(--border);

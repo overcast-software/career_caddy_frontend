@@ -6,46 +6,36 @@ export default class JobApplicationsNew extends Component {
   @tracked showAppliedAt = false;
   @tracked errorMessage = null;
   @service flashMessages;
+  @tracked selectedJobPost = null;
+  @tracked selectedResume = null;
+  @tracked selectedCoverLetter = null;
 
   constructor() {
     super(...arguments);
     const app = this.args.jobApplication;
 
-    // Default Job Post: if none selected and exactly one option available, select it
-    if (
-      !app.jobPost &&
-      Array.isArray(this.args.jobPosts) &&
-      this.args.jobPosts.length === 1
-    ) {
-      app.jobPost = this.args.jobPosts[0];
+    // Default Job Post
+    if (this.args.jobPost) {
+      this.selectedJobPost = this.args.jobPost;
     }
 
-    // Default Resume: if none selected and options available, select first
-    if (
-      !app.resume &&
-      Array.isArray(this.args.resumes) &&
-      this.args.resumes.length > 0
-    ) {
-      app.resume = this.args.resumes[0];
+    // Default Resume
+    if (this.args.resumes.length > 0) {
+      this.selectedResume = this.args.resumes[0];
     }
 
     // Default Cover Letter: if none selected and options available, select first
-    if (
-      !app.coverLetter &&
-      Array.isArray(this.args.coverLetters) &&
-      this.args.coverLetters.length > 0
-    ) {
-      app.coverLetter = this.args.coverLetters[0];
+    if (this.args.coverLetters.length > 0) {
+      this.selectedCoverLetter = this.args.coverLetters[0];
     }
 
     // Initialize applied-at visibility based on initial status
-    this.toggleAppliedAt();
   }
 
   @action honk() {
     this.flashMessages.success('honk honk', {
       showProgress: true,
-      sticky: true
+      sticky: true,
     });
   }
 
@@ -85,11 +75,11 @@ export default class JobApplicationsNew extends Component {
   }
 
   get canSave() {
-    return Boolean(this.jobApplication?.jobPost?.id);
+    return Boolean(this.selectedJobPost);
   }
 
-  get cantSave(){
-    return !this.canSave
+  get cantSave() {
+    return !this.canSave;
   }
 
   toggleAppliedAt() {
@@ -97,13 +87,16 @@ export default class JobApplicationsNew extends Component {
   }
 
   @action async saveApplication() {
-    if (!this.jobApplication?.jobPost || !this.jobApplication.jobPost.id) {
-      this.errorMessage = 'Please select a job post before saving.';
-      return;
+    if (!this.selectedJobPost ){
+      this.flashMessages.warn("please select a job.")
+      return
     }
+    this.jobApplication.jobPost = this.selectedJobPost;
+    this.jobApplication.resume = this.selectedResume;
+    this.jobApplication.coverLetter = this.selectedCoverLetter;
 
-    this.errorMessage = null;
-    await this.args.jobApplication.save();
+    this.args.jobApplication.save()
+        .then(()=> this.flashMessages.success('job application saved'))
   }
 
   @action updateStatus(event) {
@@ -114,28 +107,20 @@ export default class JobApplicationsNew extends Component {
 
   @action updateCoverLetter(event) {
     const id = event?.target?.value ?? '';
-    const selected =
-      (this.args.coverLetters ?? []).find(
-        (cl) => String(cl.id) === String(id),
-      ) || null;
-    this.args.jobApplication.coverLetter = selected;
+    const selected = this.args.coverLetters.find((cl) => cl.id === id);
+    this.selectedCoverLetter = selected;
   }
 
   @action updateResume(event) {
     const id = event?.target?.value ?? '';
-    const selected =
-      (this.args.resumes ?? []).find((r) => String(r.id) === String(id)) ||
-      null;
-    this.args.jobApplication.resume = selected;
+    const selected = this.args.resumes.find((r) => r.id === id);
+    this.selectedResume = selected;
   }
 
   @action updateJobPost(event) {
     const id = event?.target?.value ?? '';
-    const selected =
-      (this.args.jobPosts ?? []).find((jp) => String(jp.id) === String(id)) ||
-      null;
-
-    this.args.jobApplication.jobPost = selected;
+    const selected = this.args.jobPosts.find((jp) => jp.id === id);
+    this.selectedJobPost = selected;
 
     // Clear error message if a valid job post is selected
     if (selected && selected.id) {
@@ -143,7 +128,7 @@ export default class JobApplicationsNew extends Component {
     }
 
     // If a cover letter is selected and it belongs to a different job post, clear it.
-    const currentCL = this.args.jobApplication.coverLetter;
+    const currentCL = this.jobApplication.coverLetter;
     if (
       currentCL &&
       selected &&

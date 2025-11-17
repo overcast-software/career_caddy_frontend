@@ -4,6 +4,7 @@ import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 export default class JobPostsActions extends Component {
   @service store;
+  @service router;
   @service currentUser;
   @service router;
   @service flashMessages;
@@ -78,5 +79,10 @@ export default class JobPostsActions extends Component {
     } catch (e) {
       console.error('Failed to create score', e);
     }
+  }
+
+  @action
+  goToApply(){
+    this.router.transitionTo('job-applications.new', {queryParams: {jobId: this.args.jobPost.id}})
   }
 }

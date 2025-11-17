@@ -55,7 +55,11 @@
   <div class="form-actions">
     {{yield}}
   </div>
-  <LinkTo @route="job-applications.edit" @model={{@jobApplication}} class="btn">
-    Edit
-  </LinkTo>
+    <LinkTo
+      @route="job-applications.edit"
+      @model={{@jobApplication}}
+      class="btn"
+    >
+      Edit
+    </LinkTo>
 </div>

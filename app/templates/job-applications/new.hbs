@@ -6,10 +6,13 @@
   <br/>
   <span class='loader'></span>
 </Menus::SubnavBar>
+
 <div class="main container">
+  {{log this.model}}
   <JobApplications::New
-    @jobApplication={{this.model}}
-    @jobPosts={{this.jobPosts}}
+    @jobApplication={{this.model.jobApplication}}
+    @jobPosts={{this.model.jobPosts}}
+    @jobPost={{this.model.jobPost}}
     @resumes={{this.resumes}}
     @coverLetters={{this.coverLetters}}
   />

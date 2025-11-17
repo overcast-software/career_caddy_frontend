@@ -1,9 +1,7 @@
 {{page-title "Resumes"}}
-<div class='container'>
-  <ul>
+<div class='main container'>
     {{#each @resumes as |resume|}}
       <Resumes::Compact @resume={{resume}}/>
     {{/each}}
-  </ul>
   {{yield}}
 </div>

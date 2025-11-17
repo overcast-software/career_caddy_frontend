@@ -1,15 +1,13 @@
 {{page-title "Summaries"}}
-<section class="container">
-  <div class="panel-card">
-    <h1 class="panel-title">Summaries</h1>
+<Menus::SubnavBar>
+  Summaries
+</Menus::SubnavBar>
+<div class="main container">
     {{#if this.model.length}}
-      <ul class="desc-list">
         {{#each this.model as |summary|}}
           <Summaries::Item @summary={{summary}} />
         {{/each}}
-      </ul>
     {{else}}
       <p class="muted">No summaries yet.</p>
     {{/if}}
-  </div>
-</section>
+</div>
