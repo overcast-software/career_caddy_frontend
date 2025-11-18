@@ -1,3 +1,17 @@
 {{page-title "Edit"}}
-<JobApplications::Edit @jobApplication={{this.model}} />
-{{outlet}}
+<Menus::SubnavBar>
+  job application edit
+</Menus::SubnavBar>
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
+<div class="fairway">
+  <JobApplications::Edit
+    @jobApplication={{this.model.jobApplication}}
+    @resumes={{this.model.resumes}}
+    @coverLetters={{this.model.coverLetters}}
+  />
+  {{outlet}}
+</div>

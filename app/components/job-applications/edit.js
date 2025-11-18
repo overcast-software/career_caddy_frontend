@@ -5,6 +5,7 @@ import { guidFor } from '@ember/object/internals';
 export default class JobApplicationsEdit extends Component {
   @service store;
   @service currentUser;
+  @service flashMessages;
   @action updateNotes(event) {
     this.args.jobApplication.notes = event.target.value;
   }
@@ -29,7 +30,9 @@ export default class JobApplicationsEdit extends Component {
   }
 
   @action async saveApplication() {
-    await this.jobApplication.save();
+    this.jobApplication
+        .save()
+        .then(()=> this.flashMessages.success('saved'))
   }
 
   @action updateResume(event) {
@@ -60,10 +63,6 @@ export default class JobApplicationsEdit extends Component {
     if (!jobPost) return '';
     if (!company) return jobPost.title;
     return `${jobPost.title} at ${company.name}`;
-  }
-
-  get resumeOptions() {
-    return this.store.peekAll('resume')
   }
 
   get coverLetterOptions() {

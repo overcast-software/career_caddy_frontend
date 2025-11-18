@@ -7,7 +7,6 @@ export default class ResumesShowRoute extends Route {
   model({ resume_id }) {
     const resume = this.store.findRecord('resume', resume_id, {
       include: 'user,skill,experience,education,certification,summary',
-      reload: true
     });
     return resume;
   }

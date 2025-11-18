@@ -1,4 +1,4 @@
-import Service from '@ember/service';
+import Service from 'ember-simple-auth/services/session';
 import { tracked } from '@glimmer/tracking';
 import config from 'career-caddy-frontend/config/environment';
 
@@ -14,6 +14,16 @@ export default class SessionService extends Service {
     this.loadFromStorage();
   }
 
+  get authService(){
+    // I need this here to for a earlier mishap
+    // AI made it's own service not ember-simple-auth
+    // this is how to get back  to the plugin
+    return this.session
+  }
+
+  invalidateSession(){
+    this.authService.invalidate()
+  }
   get isAuthenticated() {
     return this.accessToken && this.now() < this.accessExp;
   }

@@ -18,28 +18,42 @@
   --space-6: 24px;
 }
 
-html, body {
+html,
+body {
   height: 100%;
+  margin: 0;
 }
 
 body {
   /* background: linear-gradient( */
+
   /*   180deg, */
+
   /*   #c8effa 0%, */
+
   /*   #77b6e1 5%, */
+
   /*   #92a341 10%, */
-  /*   #6f7f28 100% */
+
+  /*   #6f7f28 90%, */
+
+  /*   #6e533f 100% */
+
   /* ); */
-  margin: 0;
+  background-color: #6f7f28;
+  z-index: -1;
+}
+
+.course {
+  overflow: auto;
+  height: 100vh;
 }
 
 a {
-    /* color: #c9cb87; */
-    color: #77b6e1;
+  /* color: #c9cb87; */
+  color: #77b6e1;
 }
-body {
-  background-color: #6f7f28
-}
+
 /* Apply border-box sizing globally to ensure inputs don't overflow their parent, especially on mobile */
 *,
 *::before,
@@ -312,27 +326,46 @@ a.btn:active {
   color: (--muted);
 }
 
-.alert, .alert-box {
+.alert,
+.alert-box {
   opacity: 0;
-  position: relative;
-  background-color: red;
-  left: 1000px;
-  transition: all 700ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
+  height: 2lh; /* Assuming `lh` is a legitimate unit in your context — could be a typo; consider using valid units like `em` or `rem` */
+  width: 100%;
+  position: fixed;
+  top: 7lh;
+  background-color: #f3fbfb;
+  bottom: 100px;
+  transition: all 1500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  text-align: center; /* Add this line to center text horizontally */
+  display: flex; /* Add this to enable flexbox for centering */
+  align-items: center; /* Centers text vertically within the component */
   &.active {
     opacity: 1;
-    left: 0;
+    bottom: 0;
+    z-index: 10;
 
     &.exiting {
       opacity: 0;
-      left: 100px;
+      bottom: 100px;
     }
   }
 }
 
-.alert-box.success{
-    background-color: #9bd8f8;
+p.tee {
+  position: fixed;
+  display: none;
+  width: 100%;
+  z-index: 1;
+  background-color: blue;
+  top: 6lh;
+  min-height: 2lh;
+  vertical-align: centered;
 }
+
+.alert-box.success {
+  background-color: #9bd8f8;
+}
+
 .btn:hover {
   background: #f1f1f1;
 }
@@ -443,39 +476,38 @@ a.btn:active {
 }
 
 .container {
+  margin-top: 5lh;
   max-width: 1000px;
-  margin: 0 auto;
   padding: 0 var(--space-6);
-
 }
 
-.main.container{
-    margin: 5em;
-    clear: both;
-    padding-bottom: 5em;
+.fairway {
+  margin-top: 9lh;
+  padding: 0 var(--space-6);
+  padding-bottom: 5em;
+  max-width: 1000px;
 }
 
-.main.container.builder-page{
-    margin: 5em;
-    clear: both;
-    max-width: 90%;
+.landing-page {
+  margin-top: -2lh;
 }
 
-footer{
-    display:block;
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    padding: 1em;
-    z-index: 15;
-    align-content: center;
-    background-color: #6e533f;
+.main.container.builder-page {
+  margin: 5em;
+  clear: both;
+  max-width: 90%;
+}
 
-  background: linear-gradient(
-    #6f7f28 0%,
-    #6e533f 60%
-  );
+footer {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding: 1em;
+  z-index: 15;
+  align-content: center;
+  background-color: #6e533f;
+  background: linear-gradient(#6f7f28 0%, #6e533f 60%);
 }
 
 /* Builder page full-width */
@@ -946,7 +978,6 @@ pre {
   margin: 0 0 var(--space-3);
 }
 
-
 /* HTML: <div class="loader"></div> */
 .loader {
   aspect-ratio: 2;
@@ -959,7 +990,7 @@ pre {
 
 .loader::before {
   content: "loading";
-  font-size: .8em;
+  font-size: 0.8em;
   position: absolute;
   inset: 100% 75% -3px 0;
   background: #524656;
@@ -978,12 +1009,12 @@ pre {
     l4-2 1s linear infinite alternate;
 }
 
-.loader.top-bar{
-    font-size: 1em;
+.loader.top-bar {
+  font-size: 1em;
 }
 
-.loader.top-bar::after{
-    border: 1px solid grey;
+.loader.top-bar::after {
+  border: 1px solid grey;
 }
 
 @keyframes l4-0 {
@@ -992,6 +1023,7 @@ pre {
     translate: 0% -2px;
     rotate: 20deg;
   }
+
   70%,
   100% {
     translate: 300% -2px;
@@ -1004,6 +1036,7 @@ pre {
   2% {
     bottom: 0%;
   }
+
   98%,
   100% {
     bottom: 0.1%;
@@ -1014,6 +1047,7 @@ pre {
   0% {
     translate: -220%;
   }
+
   100% {
     translate: 220%;
   }
@@ -1090,28 +1124,37 @@ pre {
 }
 
 /* Top bar styles */
-.site-header {
+header {
   position: fixed;
-  display: block;
-  top: 0;
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  z-index: 50;
-}
-
-.header-inner {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
   padding: 10px 20px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  z-index: 50;
+  min-height: 4lh;
 }
 
-.header-inner.sub-nav{
-  background-color: #c8effa;
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.tee-box {
+  /* background-color: #c8effa; */
+  background-color: #9bd8f8;
   position: fixed;
   display: block;
-  max-width: 100%;
   width: 100%;
+  top: 4lh;
+  min-height: 3lh;
+  vertical-align: centered;
 }
 
 .brand {
@@ -1131,6 +1174,10 @@ pre {
   text-decoration: none;
   padding: 6px 10px;
   border-radius: 6px;
+}
+
+.bar-cart {
+  margin-top: 1lh;
 }
 
 .nav-link:hover {
@@ -1408,14 +1455,15 @@ pre {
 }
 
 .app-sticky-header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  display: block;
+  padding: 1em;
   z-index: 1000;
   background: white;
   width: 100%;
 }
 
-.sandtrap{
-    background-color: #e0dc99;
-    padding: 2em;
+.sandtrap {
+  background-color: #e0dc99;
+  padding: 2em;
 }

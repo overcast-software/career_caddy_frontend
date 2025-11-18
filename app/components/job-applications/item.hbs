@@ -1,35 +1,39 @@
-<div class="builder-form">
+<Panel::Card>
   <div class="field">
-    <div class="field-label">Job Post</div>
-    {{@jobApplication.jobPost.title}}
-    at
-    {{@jobApplication.jobPost.company.name}}
+    <h1>{{@jobApplication.jobPost.title}}</h1>
   </div>
 
+  <section class='job-post-description' style="border: 1px solid black">
   <div class="field">
-    <div class="field-label">Resume</div>
+    <div class="field-label">Resume:</div>
     {{#if @jobApplication.resume}}
       {{@jobApplication.resume.name}}
     {{else}}
       -
     {{/if}}
   </div>
+  </section>
 
+  <section>
   <div class="field">
     <div class="field-label">Cover Letter</div>
     {{#if @jobApplication.coverLetter}}
       {{@jobApplication.coverLetter.createdAt}}
     {{else}}
-      -
+      no cover letter recorded
     {{/if}}
   </div>
+  </section>
 
+
+  <section>
   <div class="field">
     <div class="field-label">Applied At</div>
     {{format-date @jobApplication.appliedAt}}
   </div>
 
-  <div class="field">
+  </section>
+<div class="field">
     <div class="field-label">Status</div>
     {{@jobApplication.status}}
   </div>
@@ -55,11 +59,4 @@
   <div class="form-actions">
     {{yield}}
   </div>
-    <LinkTo
-      @route="job-applications.edit"
-      @model={{@jobApplication}}
-      class="btn"
-    >
-      Edit
-    </LinkTo>
-</div>
+</Panel::Card>

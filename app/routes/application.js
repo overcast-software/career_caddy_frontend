@@ -39,7 +39,7 @@ export default class ApplicationRoute extends Route {
       await this.currentUser.load();
     } catch (err) {
       console.log(err);
-      // await this.session.invalidate();
+      await this.session.invalidate();
     }
   }
 }

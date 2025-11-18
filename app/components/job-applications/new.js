@@ -5,6 +5,7 @@ import { service } from '@ember/service';
 export default class JobApplicationsNew extends Component {
   @tracked showAppliedAt = false;
   @tracked errorMessage = null;
+  @service router
   @service flashMessages;
   @tracked selectedJobPost = null;
   @tracked selectedResume = null;
@@ -20,8 +21,12 @@ export default class JobApplicationsNew extends Component {
     }
 
     // Default Resume
-    if (this.args.resumes.length > 0) {
-      this.selectedResume = this.args.resumes[0];
+    if (this.args.resume) {
+      this.selectedResume = this.args.resumes;
+    } else {
+      if (this.args.resumes.length > 0) {
+        this.selectedResume = this.args.resumes[0];
+      }
     }
 
     // Default Cover Letter: if none selected and options available, select first
@@ -87,16 +92,21 @@ export default class JobApplicationsNew extends Component {
   }
 
   @action async saveApplication() {
-    if (!this.selectedJobPost ){
-      this.flashMessages.warn("please select a job.")
-      return
+    if (!this.selectedJobPost) {
+      this.flashMessages.warn('please select a job.');
+      return;
     }
     this.jobApplication.jobPost = this.selectedJobPost;
     this.jobApplication.resume = this.selectedResume;
     this.jobApplication.coverLetter = this.selectedCoverLetter;
 
-    this.args.jobApplication.save()
-        .then(()=> this.flashMessages.success('job application saved'))
+    this.args.jobApplication
+      .save()
+      .then((app) => {
+        this.flashMessages.success('job application saved')
+        return app
+      })
+      .then((app) => this.router.transitionTo('job-applications.show', app))
   }
 
   @action updateStatus(event) {

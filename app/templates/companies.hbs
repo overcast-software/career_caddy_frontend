@@ -1,1 +1,11 @@
-{{outlet}}
+<Menus::SubnavBar>
+  <LinkTo class='btn' @route="companies.new">New Company</LinkTo>
+</Menus::SubnavBar>
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
+<div class='fairway'>
+  {{outlet}}
+</div>

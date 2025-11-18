@@ -1,4 +1,4 @@
-<article class="panel-card">
+<Panel::Card>
   <h2 class="panel-title">{{@jobPost.company.name}}</h2>
 
   <h1 class="job-title">
@@ -10,11 +10,13 @@
       <a href="{{@jobPost.link}}">external</a>
     {{/if}}
   </h1>
+
   <section class="job-post-description">
     <p class="muted">
       {{truncate @jobPost.description}}
     </p>
   </section>
+
   <section class="job-post-scores">
     <h3 class="section-title">Scores</h3>
     <p class="muted">one score per resume</p>
@@ -37,4 +39,4 @@
       @resumes={{this.loggedInUser.resumes}}
     />
   {{/if}}
-</article>
+</Panel::Card>

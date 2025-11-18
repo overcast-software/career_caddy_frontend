@@ -1,1 +1,17 @@
-{{outlet}}
+<Menus::SubnavBar>
+  job application show |
+  <LinkTo
+    @route="job-applications.edit"
+    @model={{this.model}}
+    class="btn"
+  >edit</LinkTo>
+</Menus::SubnavBar>
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
+<div class="fairway">
+  <JobApplications::item @jobApplication={{this.model}} />
+  {{outlet}}
+</div>

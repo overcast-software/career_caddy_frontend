@@ -1,6 +1,8 @@
+
 <ul>
   {{#each @companies as |company|}}
-    <li><LinkTo @route="companies.show" @model={{company}}>Company #{{company.id}}</LinkTo></li>
+    <Panel::Card>
+        <li><LinkTo @route="companies.show" @model={{company}}>{{company.name}}</LinkTo></li>
+    </Panel::Card>
   {{/each}}
 </ul>
-<LinkTo @route="companies.new">New Company</LinkTo>
