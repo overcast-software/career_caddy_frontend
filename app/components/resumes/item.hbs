@@ -30,6 +30,7 @@
   <section>
     <h2>Experience</h2>
     <hr />
+    {{log @resume.experiences}}
     {{#each @resume.experiences as |exp|}}
       <article class="experience">
         <div class="job-header">

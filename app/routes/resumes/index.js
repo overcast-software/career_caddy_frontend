@@ -4,7 +4,10 @@ import { service } from '@ember/service';
 export default class ResumesIndexRoute extends Route {
   @service store;
 
-  model() {
-    return this.store.findAll('resume');
+  async model() {
+    const resume = this.store.findAll('resume',  {
+      include: 'user,skill,experience,education,certification,summary',
+    });
+    return resume
   }
 }

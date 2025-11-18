@@ -32,7 +32,7 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
         options._retried = true;
         return await super.ajax(url, method, options);
       } else if (error.status === 401) {
-        this.session.logout();
+        this.session.invalidate();
         this.router.transitionTo('login');
       }
       throw error;

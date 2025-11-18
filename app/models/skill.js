@@ -4,5 +4,5 @@ export default class SkillModel extends Model {
   @attr('string') text;
   @attr('string') skillType;
   @attr('boolean') active;
-  @belongsTo('resume', { async: false, inverse: 'skills' }) resume;
+  @belongsTo('resume', { async: true, inverse: 'skills' }) resume;
 }

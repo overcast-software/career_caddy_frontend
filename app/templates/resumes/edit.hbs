@@ -25,6 +25,11 @@
     >Export to Word</button>
   </div>
 </Menus::SubnavBar>
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
 <div class="fairway builder-page">
   <div class="builder-layout">
     <aside class="editor-panel">

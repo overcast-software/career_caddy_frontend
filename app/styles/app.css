@@ -21,7 +21,7 @@
 html,
 body {
   height: 100%;
-  margin: 0px;
+  margin: 0;
 }
 
 body {
@@ -457,7 +457,7 @@ p.tee {
   padding-right: 28px;
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .builder-form.two-col .field {
     flex-basis: 100%;
     min-width: 0;
@@ -483,7 +483,9 @@ p.tee {
 
 .fairway {
   margin-top: 9lh;
+  padding: 0 var(--space-6);
   padding-bottom: 5em;
+  max-width: 1000px;
 }
 
 .landing-page {
@@ -807,7 +809,7 @@ footer {
   font-size: 1.05rem;
 }
 
-@media (max-width: 1080px) {
+@media (width <= 1080px) {
   .grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1088,7 +1090,7 @@ pre {
   outline: 3px solid rgb(63 126 255 / 14%);
 }
 
-@media (min-width: 1080px) {
+@media (width >= 1080px) {
   .builder-page .container {
     overflow: hidden;
   }
@@ -1177,6 +1179,7 @@ header {
 .bar-cart {
   margin-top: 1lh;
 }
+
 .nav-link:hover {
   color: var(--text);
   background: #f7f7f7;

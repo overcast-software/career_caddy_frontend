@@ -1,9 +1,22 @@
-{{#if this.noResumes}}
-  <p>no resumes <LinkTo @route='resumes.import'>import</LinkTo> one to start.</p>
-{{else}}
-  {{#if this.model}}
-    <Resumes::List @resumes={{this.model}} />
+<Menus::SubnavBar>
+  <label>resume list</label>
+  overloaded prior: controller logic can satisfy navbar
+
+  <br/>
+</Menus::SubnavBar>
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
+<div class="fairway">
+  {{#if this.noResumes}}
+    <p>no resumes <LinkTo @route='resumes.import'>import</LinkTo> one to start.</p>
   {{else}}
-    loading...
+    {{#if this.model}}
+      <Resumes::List @resumes={{this.model}} />
+    {{else}}
+      loading...
+    {{/if}}
   {{/if}}
-{{/if}}
+</div>

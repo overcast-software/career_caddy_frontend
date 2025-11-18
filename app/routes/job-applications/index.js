@@ -3,7 +3,7 @@ import { service } from '@ember/service';
 
 export default class JobApplicationsIndexRoute extends Route {
   @service store;
-  model() {
+  async model() {
     return this.store.findAll('job-application');
   }
 }

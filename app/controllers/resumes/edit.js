@@ -5,6 +5,8 @@ import { tracked } from '@glimmer/tracking';
 
 export default class ResumesEditController extends Controller {
   @service store;
+  @service router;
+  @service flashMessages;
   @tracked summaryIndex = 0;
 
   @action
@@ -15,17 +17,19 @@ export default class ResumesEditController extends Controller {
       .createRecord('resume', {
         user,
         title: source.title ? `${source.title} (Copy)` : source.title,
-        content: source.content ?? null,
         filePath: source.filePath ?? null,
-        educations: source.hasMany('educations').value(),
-        experiences: source.hasMany('experiences').value(),
-        certifications: source.hasMany('certifications').value(),
-        summaries: source.hasMany('summaries').value(),
+        skills: source.skills.content,
+        educations: source.educations.content,
+        experiences: source.experiences.content,
+        certifications: source.certifications.content,
+        summaries: source.summaries.content
       })
       .save()
-      .then((c) => {
-        this.router.transitionTo('resumes.show', c.id);
-      });
+      .then((clone) => {
+        this.router.transitionTo('resumes.show', clone.id);
+      })
+      .then(() => this.flashMessages.success('resume successfully cloned'))
+      .catch( (error) => {debugger ; this.flashMessages.warning(error)})
   }
 
   @action
@@ -43,7 +47,8 @@ export default class ResumesEditController extends Controller {
   async deleteResume() {
     if (!confirm('Delete this resume? This cannot be undone.')) return;
     await this.model.destroyRecord();
-    this.router.transitionTo('resumes');
+    this.router.transitionTo('resumes')
+        .then(()=>{this.flashMessages.success("successfully deleted resume.")});
   }
   @action
   async exportToWord() {

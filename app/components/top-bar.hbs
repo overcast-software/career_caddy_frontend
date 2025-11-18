@@ -21,8 +21,12 @@
       rel="noopener noreferrer"
     >GitHub</a>
   </nav>
+  <button type="button" {{on 'click' this.honk}}>
+
+    honk
+  </button>
   {{#if this.authed}}
-    <LinkTo @route="logout">Logout</LinkTo>
+    <button type="button" {{on 'click' this.invalidateSession}}>Log out</button>
   {{else}}
     <LinkTo @route="login">Login</LinkTo>
   {{/if}}

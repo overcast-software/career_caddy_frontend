@@ -1,13 +1,17 @@
 {{page-title "Applications"}}
-
 <Menus::SubnavBar>
     <LinkTo @route="job-applications.new" class='btn'>New Application</LinkTo>
 </Menus::SubnavBar>
-<div class="container">
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
+<div class="fairway">
   {{#if this.model.length}}
     <JobApplications::List @jobApplications={{this.model}}/>
   {{else}}
-      <p>no applications yet</p>
+    <span class='loader'></span>
   {{/if}}
   {{outlet}}
 </div>

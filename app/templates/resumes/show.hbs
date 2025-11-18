@@ -32,6 +32,11 @@
     </span>
   </div>
 </Menus::SubnavBar>
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
 <div class="container">
   <div class="builder-layout">
     <main class="preview-panel">

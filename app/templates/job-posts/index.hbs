@@ -1,10 +1,17 @@
-<JobPosts::Controls
-  @query={{this.query}}
-  @compact={{this.compact}}
-  @onFilterChange={{this.onFilterChange}}
-  @onCompactToggle={{this.onCompactToggle}}
-  @showLoading={{this.showLoading}} // not implemented
-/>
+<Menus::SubnavBar>
+  <JobPosts::Controls
+    @query={{this.query}}
+    @compact={{this.compact}}
+    @onFilterChange={{this.onFilterChange}}
+    @onCompactToggle={{this.onCompactToggle}}
+    @showLoading={{this.showLoading}} // not implemented
+  />
+</Menus::SubnavBar>
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
 <div class='fairway'>
   <JobPosts::List
     @jobPosts={{this.model}}

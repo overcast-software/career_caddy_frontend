@@ -67,6 +67,11 @@ Router.map(function () {
   });
   this.route('resumes', function () {
     this.route(
+      'import',
+      
+      function() {this.route('resume.import')}
+    )
+    this.route(
       'show',
       {
         path: '/:resume_id',
