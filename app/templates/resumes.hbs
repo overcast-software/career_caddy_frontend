@@ -1,1 +1,12 @@
-{{outlet}}
+<Menus::SubnavBar>
+  <label>resume list</label>
+
+</Menus::SubnavBar>
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
+<div class='fairway'>
+  {{outlet}}
+</div>

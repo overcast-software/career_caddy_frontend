@@ -1,19 +1,22 @@
 {{page-title 'New Application'}}
-
 <Menus::SubnavBar>
   <button type="button" {{on 'click' this.honk}}>honk</button>
 
   <br/>
   <span class='loader'></span>
 </Menus::SubnavBar>
-
-<div class="main container">
-  {{log this.model}}
+<div class="bar-cart">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} />
+  {{/each}}
+</div>
+<div class="fairway">
   <JobApplications::New
     @jobApplication={{this.model.jobApplication}}
     @jobPosts={{this.model.jobPosts}}
-    @jobPost={{this.model.jobPost}}
-    @resumes={{this.resumes}}
+    @jobPost={{this.model.jobPost}} 
+    @resumes={{this.model.resumes}}
+    @resume={{this.model.resume}}
     @coverLetters={{this.coverLetters}}
   />
 </div>

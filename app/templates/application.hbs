@@ -1,15 +1,9 @@
 {{page-title "Career Caddy"}}
-<header class="app-sticky-header">
-  <TopBar @user={{this.currentUser}} @showLoading={{this.showLoading}}/>
-  <div class='app-sticky-header' style="display: block;  height: 10px;background-color: #c8effa">
-    {{#each this.flashMessages.queue as |flash|}}
-      <FlashMessage @flash={{flash}} @messageStyle='foundation'/>
-    {{/each}}
-  </div>
-</header>
 <MainApplication>
-  {{outlet}}
+  <div class='fairway'>
+    {{outlet}}
+  </div>
+  <footer>
+    copyleft 2025
+  </footer>
 </MainApplication>
-<footer>
-  copyleft 2025
-</footer>

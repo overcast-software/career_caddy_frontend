@@ -20,8 +20,12 @@ export default class JobApplicationsNew extends Component {
     }
 
     // Default Resume
-    if (this.args.resumes.length > 0) {
-      this.selectedResume = this.args.resumes[0];
+    if (this.args.resume){
+      this.selectedResume = this.args.resumes;
+    } else{
+        if (this.args.resumes.length > 0) {
+            this.selectedResume = this.args.resumes[0];
+        }
     }
 
     // Default Cover Letter: if none selected and options available, select first
