@@ -1,9 +1,8 @@
 <div class="resume-content">
-  <div class="profile text-center">
-    <div class="name">{{@resume.user.name}}</div>
-    <div class="title">{{@resume.title}}</div>
-    <div class="email">{{@resume.user.email}}</div>
-  </div>
+  <Resumes::Header
+    @user={{@resume.user}}
+    @resume={{@resume}}
+  />
 
   <section>
     <h2>Summary</h2>
