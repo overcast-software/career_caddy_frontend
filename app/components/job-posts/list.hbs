@@ -1,8 +1,10 @@
-  {{#each this.jobPosts as |jobPost|}}
+{{#each this.jobPosts as |jobPost|}}
+  {{#unless jobPost.isNew}}
     {{#if @compact}}
-        <JobPosts::Compact @jobPost={{jobPost}} @showLoading={{@showLoading}} />
+      <JobPosts::Compact @jobPost={{jobPost}} @showLoading={{@showLoading}} />
     {{else}}
-        {{!-- // probably don't need showLoading here since we require the show path --}}
-        <JobPosts::Item @jobPost={{jobPost}} @showLoading={{@showLoading}} />
+      {{!-- // probably don't need showLoading here since we require the show path --}}
+      <JobPosts::Item @jobPost={{jobPost}} @showLoading={{@showLoading}} />
     {{/if}}
-  {{/each}}
+  {{/unless}}
+{{/each}}
