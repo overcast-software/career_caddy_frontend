@@ -1,8 +1,29 @@
 <form class="builder-form" {{on "submit" this.submitEdit}}>
   <div class="field">
-    <label class="field-label" for="company-autocomplete">Company</label>
-    <input id="company" type="text" value={{@jobPost.company.name}} />
+    <label class="field-label" for="company-select">Company</label>
+    <select
+      id="company-select"
+      value={{this.selectedCompanyId}}
+      {{on "change" this.handleCompanyChoice}}
+    >
+      <option value="__new__">Create new company…</option>
+      {{#each this.companies as |company|}}
+        <option value={{company.id}}>{{company.name}}</option>
+      {{/each}}
+    </select>
   </div>
+
+  {{#if this.useNewCompany}}
+    <div class="field">
+      <label class="field-label" for="company-new-name">New company name</label>
+      <input
+        id="company-new-name"
+        type="text"
+        value={{this.newCompanyName}}
+        {{on "input" this.updateNewCompanyName}}
+      />
+    </div>
+  {{/if}}
 
   <div class="field">
     <label class="field-label" for="title">Title</label>
@@ -37,6 +58,6 @@
 
   <div class="form-actions">
     <button type="submit" class="btn primary">Save</button>
-    <button class="btn danger" type="submit" {{on 'click' this.submitDelete }}>Delete</button>
+    <button class="btn danger" type="button" {{on 'click' this.submitDelete }}>Delete</button>
   </div>
 </form>

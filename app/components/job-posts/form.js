@@ -3,15 +3,28 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 // import { A } from '@ember/array';
-import ArrayProxy from '@ember/array/proxy';
 
 export default class JobPostsFormComponent extends Component {
   @service router;
   @service store;
+  @service flashMessages;
   @tracked errorMessage = null;
   @tracked form_toggle = false; // false = "by url", true = "manual"
-  @tracked companyQuery = '';
-  @service flashMessages;
+  @tracked selectedCompanyId = '__new__';
+  @tracked useNewCompany = true;
+  @tracked newCompanyName = '';
+
+  constructor() {
+    super(...arguments);
+    const company = this.args.jobPost?.company;
+    if (company) {
+      this.useNewCompany = false;
+      this.selectedCompanyId = company.id;
+    } else {
+      this.useNewCompany = true;
+      this.selectedCompanyId = '__new__';
+    }
+  }
 
   get companies() {
     return this.store.peekAll('company');
@@ -20,6 +33,23 @@ export default class JobPostsFormComponent extends Component {
   @action
   onModeChange(event) {
     this.form_toggle = event.target.value === 'manual';
+  }
+
+  @action
+  handleCompanyChoice(event) {
+    const value = event.target.value;
+    if (value === '__new__') {
+      this.useNewCompany = true;
+      this.selectedCompanyId = '__new__';
+    } else {
+      this.useNewCompany = false;
+      this.selectedCompanyId = value;
+    }
+  }
+
+  @action
+  updateNewCompanyName(event) {
+    this.newCompanyName = event.target.value;
   }
 
   @action
@@ -35,21 +65,35 @@ export default class JobPostsFormComponent extends Component {
   async submitEdit(event) {
     event.preventDefault();
     this.errorMessage = null;
-    const companyName = event.target.elements['company'].value;
-    let company = this.companies.find((company) => company.name == companyName);
-    if (!company) {
-      company = await this.store
-        .createRecord('company', { name: companyName })
-        .save();
-      this.args.jobPost.company = company;
-      this.args.jobPost.save();
-    } else {
-      this.args.jobPost.company = company;
-      this.args.jobPost
-        .save()
-        .then(() => this.flashMessages.add({ message: 'Saved the job post' }))
-        .then(() => this.router.transitionTo('job-posts.index'))
-        .catch(() => this.flashMessages.danger('Problem in saving job post.'));
+
+    try {
+      if (this.useNewCompany) {
+        const name = (this.newCompanyName || '').trim();
+        if (!name) {
+          this.flashMessages.danger('Please enter a company name.');
+          return;
+        }
+        const company = await this.store
+          .createRecord('company', { name })
+          .save();
+        this.args.jobPost.company = company;
+      } else if (this.selectedCompanyId) {
+        const company = this.store.peekRecord('company', this.selectedCompanyId);
+        if (!company) {
+          this.flashMessages.danger('Please select a company.');
+          return;
+        }
+        this.args.jobPost.company = company;
+      } else {
+        this.flashMessages.danger('Please select a company.');
+        return;
+      }
+
+      await this.args.jobPost.save();
+      this.flashMessages.add({ message: 'Saved the job post' });
+      this.router.transitionTo('job-posts.index');
+    } catch (e) {
+      this.flashMessages.danger('Problem in saving job post.');
     }
   }
   @action
