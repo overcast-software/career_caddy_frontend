@@ -2,11 +2,7 @@
   <label>ingest list</label>
   ingestion
 </Menus::SubnavBar>
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
+<BarCart @flashMessages={{this.flashMessages}}/>
 {{page-title "Import"}}
 <UploadForm @onUpload={{this.ingestResume}} />
 {{outlet}}
