@@ -6,7 +6,6 @@ export default class SummariesIndexRoute extends Route {
   @service currentUser;
 
   model() {
-    this.store.findAll('job-post', { created_by: this.currentUser.user });
-    return this.currentUser.user.summaries;
+    return this.store.findAll('summary');
   }
 }
