@@ -21,7 +21,7 @@ export default class JobApplicationsEditRoute extends Route {
     let coverLetters = null;
     if (jobApplication.coverLetters.length == 0) {
       // coverLetters = await this.store.findAll('cover-letter');
-      coverLetters = await jobApplication.coverLetters
+      coverLetters = await jobApplication.coverLetters;
     }
     return { resumes, jobApplication, coverLetters };
   }

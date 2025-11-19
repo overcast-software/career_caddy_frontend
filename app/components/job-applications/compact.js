@@ -11,6 +11,8 @@ export default class JobApplicationsCompact extends Component {
       .then((record) => {
         this.flashMessages.success(`removed application #${record.id}`);
       })
-      .catch((error) => { this.flashMessages.alert(`problem deleting`)});
+      .catch((error) => {
+        this.flashMessages.alert(`problem deleting`);
+      });
   }
 }

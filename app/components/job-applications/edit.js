@@ -30,9 +30,7 @@ export default class JobApplicationsEdit extends Component {
   }
 
   @action async saveApplication() {
-    this.jobApplication
-        .save()
-        .then(()=> this.flashMessages.success('saved'))
+    this.jobApplication.save().then(() => this.flashMessages.success('saved'));
   }
 
   @action updateResume(event) {

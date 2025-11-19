@@ -5,7 +5,7 @@ import { service } from '@ember/service';
 export default class JobApplicationsNew extends Component {
   @tracked showAppliedAt = false;
   @tracked errorMessage = null;
-  @service router
+  @service router;
   @service flashMessages;
   @tracked selectedJobPost = null;
   @tracked selectedResume = null;
@@ -103,10 +103,10 @@ export default class JobApplicationsNew extends Component {
     this.args.jobApplication
       .save()
       .then((app) => {
-        this.flashMessages.success('job application saved')
-        return app
+        this.flashMessages.success('job application saved');
+        return app;
       })
-      .then((app) => this.router.transitionTo('job-applications.show', app))
+      .then((app) => this.router.transitionTo('job-applications.show', app));
   }
 
   @action updateStatus(event) {

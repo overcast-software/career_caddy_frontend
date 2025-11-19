@@ -2,7 +2,7 @@ import Controller from '@ember/controller';
 import { service } from '@ember/service';
 
 export default class ResumesIndexController extends Controller {
-  @service flashMessages
+  @service flashMessages;
 
   get resumeCount() {
     return this.model.length;

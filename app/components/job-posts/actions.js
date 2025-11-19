@@ -82,7 +82,9 @@ export default class JobPostsActions extends Component {
   }
 
   @action
-  goToApply(){
-    this.router.transitionTo('job-applications.new', {queryParams: {jobId: this.args.jobPost.id}})
+  goToApply() {
+    this.router.transitionTo('job-applications.new', {
+      queryParams: { jobId: this.args.jobPost.id },
+    });
   }
 }

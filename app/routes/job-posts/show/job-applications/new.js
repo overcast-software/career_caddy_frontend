@@ -12,6 +12,6 @@ export default class JobPostsShowJobApplicationNewRoute extends Route {
       status: 'applied',
     });
     jobApplication.jobPost = this.store.peekRecord('job-post', job_post_id);
-    return jobApplication
+    return jobApplication;
   }
 }

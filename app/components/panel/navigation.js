@@ -16,14 +16,14 @@ export default class PanelNavigation extends Component {
     this.args.down();
   }
 
-  wrappedRecords = null
-  get records(){
-    if ( !this.wrappedRecords ) {
+  wrappedRecords = null;
+  get records() {
+    if (!this.wrappedRecords) {
       this.wrappedRecords = ArrayProxy.create({
-        content: this.args.recordArray.content
-      })
+        content: this.args.recordArray.content,
+      });
     }
-    return this.wrappedRecords
+    return this.wrappedRecords;
   }
 
   @action
@@ -42,11 +42,12 @@ export default class PanelNavigation extends Component {
   }
 
   get activeRecordIndex() {
-    return this.records.indexOf(this.activeRecord)
+    return this.records.indexOf(this.activeRecord);
   }
 
-  get activeRecord(){
-    return this.records.findBy('active') }
+  get activeRecord() {
+    return this.records.findBy('active');
+  }
 
   @action
   async selectNext() {

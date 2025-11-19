@@ -16,12 +16,12 @@ export default class ResumesShowController extends Controller {
   async cloneResume() {
     const source = this.model;
     const user = await source.user;
-    console.log("skills", source.skills)
-    debugger
-    console.log("educations", source.educations)
-    console.log("experiences", source.experiences)
-    console.log("certifications", source.certifications)
-    console.log("summaries", source.summaries)
+    console.log('skills', source.skills);
+    debugger;
+    console.log('educations', source.educations);
+    console.log('experiences', source.experiences);
+    console.log('certifications', source.certifications);
+    console.log('summaries', source.summaries);
     this.store
       .createRecord('resume', {
         user,
@@ -32,7 +32,7 @@ export default class ResumesShowController extends Controller {
         experiences: source.experiences.content,
         certifications: source.certifications.content,
         summaries: source.summaries.content,
-        projects: source.projects?.content
+        projects: source.projects?.content,
       })
       .save()
       .then((clone) => {
@@ -40,16 +40,19 @@ export default class ResumesShowController extends Controller {
         this.router.transitionTo('resumes.show', clone.id);
       })
       .then(() => this.flashMessages.success('resume successfully cloned'))
-      .catch( (error) => {debugger ; this.flashMessages.warning(error)})
+      .catch((error) => {
+        debugger;
+        this.flashMessages.warning(error);
+      });
   }
 
   @action
   async saveResume() {
-    this.model.save()
-        .then(()=> this.flashMessages.success("saved"))
-        .then(()=> this.router.transitionTo("resume.show", this.model.id))
+    this.model
+      .save()
+      .then(() => this.flashMessages.success('saved'))
+      .then(() => this.router.transitionTo('resume.show', this.model.id));
   }
-
 
   @action
   async deleteResume() {

@@ -47,7 +47,7 @@ export default class JobPostsFormComponent extends Component {
       this.args.jobPost.company = company;
       this.args.jobPost
         .save()
-        .then(() => this.flashMessages.add({message: 'Saved the job post'}))
+        .then(() => this.flashMessages.add({ message: 'Saved the job post' }))
         .then(() => this.router.transitionTo('job-posts.index'))
         .catch(() => this.flashMessages.danger('Problem in saving job post.'));
     }

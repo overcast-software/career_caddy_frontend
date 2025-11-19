@@ -9,16 +9,16 @@ export default class TopBarComponent extends Component {
 
   @action honk() {
     console.log('honk');
-    console.log(this.loadingStatus.loading)
+    console.log(this.loadingStatus.loading);
     this.flashMessages.alert('honk', {
       showProgress: true,
       sticky: true,
     });
   }
 
-  get loading(){
-    console.log("loading", this.loadingStatus.loading)
-    return this.loadingStatus.loading
+  get loading() {
+    console.log('loading', this.loadingStatus.loading);
+    return this.loadingStatus.loading;
   }
 
   get authed() {
@@ -26,9 +26,8 @@ export default class TopBarComponent extends Component {
   }
 
   @action async invalidateSession() {
-    console.log(Object.keys(this.session))
-    await this.session.invalidateSession()
-    this.router.transitionTo('login')
-
+    console.log(Object.keys(this.session));
+    await this.session.invalidateSession();
+    this.router.transitionTo('login');
   }
 }

@@ -15,7 +15,9 @@ export default class ResumesItemComponent extends Component {
   }
 
   get groupedSkillsMap() {
-    const skillsArray = ArrayProxy.create({ content: this.args.resume.skills.content });
+    const skillsArray = ArrayProxy.create({
+      content: this.args.resume.skills.content,
+    });
 
     const result = skillsArray.reduce(function (current, skill) {
       const skillType = skill.skillType || 'Other';

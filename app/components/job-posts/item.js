@@ -62,7 +62,7 @@ export default class JobPostsItemComponent extends Component {
     this.selectedResumeId = event.target.value;
   }
 
-  toggleLoading(){
-    this.args.showLoading = !this.args.showLoading
+  toggleLoading() {
+    this.args.showLoading = !this.args.showLoading;
   }
 }

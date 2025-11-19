@@ -22,14 +22,17 @@ export default class ResumesEditController extends Controller {
         educations: source.educations.content,
         experiences: source.experiences.content,
         certifications: source.certifications.content,
-        summaries: source.summaries.content
+        summaries: source.summaries.content,
       })
       .save()
       .then((clone) => {
         this.router.transitionTo('resumes.show', clone.id);
       })
       .then(() => this.flashMessages.success('resume successfully cloned'))
-      .catch( (error) => {debugger ; this.flashMessages.warning(error)})
+      .catch((error) => {
+        debugger;
+        this.flashMessages.warning(error);
+      });
   }
 
   @action
@@ -47,8 +50,9 @@ export default class ResumesEditController extends Controller {
   async deleteResume() {
     if (!confirm('Delete this resume? This cannot be undone.')) return;
     await this.model.destroyRecord();
-    this.router.transitionTo('resumes')
-        .then(()=>{this.flashMessages.success("successfully deleted resume.")});
+    this.router.transitionTo('resumes').then(() => {
+      this.flashMessages.success('successfully deleted resume.');
+    });
   }
   @action
   async exportToWord() {

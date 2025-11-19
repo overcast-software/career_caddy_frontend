@@ -5,7 +5,7 @@ import { service } from '@ember/service';
 export default class JobPostsIndexController extends Controller {
   @tracked query = '';
   @tracked compact = false;
-  @service flashMessages
+  @service flashMessages;
 
   showControls = false;
   @action
