@@ -131,4 +131,5 @@ Router.map(function () {
       path: '/:summary_id/edit',
     });
   });
+  this.route('about');
 });

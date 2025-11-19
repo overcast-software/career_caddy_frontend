@@ -2,31 +2,22 @@
   <LinkTo @route="index" class="brand">Career Caddy</LinkTo>
   <nav class="nav" aria-label="loggedout">
     <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
+    <LinkTo @route="about" class="nav-link">about</LinkTo>
     <a
-      href={{this.aboutUrl}}
-      class="nav-link"
-      target="_blank"
-      rel="noopener noreferrer"
-    >About</a>
-    <a
-      href={{this.docsUrl}}
-      class="nav-link"
-      target="_blank"
-      rel="noopener noreferrer"
-    >Docs</a>
-    <a
-      href={{this.githubUrl}}
+      href="http://github.com/overcast-software/career_caddy_frontend"
       class="nav-link"
       target="_blank"
       rel="noopener noreferrer"
     >GitHub</a>
   </nav>
-  <button type="button" {{on 'click' this.honk}}>
-
+  {{#if this.loading}}
+    <span class="loader top-bar"></span>
+  {{/if}}
+  <button type="button" {{on "click" this.honk}}>
     honk
   </button>
   {{#if this.authed}}
-    <button type="button" {{on 'click' this.invalidateSession}}>Log out</button>
+    <button type="button" {{on "click" this.invalidateSession}}>Log out</button>
   {{else}}
     <LinkTo @route="login">Login</LinkTo>
   {{/if}}

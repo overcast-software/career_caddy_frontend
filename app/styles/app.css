@@ -323,7 +323,7 @@ a.btn:visited,
 a.btn:hover,
 a.btn:active {
   text-decoration: none;
-  color: (--muted);
+  color: var(--muted);
 }
 
 .alert,
@@ -427,10 +427,13 @@ p.tee {
   align-items: flex-start;
 }
 
-.builder-form.two-col .field {
-  flex: 1 1 calc(50% - var(--space-5));
-  min-width: 300px;
-}
+/* .builder-form.two-col .field { */
+
+/*   flex: 1 1 calc(50% - var(--space-5)); */
+
+/*   min-width: 300px; */
+
+/* } */
 
 .builder-form.two-col .form-actions {
   flex: 1 0 100%;
@@ -490,6 +493,11 @@ p.tee {
 
 .landing-page {
   margin-top: -2lh;
+  background-image: url("/images/ian_finnis.webp");
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+  min-height: 50vh;
 }
 
 .main.container.builder-page {
@@ -506,7 +514,6 @@ footer {
   padding: 1em;
   z-index: 15;
   align-content: center;
-  background-color: #6e533f;
   background: linear-gradient(#6f7f28 0%, #6e533f 60%);
 }
 
@@ -785,13 +792,6 @@ footer {
   margin-top: var(--space-4);
 }
 
-.landing-page {
-  background-image: url("/images/ian_finnis.webp");
-  background-size: cover;
-  background-position: top;
-  background-repeat: no-repeat;
-  min-height: 50vh;
-}
 
 .disclaimer {
   color: var(--muted);
@@ -1053,7 +1053,7 @@ pre {
   }
 }
 
-@keyframes translateBackground {
+@keyframes translate-background {
   0% {
     background-position-x: 0;
   }
@@ -1466,4 +1466,5 @@ header {
 .sandtrap {
   background-color: #e0dc99;
   padding: 2em;
+}
 }
