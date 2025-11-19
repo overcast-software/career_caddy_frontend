@@ -523,10 +523,16 @@ p.tee {
 }
 
 .fairway {
-  margin-top: 9lh;
+  margin: 9lh auto 0;
   padding: 0 var(--space-6);
   padding-bottom: 5em;
   max-width: 1000px;
+}
+
+.fairway.builder-page {
+  margin: 9lh 10% 0;
+  max-width: none;
+  width: auto;
 }
 
 .landing-page {

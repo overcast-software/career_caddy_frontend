@@ -4,5 +4,7 @@
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 {{page-title "Import"}}
+<div class='fairway'>
 <UploadForm @onUpload={{this.ingestResume}} />
 {{outlet}}
+</div>

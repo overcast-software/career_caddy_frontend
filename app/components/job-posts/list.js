@@ -24,10 +24,26 @@ export default class JobPostsListComponent extends Component {
       });
     }
 
-    // Sort by date (newest first)
-    filteredList.sortBy('postedDate');
+    // Sort by date (newest first, DESC)
+    const items = Array.isArray(filteredList)
+      ? filteredList
+      : filteredList?.toArray
+      ? filteredList.toArray()
+      : [];
 
-    return filteredList;
+    items.sort((a, b) => {
+      const aDate = a.get ? a.get('postedDate') : a.postedDate;
+      const bDate = b.get ? b.get('postedDate') : b.postedDate;
+
+      const aTime =
+        aDate instanceof Date ? aDate.getTime() : (aDate ? new Date(aDate).getTime() : 0);
+      const bTime =
+        bDate instanceof Date ? bDate.getTime() : (bDate ? new Date(bDate).getTime() : 0);
+
+      return bTime - aTime; // DESC: newest first
+    });
+
+    return items;
   }
   toggleShowLoading() {
     this.args.showLoading = !this.args.showLoading;
