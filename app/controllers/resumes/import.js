@@ -6,7 +6,7 @@ import { service } from '@ember/service';
 export default class ResumesImportController extends Controller {
   @service session;
   @service flashMessages;
-  @service loadingStatus;
+
   @action
   async ingestResume(file) {
     this.flashMessages.info(
@@ -27,7 +27,6 @@ export default class ResumesImportController extends Controller {
       ? { Authorization: this.session.authorizationHeader }
       : {};
     try {
-      this.loadingStatus.loading = true;
       new UploadFile(file)
         .upload({
           url,
@@ -37,7 +36,7 @@ export default class ResumesImportController extends Controller {
           console.log(resume);
           this.flashMessges.success('Resume imported');
         })
-        .finally((this.loadingStatus.loading = false))
+        .finally()
         .catch((error) => {
           this.flashMessages.clearMessages();
           this.flashMessages.success(`Resume failed ${error}`);

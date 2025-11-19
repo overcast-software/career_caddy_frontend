@@ -5,7 +5,6 @@ export default class TopBarComponent extends Component {
   @service session;
   @service flashMessages;
   @service router;
-  @service loadingStatus;
 
   @action honk() {
     console.log('honk');
