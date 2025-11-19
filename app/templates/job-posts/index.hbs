@@ -7,11 +7,7 @@
     @showLoading={{this.showLoading}} // not implemented
   />
 </Menus::SubnavBar>
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
+<BarCart @flashMessages={{this.flashMessages}}/>
 <div class='fairway'>
   <JobPosts::List
     @jobPosts={{this.model}}
