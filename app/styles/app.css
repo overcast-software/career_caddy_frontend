@@ -888,7 +888,6 @@ footer {
 }
 
 .editor-panel {
-  position: sticky;
   top: 16px;
   gap: var(--space-4);
   align-self: start;

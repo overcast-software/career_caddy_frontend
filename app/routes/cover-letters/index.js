@@ -7,7 +7,6 @@ export default class CoverLettersIndexRoute extends Route {
   model() {
     return this.store.findAll('cover-letter', {
       include: 'job-post,resume',
-      reload: true,
     });
   }
 }
