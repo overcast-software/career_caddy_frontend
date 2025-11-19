@@ -32,18 +32,15 @@
     </span>
   </div>
 </Menus::SubnavBar>
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
-<div class="container">
-  <div class="builder-layout">
-    <main class="preview-panel">
-
-      <div class="resume-preview">
-        <Resumes::Item @resume={{this.model}} />
-      </div>
-    </main>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class='fairway'>
+  <div class="container">
+    <div class="builder-layout">
+      <main class="preview-panel">
+        <div class="resume-preview">
+          <Resumes::Item @resume={{this.model}} />
+        </div>
+      </main>
+    </div>
   </div>
 </div>

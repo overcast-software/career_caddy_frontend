@@ -1,30 +1,34 @@
 {{page-title "Career Caddy"}}
 <Menus::SubnavBar>
-  {{#if this.session.isAuthenticated}}
-    <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
-    <LinkTo @route="cover-letters.index" class="nav-link">Cover letters</LinkTo>
-    <LinkTo @route="resumes.index" class="nav-link">Resumes</LinkTo>
-    <LinkTo @route="summaries.index" class="nav-link">Summaries</LinkTo>
-    <LinkTo @route="scores.index" class="nav-link">Scores</LinkTo>
-    <LinkTo @route="job-applications.index" class="nav-link">Applications</LinkTo>
-  {{else}}
-    <h2>Welcome to Career Caddy</h2>
-  {{/if}}
-</Menus::SubnavBar>
+  <div class="submenu-buttons">
+    {{#if this.session.isAuthenticated}}
 
-<div class='landing-page' >
-  <br/>
-  <p>Your personal career management assistant</p>
-
-  <div class="landing-actions">
-    <LinkTo @route="resumes.index" class="btn primary">Get Started</LinkTo>
-    {{#unless this.session.isAuthenticated}}
-      <LinkTo @route="login" class="btn">Login</LinkTo>
-    {{/unless}}
-    {{#if this.unhealthy}}
-      <LinkTo @route="setup" class="btn secondary">Initial Setup</LinkTo>
+      <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
+      <LinkTo @route="cover-letters.index" class="nav-link">Cover letters</LinkTo>
+      <LinkTo @route="resumes.index" class="nav-link">Resumes</LinkTo>
+      <LinkTo @route="summaries.index" class="nav-link">Summaries</LinkTo>
+      <LinkTo @route="scores.index" class="nav-link">Scores</LinkTo>
+      <LinkTo @route="job-applications.index" class="nav-link">Applications</LinkTo>
+    {{else}}
+      <h2>Welcome to Career Caddy</h2>
     {{/if}}
   </div>
-</div>
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class='fairway'>
+  <div class='landing-page' >
+    <br/>
+    <p>Your personal career management assistant</p>
 
+    <div class="landing-actions">
+      <LinkTo @route="resumes.index" class="btn primary">Get Started</LinkTo>
+      {{#unless this.session.isAuthenticated}}
+        <LinkTo @route="login" class="btn">Login</LinkTo>
+      {{/unless}}
+      {{#if this.unhealthy}}
+        <LinkTo @route="setup" class="btn secondary">Initial Setup</LinkTo>
+      {{/if}}
+    </div>
+  </div>
+</div>
 {{outlet}}
