@@ -339,6 +339,7 @@ a.btn:active {
   text-align: center; /* Add this line to center text horizontally */
   display: flex; /* Add this to enable flexbox for centering */
   align-items: center; /* Centers text vertically within the component */
+  justify-content: center; /* Centers content horizontally within flex container */
   &.active {
     opacity: 1;
     bottom: 0;
@@ -364,6 +365,43 @@ p.tee {
 
 .alert-box.success {
   background-color: #9bd8f8;
+}
+
+/* Alert variants */
+.alert.alert-alert,
+.alert-box.alert-alert {
+  background-color: #ffecec;
+  border: 1px solid #f2b8b5;
+  color: var(--danger);
+}
+
+.alert.alert-info,
+.alert-box.alert-info {
+  background-color: #f5f6f8;
+  border: 1px solid #e1e5ea;
+  color: var(--muted);
+}
+
+.alert.alert-warning,
+.alert-box.alert-warning {
+  background-color: #fff7e6;
+  border: 1px solid #ffe0b2;
+  color: #8a5a00;
+}
+
+.alert.alert-secondary,
+.alert-box.alert-secondary {
+  background-color: #fafafa;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.alert.alert-success,
+.alert-box.alert-success,
+.alert-box.success {
+  background-color: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  color: #2e7d32;
 }
 
 .btn:hover {
@@ -460,7 +498,7 @@ p.tee {
   padding-right: 28px;
 }
 
-@media (width <= 640px) {
+@media (max-width: 640px) {
   .builder-form.two-col .field {
     flex-basis: 100%;
     min-width: 0;
@@ -809,7 +847,7 @@ footer {
   font-size: 1.05rem;
 }
 
-@media (width <= 1080px) {
+@media (max-width: 1080px) {
   .grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1019,14 +1057,12 @@ pre {
 @keyframes l4-0 {
   0%,
   30% {
-    translate: 0% -2px;
-    rotate: 20deg;
+    transform: translate(0%, -2px) rotate(20deg);
   }
 
   70%,
   100% {
-    translate: 300% -2px;
-    rotate: -20deg;
+    transform: translate(300%, -2px) rotate(-20deg);
   }
 }
 
@@ -1044,11 +1080,11 @@ pre {
 
 @keyframes l4-2 {
   0% {
-    translate: -220%;
+    transform: translateX(-220%);
   }
 
   100% {
-    translate: 220%;
+    transform: translateX(220%);
   }
 }
 
@@ -1089,7 +1125,7 @@ pre {
   outline: 3px solid rgb(63 126 255 / 14%);
 }
 
-@media (width >= 1080px) {
+@media (min-width: 1080px) {
   .builder-page .container {
     overflow: hidden;
   }
@@ -1149,11 +1185,12 @@ header {
   /* background-color: #c8effa; */
   background-color: #9bd8f8;
   position: fixed;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   top: 4lh;
   min-height: 3lh;
-  vertical-align: centered;
 }
 
 .brand {
@@ -1465,5 +1502,4 @@ header {
 .sandtrap {
   background-color: #e0dc99;
   padding: 2em;
-}
 }

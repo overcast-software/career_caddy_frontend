@@ -8,15 +8,13 @@ export default class TopBarComponent extends Component {
 
   @action honk() {
     console.log('honk');
-    console.log(this.loadingStatus.loading);
-    this.flashMessages.alert('honk', {
+    this.flashMessages.success('honk', {
       showProgress: true,
       sticky: true,
     });
   }
 
   get loading() {
-    console.log('loading', this.loadingStatus.loading);
     return this.loadingStatus.loading;
   }
 

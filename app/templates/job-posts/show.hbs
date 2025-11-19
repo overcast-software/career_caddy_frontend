@@ -5,10 +5,7 @@
     @model={{this.model}}
   >Edit</LinkTo>
 </Menus::SubnavBar>
-{{#if this.errorMessage}}
-  <p class="error">{{this.errorMessage}}</p>
-{{/if}}
-
+<BarCart @flashMessages={{this.flashMessages}}/>
 <div class="fairway">
   <JobPosts::Item
     @showControls={{this.showControls}}

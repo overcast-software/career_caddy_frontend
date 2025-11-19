@@ -11,5 +11,6 @@ export default class JobPostsShowController extends Controller {
   @tracked resumes = null;
   @tracked users = null;
   @tracked coverLetters = null;
+  @service flashMessages;
   showControls = true;
 }
