@@ -1,0 +1,18 @@
+{{page-title "About"}}
+
+<Menus::SubnavBar>
+  {{#if this.session.isAuthenticated}}
+    <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
+    <LinkTo @route="cover-letters.index" class="nav-link">Cover letters</LinkTo>
+    <LinkTo @route="resumes.index" class="nav-link">Resumes</LinkTo>
+    <LinkTo @route="summaries.index" class="nav-link">Summaries</LinkTo>
+    <LinkTo @route="scores.index" class="nav-link">Scores</LinkTo>
+    <LinkTo @route="job-applications.index" class="nav-link">Applications</LinkTo>
+  {{else}}
+    <h2>Welcome to Career Caddy</h2>
+  {{/if}}
+</Menus::SubnavBar>
+
+<div class='landing-page' >
+{{outlet}}
+</div>

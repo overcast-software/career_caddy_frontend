@@ -1,7 +1,6 @@
-{{yield}}
 <Panel::Card>
   <article class="summary-item">
-    <header class="summary-header">
+    <div class="summary-header">
       {{#if @summary.jobPost}}
         <span class="muted">Job:</span>
         <LinkTo @route="job-posts.show" @model={{@summary.jobPost}}>
@@ -19,7 +18,7 @@
           {{/if}}
         </LinkTo>
       {{/if}}
-    </header>
+    </div>
 
     {{#if @summary.content}}
       <p class="summary-content clamp-4">
@@ -27,12 +26,9 @@
       </p>
     {{else}}
       <p class="summary-content clamp-4">
-        <span
-          class="spinner"
-          role="status"
-          aria-label="Loading summary content"
-        ></span>
+        <span class='loader'></span>
       </p>
     {{/if}}
   </article>
 </Panel::Card>
+{{yield}}

@@ -87,5 +87,15 @@
     {{/each}}
   </section>
 
-  {{yield}}
+  {{#if @resume.projects}}
+    <article>
+      {{#each @resume.projects as |project|}}
+        <section>
+          <!-- TODO -->
+        </section>
+      {{/each}}
+    </article>
+    {{/if}}
+
+    {{yield}}
 </div>
