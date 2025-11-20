@@ -13,7 +13,6 @@ export default class JobApplicationsNew extends Component {
 
   constructor() {
     super(...arguments);
-    const app = this.args.jobApplication;
 
     // Default Job Post
     if (this.args.jobPost) {

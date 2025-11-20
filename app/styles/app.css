@@ -498,7 +498,7 @@ p.tee {
   padding-right: 28px;
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .builder-form.two-col .field {
     flex-basis: 100%;
     min-width: 0;
@@ -853,7 +853,7 @@ footer {
   font-size: 1.05rem;
 }
 
-@media (max-width: 1080px) {
+@media (width <= 1080px) {
   .grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1131,7 +1131,7 @@ pre {
   outline: 3px solid rgb(63 126 255 / 14%);
 }
 
-@media (min-width: 1080px) {
+@media (width >= 1080px) {
   .builder-page .container {
     overflow: hidden;
   }
