@@ -134,5 +134,10 @@ Router.map(function () {
     });
   });
   this.route('about');
-  this.route('questions');
+  this.route('questions', function() {
+    this.route('new');
+    this.route('show');
+    this.route('edit');
+  });
+  this.route('answers');
 });

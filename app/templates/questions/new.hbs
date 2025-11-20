@@ -1,0 +1,11 @@
+{{page-title "New"}}
+<Menus::SubnavBar>
+  new question
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+  <Questions::Form/>
+{{outlet}}
+<Questions::Form
+  @question={{this.model.question}}
+  @companies={{this.model.companies}}
+/>
