@@ -19,6 +19,4 @@
 <h2>
   score: {{@score.score}}
 </h2>
-<pre>
-  {{@score.explanation}}
-</pre>
+  <MarkdownToHtml @markdown={{@score.explanation}}/>
