@@ -1,0 +1,22 @@
+<Panel::Card>
+  <form class="builder-form" >
+    <label>
+      <div class="field">
+        Answers form TBD
+        {{@answer.content}}
+      </div>
+    </label>
+    <label>
+      {{@answer}}
+      <div class="field">
+        answer to question
+        {{!content.content because content is reserved word}}
+        {{@answer.question.content.content}}
+        <textarea {{on "change" this.updateContent}}>{{@answer.content}}</textarea>
+      </div>
+    </label>
+
+    <button {{on 'click' this.save}} type='submit' class='btn'>save</button>
+  </form>
+</Panel::Card>
+{{yield}}

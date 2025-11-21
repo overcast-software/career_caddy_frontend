@@ -1,0 +1,9 @@
+{{page-title "Index"}}
+<Menus::SubnavBar>
+  <LinkTo @route="questions.new" class='btn'>New</LinkTo>
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class='fairway'>
+  <Questions::List @questions={{this.model}}/>
+  {{outlet}}
+</div>

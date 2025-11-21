@@ -1,3 +1,21 @@
-{{this.model.name}}
-<LinkTo @route="companies.show.job-posts" @model={{this.model}}>Job Posts</LinkTo>
-{{outlet}}
+<Menus::SubnavBar>
+  {{this.model.name}}
+  <LinkTo
+    @route="companies.show"
+    @model={{this.model}}
+    class='btn'
+  >
+    Job Posts
+  </LinkTo>
+  <LinkTo
+    @route="companies.edit"
+    @model={{this.model}}
+    class='btn'
+  >
+    edit
+  </LinkTo>
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class='fairway'>
+  {{outlet}}
+</div>

@@ -1,0 +1,26 @@
+{{page-title "Show"}}
+<Menus::SubnavBar>
+  questions show
+  <LinkTo
+    class='btn'
+    @route='questions.new'
+  >new
+  </LinkTo>
+  <LinkTo
+    class='btn'
+    @route='questions.edit'
+    @model={{this.model}}
+  >edit
+  </LinkTo>
+  <LinkTo
+    class='btn'
+    @route='questions.show.answers.new'
+    @model={{this.model}}
+  >manully answer
+  </LinkTo>
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class='fairway'>
+  <Questions::Item @question={{this.model}}/>
+  {{outlet}}
+</div>

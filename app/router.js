@@ -137,11 +137,20 @@ Router.map(function () {
   this.route('questions', function () {
     this.route('new');
     this.route('show', {
-      path: '/:question_id/show'
-    });
+      path: '/:question_id'
+    },
+      function () {
+        this.route('answers', function () {
+          this.route('new');
+          this.route('edit', {path: '/:answer_id/edit'})
+        });
+      },
+   );
     this.route('edit', {
       path: '/:question_id/edit',
     });
   });
-  this.route('answers');
+  this.route('answers', function() {
+    this.route('edit', {path: '/:answer_id/edit'});
+  });
 });

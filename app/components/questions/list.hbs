@@ -1,0 +1,20 @@
+<Panel::Card>
+      <PowerSelect
+        @options={{this.companies}}
+        @onChange={{this.updateCompany}}
+        @searchEnabled={{true}}
+        @searchField="name"
+        @selected={{this.selectedCompany}}
+        @placeholder="Select a Company"
+        @labelText="Filter by Company"
+        as |company|
+      >
+        {{company.name}}
+    </PowerSelect>
+    {{#each this.companyQuestions as |question|}}
+      <div class='panel-card'>
+        {{question.company.name}}: {{question.jobApplication.jobPost.name}}{{question.content}}<LinkTo @route='questions.show' @model={{question}}>show</LinkTo>
+      </div>
+    {{/each}}
+</Panel::Card>
+{{yield}}

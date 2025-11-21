@@ -1,11 +1,12 @@
 import Service from 'ember-simple-auth/services/session';
 import { tracked } from '@glimmer/tracking';
 import config from 'career-caddy-frontend/config/environment';
-
+import { service } from '@ember/service';
 export default class SessionService extends Service {
   @tracked accessToken = null;
   @tracked refreshToken = null;
   @tracked accessExp = null;
+  @service flashMessages;
   refreshInFlight = null;
   refreshTimerId = null;
 
@@ -183,7 +184,9 @@ export default class SessionService extends Service {
     });
 
     if (!response.ok) {
+
       const error = await response.json().catch(() => ({}));
+      this.flashMessages.alert("login failed")
       throw new Error(error.detail || 'Login failed');
     }
 

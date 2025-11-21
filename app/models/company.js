@@ -3,6 +3,7 @@ import Model, { attr, hasMany } from '@ember-data/model';
 export default class CompanyModel extends Model {
   @attr('string') name;
   @attr('string') displayName;
+  @attr('string') note;
   @hasMany('job-post', { async: true, inverse: 'company' }) jobPosts;
   @hasMany('scrape', { async: false, inverse: 'company' }) scrapes;
   @hasMany('question',{async: true, inverse: 'company'}) questions;

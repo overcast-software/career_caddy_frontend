@@ -1,0 +1,19 @@
+{{page-title "Answers"}}
+<Menus::SubnavBar>
+  replace me
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class='fairway'>
+  <div class='panel-card'>
+
+    <ul>
+      {{#each this.model as |answer|}}
+        <li>
+          {{answer.content}}
+          <LinkTo @route="answers.edit" @model={{answer}}>edit</LinkTo>
+        </li>
+      {{/each}}
+    </ul>
+    {{outlet}}
+  </div>
+</div>

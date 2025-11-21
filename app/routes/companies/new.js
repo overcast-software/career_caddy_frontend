@@ -4,7 +4,7 @@ import { service } from '@ember/service';
 export default class CompaniesNewRoute extends Route {
   @service store;
 
-  model() {
+  async model() {
     return this.store.createRecord('company');
   }
 }

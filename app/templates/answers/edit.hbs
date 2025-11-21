@@ -1,0 +1,25 @@
+{{page-title "Edit"}}
+<Menus::SubnavBar>
+  answer edit
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class='fairway'>
+  <div class='panel-card builder-form'>
+    <div class='field'>
+      {{this.model.question.content.content}}
+    </div>
+    <form {{on 'submit' this.saveAnswer}}>
+    <div class='field'>
+      <label>
+        <textarea>
+          {{this.model.content}}
+        </textarea>
+      </label>
+    </div>
+    <button type='submit' class='btn'>save</button>
+    <button {{on 'click' this.deleteAnswer}} type='button' class='btn'>delete</button>
+
+    </form>
+  </div>
+  {{outlet}}
+</div>
