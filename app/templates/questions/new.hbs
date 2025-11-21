@@ -3,9 +3,10 @@
   new question
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
-  <Questions::Form/>
+<div class='fairway'>
 {{outlet}}
+{{log this.model}}
 <Questions::Form
-  @question={{this.model.question}}
-  @companies={{this.model.companies}}
+  @question={{this.model}}
 />
+</div>

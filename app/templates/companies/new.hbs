@@ -1,1 +1,8 @@
-<Companies::Form @company={{this.model}} />
+<Menus::SubnavBar >
+  <button type='button' class='btn'>save</button>
+</Menus::SubnavBar>
+
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class='fairway'>
+  <Companies::Form @company={{this.model}} />
+</div>

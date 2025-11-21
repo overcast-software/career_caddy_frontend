@@ -1,16 +1,14 @@
 <form class="builder-form" {{on "submit" this.submitEdit}}>
   <div class="field">
-    <label class="field-label" for="company-select">Company</label>
-    <select
-      id="company-select"
-      value={{this.selectedCompanyId}}
-      {{on "change" this.handleCompanyChoice}}
+    <PowerSelect
+      @options={{this.companies}}
+      @onChange={{this.handleCompanyChoice}}
+      @selected={{this.selectedCompany}}
+      @labelText="Company"
+      as |company|
     >
-      <option value="__new__">Create new company…</option>
-      {{#each this.companies as |company|}}
-        <option value={{company.id}}>{{company.name}}</option>
-      {{/each}}
-    </select>
+      {{company.name}}
+    </PowerSelect>
   </div>
 
   {{#if this.useNewCompany}}

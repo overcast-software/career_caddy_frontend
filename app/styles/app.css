@@ -95,6 +95,7 @@ a {
   pointer-events: auto;
 }
 
+
 .builder-form {
   display: grid;
   gap: var(--space-5);
@@ -836,7 +837,6 @@ footer {
   margin-top: var(--space-4);
 }
 
-
 .disclaimer {
   color: var(--muted);
   font-size: 0.9rem;
@@ -1196,7 +1196,12 @@ header {
   justify-content: center;
   width: 100%;
   top: 4lh;
+  z-index: 50;
   min-height: 3lh;
+}
+
+.ember-power-select-trigger{
+    position: static;
 }
 
 .brand {

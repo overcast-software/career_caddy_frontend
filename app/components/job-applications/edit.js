@@ -2,15 +2,39 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { guidFor } from '@ember/object/internals';
+import { tracked } from '@glimmer/tracking';
 export default class JobApplicationsEdit extends Component {
   @service store;
   @service currentUser;
   @service flashMessages;
+  @tracked selectedCompany = null;
+  @tracked disableCompanySelector = false;
+  constructor() {
+    super(...arguments);
+
+    const company = this.args.jobApplication.get('company')
+    if (company) {
+      this.selectedCompany = company;
+      this.disableCompanySelector = true;
+    }
+  }
+
+  get resumes(){
+    return this.store.fineAll('resume')
+  }
+
+  get coverLetters(){
+    return this.store.findAll('cover-letter')
+  }
+
   @action updateNotes(event) {
     this.args.jobApplication.notes = event.target.value;
   }
   get user() {
     return this.currentUser.user;
+  }
+  get companies() {
+    return this.store.findAll('company');
   }
   get jobApplication() {
     return this.args.jobApplication;
@@ -56,8 +80,8 @@ export default class JobApplicationsEdit extends Component {
   }
 
   get jobPostAtCompany() {
-    const jobPost = this.jobApplication.belongsTo('jobPost').value();
-    const company = jobPost?.belongsTo('company')?.value();
+    const jobPost = this.jobApplication.jobPost;
+    const company = jobPost.company;
     if (!jobPost) return '';
     if (!company) return jobPost.title;
     return `${jobPost.title} at ${company.name}`;

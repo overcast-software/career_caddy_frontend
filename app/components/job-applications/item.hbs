@@ -1,62 +1,64 @@
 <Panel::Card>
-  <div class="field">
-    <h1>{{@jobApplication.jobPost.title}}</h1>
-  </div>
+  <div class='builder-form'>
+    <div class="field">
+      <h1>{{@jobApplication.jobPost.title}}</h1>
+    </div>
 
-  <section class='job-post-description' style="border: 1px solid black">
-  <div class="field">
-    <div class="field-label">Resume:</div>
-    {{#if @jobApplication.resume}}
-      {{@jobApplication.resume.name}}
-    {{else}}
-      -
-    {{/if}}
-  </div>
-  </section>
+    <section class='job-post-description'>
+      <div class="field">
+        <div class="field-label">Resume:</div>
+        {{#if @jobApplication.resume}}
+          {{@jobApplication.resume.name}}
+        {{else}}
+          -
+        {{/if}}
+      </div>
+    </section>
 
-  <section>
-  <div class="field">
-    <div class="field-label">Cover Letter</div>
-    {{#if @jobApplication.coverLetter}}
-      {{@jobApplication.coverLetter.createdAt}}
-    {{else}}
-      no cover letter recorded
-    {{/if}}
-  </div>
-  </section>
+    <section>
+      <div class="field">
+        <div class="field-label">Cover Letter</div>
+        {{#if @jobApplication.coverLetter}}
+          {{@jobApplication.coverLetter.createdAt}}
+        {{else}}
+          no cover letter recorded
+        {{/if}}
+      </div>
+    </section>
 
 
-  <section>
-  <div class="field">
-    <div class="field-label">Applied At</div>
-    {{format-date @jobApplication.appliedAt}}
-  </div>
+    <section>
+      <div class="field">
+        <div class="field-label">Applied At</div>
+        {{format-date @jobApplication.appliedAt}}
+      </div>
 
-  </section>
-<div class="field">
-    <div class="field-label">Status</div>
-    {{@jobApplication.status}}
-  </div>
+    </section>
+    <div class="field">
+      <div class="field-label">Status</div>
+      {{@jobApplication.status}}
+    </div>
 
-  <div class="field">
-    <div class="field-label">Tracking URL</div>
-    {{#if @jobApplication.trackingUrl}}
-      <a
-        href={{@jobApplication.trackingUrl}}
-        target="_blank"
-        rel="noopener noreferrer"
-      >{{@jobApplication.trackingUrl}}</a>
-    {{else}}
-      -
-    {{/if}}
-  </div>
+    <div class="field">
+      <div class="field-label">Tracking URL</div>
+      {{#if @jobApplication.trackingUrl}}
+        <a
+          href={{@jobApplication.trackingUrl}}
+          target="_blank"
+          rel="noopener noreferrer"
+        >{{@jobApplication.trackingUrl}}</a>
+      {{else}}
+        -
+      {{/if}}
+    </div>
 
-  <div class="field">
-    <div class="field-label">Notes</div>
-    {{@jobApplication.notes}}
-  </div>
+    <div class="field">
+      <div class="field-label">Notes</div>
+      {{@jobApplication.notes}}
+    </div>
 
-  <div class="form-actions">
-    {{yield}}
+    <div class="form-actions">
+      {{yield}}
+    </div>
   </div>
 </Panel::Card>

@@ -134,10 +134,14 @@ Router.map(function () {
     });
   });
   this.route('about');
-  this.route('questions', function() {
+  this.route('questions', function () {
     this.route('new');
-    this.route('show');
-    this.route('edit');
+    this.route('show', {
+      path: '/:question_id/show'
+    });
+    this.route('edit', {
+      path: '/:question_id/edit',
+    });
   });
   this.route('answers');
 });

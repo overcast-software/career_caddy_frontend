@@ -1,1 +1,24 @@
+<div class='builder-form '>
+  <form {{on 'submit' this.saveCompany}}>
+    <div class='field'>
+    <label class='field-label'>
+      company name
+    </label>
+    <input
+      type="text"
+      id="companyName"
+      value={{this.company.Name}}
+      {{on "blur" this.updateCompanyName}}
+    />
+    </div>
+    <br/>
+    <div class='field'>
+    <label class='field-label'>
+      Notes
+    <textarea {{on 'blur' this.updateCompanyNote}}>{{this.company.notes}}</textarea>
+    </label>
+    </div>
+    <button type='submit' class='btn' >save</button>
+  </form>
+</div>
 {{yield}}

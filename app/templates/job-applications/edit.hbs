@@ -1,6 +1,7 @@
 {{page-title "Edit"}}
 <Menus::SubnavBar>
-  job application edit
+  <button {{on "click" this.save}}class="btn" type="button">save</button>
+  <button class="btn" type="button">cancel</button>
 </Menus::SubnavBar>
 <div class="bar-cart">
   {{#each this.flashMessages.queue as |flash|}}
@@ -9,9 +10,7 @@
 </div>
 <div class="fairway">
   <JobApplications::Edit
-    @jobApplication={{this.model.jobApplication}}
-    @resumes={{this.model.resumes}}
-    @coverLetters={{this.model.coverLetters}}
+    @jobApplication={{this.model}}
   />
   {{outlet}}
 </div>

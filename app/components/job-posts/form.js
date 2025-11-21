@@ -10,13 +10,13 @@ export default class JobPostsFormComponent extends Component {
   @service flashMessages;
   @tracked errorMessage = null;
   @tracked form_toggle = false; // false = "by url", true = "manual"
-  @tracked selectedCompanyId = '__new__';
+  @tracked selectedCompany = null
   @tracked useNewCompany = true;
   @tracked newCompanyName = '';
 
   constructor() {
     super(...arguments);
-    const company = this.args.jobPost?.company;
+    const company = this.args.jobPost.company;
     if (company) {
       this.useNewCompany = false;
       this.selectedCompanyId = company.id;
@@ -30,21 +30,16 @@ export default class JobPostsFormComponent extends Component {
     return this.store.peekAll('company');
   }
 
+
+
   @action
   onModeChange(event) {
     this.form_toggle = event.target.value === 'manual';
   }
 
   @action
-  handleCompanyChoice(event) {
-    const value = event.target.value;
-    if (value === '__new__') {
-      this.useNewCompany = true;
-      this.selectedCompanyId = '__new__';
-    } else {
-      this.useNewCompany = false;
-      this.selectedCompanyId = value;
-    }
+  handleCompanyChoice(company) {
+    this.selectedCompany = company
   }
 
   @action
