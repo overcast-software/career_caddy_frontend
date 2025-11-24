@@ -1,1 +1,6 @@
+<Menus::SubnavBar>
+  <button type='button' {{on 'click' this.exportToDocx}} class='btn' >export to docx</button>
+  <LinkTo class='btn' @route='cover-letters.edit' @model={{  this.model  }}>edit</LinkTo>
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
 <CoverLetters::Item @coverLetter={{this.model}} />

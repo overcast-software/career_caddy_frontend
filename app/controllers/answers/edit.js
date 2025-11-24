@@ -4,13 +4,18 @@ import { action } from '@ember/object';
 export default class AnswersEditController extends Controller {
   @service store;
   @service flashMessages;
+  @action updateContent(event) {
+    this.model.content = event.target.value;
+  }
   @action saveAnswer(event) {
     event.preventDefault();
-    // this.model.save()
-    this.flashMessages.success('called save')
+    this.model.save().then(() => {
+      this.flashMessages.success('answer saved');
+    });
   }
-  @action deleteAnswer(event){
-    // this.model.destroyRecord()
-    this.flashMessages.success('called delete')
+  @action deleteAnswer() {
+    this.model.destroyRecord().then(() => {
+      this.flashMessages.success('called delete');
+    });
   }
 }

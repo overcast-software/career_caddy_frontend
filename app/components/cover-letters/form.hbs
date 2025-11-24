@@ -1,2 +1,8 @@
-<Panel::Card>not implemented use AI generated one from <LinkTo @route="job-posts.index">job post</LinkTo></Panel::Card>
-{{yield}}
+<div class='builder-form'>
+  <form>
+    <div class='field'>
+      <textarea aria-label='update-content' {{on 'change' this.updateContent}}>{{@coverLetter.content}}</textarea>
+    </div>
+  </form>
+  {{yield}}
+</div>

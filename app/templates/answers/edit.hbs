@@ -11,7 +11,7 @@
     <form {{on 'submit' this.saveAnswer}}>
     <div class='field'>
       <label>
-        <textarea>
+        <textarea {{on 'change' this.updateContent}}>
           {{this.model.content}}
         </textarea>
       </label>

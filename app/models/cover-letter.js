@@ -8,7 +8,4 @@ export default class CoverLetterModel extends Model {
   @belongsTo('resume', { async: true, inverse: 'coverLetters' }) resume;
   @belongsTo('job-application', { async: true, inverse: 'coverLetters' })
   jobApplication;
-  get derp() {
-    return 'derp';
-  }
 }

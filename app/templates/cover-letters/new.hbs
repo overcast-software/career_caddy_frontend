@@ -1,3 +1,10 @@
-<div class="container">
+<Menus::SubnavBar>
+  <button type='button' class='btn' {{on 'click' this.saveCoverLetter}}>Save</button>
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class="fairway">
+  <Panel::Card @collapable={{true}}>
+    <Companies::Selector @companies={{this.companies}}/>
     <CoverLetters::Form @coverLetter={{this.model}} />
+  </Panel::Card>
 </div>

@@ -4,6 +4,32 @@
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 <div class='fairway'>
-  <Questions::List @questions={{this.model}}/>
-  {{outlet}}
+  <Panel::Card>
+    <PowerSelect
+      @options={{this.companies}}
+      @onChange={{this.updateCompany}}
+      @searchEnabled={{true}}
+      @searchField="name"
+      @selected={{this.selectedCompany}}
+      @placeholder="Select a Company"
+      @labelText="Filter by Company"
+      as |company|
+    >
+      {{company.name}}
+    </PowerSelect>
+    {{#each this.companyQuestions as |question|}}
+      <div class='panel-card'>
+        <p>
+          {{question.company.name}}: {{question.jobApplication.jobPost.name}}{{question.content}}
+        </p>
+        <p>
+          answers: {{question.answers.length}}
+        </p>
+        <br/>
+        <LinkTo @route='questions.show' @model={{question}}>show</LinkTo>
+        <LinkTo @route='questions.show.answers.new' @model={{question}}>answer</LinkTo>
+      </div>
+    {{/each}}
+  </Panel::Card>
+  {{yield}}
 </div>

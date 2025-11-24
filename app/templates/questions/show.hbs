@@ -1,6 +1,7 @@
 {{page-title "Show"}}
 <Menus::SubnavBar>
   questions show
+  <button type='button' class='btn' {{on "click" this.deleteQuestion}}>Delete</button>
   <LinkTo
     class='btn'
     @route='questions.new'

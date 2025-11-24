@@ -1,0 +1,12 @@
+<PowerSelect
+  @options={{@companies}}
+  @searchEnabled={{true}}
+  @searchField='name'
+  @placeHolder='select a company'
+  @labelText="select company"
+  @onChange={{this.updateCompany}}
+  as |company|
+>
+  {{company.name}}
+</PowerSelect>
+{{yield}}
