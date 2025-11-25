@@ -1,11 +1,47 @@
 <Menus::SubnavBar>
   <LinkTo @route="job-posts.scrape" class='btn'>scrape</LinkTo>
 </Menus::SubnavBar>
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
+<BarCart @flashMessages={{this.flashMessages}}/>
 <div class='fairway'>
-  <JobPosts::Form @jobPost={{this.model}} />
+  <form class="builder-form" {{on "submit" this.submitJobPost}}>
+    <Companies::SelectOrCreate
+      @companies={{this.companies}}
+      @companyCallback={{this.addCompanyToJobPost}}
+      />
+    <div class="field">
+      <label class="field-label" for="title">Title</label>
+      <input
+        id="title"
+        type="text"
+        value={{this.model.title}}
+        {{on "input" (fn this.updateField "title")}}
+        required
+      />
+    </div>
+    <div class="field">
+      <label class="field-label" for="description">Description</label>
+      <textarea
+        id="description"
+        value={{this.model.description}}
+        {{on "input" (fn this.updateField "description")}}
+        rows="8"
+      ></textarea>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="url">url</label>
+      <input
+        id="url"
+        type="text"
+        value={{this.model.link}}
+        {{on "input" (fn this.updateField "link")}}
+        required
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn primary">Save</button>
+      <button class="btn danger" type="button" {{on 'click' this.submitDelete }}>Delete</button>
+    </div>
+  </form>
 </div>

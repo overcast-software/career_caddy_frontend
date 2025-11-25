@@ -9,6 +9,19 @@ export default class CoverLettersNewController extends Controller {
         .then(()=> this.flashMessages.success('saved'))
   }
   get companies() {
-    return this.store.findAll('company');
+    // XXX got rid of this
+    return this.store.peekAll('company');
+  }
+
+  get jobPosts(){
+    return this.store.peekAll('job-post');
+  }
+
+  @action updateCoverLetter(event){
+    this.model.content = event.target.value;
+  }
+
+  @action addJobPostToCoverLetter(jobPost){
+    this.model.jobPost = jobPost
   }
 }

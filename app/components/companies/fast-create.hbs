@@ -1,0 +1,8 @@
+<div class="companies-fast-create">
+  <label class="inline-field">
+    Name:
+    <input {{on "change" this.handleNameChange}} type="text" />
+  </label>
+  <button type="button" class="btn" {{on "click" this.handleClick}}>Save</button>
+</div>
+{{yield}}

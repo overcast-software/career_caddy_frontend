@@ -1514,3 +1514,37 @@ header {
   background-color: #e0dc99;
   padding: 2em;
 }
+
+/* Companies selector/create layout */
+.companies-select-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.companies-select-row .grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.companies-fast-create {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.inline-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.inline-field input {
+  flex: 1 1 auto;
+  min-width: 0;
+}

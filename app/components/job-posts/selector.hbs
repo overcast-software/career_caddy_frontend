@@ -1,0 +1,10 @@
+{{yield}}
+<PowerSelect
+  @options={{this.postsByCompany}}
+  @selected={{this.selectedJobPost}}
+  @onChange={{this.updateJobPost}}
+  @searchField="title"
+  as |jobPost|
+>
+  {{jobPost.title}}
+</PowerSelect>

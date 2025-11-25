@@ -7,6 +7,9 @@ export default class CompaniesSelector extends Component {
   @service flashMessages;
   @tracked selectedCompany;
   @action updateCompany(company) {
+    if (this.args.companyCallback){
+      this.args.companyCallback(company)
+    }
     this.selectedCompany = company;
   }
 }

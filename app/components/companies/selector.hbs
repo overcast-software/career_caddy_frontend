@@ -1,10 +1,11 @@
 <PowerSelect
   @options={{@companies}}
+  @onChange={{this.updateCompany}}
   @searchEnabled={{true}}
   @searchField='name'
   @placeHolder='select a company'
   @labelText="select company"
-  @onChange={{this.updateCompany}}
+  @selected={{this.selectedCompany}}
   as |company|
 >
   {{company.name}}

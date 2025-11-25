@@ -1,0 +1,23 @@
+<div class="builder-form">
+  <div class="field companies-select-row">
+    <div class="grow">
+      <Companies::Selector
+        @companies={{this.companyAndCreate}}
+        @companyCallback={{@companyCallback}}
+      />
+    </div>
+    {{#if this.showCreate}}
+      <button type="button" class="btn" {{on "click" this.toggleCreateForm}}>Hide</button>
+    {{else}}
+      <span class="muted">or</span>
+      <button type="button" class="btn" {{on "click" this.toggleCreateForm}}>Create new company</button>
+    {{/if}}
+  </div>
+
+  {{#if this.showCreate}}
+    <div class="field">
+      <Companies::FastCreate />
+    </div>
+  {{/if}}
+</div>
+{{yield}}
