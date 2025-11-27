@@ -5,7 +5,7 @@
     {{@question.content}}
   </p>
   <h3>answers</h3>
-  {{#if @questions.answers}}
+  {{#if @question.answers}}
     {{#each @question.answers as |answer|}}
       {{answer.content}}
     {{/each}}

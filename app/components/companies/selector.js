@@ -12,4 +12,10 @@ export default class CompaniesSelector extends Component {
     }
     this.selectedCompany = company;
   }
+  get placeHolder(){
+    return this.args.placeHolder || "placeholder"
+  }
+  get labelText(){
+    return this.args.labelText || "Select a company"
+  }
 }

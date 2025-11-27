@@ -4,6 +4,7 @@ import { action } from '@ember/object';
 export default class JobPostsNewController extends Controller {
   @service store;
   @service flashMessages;
+  @service router;
   get companies() {
     return this.store.findAll('company');
   }
@@ -25,6 +26,6 @@ export default class JobPostsNewController extends Controller {
     event.preventDefault()
     this.model.save()
         .then(()=> this.flashMessages.success("Job post saved"))
-
+        .then(()=> this.router.transitionTo('job-posts.show', this.model))
   }
 }

@@ -5,19 +5,95 @@
   <br/>
   <span class='loader'></span>
 </Menus::SubnavBar>
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
+<BarCart @flashMessages={{this.flashMessages}}/>
 <div class="fairway">
-  <JobApplications::New
-    @jobApplication={{this.model.jobApplication}}
-    @jobPosts={{this.model.jobPosts}}
-    @jobPost={{this.model.jobPost}} 
-    @resumes={{this.model.resumes}}
-    @resume={{this.model.resume}}
-    @coverLetters={{this.coverLetters}}
-  />
+  <div class="builder-form">
+    <div class="field">
+      <label class="field-label" >Job post:</label>
+      <PowerSelect
+        @options={{this.jobPosts}}
+        @onChange={{fn (mut this.selectedJobPost)}}
+        @selected={{this.selectedJobPost}}
+        as |jobPost|
+      >
+        {{jobPost.title}}
+      </PowerSelect>
+    </div>
+
+    <div class="field">
+      <label class="field-label" >Resume to use:</label>
+      <select value={{this.model.resume.id}} {{on "change" this.updateResume}}>
+        {{#each @resumes as |resume|}}
+          <option value={{resume.id}}>
+            {{resume.name}}
+          </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field-label" >Cover Letter</label>
+      <select value={{this.model.coverLetter.id}} {{on "change" this.updateCoverLetter}} >
+        {{#each @coverLetters as |coverLetter|}}
+          <option value={{coverLetter.id}}>
+            cover letter {{coverLetter.id}} - written on {{format-date coverLetter.createdAt}}
+          </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field-label" >Status</label>
+      <select
+        value={{this.model.status}}
+        {{on "change" this.updateStatus}}
+      >
+        {{#each this.statusOptions as |status|}}
+          <option value={{status}}>
+            {{status}}
+          </option>
+        {{/each}}
+      </select>
+    </div>
+    {{#if this.showAppliedAt}}
+      <div class="field">
+        <label class="field-label" >Applied At</label>
+        <input
+          type="date"
+          value={{format-date this.model.appliedAt}}
+          {{on "change" (fn this.updateField "appliedAt")}}
+        />
+      </div>
+    {{/if}}
+
+    <div class="field">
+      <label class="field-label" >Tracking URL</label>
+      <input
+        type="url"
+        value={{this.model.trackingUrl}}
+        {{on "input" (fn this.updateField "trackingUrl")}}
+      />
+    </div>
+
+    <div class="field">
+      <label class="field-label" >Notes</label>
+
+      <textarea
+        id={{this.notesTextareaId}}
+        value={{this.model.notes}}
+        {{on "input" (fn this.updateField "notes")}}
+      ></textarea>
+    </div>
+
+    <div class="form-actions">
+      {{yield}}
+    </div>
+    <button
+      type="button"
+      class="btn"
+      disabled={{this.cantSave}}
+      {{on "click" this.saveApplication}}
+    >Save</button>
+  </div>
 </div>
 {{outlet}}

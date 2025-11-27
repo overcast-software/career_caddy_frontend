@@ -12,7 +12,31 @@
     <h2>Welcome to Career Caddy</h2>
   {{/if}}
 </Menus::SubnavBar>
-
+<BarCart @flashMessages={{this.flashMessages}}/>
 <div class='landing-page' >
-{{outlet}}
+  <div class='fairway'>
+    <Panel::Card>
+    <ul>
+      <li>
+        Career Caddy documents your journey to getting a job.
+      </li>
+      <li>
+        Career Caddy is AI enhanced.
+      </li>
+      <li>
+        Career Caddy learns your professional persona.
+      </li>
+      <li>
+        Career Caddy can score a job against your resume.
+      </li>
+      <li>
+        Career Caddy can increase your ranking among other applicants.
+      </li>
+      <li>
+        Career Caddy can write your cover letter.
+      </li>
+    </ul>
+    </Panel::Card>
+    {{outlet}}
+  </div>
 </div>

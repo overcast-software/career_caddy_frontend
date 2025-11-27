@@ -4,4 +4,5 @@ job application for {{@jobApplication.jobPost.title}} at {{@jobApplication.jobPo
   <LinkTo @route='job-applications.show' @model={{@jobApplication}}>show</LinkTo>
   <LinkTo @route='job-applications.edit' @model={{@jobApplication}}>edit</LinkTo>
   <a href="#" {{on 'click' this.delete}}>delete</a>
+  Status: {{@jobApplication.status}}
 </Panel::Card>

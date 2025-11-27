@@ -8,10 +8,6 @@ export default class CoverLettersNewController extends Controller {
     this.model.save()
         .then(()=> this.flashMessages.success('saved'))
   }
-  get companies() {
-    // XXX got rid of this
-    return this.store.peekAll('company');
-  }
 
   get jobPosts(){
     return this.store.peekAll('job-post');

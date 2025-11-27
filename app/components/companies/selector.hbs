@@ -3,9 +3,11 @@
   @onChange={{this.updateCompany}}
   @searchEnabled={{true}}
   @searchField='name'
-  @placeHolder='select a company'
-  @labelText="select company"
+  @placeHolder={{this.placeHolder}}
+  @labelText={{this.labelText}}
   @selected={{this.selectedCompany}}
+  @onInput={{@onInput}}
+  @onKeydown={{@onKeydown}}
   as |company|
 >
   {{company.name}}

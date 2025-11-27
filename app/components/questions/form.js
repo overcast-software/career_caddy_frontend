@@ -46,7 +46,7 @@ export default class QuestionsFormComponent extends Component {
     this.args.question.save()
         .then( () => {this.flashMessages.succes("success")} )
         .then(() => {
-      this.router.transitionTo('quesitons.new', {
+      this.router.transitionTo('questions.new', {
         queryParams: { companyId: this.selectedCompany.id },
       });
     })

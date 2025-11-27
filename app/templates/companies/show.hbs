@@ -1,7 +1,7 @@
 <Menus::SubnavBar>
   {{this.model.name}}
   <LinkTo
-    @route="companies.show"
+    @route="companies.show.job-posts"
     @model={{this.model}}
     class='btn'
   >
@@ -17,5 +17,14 @@
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 <div class='fairway'>
+
+  <Panel::Card>
+    {{this.model.name}}
+    <br/>
+    job posts: {{this.model.jobPosts.length}}
+    <br/>
+    job applications: {{this.model.jobApplications.length}}
+    <br/>
+  </Panel::Card>
   {{outlet}}
 </div>

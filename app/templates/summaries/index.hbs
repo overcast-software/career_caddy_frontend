@@ -3,11 +3,16 @@
   Summaries
 </Menus::SubnavBar>
 <div class="fairway">
-    {{#if this.model.length}}
-        {{#each this.model as |summary|}}
-          <Summaries::Item @summary={{summary}} />
-        {{/each}}
+  {{#if this.model.length}}
+    {{#each this.model as |summary|}}
+      <Panel::Card>
+        <Summaries::Item @summary={{summary}} />
+        <LinkTo class='btn' @route='summaries.show' @model={{summary}}>show</LinkTo>
+      </Panel::Card>
+
+
+    {{/each}}
     {{else}}
-      <p class="muted">No summaries yet.</p>
-    {{/if}}
+    <p class="muted">No summaries yet.</p>
+  {{/if}}
 </div>

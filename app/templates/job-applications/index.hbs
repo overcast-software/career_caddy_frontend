@@ -1,17 +1,31 @@
 {{page-title "Applications"}}
 <Menus::SubnavBar>
-    <LinkTo @route="job-applications.new" class='btn'>New Application</LinkTo>
+  <LinkTo @route="job-applications.new" class='btn'>New Application</LinkTo>
 </Menus::SubnavBar>
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
+<BarCart @flashMessages={{this.flashMessages}}/>
 <div class="fairway">
-  {{#if this.model.length}}
-    <JobApplications::List @jobApplications={{this.model}}/>
-  {{else}}
-    <span class='loader'></span>
-  {{/if}}
+  <Panel::Card>
+    <Companies::Selector
+      @companies={{this.companies}}
+      @companyCallback={{this.companyFilter}}
+      @onInput={{this.selectInput}}
+      @labelText={{this.labelText}}
+      @onKeydown={{this.companyKeydown}}
+    />
+
+    <PowerSelect
+      @options={{this.statuses}}
+      @onChange={{this.statusFilter}}
+      @selected={{this.selectedStatus}}
+      @labelText="Find by status"
+      as |status|
+    >
+      {{status}}
+    </PowerSelect>
+  </Panel::Card>
+
+  {{#each this.fullFilter as |application|}}
+    <JobApplications::Compact @jobApplication={{application}}/>
+  {{/each}}
   {{outlet}}
 </div>

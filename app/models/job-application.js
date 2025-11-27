@@ -2,7 +2,7 @@ import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 
 export default class JobApplicationModel extends Model {
   @attr('date') appliedAt;
-  @attr('string', { defaultValue: 'Applied' }) status;
+  @attr('string', { defaultValue: 'Saved' }) status;
   @attr('string') trackingUrl;
   @attr('string') notes;
   @belongsTo('user', { async: true, inverse: 'jobApplications' }) user;
@@ -17,5 +17,11 @@ export default class JobApplicationModel extends Model {
   }
   get jobPostCompany(){
     return this.get("jobPost.company")
+  }
+
+  get fetchCompany(){
+    const funtimes = this.get('company') || this.jobPostCompany
+    debugger
+    return funtimes
   }
 }
