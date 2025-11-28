@@ -1,19 +1,11 @@
 <article class="panel-card builder-form">
   Questions from an application you want AI to answer
   <form class="questions-form" {{on "submit" this.save}}>
+
     <div class="field">
-      <PowerSelect
-        @options={{this.companies}}
-        @onChange={{this.updateCompany}}
-        @selected={{this.selectedCompany}}
-        @searchField="name"
-        @searchEnabled={{true}}
-        @placeholder="Select a Company"
-        @labelText="Company"
-        as |company|
-      >
-        {{company.name}} (with {{company.jobPosts.length}} job post)
-      </PowerSelect>
+      <Companies::SelectOrCreate
+        @companies={{this.companies}}
+      />
     </div>
     <div class="field">
       <label for="question-content">Question</label>
@@ -54,7 +46,7 @@
         <button
           class="btn" type="submit" {{on 'click' this.saveAndNew}}
         >
-            save an new {{this.selectedCompany.name}} Question
+          save an new {{this.selectedCompany.name}} Question
         </button>
       {{/if}}
     </div>

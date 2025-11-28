@@ -2,16 +2,17 @@
   <div class="field companies-select-row">
     <div class="grow">
       <Companies::Selector
-        @companies={{this.companyAndCreate}}
-        @companyCallback={{@companyCallback}}
-      />
+        @companies={{@companies}}
+        @onInput={{this.selectInput}}
+        @companyCallback={{this.companyFilter}}
+        @onKeydown={{this.companyKeydown}}
+        @labelText={{this.labelText}}
+        @onChange={{this.updateCompany}}
+        as |company|
+      >
+        {{company.name}}
+      </Companies::Selector>
     </div>
-    {{#if this.showCreate}}
-      <button type="button" class="btn" {{on "click" this.toggleCreateForm}}>Hide</button>
-    {{else}}
-      <span class="muted">or</span>
-      <button type="button" class="btn" {{on "click" this.toggleCreateForm}}>Create new company</button>
-    {{/if}}
   </div>
 
   {{#if this.showCreate}}

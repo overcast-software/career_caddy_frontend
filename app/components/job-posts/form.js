@@ -10,27 +10,23 @@ export default class JobPostsFormComponent extends Component {
   @service flashMessages;
   @tracked errorMessage = null;
   @tracked form_toggle = false; // false = "by url", true = "manual"
-  @tracked selectedCompany = null
+  @tracked selectedCompany = null;
   @tracked useNewCompany = true;
   @tracked newCompanyName = '';
 
   constructor() {
     super(...arguments);
-    const company = this.args.jobPost.company;
-    if (company) {
-      this.useNewCompany = false;
-      this.selectedCompanyId = company.id;
-    } else {
-      this.useNewCompany = true;
-      this.selectedCompanyId = '__new__';
-    }
+    this.args.jobPost.company.then((company) => {
+      if (company) {
+        this.useNewCompany = false;
+        this.selectedCompany = company;
+      }
+    });
   }
 
   get companies() {
     return this.store.peekAll('company');
   }
-
-
 
   @action
   onModeChange(event) {
@@ -39,7 +35,7 @@ export default class JobPostsFormComponent extends Component {
 
   @action
   handleCompanyChoice(company) {
-    this.selectedCompany = company
+    this.selectedCompany = company;
   }
 
   @action
@@ -59,37 +55,11 @@ export default class JobPostsFormComponent extends Component {
   @action
   async submitEdit(event) {
     event.preventDefault();
-    this.errorMessage = null;
+    this.args.jobPost.save()
+        .catch((error)=>this.flashMessages.alert(error))
+        .then(()=> this.router.transitionTo('job-posts.show', this.args.jobPost))
+        .then(()=> this.flashMessages.success('successfully saved job post'))
 
-    try {
-      if (this.useNewCompany) {
-        const name = (this.newCompanyName || '').trim();
-        if (!name) {
-          this.flashMessages.danger('Please enter a company name.');
-          return;
-        }
-        const company = await this.store
-          .createRecord('company', { name })
-          .save();
-        this.args.jobPost.company = company;
-      } else if (this.selectedCompanyId) {
-        const company = this.store.peekRecord('company', this.selectedCompanyId);
-        if (!company) {
-          this.flashMessages.danger('Please select a company.');
-          return;
-        }
-        this.args.jobPost.company = company;
-      } else {
-        this.flashMessages.danger('Please select a company.');
-        return;
-      }
-
-      await this.args.jobPost.save();
-      this.flashMessages.add({ message: 'Saved the job post' });
-      this.router.transitionTo('job-posts.index');
-    } catch (e) {
-      this.flashMessages.danger('Problem in saving job post.');
-    }
   }
   @action
   async submitDelete(event) {

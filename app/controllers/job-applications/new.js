@@ -6,23 +6,33 @@ export default class JobApplicationsNewController extends Controller {
   @service store;
   @service flashMessages;
   @tracked selectedJobPost;
-  @tracked selectedReusme
-  constuctor(){
-    this.selectedJobPost = this.model.jobPost
-    this.selectedResume = this.model.resume
-  }
-  get coverLetters() {
-    return this.store.peekAll('cover-letter');
+  @tracked selectedReusme;
+  @tracked selectedCoverLetter;
+  constuctor() {
+    this.selectedJobPost = this.model.jobPost;
+    this.selectedResume = this.model.resume;
   }
 
-  get resumes(){
-    return this.store.peekAll('resume')
+  get jobApplication() {
+    return this.args.jobApplication;
   }
-  get jobPosts(){
-    return this.store.peekAll('job-post')
+
+  get coverLetters() {
+    const coverLetters = this.store.peekAll('cover-letter')
+    console.log(coverLetters)
+    if (this.selectedJobPost){
+      return coverLetters.filter((cl)=> cl.jobPost.id === this.selectedJobPost.id)
+    } else {
+      return coverLetters
+    }
   }
-  @action clearMessages() {
-    this.flashMessages.clearMessages();
+
+  get resumes() {
+    return this.store.peekAll('resume');
+  }
+
+  get jobPosts() {
+    return this.store.peekAll('job-post');
   }
 
   @action honk() {
@@ -30,10 +40,6 @@ export default class JobApplicationsNewController extends Controller {
       showProgress: true,
       sticky: true,
     });
-  }
-
-  get jobApplication() {
-    return this.args.jobApplication;
   }
 
   get statuses() {
@@ -67,9 +73,9 @@ export default class JobApplicationsNewController extends Controller {
     return this.statuses;
   }
 
-
-  get cantSave() {
-    return !this.canSave;
+  get invalid() {
+    // TODO always comes true.  validation can go here
+    return false;
   }
 
   toggleAppliedAt() {
@@ -85,7 +91,7 @@ export default class JobApplicationsNewController extends Controller {
     this.jobApplication.resume = this.selectedResume;
     this.jobApplication.coverLetter = this.selectedCoverLetter;
 
-    this.args.jobApplication
+    this.jobApplication
       .save()
       .then((app) => {
         this.flashMessages.success('job application saved');
@@ -94,34 +100,21 @@ export default class JobApplicationsNewController extends Controller {
       .then((app) => this.router.transitionTo('job-applications.show', app));
   }
 
-  @action updateStatus(event) {
-    const status = event?.target?.value ?? '';
+  @action updateStatus(status) {
     this.jobApplication.status = status;
     this.toggleAppliedAt();
   }
 
-  @action updateCoverLetter(event) {
-    const id = event?.target?.value ?? '';
-    const selected = this.args.coverLetters.find((cl) => cl.id === id);
-    this.selectedCoverLetter = selected;
+  @action updateCoverLetter(coverLetter) {
+    this.selectedCoverLetter = coverLetter;
   }
 
-  @action updateResume(event) {
-    const id = event?.target?.value ?? '';
-    const selected = this.args.resumes.find((r) => r.id === id);
-    this.selectedResume = selected;
+  @action updateResume(resume) {
+    this.selectedResume = resume;
   }
 
-  @action updateJobPost(event) {
-    const id = event?.target?.value ?? '';
-    const selected = this.args.jobPosts.find((jp) => jp.id === id);
-    this.selectedJobPost = selected;
-
-    // Clear error message if a valid job post is selected
-    if (selected && selected.id) {
-      this.errorMessage = null;
-    }
-
+  @action updateJobPost(jobPost) {
+    this.selectedJobPost = jobPost;
     // If a cover letter is selected and it belongs to a different job post, clear it.
     const currentCL = this.jobApplication.coverLetter;
     if (

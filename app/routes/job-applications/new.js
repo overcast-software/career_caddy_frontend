@@ -14,14 +14,13 @@ export default class JobApplicationsNewRoute extends Route {
       jobPost = this.store.peekRecord('job-post', jobId);
       jobApplication.jobPost = jobPost;
     } else {
-      this.store.findAll('job-post', { reload: true });
+      this.store.findAll('job-post', { include: "company" });
     }
     this.store.findAll('cover-letter');
     if (resumeId) {
       const resume = this.store.peekRecord('resume', resumeId);
       jobApplication.resume = resume;
     } else {
-      debugger
       this.store.findAll('resume');
     }
     return jobApplication;

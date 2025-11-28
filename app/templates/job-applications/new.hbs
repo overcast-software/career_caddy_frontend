@@ -16,44 +16,44 @@
         @selected={{this.selectedJobPost}}
         as |jobPost|
       >
-        {{jobPost.title}}
+        {{jobPost.title}} at {{jobPost.company.name}}
       </PowerSelect>
     </div>
 
     <div class="field">
       <label class="field-label" >Resume to use:</label>
-      <select value={{this.model.resume.id}} {{on "change" this.updateResume}}>
-        {{#each @resumes as |resume|}}
-          <option value={{resume.id}}>
-            {{resume.name}}
-          </option>
-        {{/each}}
-      </select>
+      <PowerSelect
+        @options={{this.resumes}}
+        @onChange={{this.updateResume}}
+        @selected={{this.selectedResume}}
+        as |resume|
+      >
+        {{resume.title}}
+      </PowerSelect>
     </div>
 
     <div class="field">
-      <label class="field-label" >Cover Letter</label>
-      <select value={{this.model.coverLetter.id}} {{on "change" this.updateCoverLetter}} >
-        {{#each @coverLetters as |coverLetter|}}
-          <option value={{coverLetter.id}}>
-            cover letter {{coverLetter.id}} - written on {{format-date coverLetter.createdAt}}
-          </option>
-        {{/each}}
-      </select>
+      <label class="field-label" >Cover letter:</label>
+      <PowerSelect
+        @options={{this.coverLetters}}
+        @onChange={{this.updateCoverLetter}}
+        @selected={{this.selectedCoverLetter}}
+        as |coverLetter|
+      >
+        {{coverLetter}}
+      </PowerSelect>
     </div>
 
     <div class="field">
       <label class="field-label" >Status</label>
-      <select
-        value={{this.model.status}}
-        {{on "change" this.updateStatus}}
+      <PowerSelect
+        @options={{this.statusOptions}}
+        @onChange={{this.updateStatus}}
+        @selected={{@jobApplication.status}}
+        as |status|
       >
-        {{#each this.statusOptions as |status|}}
-          <option value={{status}}>
-            {{status}}
-          </option>
-        {{/each}}
-      </select>
+        {{status}}
+      </PowerSelect>
     </div>
     {{#if this.showAppliedAt}}
       <div class="field">
@@ -79,7 +79,6 @@
       <label class="field-label" >Notes</label>
 
       <textarea
-        id={{this.notesTextareaId}}
         value={{this.model.notes}}
         {{on "input" (fn this.updateField "notes")}}
       ></textarea>
@@ -91,7 +90,7 @@
     <button
       type="button"
       class="btn"
-      disabled={{this.cantSave}}
+      disabled={{this.invalid}}
       {{on "click" this.saveApplication}}
     >Save</button>
   </div>

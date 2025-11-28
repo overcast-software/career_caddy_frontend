@@ -34,15 +34,14 @@ export default class ResumesImportController extends Controller {
         })
         .then((resume) => {
           console.log(resume);
-          this.flashMessges.success('Resume imported');
+          this.flashMessages.success('Resume imported');
         })
-        .finally()
         .catch((error) => {
           this.flashMessages.clearMessages();
           this.flashMessages.success(`Resume failed ${error}`);
         });
     } catch (error) {
-      this.flashMessges.alert(`Resume failed ${error}`);
+      this.flashMessages.alert(`Resume failed ${error}`);
     }
   }
 }

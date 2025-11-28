@@ -7,7 +7,7 @@ export default class QuestionsFormComponent extends Component {
   @tracked selectedCompany = null;
   @tracked selectedJobApplication = null;
   @service store;
-  @service flashMessages
+  @service flashMessages;
   @service router;
 
   get jobApplications() {
@@ -43,13 +43,20 @@ export default class QuestionsFormComponent extends Component {
   }
   @action saveAndNew() {
     this.args.question.company = this.selectedCompany;
-    this.args.question.save()
-        .then( () => {this.flashMessages.succes("success")} )
-        .then(() => {
-      this.router.transitionTo('questions.new', {
-        queryParams: { companyId: this.selectedCompany.id },
-      });
-    })
+    this.args.question
+      .save()
+      .then(() => {
+        this.flashMessages.succes('success');
+      })
+      .then(() => {
+        this.router.transitionTo('questions.new', {
+          queryParams: { companyId: this.selectedCompany.id },
+        });
+      })
+      .then(()=>{
+        this.args.question.createRecord("question")
+        this.args.question.company = this.selectedCompany
+      })
   }
 
   @action cancel(event) {

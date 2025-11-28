@@ -21,7 +21,6 @@ export default class JobApplicationModel extends Model {
 
   get fetchCompany(){
     const funtimes = this.get('company') || this.jobPostCompany
-    debugger
     return funtimes
   }
 }
