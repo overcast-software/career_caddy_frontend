@@ -4,18 +4,12 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 export default class JobApplicationsNewController extends Controller {
   @service store;
+  @service router;
   @service flashMessages;
   @tracked selectedJobPost;
-  @tracked selectedReusme;
+  @tracked selectedResume;
   @tracked selectedStatus;
   @tracked selectedCoverLetter;
-  constructor() {
-    super(...arguments);
-  }
-
-  get jobApplication() {
-    return this.args.jobApplication;
-  }
 
   get coverLetters() {
     const coverLetters = this.store.peekAll('cover-letter');
@@ -63,7 +57,7 @@ export default class JobApplicationsNewController extends Controller {
   }
 
   @action updateField(field, event) {
-    const app = this.jobApplication;
+    const app = this.model;
     if (field === 'appliedAt') {
       app.appliedAt = event.target.valueAsDate ?? null;
     } else {
@@ -84,16 +78,16 @@ export default class JobApplicationsNewController extends Controller {
     this.showAppliedAt = this.jobApplication.status === 'Applied';
   }
 
-  @action async saveApplication() {
+  @action saveApplication() {
     if (!this.selectedJobPost) {
       this.flashMessages.warn('please select a job.');
       return;
     }
-    this.jobApplication.jobPost = this.selectedJobPost;
-    this.jobApplication.resume = this.selectedResume;
-    this.jobApplication.coverLetter = this.selectedCoverLetter;
+    this.model.jobPost = this.selectedJobPost;
+    this.model.resume = this.selectedResume;
+    this.model.coverLetter = this.selectedCoverLetter;
 
-    this.jobApplication
+    this.model
       .save()
       .then((app) => {
         this.flashMessages.success('job application saved');
@@ -113,20 +107,11 @@ export default class JobApplicationsNewController extends Controller {
   }
 
   @action updateResume(resume) {
+
     this.selectedResume = resume;
   }
 
   @action updateJobPost(jobPost) {
     this.selectedJobPost = jobPost;
-    // If a cover letter is selected and it belongs to a different job post, clear it.
-    const currentCL = this.jobApplication.coverLetter;
-    if (
-      currentCL &&
-      selected &&
-      currentCL.jobPost &&
-      String(currentCL.jobPost.id) !== String(selected.id)
-    ) {
-      this.args.jobApplication.coverLetter = null;
-    }
   }
 }

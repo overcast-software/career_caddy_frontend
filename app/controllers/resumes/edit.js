@@ -30,7 +30,6 @@ export default class ResumesEditController extends Controller {
       })
       .then(() => this.flashMessages.success('resume successfully cloned'))
       .catch((error) => {
-        debugger;
         this.flashMessages.warning(error);
       });
   }

@@ -11,9 +11,9 @@ export default class QuestionsFormComponent extends Component {
   @service router;
 
   get jobApplications() {
-    return this.selectedCompany
-      ? this.selectedCompany.jobApplications.content
-      : this.store.peekAll('job-application');
+    // TODO if company, reduce options
+    // for some reason I can't make it work
+      return this.store.peekAll('job-application');
   }
 
   get companies() {

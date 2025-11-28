@@ -8,6 +8,7 @@ export default class JobApplicationsNewRoute extends Route {
     controller.selectedResume = model.resume;
     controller.selectedCoverLetter = model.coverLetter;
     controller.selectedStatus = model.status;
+    controller.model = model
   }
   async model(_params, transition) {
     // Look for params that specifiy we already know the
@@ -28,7 +29,6 @@ export default class JobApplicationsNewRoute extends Route {
     } else {
       this.store.findAll('resume');
     }
-    console.log(jobApplication.jobPost)
     return jobApplication;
   }
 }
