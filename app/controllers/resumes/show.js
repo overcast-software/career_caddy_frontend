@@ -16,12 +16,6 @@ export default class ResumesShowController extends Controller {
   async cloneResume() {
     const source = this.model;
     const user = await source.user;
-    console.log('skills', source.skills);
-    debugger;
-    console.log('educations', source.educations);
-    console.log('experiences', source.experiences);
-    console.log('certifications', source.certifications);
-    console.log('summaries', source.summaries);
     this.store
       .createRecord('resume', {
         user,
@@ -36,12 +30,10 @@ export default class ResumesShowController extends Controller {
       })
       .save()
       .then((clone) => {
-        debugger;
         this.router.transitionTo('resumes.show', clone.id);
       })
       .then(() => this.flashMessages.success('resume successfully cloned'))
       .catch((error) => {
-        debugger;
         this.flashMessages.warning(error);
       });
   }

@@ -56,6 +56,9 @@ Router.map(function () {
         this.route('job-applications', function () {
           this.route('new');
         });
+        this.route('questions', function() {
+          this.route('new');
+        });
       },
     );
     this.route('new');

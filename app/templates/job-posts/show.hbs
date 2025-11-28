@@ -4,6 +4,12 @@
     class="btn"
     @model={{this.model}}
   >Edit</LinkTo>
+  <LinkTo
+    @route='job-posts.show.questions.new'
+    @model={{this.model}}
+  >
+    new question
+  </LinkTo>
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 <div class="fairway">

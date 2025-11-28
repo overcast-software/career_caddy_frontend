@@ -4,6 +4,7 @@ import { action } from '@ember/object';
 export default class AnswersEditController extends Controller {
   @service store;
   @service flashMessages;
+  @service router;
   @action updateContent(event) {
     this.model.content = event.target.value;
   }
@@ -15,7 +16,8 @@ export default class AnswersEditController extends Controller {
   }
   @action deleteAnswer() {
     this.model.destroyRecord().then(() => {
-      this.flashMessages.success('called delete');
+      this.flashMessages.success('Answer deleted');
     });
+    this.router('questions.show.answers.index', record.question);
   }
 }

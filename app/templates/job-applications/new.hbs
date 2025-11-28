@@ -12,7 +12,7 @@
       <label class="field-label" >Job post:</label>
       <PowerSelect
         @options={{this.jobPosts}}
-        @onChange={{fn (mut this.selectedJobPost)}}
+        @onChange={{this.updateJobPost}}
         @selected={{this.selectedJobPost}}
         as |jobPost|
       >
@@ -28,7 +28,7 @@
         @selected={{this.selectedResume}}
         as |resume|
       >
-        {{resume.title}}
+        {{resume.title}} - {{resume.notes}}
       </PowerSelect>
     </div>
 
@@ -49,7 +49,7 @@
       <PowerSelect
         @options={{this.statusOptions}}
         @onChange={{this.updateStatus}}
-        @selected={{@jobApplication.status}}
+        @selected={{this.selectedStatus}}
         as |status|
       >
         {{status}}

@@ -1,0 +1,16 @@
+{{page-title "Index"}}
+<Menus::SubnavBar>
+  {{this.model.question.content.content}}
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<Panel::Card>
+  <h3>answers</h3>
+</Panel::Card>
+{{#each this.model as |answer|}}
+  <Panel::Card>
+    <MarkdownToHtml @markdown={{answer.content}}/>
+    <LinkTo @route='answers.edit' @model={{answer}}>edit</LinkTo>
+  </Panel::Card>
+{{/each}}
+
+{{outlet}}

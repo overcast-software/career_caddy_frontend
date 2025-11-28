@@ -1,17 +1,9 @@
 <div class="builder-form">
   <p>
-    {{@question.company.name}} asked on job application: {{@question.jobApplication.id}}
+    <LinkTo @route="companies.show" @model={{@question.company.id}}>{{@question.company.name}}</LinkTo> asked on job application: {{@question.jobApplication.id}}
     <br/>
     {{@question.content}}
   </p>
-  <h3>answers</h3>
-  {{#if @question.answers}}
-    {{#each @question.answers as |answer|}}
-      {{answer.content}}
-    {{/each}}
-  {{else}}
-    no answers provided yet
-  {{/if}}
   <button class='btn' type="button" {{on 'click' this.askAI}}>ask AI to answer</button>
   {{yield}}
 </div>

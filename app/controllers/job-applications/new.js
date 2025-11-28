@@ -7,10 +7,10 @@ export default class JobApplicationsNewController extends Controller {
   @service flashMessages;
   @tracked selectedJobPost;
   @tracked selectedReusme;
+  @tracked selectedStatus;
   @tracked selectedCoverLetter;
-  constuctor() {
-    this.selectedJobPost = this.model.jobPost;
-    this.selectedResume = this.model.resume;
+  constructor() {
+    super(...arguments);
   }
 
   get jobApplication() {
@@ -18,12 +18,14 @@ export default class JobApplicationsNewController extends Controller {
   }
 
   get coverLetters() {
-    const coverLetters = this.store.peekAll('cover-letter')
-    console.log(coverLetters)
-    if (this.selectedJobPost){
-      return coverLetters.filter((cl)=> cl.jobPost.id === this.selectedJobPost.id)
+    const coverLetters = this.store.peekAll('cover-letter');
+    console.log(coverLetters);
+    if (this.selectedJobPost) {
+      return coverLetters.filter(
+        (cl) => cl.jobPost.id === this.selectedJobPost.id,
+      );
     } else {
-      return coverLetters
+      return coverLetters;
     }
   }
 
@@ -101,6 +103,7 @@ export default class JobApplicationsNewController extends Controller {
   }
 
   @action updateStatus(status) {
+    this.selectedStatus = status
     this.jobApplication.status = status;
     this.toggleAppliedAt();
   }
