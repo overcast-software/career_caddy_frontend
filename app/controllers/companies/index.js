@@ -1,18 +1,34 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
-import { tracked } from '@glimmer/tracking';
 export default class CompaniesIndexController extends Controller {
   @service flashMessages
   @service store
-  @action deleteCompany(company){
+  @action async deleteCompany(company){
     console.log(company)
-    company.destroyRecord()
-           .then((company) => this.flashMessages.success('deleted ' + company.name))
+    const name = company.name;
+    try {
+      await company.destroyRecord();
+      this.flashMessages.success(`deleted ${name}`);
+    } catch (error) {
+      this.flashMessages.danger('Failed to delete company');
+    }
   }
-  @action companyFilter(company){
-    const jobApplications = this.store.peekAll('job-application')
-    this.filtered = jobApplications.filterBy('company')
+
+  get sortedCompanies(){
+    const list = this.model;
+    if (!list || typeof list.length !== 'number') return [];
+    const copy = Array.prototype.slice.call(list);
+    return copy.sort((a, b) => {
+      const an = Number(a.id);
+      const bn = Number(b.id);
+      if (Number.isFinite(an) && Number.isFinite(bn)) {
+        // numeric descending
+        return bn - an;
+      }
+      // Fallback: string compare descending when IDs aren't numeric
+      return String(a.id).localeCompare(String(b.id)) * -1;
+    });
   }
 
 }

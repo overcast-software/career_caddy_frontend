@@ -3,7 +3,7 @@
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 <div class='fairway'>
-  {{#each this.model as |company|}}
+  {{#each this.sortedCompanies as |company|}}
     <Panel::Card>
       <LinkTo @route="companies.show" @model={{company}}>{{company.name}}</LinkTo>
       <LinkTo class='btn' @route="companies.edit" @model={{company}}>Edit</LinkTo>

@@ -4,7 +4,7 @@ import { service } from '@ember/service';
 export default class CompaniesIndexRoute extends Route {
   @service store;
 
-  model() {
-    return this.store.findAll('company');
+  async model() {
+    return  this.store.findAll('company')
   }
 }
