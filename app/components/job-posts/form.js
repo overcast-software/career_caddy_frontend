@@ -2,8 +2,6 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
-// import { A } from '@ember/array';
-
 export default class JobPostsFormComponent extends Component {
   @service router;
   @service store;
@@ -11,14 +9,12 @@ export default class JobPostsFormComponent extends Component {
   @tracked errorMessage = null;
   @tracked form_toggle = false; // false = "by url", true = "manual"
   @tracked selectedCompany = null;
-  @tracked useNewCompany = true;
   @tracked newCompanyName = '';
 
   constructor() {
     super(...arguments);
     this.args.jobPost.company.then((company) => {
       if (company) {
-        this.useNewCompany = false;
         this.selectedCompany = company;
       }
     });

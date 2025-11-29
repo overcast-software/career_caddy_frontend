@@ -11,18 +11,6 @@
     </PowerSelect>
   </div>
 
-  {{#if this.useNewCompany}}
-    <div class="field">
-      <label class="field-label" for="company-new-name">New company name</label>
-      <input
-        id="company-new-name"
-        type="text"
-        value={{this.newCompanyName}}
-        {{on "input" this.updateNewCompanyName}}
-      />
-    </div>
-  {{/if}}
-
   <div class="field">
     <label class="field-label" for="title">Title</label>
     <input

@@ -1,16 +1,18 @@
 <Menus::SubnavBar>
   <LinkTo
+    class="nav-link"
     @route="job-posts.edit"
-    class="btn"
     @model={{this.model}}
   >Edit</LinkTo>
   <LinkTo
+    class="nav-link"
     @route='job-posts.show.questions.new'
     @model={{this.model}}
   >
     new question
   </LinkTo>
   <LinkTo
+    class="nav-link"
     @route='job-posts.show.job-applications.index'
     @model={{this.model}}
   >
