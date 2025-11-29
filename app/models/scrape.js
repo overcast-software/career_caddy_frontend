@@ -9,7 +9,7 @@ export default class ScrapeModel extends Model {
   @attr('date') scrapedAt;
   @attr('string') state;
   @attr('string') html;
-  @belongsTo('job-post', { async: false, inverse: null }) jobPost;
-  @belongsTo('company', { async: false, inverse: null }) company;
-  @belongsTo('scrape', { async: false, inverse: null }) sourceScrape;
+  @belongsTo('job-post', { async: false, inverse: 'scrapes' }) jobPost;
+  @belongsTo('company', { async: false, inverse: 'scrapes' }) company;
+  @belongsTo('scrape', { async: false, inverse: 'scrapes' }) sourceScrape;
 }

@@ -1,13 +1,14 @@
 <Menus::SubnavBar>
-  <LinkTo class='btn' @route='companies.new'>new company</LinkTo>
+  <LinkTo class='nav-link' @route='companies.new'>new company</LinkTo>
+
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 <div class='fairway'>
   {{#each this.sortedCompanies as |company|}}
     <Panel::Card>
       <LinkTo @route="companies.show" @model={{company}}>{{company.name}}</LinkTo>
-      <LinkTo class='btn' @route="companies.edit" @model={{company}}>Edit</LinkTo>
-      <button type='button' class='btn' {{on 'click' (fn this.deleteCompany company)}}>delete</button>
+      <LinkTo class='nav-link' @route="companies.edit" @model={{company}}>Edit</LinkTo>
+      <!-- <button type='button' class='btn danger' {{on 'click' (fn this.deleteCompany company)}}>delete</button> -->
     </Panel::Card>
   {{/each}}
 </div>

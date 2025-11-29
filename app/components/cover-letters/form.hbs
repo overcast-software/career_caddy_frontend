@@ -1,8 +1,14 @@
 <div class='builder-form'>
-  <form>
+  <form {{on 'submit' this.saveCoverLetter}}>
     <div class='field'>
       Body:
-      <textarea aria-label='update-content' {{on 'change' this.updateContent}}>{{@coverLetter.content}}</textarea>
+      <textarea
+        rows="30"
+        aria-label='update-content'
+        {{on 'change' this.updateContent}}>
+        {{@coverLetter.content}}
+      </textarea>
+      <button type="submit" class='btn primary'>Save</button>
     </div>
   </form>
   {{yield}}

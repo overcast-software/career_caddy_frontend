@@ -4,7 +4,7 @@ import config from 'career-caddy-frontend/config/environment';
 
 export default class JwtAuthenticator extends Base {
   @service router;
-
+  
   refreshTimerId = null;
   refreshInFlight = null;
 
@@ -61,7 +61,7 @@ export default class JwtAuthenticator extends Base {
     }
 
     const now = this.now();
-
+    
     if (data.exp && now < data.exp) {
       this.scheduleRefresh(data);
       return data;
@@ -114,7 +114,7 @@ export default class JwtAuthenticator extends Base {
 
     const responseData = await response.json();
     const exp = this.decodeExp(responseData.access);
-
+    
     return {
       ...data,
       access: responseData.access,
