@@ -7,7 +7,7 @@ export default class TopBarComponent extends Component {
   @service router;
 
   @action honk() {
-    console.log('honk');
+    // I'm here to test flash messages
     this.flashMessages.success('honk', {
       showProgress: true,
       sticky: true,
@@ -23,8 +23,11 @@ export default class TopBarComponent extends Component {
   }
 
   @action async invalidateSession() {
-    console.log(Object.keys(this.session));
-    await this.session.invalidateSession();
-    this.router.transitionTo('login');
+    this.session
+      .invalidate()
+      .then(this.flashMessages.success('Successfully logged out.'))
+      .then(() => {
+        this.router.transitionTo('index');
+      });
   }
 }

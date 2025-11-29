@@ -5,30 +5,32 @@ import { action } from '@ember/object';
 
 export default class LoginController extends Controller {
   @service session;
+  @service flashMessages;
   @service router;
   @tracked username;
   @tracked password;
   @tracked errorMessage;
 
-  @action
-  async login(e) {
+  @action async authenticate(e) {
     e.preventDefault();
-    this.errorMessage = null;
+    let { username, password } = this;
     try {
-      await this.session.login(this.username, this.password);
-      this.router.transitionTo('resumes.index');
+      await this.session.authenticate('authenticator:jwt', username, password);
     } catch (error) {
-      this.errorMessage = error.message || 'Login failed';
+      this.flashMessages.danger(
+        error?.error || error?.errors?.[0]?.detail || 'Login failed',
+      );
     }
+    this.router
+      .transitionTo('index')
+      .then(this.flashMessages.success('Successfully logged in'));
   }
 
-  @action
-  updateUsername(e) {
-    this.username = e.target.value;
-  }
-
-  @action
-  updatePassword(e) {
+  @action updatePassword(e) {
     this.password = e.target.value;
+  }
+
+  @action updateUsername(e) {
+    this.username = e.target.value;
   }
 }

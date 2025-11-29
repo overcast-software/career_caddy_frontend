@@ -24,7 +24,8 @@
 
     <div class="landing-actions">
       <LinkTo @route="resumes.index" class="btn primary">Get Started</LinkTo>
-      {{#unless this.session.isAuthenticated}}
+      {{#unless this.session.authService.isAuthenticated}}
+        {{log this.session.authService.isAuthenticated}}
         <LinkTo @route="login" class="btn">Login</LinkTo>
       {{/unless}}
       {{#if this.unhealthy}}

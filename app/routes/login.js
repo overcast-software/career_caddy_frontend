@@ -3,11 +3,8 @@ import { service } from '@ember/service';
 
 export default class LoginRoute extends Route {
   @service session;
-  @service router;
 
   beforeModel() {
-    if (this.session.isAuthenticated) {
-      this.router.transitionTo('job-posts.index');
-    }
+    // this.session.prohibitAuthentication('job-posts.index');
   }
 }

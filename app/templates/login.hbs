@@ -1,36 +1,32 @@
 {{page-title "Login"}}
 
-<div class="container">
-  <div class="login-page">
-    <h1>Login to Career Caddy</h1>
+<div class="fairway">
+  <Panel::Card>
+    <div class="login-page">
+      <h1>Login to Career Caddy</h1>
+      <form {{on "submit" this.authenticate}}>
+        <label for="username">Username</label>
+        <input
+          id="username"
+          placeholder="Enter Username"
+          value={{this.username}}
+          {{on 'change' this.updateUsername}}
+        />
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          placeholder="Enter Password"
+          value={{this.password}}
+          {{on 'change' this.updatePassword}}
+        />
+        <button type="submit">Login</button>
+      </form>
 
-    {{#if this.errorMessage}}
-      <div class="error">{{this.errorMessage}}</div>
-    {{/if}}
-
-    {{! app/templates/login.hbs }}
-    <form {{on "submit" this.login}}>
-      <label for="username">Username</label>
-      <input
-        id="username"
-        placeholder="Enter Username"
-        value={{this.username}}
-        {{on "change" this.updateUsername}}
-      />
-      <label for="password">Password</label>
-      <input
-        id="password"
-        type="password"
-        placeholder="Enter Password"
-        value={{this.password}}
-        {{on "change" this.updatePassword}}
-      />
-      <button type="submit">Login</button>
-    </form>
-
-    <p>
-      Need to set up the app?
-      <LinkTo @route="setup">Initial Setup</LinkTo>
-    </p>
-  </div>
+      <p>
+        Need to set up the app?
+        <LinkTo @route="setup">Initial Setup</LinkTo>
+      </p>
+    </div>
+  </Panel::Card>
 </div>
