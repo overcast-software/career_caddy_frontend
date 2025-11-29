@@ -75,7 +75,7 @@ export default class JobApplicationsNewController extends Controller {
   }
 
   toggleAppliedAt() {
-    this.showAppliedAt = this.jobApplication.status === 'Applied';
+    this.showAppliedAt = this.model.status === 'Applied';
   }
 
   @action saveApplication() {
@@ -83,9 +83,9 @@ export default class JobApplicationsNewController extends Controller {
       this.flashMessages.warn('please select a job.');
       return;
     }
-    this.model.jobPost = this.selectedJobPost;
-    this.model.resume = this.selectedResume;
-    this.model.coverLetter = this.selectedCoverLetter;
+    this.model.jobPost = this.store.peekRecord('job-post',  this.selectedJobPost.id);
+    this.model.resume = this.store.peekRecord('resume', this.selectedResume.id)
+    this.model.coverLetter = this.store.peekRecord('cover-letter', this.selectedCoverLetter.id)
 
     this.model
       .save()
@@ -98,7 +98,7 @@ export default class JobApplicationsNewController extends Controller {
 
   @action updateStatus(status) {
     this.selectedStatus = status
-    this.jobApplication.status = status;
+    this.model.status = status;
     this.toggleAppliedAt();
   }
 

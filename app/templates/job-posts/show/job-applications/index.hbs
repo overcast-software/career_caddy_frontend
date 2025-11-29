@@ -1,0 +1,10 @@
+{{page-title "Applications"}}
+{{outlet}}
+
+{{#each this.model.jobApplications as |jobApplication|}}
+  <Panel::Card>
+    <LinkTo @route='job-applications.show' @model={{jobApplication.id}}>
+    {{jobApplication.id}}
+    </LinkTo>
+  </Panel::Card>
+{{/each}}

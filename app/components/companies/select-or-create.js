@@ -17,6 +17,9 @@ export default class CompaniesSelectOrCreate extends Component {
   }
 
   @action updateCompany(company) {
+    //do this in case someone uses clipboard and now keydown
+    this.proposedCompanyName = company.name
+    // this is the regular behaviour
     this.selectedCompany = company;
   }
 
