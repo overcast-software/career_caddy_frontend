@@ -13,8 +13,8 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
   namespace = config.APP.API_NAMESPACE;
 
   get headers() {
-    if (this.session.isAuthenticated && this.session.data.authenticated.access) {
-      return { Authorization: `Bearer ${this.session.data.authenticated.access}` };
+    if (this.session.authorizationHeader) {
+      return { Authorization: this.session.authorizationHeader };
     }
     return {};
   }
@@ -24,6 +24,15 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
       return await super.ajax(url, method, options);
     } catch (error) {
       if (error.status === 401) {
+        if (!options._retried && this.session.refreshToken) {
+          try {
+            await this.session.refresh();
+            options._retried = true;
+            return await super.ajax(url, method, options);
+          } catch (refreshError) {
+            // Refresh failed, proceed with logout
+          }
+        }
         await this.session.invalidate();
         this.router.transitionTo('login');
       }

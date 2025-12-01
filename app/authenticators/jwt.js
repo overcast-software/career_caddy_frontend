@@ -1,20 +1,17 @@
 import Base from 'ember-simple-auth/authenticators/base';
 import { service } from '@ember/service';
 import config from 'career-caddy-frontend/config/environment';
+import { buildBaseUrl } from 'career-caddy-frontend/utils/base-url';
 
 export default class JwtAuthenticator extends Base {
   @service router;
+  @service session;
   
   refreshTimerId = null;
   refreshInFlight = null;
 
   get baseUrl() {
-    const host = (config.APP.API_HOST ?? '').replace(/\/+$/, '');
-    const namespace = (config.APP.API_NAMESPACE ?? 'api/v1').replace(
-      /^\/+|\/+$/g,
-      '',
-    );
-    return `${host}/${namespace}/`;
+    return buildBaseUrl();
   }
 
   get authConfig() {
@@ -58,6 +55,11 @@ export default class JwtAuthenticator extends Base {
   async restore(data) {
     if (!data.access || !data.refresh) {
       throw new Error('No tokens available');
+    }
+
+    // Ensure exp is always present
+    if (!data.exp) {
+      data.exp = this.decodeExp(data.access);
     }
 
     const now = this.now();
@@ -118,6 +120,7 @@ export default class JwtAuthenticator extends Base {
     return {
       ...data,
       access: responseData.access,
+      refresh: responseData.refresh || data.refresh,
       exp: exp
     };
   }
@@ -125,21 +128,29 @@ export default class JwtAuthenticator extends Base {
   scheduleRefresh(data) {
     this.cancelRefresh();
     if (data.exp) {
-      const refreshTime = (data.exp - this.now() - 60) * 1000;
-      if (refreshTime > 0) {
-        this.refreshTimerId = setTimeout(async () => {
-          try {
-            const refreshedData = await this.refresh(data);
-            // Trigger session update with new data
-            if (this.session?.isAuthenticated) {
-              this.session.set('data.authenticated', refreshedData);
-            }
-          } catch (error) {
-            // Silent fail for background refresh - let normal request flow handle it
-            console.warn('Background token refresh failed:', error);
-          }
-        }, refreshTime);
+      const refreshTimeMs = (data.exp - this.now() - 60) * 1000;
+      
+      if (refreshTimeMs <= 0) {
+        // Token is near/past expiry, refresh immediately
+        this.refresh(data).then((refreshedData) => {
+          this.session.set('data.authenticated', refreshedData);
+          this.scheduleRefresh(refreshedData);
+        }).catch((error) => {
+          console.warn('Immediate token refresh failed:', error);
+        });
+        return;
       }
+      
+      this.refreshTimerId = setTimeout(async () => {
+        try {
+          const latest = this.session.data?.authenticated || data;
+          const refreshedData = await this.refresh(latest);
+          this.session.set('data.authenticated', refreshedData);
+          this.scheduleRefresh(refreshedData); // Reschedule for next cycle
+        } catch (error) {
+          console.warn('Background token refresh failed:', error);
+        }
+      }, refreshTimeMs);
     }
   }
 
@@ -151,11 +162,15 @@ export default class JwtAuthenticator extends Base {
   }
 
   decodeExp(token) {
-    const payload = token.split('.')[1];
-    const decoded = JSON.parse(
-      atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
-    );
-    return decoded.exp;
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(
+        atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
+      );
+      return decoded.exp;
+    } catch (error) {
+      throw new Error('Failed to decode JWT token');
+    }
   }
 
   now() {
