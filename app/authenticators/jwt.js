@@ -2,6 +2,7 @@ import Base from 'ember-simple-auth/authenticators/base';
 import { service } from '@ember/service';
 import config from 'career-caddy-frontend/config/environment';
 import { buildBaseUrl } from 'career-caddy-frontend/utils/base-url';
+import { decodeExp, now } from 'career-caddy-frontend/utils/jwt';
 
 export default class JwtAuthenticator extends Base {
   @service router;
@@ -41,7 +42,7 @@ export default class JwtAuthenticator extends Base {
     }
 
     const data = await response.json();
-    const exp = this.decodeExp(data.access);
+    const exp = decodeExp(data.access);
     const authenticatedData = {
       access: data.access,
       refresh: data.refresh,
@@ -59,12 +60,12 @@ export default class JwtAuthenticator extends Base {
 
     // Ensure exp is always present
     if (!data.exp) {
-      data.exp = this.decodeExp(data.access);
+      data.exp = decodeExp(data.access);
     }
 
-    const now = this.now();
+    const nowTime = now();
     
-    if (data.exp && now < data.exp) {
+    if (data.exp && nowTime < data.exp) {
       this.scheduleRefresh(data);
       return data;
     }
@@ -115,7 +116,7 @@ export default class JwtAuthenticator extends Base {
     }
 
     const responseData = await response.json();
-    const exp = this.decodeExp(responseData.access);
+    const exp = decodeExp(responseData.access);
     
     return {
       ...data,
@@ -128,7 +129,7 @@ export default class JwtAuthenticator extends Base {
   scheduleRefresh(data) {
     this.cancelRefresh();
     if (data.exp) {
-      const refreshTimeMs = (data.exp - this.now() - 60) * 1000;
+      const refreshTimeMs = (data.exp - now() - 60) * 1000;
       
       if (refreshTimeMs <= 0) {
         // Token is near/past expiry, refresh immediately
@@ -161,19 +162,4 @@ export default class JwtAuthenticator extends Base {
     }
   }
 
-  decodeExp(token) {
-    try {
-      const payload = token.split('.')[1];
-      const decoded = JSON.parse(
-        atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
-      );
-      return decoded.exp;
-    } catch (error) {
-      throw new Error('Failed to decode JWT token');
-    }
-  }
-
-  now() {
-    return Math.floor(Date.now() / 1000);
-  }
 }

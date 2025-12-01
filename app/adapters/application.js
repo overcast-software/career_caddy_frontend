@@ -20,6 +20,15 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
   }
 
   async ajax(url, method, options = {}) {
+    // Preflight token refresh for write operations
+    if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
+      try {
+        await this.session.ensureFreshToken(90);
+      } catch (error) {
+        // Let it proceed - the 401 handler below will catch and retry
+      }
+    }
+
     try {
       return await super.ajax(url, method, options);
     } catch (error) {

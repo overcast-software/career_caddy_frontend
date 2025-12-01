@@ -35,6 +35,17 @@ export default class ApplicationRoute extends Route {
     }
 
     this.healthy = true;
+    
+    // Start activity watching and ensure fresh token
+    if (this.session.isAuthenticated) {
+      this.session.startActivityWatch();
+      try {
+        await this.session.ensureFreshToken(90);
+      } catch (error) {
+        console.warn('Initial token refresh failed:', error);
+      }
+    }
+    
     return this._loadCurrentUser();
   }
 
