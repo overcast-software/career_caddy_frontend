@@ -25,9 +25,13 @@ export default class ApplicationRoute extends Route {
       return;
     }
 
+    // Restore session before checking authentication
+    await this.session.setup();
+
     // Enforce authentication for protected routes
     if (routeName !== 'index' && !this.session.isAuthenticated) {
       this.router.transitionTo('login');
+      return; // IMPORTANT: abort further processing and the original transition
     }
 
     this.healthy = true;

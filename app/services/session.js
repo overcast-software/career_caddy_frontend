@@ -21,7 +21,7 @@ export default class SessionService extends Service {
     if (!this.refreshToken) {
       throw new Error('No refresh token available');
     }
-    
+
     const authenticator = getOwner(this).lookup('authenticator:jwt');
     const newData = await authenticator.refresh(this.data.authenticated);
     this.set('data.authenticated', newData);
