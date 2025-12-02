@@ -21,7 +21,7 @@ export default class JobPostsFormComponent extends Component {
   }
 
   get companies() {
-    return this.store.peekAll('company');
+    return this.args.companies || this.store.peekAll('company')
   }
 
   @action

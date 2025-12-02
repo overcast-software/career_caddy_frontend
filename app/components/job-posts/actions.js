@@ -31,21 +31,17 @@ export default class JobPostsActions extends Component {
   @action
   createCoverLetter() {
     const jobPost = this.args.jobPost;
-    const user = this.currentUser.user;
-    const resumeId = this.selectedResumeId;
+    const resumeId = this.selectedResume.id;
     let resume = this.store.peekRecord('resume', resumeId);
     const newCoverLetter = this.store.createRecord('cover-letter', {
       resume,
       jobPost,
-      user,
     });
     this.flashMessages.info('creating new cover letter');
-    this.coverLetterInProgress = true;
     newCoverLetter
       .save()
-      .then(() => {
-        this.flashMessages.success('finished');
-      })
+      .then((cl)=> this.router.transitionTo('cover-letters.show', cl))
+      .then(() => this.flashMessages.success('Cover letter created'))
       .catch((error) => console.log(error) & this.flashMessages.alert(error));
   }
 

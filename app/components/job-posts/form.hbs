@@ -1,14 +1,10 @@
 <form class="builder-form" {{on "submit" this.submitEdit}}>
   <div class="field">
-    <PowerSelect
-      @options={{this.companies}}
-      @onChange={{this.handleCompanyChoice}}
-      @selected={{this.selectedCompany}}
-      @labelText="Company"
-      as |company|
-    >
-      {{company.name}}
-    </PowerSelect>
+
+    <Companies::SelectOrCreate
+      @companies={{@companies}}
+      @companyCallback={{this.addCompanyToJobPost}}
+      />
   </div>
 
   <div class="field">

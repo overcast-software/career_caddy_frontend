@@ -8,7 +8,7 @@
     <Panel::Card>
       <LinkTo @route="companies.show" @model={{company}}>{{company.name}}</LinkTo>
       <LinkTo class='nav-link' @route="companies.edit" @model={{company}}>Edit</LinkTo>
-      <!-- <button type='button' class='btn danger' {{on 'click' (fn this.deleteCompany company)}}>delete</button> -->
+      {{!-- <button type='button' class='btn danger' {{on 'click' (fn this.deleteCompany company)}}>delete</button> --}}
     </Panel::Card>
   {{/each}}
 </div>
