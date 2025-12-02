@@ -1,7 +1,6 @@
 {{yield}}
 <article class="panel-card">
   <h3 >
-    Resume
     <LinkTo @route="resumes.show" @model={{@resume}}>
       {{@resume.name}}
     </LinkTo>
@@ -9,6 +8,9 @@
 
   <p>
     Used in {{@resume.jobApplications.length}} job appliations
+  </p>
+  <p>
+    Note: {{or @resume.notes "N/A"}}
   </p>
   <LinkTo @route="resumes.edit" @model={{@resume}} class='btn'>Edit</LinkTo>
 </article>

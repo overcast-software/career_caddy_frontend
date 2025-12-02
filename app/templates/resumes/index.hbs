@@ -14,7 +14,9 @@
     <p>no resumes <LinkTo @route='resumes.import'>import</LinkTo> one to start.</p>
   {{else}}
     {{#if this.model}}
-      <Resumes::List @resumes={{this.model}} />
+        {{#each this.model as |resume|}}
+            <Resumes::Compact @resume={{resume}}/>
+        {{/each}}
     {{else}}
       loading...
     {{/if}}
