@@ -6,6 +6,7 @@ export default class JobApplicationsNewController extends Controller {
   @service store;
   @service router;
   @service flashMessages;
+  @service spinner;
   @tracked selectedJobPost;
   @tracked selectedResume;
   @tracked selectedStatus;
@@ -31,11 +32,17 @@ export default class JobApplicationsNewController extends Controller {
     return this.store.peekAll('job-post');
   }
 
-  @action honk() {
-    this.flashMessages.success('honk honk', {
-      showProgress: true,
-      sticky: true,
-    });
+  @action async honk() {
+    const token = this.spinner.begin({ label: 'Honk honk', delayMs: 0 });
+    try {
+      this.flashMessages.success('honk honk', {
+        showProgress: true,
+        sticky: true,
+      });
+      await new Promise((r) => setTimeout(r, 3000));
+    } finally {
+      this.spinner.end(token);
+    }
   }
 
   get statuses() {

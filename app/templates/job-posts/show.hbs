@@ -22,12 +22,14 @@
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 <div class="fairway">
+  {{log this.resumes}}
   <JobPosts::Item
     @showControls={{this.showControls}}
     @jobPost={{this.model}}
     @showLoading={{this.showLoading}}
     @resumeSetter={{this.resumeSetter}}
     @resume={{this.model.resume}}
+    @resumes={{this.resumes}}
   />
   {{outlet}}
 </div>

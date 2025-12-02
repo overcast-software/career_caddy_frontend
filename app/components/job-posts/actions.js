@@ -8,35 +8,25 @@ export default class JobPostsActions extends Component {
   @service currentUser;
   @service router;
   @service flashMessages;
-  @tracked selectedResumeId = null;
+  @tracked selectedResume = null;
   @tracked coverLetterInProgress = false;
-  @action
-  onResumeChange(event) {
-    this.selectedResumeId = event.target.value;
+  @action updateResume(resume) {
+    this.args.resumeCallback?.(resume);
+    this.selectedResume = resume;
   }
 
   @action
   async createSummary() {
+    debugger;
     const jobPost = this.jobPost ?? this.args.jobPost;
-    const user = this.currentUser.user;
-    const resumeId = this.selectedResumeId;
+    const resumeId = this.selectedResume.id;
 
-    const resume = await this.store.peekRecord('resume', resumeId);
-    const summary = await this.store.createRecord('summary', {
-      resume,
-      jobPost: jobPost,
-      user,
-    });
-
-    try {
-      // this action automatically sets the summary to the currently
-      // selected resume.  Sometimes it's better to clone first.
-      // the summary has no body so the api reaches out to chatgpt
-      summary.save();
-      this.router.transitionTo('summaries.index');
-    } catch (e) {
-      console.error('Failed to get or create summary', e);
-    }
+    const resume = this.store.peekRecord('resume', resumeId);
+    const summary = this.store.createRecord('summary', { resume, jobPost });
+    summary
+      .save()
+      .then((summary) => this.router.transitionTo('summaries.show', summary.id))
+      .catch(this.flashMessages.danger('failed to create summary'));
   }
   @action
   createCoverLetter() {
@@ -63,7 +53,7 @@ export default class JobPostsActions extends Component {
   async scoreResume() {
     const jobPost = this.args.jobPost;
     const user = this.currentUser.user;
-    const resumeId = this.selectedResumeId;
+    const resumeId = this.selectedResume.id;
 
     let resume = this.store.peekRecord('resume', resumeId);
     const newScore = this.store.createRecord('score', {
@@ -77,14 +67,27 @@ export default class JobPostsActions extends Component {
       //api will reach out to chatgpt to fill it in using user
       newScore.save();
     } catch (e) {
-      console.error('Failed to create score', e);
+      this.flashMessages.danger(e);
     }
   }
 
   @action
   goToApply() {
-    this.router.transitionTo('job-applications.new', {
-      queryParams: { jobId: this.args.jobPost.id },
-    });
+    const queryParams = { jobId: this.args.jobPost.id };
+
+    // Add coverLetterId and resumeId to queryParams if they are populated
+    if (this.selectedResumeId) {
+      queryParams.resumeId = this.selectedResumeId;
+    }
+
+    // Assuming you have a tracked property or method to get cover letter ID
+    const coverLetterId =
+      this.selectedCoverLetterId || this.getSelectedCoverLetterId();
+
+    if (coverLetterId) {
+      queryParams.coverLetterId = coverLetterId;
+    }
+
+    this.router.transitionTo('job-applications.new', { queryParams });
   }
 }

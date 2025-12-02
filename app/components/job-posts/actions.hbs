@@ -1,24 +1,16 @@
 <section class="job-post-controls">
   <div>
     <label for="resume-select">Select a resume: </label>
-    <select
-      id="resume-select"
-      {{on "change" this.onResumeChange}}
-      value={{this.selectedResumeId}}
+    <PowerSelect
+      @options={{@resumes}}
+      @onChange={{this.updateResume}}
+      @selected={{this.selectedResume}}
+      as |resume|
     >
-      <option value="">None</option>
-      {{#each @resumes as |resume|}}
-        <option value={{resume.id}}>
-          {{#if resume.name}}
-            {{resume.name}}
-          {{else}}
-            {{resume.title}}
-          {{/if}}
-        </option>
-      {{/each}}
-    </select>
+      {{or resume.name resume.title}}
+    </PowerSelect>
   </div>
-  {{#if this.selectedResumeId}}
+  {{#if this.selectedResume}}
     <div class="actions">
       <button type="button" class="btn" {{on "click" this.scoreResume}}>Score
         resume against job post</button>

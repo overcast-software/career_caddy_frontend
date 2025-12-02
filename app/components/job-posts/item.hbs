@@ -27,7 +27,7 @@
           {{score.resume.name}}
           —
           <span class="muted">Score:</span>
-          <LinkTo @route="scores.show" @model={{score}}>{{score.score}}</LinkTo>
+          <LinkTo @route="scores.show" @model={{score}}>{{or score.score "thinking"}}</LinkTo>
         </li>
       {{/each}}
     </ul>
@@ -36,7 +36,7 @@
   {{#if @showControls}}
     <JobPosts::Actions
       @jobPost={{@jobPost}}
-      @resumes={{this.loggedInUser.resumes}}
+      @resumes={{@resumes}}
     />
   {{/if}}
 </Panel::Card>
