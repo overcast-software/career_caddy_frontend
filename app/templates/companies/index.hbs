@@ -1,6 +1,5 @@
 <Menus::SubnavBar>
-  <LinkTo class='nav-link' @route='companies.new'>new company</LinkTo>
-
+  <Companies::Search @companies={{this.model}}/>
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 <div class='fairway'>
