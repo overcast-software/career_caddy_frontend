@@ -1,16 +1,11 @@
 {{#if this.spinner.isShowing}}
   <div
     class="spinner-indicator spinner-indicator--active"
+    ...attributes
     role="status"
     aria-live="polite"
     aria-label={{or this.displayWord "Loading"}}
   >
-    <span class="visually-hidden">{{or this.displayWord "Loading"}}</span>
-    <span class="">
-      {{#each this.letters as |letter|}}
-        <span class="spinner-letter {{if letter.active 'is-active'}}">{{letter.ch}}</span>
-      {{/each}}
-    </span>
-    <div class="spinner-indicator__ring"></div>
+    <span class='loader'></span>
   </div>
 {{/if}}

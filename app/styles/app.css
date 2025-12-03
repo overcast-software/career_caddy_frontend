@@ -1046,6 +1046,7 @@ pre {
   inset: auto 42.5% 0;
   aspect-ratio: 1;
   border-radius: 50%;
+  border: 1px solid grey;
   background: #fff;
   animation:
     l4-1 1s cubic-bezier(0, 700, 1, 700) infinite alternate,
@@ -1185,6 +1186,21 @@ header {
   gap: var(--space-4);
   width: 100%;
   flex-wrap: nowrap;
+}
+
+.brand-with-spinner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Position spinner to the right of the brand without affecting layout */
+.spinner-indicator--topbar {
+  position: absolute;
+  left: calc(100% + var(--space-2));
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .tee-box {

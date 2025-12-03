@@ -7,6 +7,7 @@ export default class JobPostsActions extends Component {
   @service router;
   @service currentUser;
   @service router;
+  @service spinner;
   @service flashMessages;
   @tracked selectedResume = null;
   @tracked coverLetterInProgress = false;
@@ -61,7 +62,7 @@ export default class JobPostsActions extends Component {
     try {
       //like summary above.  score is missing the content and
       //api will reach out to chatgpt to fill it in using user
-      newScore.save();
+      this.spinner.wrap(newScore.save(), {label: "scoring, please wait"})
     } catch (e) {
       this.flashMessages.danger(e);
     }
