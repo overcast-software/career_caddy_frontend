@@ -18,7 +18,6 @@ export default class JobPostsActions extends Component {
 
   @action
   async createSummary() {
-    debugger;
     const jobPost = this.jobPost ?? this.args.jobPost;
     const resumeId = this.selectedResume.id;
 

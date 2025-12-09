@@ -26,7 +26,7 @@
           answers: {{question.answers.length}}
         </p>
         <br/>
-        <LinkTo @route='questions.show' @model={{question}}>show</LinkTo>
+        <LinkTo @route='questions.show.answers' @model={{question}}>show</LinkTo>
         <LinkTo @route='questions.show.answers.new' @model={{question}}>answer</LinkTo>
       </div>
     {{/each}}

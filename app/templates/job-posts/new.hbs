@@ -41,6 +41,7 @@
 
     <div class="form-actions">
       <button type="submit" class="btn primary">Save</button>
+      <button {{on 'click' this.createAndApply}}type="button" class="btn primary">Save and apply</button>
       <button class="btn danger" type="button" {{on 'click' this.submitDelete }}>Delete</button>
     </div>
   </form>

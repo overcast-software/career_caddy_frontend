@@ -1,10 +1,17 @@
 <Menus::SubnavBar>
-  job application show |
   <LinkTo
     @route="job-applications.edit"
     @model={{this.model}}
-    class="btn"
+    class="nav-link"
   >edit</LinkTo>
+  <LinkTo
+    {{on 'click' this.destroyRecord}}
+    @route="job-applications.edit"
+    @model={{this.model}}
+    class="nav-link"
+  >destroy</LinkTo>
+  <LinkTo class='nav-link' @route="job-posts.show" @model={{this.model.jobPost}}>job post</LinkTo>
+  <LinkTo class='nav-link' @route="job-applications.show.questions.index" @model={{this.model}}>questions</LinkTo>
 </Menus::SubnavBar>
 <div class="bar-cart">
   {{#each this.flashMessages.queue as |flash|}}
@@ -12,6 +19,68 @@
   {{/each}}
 </div>
 <div class="fairway">
-  <JobApplications::item @jobApplication={{this.model}} />
-  {{outlet}}
+  <Panel::Card>
+    <div class='builder-form'>
+      <div class="field">
+        <h1>{{this.model.jobPost.title}} at {{this.model.jobPost.company.name}}</h1>
+      </div>
+
+      <section class='job-post-description'>
+        <div class="field">
+          <div class="field-label">Resume:</div>
+          {{#if this.model.resume}}
+            {{this.model.resume.name}}
+          {{else}}
+            -
+          {{/if}}
+        </div>
+      </section>
+
+      <section>
+        <div class="field">
+          <div class="field-label">Cover Letter</div>
+          {{#if this.model.coverLetter}}
+            {{this.model.coverLetter.createdAt}}
+          {{else}}
+            no cover letter recorded
+          {{/if}}
+        </div>
+      </section>
+
+
+      <section>
+        <div class="field">
+          <div class="field-label">Applied At</div>
+          {{format-date this.model.appliedAt}}
+        </div>
+
+      </section>
+      <div class="field">
+        <div class="field-label">Status</div>
+        {{this.model.status}}
+      </div>
+
+      <div class="field">
+        <div class="field-label">Tracking URL</div>
+        {{#if this.model.trackingUrl}}
+          <a
+            href={{this.model.trackingUrl}}
+            target="_blank"
+            rel="noopener noreferrer"
+          >{{this.model.trackingUrl}}</a>
+        {{else}}
+          -
+        {{/if}}
+      </div>
+
+      <div class="field">
+        <div class="field-label">Notes</div>
+        {{this.model.notes}}
+      </div>
+
+      <div class="form-actions">
+        {{yield}}
+      </div>
+    </div>
+  </Panel::Card>
 </div>

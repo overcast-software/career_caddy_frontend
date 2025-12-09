@@ -6,5 +6,7 @@
     <LinkTo @route='job-applications.show' @model={{jobApplication.id}}>
     {{jobApplication.id}}
     </LinkTo>
+    -- applied at {{format-date jobApplication.createdAt}}
+    status: {{jobApplication.status}}
   </Panel::Card>
 {{/each}}

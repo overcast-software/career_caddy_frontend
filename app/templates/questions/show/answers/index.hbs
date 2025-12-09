@@ -1,6 +1,27 @@
 {{page-title "Index"}}
 <Menus::SubnavBar>
-  {{this.model.question.content.content}}
+  <LinkTo
+    class='nav-link'
+    @route='questions.new'
+  >new
+  </LinkTo>
+  <LinkTo
+    class='nav-link'
+    @route='questions.edit'
+    @model={{this.model}}
+  >edit
+  </LinkTo>
+  <LinkTo
+    class='nav-link'
+    @route='questions.show.answers.new'
+    @model={{this.model}}
+  >answer
+  </LinkTo>
+  <LinkTo @route="questions.delete" @model={{this.model}}
+          class='danger nav-link'
+          {{on "click" this.deleteQuestion}}
+  >delete
+  </LinkTo>
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 <Panel::Card>

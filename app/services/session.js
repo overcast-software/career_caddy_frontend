@@ -5,7 +5,7 @@ import { decodeExp, now } from 'career-caddy-frontend/utils/jwt';
 
 export default class SessionService extends Service {
   @service router;
-  
+
   _activityWatchStarted = false;
 
   get accessToken() {
@@ -26,8 +26,8 @@ export default class SessionService extends Service {
     }
 
     const authenticator = getOwner(this).lookup('authenticator:jwt');
-    const newData = await authenticator.refresh(this.data.authenticated);
-    this.set('data.authenticated', newData);
+    const newData = await authenticator.refresh(this.data.isAuthenticated);
+    this.set('data.isAuthenticated', newData);
     authenticator.scheduleRefresh(newData);
     return newData;
   }
@@ -74,7 +74,7 @@ export default class SessionService extends Service {
       if (debounceTimer) {
         clearTimeout(debounceTimer);
       }
-      
+
       debounceTimer = setTimeout(async () => {
         if (document.visibilityState === 'visible' && this.isAuthenticated) {
           try {

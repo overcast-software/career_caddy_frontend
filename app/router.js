@@ -13,6 +13,8 @@ Router.map(function () {
   this.route('job-applications', function () {
     this.route('show', {
       path: '/:application_id',
+    }, function() {
+      this.route('questions', function() {});
     });
     this.route('new');
 
@@ -151,6 +153,9 @@ Router.map(function () {
    );
     this.route('edit', {
       path: '/:question_id/edit',
+    });
+    this.route('delete', {
+      path: '/:question_id/delete',
     });
   });
   this.route('answers', function() {

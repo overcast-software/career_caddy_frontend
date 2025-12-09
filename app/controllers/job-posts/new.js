@@ -13,19 +13,29 @@ export default class JobPostsNewController extends Controller {
     this.model[field] = event.target.value;
   }
 
-  @action submitDelete(){
-    this.model.destroyRecord()
-        .then(()=> this.flashMessages.success("successfully deleted record"))
+  @action submitDelete() {
+    this.model
+      .destroyRecord()
+      .then(() => this.flashMessages.success('successfully deleted record'));
   }
 
   @action addCompanyToJobPost(company) {
     this.model.company = company;
   }
 
-  @action submitJobPost(event){
-    event.preventDefault()
-    this.model.save()
-        .then(()=> this.flashMessages.success("Job post saved"))
-        .then(()=> this.router.transitionTo('job-posts.show', this.model))
+  @action submitJobPost(event) {
+    event.preventDefault();
+    this.model
+      .save()
+      .then(this.flashMessages.success('Job post saved'))
+      .then(this.router.transitionTo('job-posts.show', this.model));
+  }
+  @action createAndApply(event) {
+    event.preventDefault();
+    this.model
+      .save()
+      .then(
+        this.router.transitionTo('job-posts.show.job-applications.new', this.model, {}),
+      );
   }
 }
