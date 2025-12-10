@@ -1,13 +1,16 @@
 <Menus::SubnavBar>
-  <Companies::Selector @companies={{this.model}}/>
+  <div class="controls">
+    <label>search by name: </label>
+    <input
+      type="search"
+      aria-label='search'
+      placeholder="Search companies..."
+      value={{this.query}}
+      {{on "input" this.onInput}}
+    />
+  </div>
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
 <div class='fairway'>
-  {{#each this.sortedCompanies as |company|}}
-    <Panel::Card>
-      <LinkTo @route="companies.show" @model={{company}}>{{company.name}}</LinkTo>
-      <LinkTo class='nav-link' @route="companies.edit" @model={{company}}>Edit</LinkTo>
-      {{!-- <button type='button' class='btn danger' {{on 'click' (fn this.deleteCompany company)}}>delete</button> --}}
-    </Panel::Card>
-  {{/each}}
+  <Companies::List @companies={{this.companies}} />
 </div>

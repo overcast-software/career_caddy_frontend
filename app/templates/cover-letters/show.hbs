@@ -3,4 +3,6 @@
   <LinkTo class='btn' @route='cover-letters.edit' @model={{  this.model  }}>edit</LinkTo>
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}}/>
-<CoverLetters::Item @coverLetter={{this.model}} />
+<div class='fairway'>
+  <CoverLetters::Item @coverLetter={{this.model}} />
+</div>

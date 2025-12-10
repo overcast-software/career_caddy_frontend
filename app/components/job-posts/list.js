@@ -45,7 +45,4 @@ export default class JobPostsListComponent extends Component {
 
     return items;
   }
-  toggleShowLoading() {
-    this.args.showLoading = !this.args.showLoading;
-  }
 }

@@ -4,18 +4,27 @@ import { action } from '@ember/object';
 export default class QuestionsShowController extends Controller {
   @service flashMessages;
   @service store;
-  @action deleteQuestion(){
-    this.model.destroyRecord()
-        .then(this.flashMessages.success('deleted question'))
+  @service spinner;
+  @action deleteQuestion() {
+    this.model
+      .destroyRecord()
+      .then(this.flashMessages.success('deleted question'));
   }
-  get answers(){
-    return this.model.answers
+  get answers() {
+    return this.model.answers;
   }
 
-  @action askAI(question){
+  @action askAI(question) {
     this.flashMessages.success('asking AI');
-    const answer = this.store.createRecord('answer', {question, ai_assist: true})
-    answer.save()
-          .then(()=> this.flashMessages.success("answer returned"))
+    const answer = this.store.createRecord('answer', {
+      question,
+      ai_assist: true,
+    });
+    this.spinner.wrap(
+      answer
+        .save()
+        .then(this.flashMessages.success('answer returned'))
+        .then(this.router.transitionTo('questions.show.answers')),
+    );
   }
 }
