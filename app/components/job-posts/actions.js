@@ -23,10 +23,13 @@ export default class JobPostsActions extends Component {
 
     const resume = this.store.peekRecord('resume', resumeId);
     const summary = this.store.createRecord('summary', { resume, jobPost });
+
+    this.spinner.wrap(
     summary
       .save()
       .then((summary) => this.router.transitionTo('summaries.show', summary.id))
-      .catch(this.flashMessages.danger('failed to create summary'));
+      .catch(this.flashMessages.danger('failed to create summary'))
+    )
   }
   @action
   createCoverLetter() {
@@ -38,11 +41,14 @@ export default class JobPostsActions extends Component {
       jobPost,
     });
     this.flashMessages.info('creating new cover letter');
-    newCoverLetter
-      .save()
-      .then((cl)=> this.router.transitionTo('cover-letters.show', cl))
-      .then(() => this.flashMessages.success('Cover letter created'))
-      .catch((error) => console.log(error) & this.flashMessages.alert(error));
+
+    this.spinner.wrap(
+      newCoverLetter
+        .save()
+        .then((cl) => this.router.transitionTo('cover-letters.show', cl))
+        .then(() => this.flashMessages.success('Cover letter created'))
+        .catch((error) => console.log(error) & this.flashMessages.alert(error)),
+    );
   }
 
   @action
@@ -61,7 +67,7 @@ export default class JobPostsActions extends Component {
     try {
       //like summary above.  score is missing the content and
       //api will reach out to chatgpt to fill it in using user
-      this.spinner.wrap(newScore.save(), {label: "scoring, please wait"})
+      this.spinner.wrap(newScore.save(), { label: 'scoring, please wait' });
     } catch (e) {
       this.flashMessages.danger(e);
     }

@@ -4,10 +4,16 @@
 <BarCart @flashMessages={{this.flashMessages}}/>
 <div class='fairway'>
   <form class="builder-form" {{on "submit" this.submitJobPost}}>
-    <Companies::SelectOrCreate
-      @companies={{this.companies}}
-      @companyCallback={{this.addCompanyToJobPost}}
-      />
+    <label>Company</label>
+    <PowerSelectWithCreate
+      @options={{this.companies}}
+      @searchField="name"
+      @onCreate={{this.addCompanyToJobPost}}
+      @selected={{this.selectedCompany}}
+      as |company|
+    >
+      {{company.name}}
+    </PowerSelectWithCreate>
     <div class="field">
       <label class="field-label" for="title">Title</label>
       <input
