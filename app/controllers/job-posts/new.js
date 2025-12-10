@@ -16,6 +16,11 @@ export default class JobPostsNewController extends Controller {
     this.model[field] = event.target.value;
   }
 
+  @action updateCompany(company){
+    this.model.company = company
+    this.selectedCompany = company
+  }
+
   @action submitDelete() {
     this.model
       .destroyRecord()

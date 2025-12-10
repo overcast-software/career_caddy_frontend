@@ -1,11 +1,8 @@
-import Controller from '@ember/controller';
-import { service } from '@ember/service';
-import { action } from '@ember/object';
+import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import ArrayProxy from '@ember/array/proxy';
-export default class CompaniesIndexController extends Controller {
-  @service flashMessages
-  @service store
+
+export default class CompaniesListComponent extends Component {
   @tracked query = '';
 
   onInput = (event) => {
@@ -13,9 +10,11 @@ export default class CompaniesIndexController extends Controller {
   };
 
   get companies() {
-    const source = this.model
+    const source = this.args.companies ?? [];
     const list = ArrayProxy.create({ content: source });
-    const q = this.query.trim().toLowerCase();
+
+    const q = ((this.args.query ?? this.query) ?? '').trim().toLowerCase();
+
     let filteredList = list;
 
     if (q) {
@@ -27,6 +26,7 @@ export default class CompaniesIndexController extends Controller {
           .filter(Boolean)
           .join(' ')
           .toLowerCase();
+
         return searchableText.includes(q);
       });
     }
@@ -51,32 +51,4 @@ export default class CompaniesIndexController extends Controller {
 
     return items;
   }
-
-  @action async deleteCompany(company){
-    console.log(company)
-    const name = company.name;
-    try {
-      await company.destroyRecord();
-      this.flashMessages.success(`deleted ${name}`);
-    } catch (error) {
-      this.flashMessages.danger('Failed to delete company');
-    }
-  }
-
-  get sortedCompanies(){
-    const list = this.model;
-    if (!list || typeof list.length !== 'number') return [];
-    const copy = Array.prototype.slice.call(list);
-    return copy.sort((a, b) => {
-      const an = Number(a.id);
-      const bn = Number(b.id);
-      if (Number.isFinite(an) && Number.isFinite(bn)) {
-        // numeric descending
-        return bn - an;
-      }
-      // Fallback: string compare descending when IDs aren't numeric
-      return String(a.id).localeCompare(String(b.id)) * -1;
-    });
-  }
-
 }

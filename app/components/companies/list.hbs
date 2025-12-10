@@ -1,0 +1,8 @@
+<div class="fairway">
+  {{#each @companies as |company|}}
+    <Panel::Card>
+      <LinkTo @route="companies.show" @model={{company}}>{{company.name}}</LinkTo>
+      <LinkTo class="nav-link" @route="companies.edit" @model={{company}}>Edit</LinkTo>
+    </Panel::Card>
+  {{/each}}
+</div>
