@@ -1,29 +1,50 @@
 # Stage 1: Build
-FROM node:20-alpine AS builder
+FROM node:20-bullseye-slim AS node
+FROM python:3.11-slim AS app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libpq-dev curl git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=node /usr/local /usr/local
+
+# Enable pnpm via Corepack as root
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Create non-root user and set ownership for app directory
+RUN useradd -m appuser && mkdir -p /app && chown -R appuser:appuser /app
+USER appuser
 
-# Install dependencies
-RUN npm ci
+# Clone frontend repository and install dependencies
+ARG FRONTEND_REPO=https://github.com/overcast-software/career_caddy_frontend
+ARG FRONTEND_REF=main
+RUN git clone --depth 1 --branch "$FRONTEND_REF" "$FRONTEND_REPO" /app/frontend
+WORKDIR /app/frontend
+RUN pnpm install --frozen-lockfile=false
 
-# Copy source code
-COPY . .
+# Clone backend repository
+ARG BACKEND_REPO=https://github.com/overcast-software/career_caddy_api
+ARG BACKEND_REF=main
+WORKDIR /app
+RUN git clone --depth 1 --branch "$BACKEND_REF" "$BACKEND_REPO" /app/backend
+WORKDIR /app/backend
+RUN python -m pip install --upgrade pip wheel && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-# Build the application
-RUN EMBER_ENV=production npm run build
+# Set unified env for both services
+ENV DEBUG=True \
+    NODE_ENV=development \
+    EMBER_ENV=development \
+    CHOKIDAR_USEPOLLING=true \
+    WATCHPACK_POLLING=true
 
-# Stage 2: Serve
-FROM nginx:alpine
+EXPOSE 4200 8000
 
-# Copy built application
-COPY --from=builder /app/dist /usr/share/nginx/html
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -fsS http://127.0.0.1:4200/ >/dev/null && (curl -fsS http://127.0.0.1:8000/api/v1/healthcheck >/dev/null || curl -fsS http://127.0.0.1:8000/ >/dev/null || curl -fsS http://127.0.0.1:8000/api/ >/dev/null) || exit 1
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+WORKDIR /app
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]

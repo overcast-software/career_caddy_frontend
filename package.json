@@ -48,7 +48,7 @@
     "csslint": "^1.0.5",
     "ember-auto-import": "^2.10.0",
     "ember-basic-dropdown": "^8.8.0",
-    "ember-cli": "^6.8.0",
+    "ember-cli": "^6.9.1",
     "ember-cli-app-version": "^7.0.0",
     "ember-cli-babel": "^8.2.0",
     "ember-cli-clean-css": "^3.0.0",
