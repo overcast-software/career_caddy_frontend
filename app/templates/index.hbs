@@ -21,15 +21,106 @@
     <br/>
     <p>Your personal career management assistant</p>
 
-    <div class="landing-actions">
-      <LinkTo @route="resumes.index" class="btn primary">Get Started</LinkTo>
-      {{#unless this.session.isAuthenticated}}
-        <LinkTo @route="login" class="btn">Login</LinkTo>
-      {{/unless}}
-      {{#if this.unhealthy}}
-        <LinkTo @route="setup" class="btn secondary">Initial Setup</LinkTo>
-      {{/if}}
-    </div>
+    {{#if this.needsInitialization}}
+      <div class="initialization-section">
+        <h3>Application Setup Required</h3>
+        <p>This appears to be your first time using Career Caddy. Please complete the initial setup.</p>
+        
+        {{#unless this.showInitializationForm}}
+          <button type="button" class="btn primary" {{on "click" this.toggleInitializationForm}}>
+            Begin Setup
+          </button>
+        {{/unless}}
+
+        {{#if this.showInitializationForm}}
+          <form {{on "submit" this.performInitialization}} class="initialization-form">
+            <div class="form-group">
+              <label for="username">Username:</label>
+              <input 
+                type="text" 
+                id="username" 
+                value={{this.initializationData.username}}
+                {{on "input" (fn this.updateInitializationData "username" (target-value))}}
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email (optional):</label>
+              <input 
+                type="email" 
+                id="email" 
+                value={{this.initializationData.email}}
+                {{on "input" (fn this.updateInitializationData "email" (target-value))}}
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password:</label>
+              <input 
+                type="password" 
+                id="password" 
+                value={{this.initializationData.password}}
+                {{on "input" (fn this.updateInitializationData "password" (target-value))}}
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="firstName">First Name (optional):</label>
+              <input 
+                type="text" 
+                id="firstName" 
+                value={{this.initializationData.firstName}}
+                {{on "input" (fn this.updateInitializationData "firstName" (target-value))}}
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="lastName">Last Name (optional):</label>
+              <input 
+                type="text" 
+                id="lastName" 
+                value={{this.initializationData.lastName}}
+                {{on "input" (fn this.updateInitializationData "lastName" (target-value))}}
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="openaiApiKey">OpenAI API Key (optional):</label>
+              <input 
+                type="password" 
+                id="openaiApiKey" 
+                value={{this.initializationData.openaiApiKey}}
+                {{on "input" (fn this.updateInitializationData "openaiApiKey" (target-value))}}
+                placeholder="sk-..."
+              />
+              <small>Required for AI-powered features like resume generation and job matching.</small>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary" disabled={{this.isInitializing}}>
+                {{#if this.isInitializing}}
+                  Initializing...
+                {{else}}
+                  Complete Setup
+                {{/if}}
+              </button>
+              <button type="button" class="btn secondary" {{on "click" this.toggleInitializationForm}}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        {{/if}}
+      </div>
+    {{else}}
+      <div class="landing-actions">
+        <LinkTo @route="resumes.index" class="btn primary">Get Started</LinkTo>
+        {{#unless this.session.isAuthenticated}}
+          <LinkTo @route="login" class="btn">Login</LinkTo>
+        {{/unless}}
+      </div>
+    {{/if}}
   </div>
 </div>
 {{outlet}}
