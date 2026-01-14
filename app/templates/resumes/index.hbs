@@ -15,7 +15,17 @@
   {{else}}
     {{#if this.model}}
         {{#each this.model as |resume|}}
-            <Resumes::Compact @resume={{resume}}/>
+            <div class="resume-item">
+              <button 
+                type="button" 
+                class="favorite-btn {{if resume.favorite 'favorited'}}"
+                {{on "click" (fn this.toggleFavorite resume)}}
+                title="{{if resume.favorite 'Remove from favorites' 'Add to favorites'}}"
+              >
+                {{#if resume.favorite}}★{{else}}☆{{/if}}
+              </button>
+              <Resumes::Compact @resume={{resume}}/>
+            </div>
         {{/each}}
     {{else}}
       loading...

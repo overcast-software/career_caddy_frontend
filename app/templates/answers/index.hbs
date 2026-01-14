@@ -9,6 +9,14 @@
     <ul>
       {{#each this.model as |answer|}}
         <li>
+          <button 
+            type="button" 
+            class="favorite-btn {{if answer.favorite 'favorited'}}"
+            {{on "click" (fn this.toggleFavorite answer)}}
+            title="{{if answer.favorite 'Remove from favorites' 'Add to favorites'}}"
+          >
+            {{#if answer.favorite}}★{{else}}☆{{/if}}
+          </button>
           {{answer.content}}
           <LinkTo @route="answers.edit" @model={{answer}}>edit</LinkTo>
         </li>

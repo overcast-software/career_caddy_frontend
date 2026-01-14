@@ -19,9 +19,19 @@
     </PowerSelect>
     {{#each this.companyQuestions as |question|}}
       <div class='panel-card'>
-        <p>
-          {{question.company.name}}: {{question.jobApplication.jobPost.name}}{{question.content}}
-        </p>
+        <div class="question-header">
+          <button 
+            type="button" 
+            class="favorite-btn {{if question.favorite 'favorited'}}"
+            {{on "click" (fn this.toggleFavorite question)}}
+            title="{{if question.favorite 'Remove from favorites' 'Add to favorites'}}"
+          >
+            {{#if question.favorite}}★{{else}}☆{{/if}}
+          </button>
+          <p>
+            {{question.company.name}}: {{question.jobApplication.jobPost.name}}{{question.content}}
+          </p>
+        </div>
         <p>
           answers: {{question.answers.length}}
         </p>
