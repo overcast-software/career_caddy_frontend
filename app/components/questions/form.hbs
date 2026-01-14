@@ -22,6 +22,17 @@
     </div>
 
     <div class="field">
+      <label class="checkbox">
+        <input
+          type="checkbox"
+          checked={{@question.favorite}}
+          {{on "change" this.updateFavorite}}
+        />
+        Favorite
+      </label>
+    </div>
+
+    <div class="field">
 
       <PowerSelect
         @options={{this.jobApplications}}

@@ -24,6 +24,10 @@ export default class QuestionsFormComponent extends Component {
     this.args.question.content = event.target.value;
   }
 
+  @action updateFavorite(event) {
+    this.args.question.favorite = event.target.checked;
+  }
+
   @action updateCompany(company) {
     this.selectedCompany = company;
   }
