@@ -14,7 +14,9 @@ Router.map(function () {
     this.route('show', {
       path: '/:application_id',
     }, function() {
-      this.route('questions', function() {});
+      this.route('questions', function() {
+        this.route('new');
+      });
     });
     this.route('new');
 

@@ -18,7 +18,7 @@ export default class JobPostsShowQuestionsNewRoute extends Route {
     
     await jobApplication.save();
     
-    // Redirect to the nested route
-    this.router.transitionTo('job-posts.show.job-applications.show.questions.new', job_post_id, jobApplication.id);
+    // Redirect to the job-applications questions route
+    this.router.transitionTo('job-applications.show.questions.new', jobApplication.id);
   }
 }
