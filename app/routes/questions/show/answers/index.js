@@ -5,7 +5,8 @@ export default class QuestionsShowAnswersIndexRoute extends Route {
   async model(){
     const { question_id } = this.paramsFor('questions.show');
     const question = this.store.peekRecord('question', question_id)
-    return question.get('answers');
+    const answers = question.get('answers');
+    return { question, answers };
   }
 
 }
