@@ -7,8 +7,8 @@ export default class JobPostsShowJobApplicationsShowQuestionsNewRoute extends Ro
   async model() {
     const { job_post_id } = this.paramsFor('job-posts.show');
     const { job_application_id } = this.paramsFor('job-posts.show.job-applications.show');
-    const jobApplication = this.store.peekRecord('job-application', job_application_id);
-    const jobPost = this.store.peekRecord('job-post', job_post_id);
+    const jobApplication = await this.store.findRecord('job-application', job_application_id);
+    const jobPost = await this.store.findRecord('job-post', job_post_id);
     
     // Create the question and attach it to the existing job-application
     const question = this.store.createRecord('question', {
