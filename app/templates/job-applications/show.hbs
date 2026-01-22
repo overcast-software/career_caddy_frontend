@@ -5,13 +5,21 @@
     class="nav-link"
   >edit</LinkTo>
   <LinkTo
-    {{on 'click' this.destroyRecord}}
+    {{on "click" this.destroyRecord}}
     @route="job-applications.edit"
     @model={{this.model}}
     class="nav-link"
   >destroy</LinkTo>
-  <LinkTo class='nav-link' @route="job-posts.show" @model={{this.model.jobPost}}>job post</LinkTo>
-  <LinkTo class='nav-link' @route="job-applications.show.questions.index" @model={{this.model}}>questions</LinkTo>
+  <LinkTo
+    class="nav-link"
+    @route="job-posts.show"
+    @model={{this.model.jobPost}}
+  >job post</LinkTo>
+  <LinkTo
+    class="nav-link"
+    @route="job-applications.show.questions.index"
+    @model={{this.model}}
+  >questions</LinkTo>
 </Menus::SubnavBar>
 <div class="bar-cart">
   {{#each this.flashMessages.queue as |flash|}}
@@ -19,14 +27,21 @@
   {{/each}}
 </div>
 <div class="fairway">
-  <Panel::Card @title="{{this.model.jobPost.title}} at {{this.model.jobPost.company.name}}" @collapsible={{true}} @startCollapsed={{true}}>
-    <:top as |card|>
-      <button type="button" {{on "click" card.toggleCollapsed}} class="btn btn-sm">
-        {{if card.collapsed "Show" "Hide"}} Details
-      </button>
-    </:top>
-    <div class='builder-form'>
-      <section class='job-post-description'>
+  <Panel::Card
+    @title="{{this.model.jobPost.title}} at {{this.model.jobPost.company.name}}"
+    @collapsible={{true}}
+    @startCollapsed={{true}}
+  >
+    <button
+      type="button"
+      {{on "click" this.toggleCollapsed}}
+      class="btn btn-sm"
+    >
+      {{if this.collapsed "Show" "Hide"}}
+      Details
+    </button>
+    <div class="builder-form">
+      <section class="job-post-description">
         <div class="field">
           <div class="field-label">Resume:</div>
           {{#if this.model.resume}}
@@ -47,7 +62,6 @@
           {{/if}}
         </div>
       </section>
-
 
       <section>
         <div class="field">
@@ -84,6 +98,6 @@
       </div>
     </div>
   </Panel::Card>
-  
+
   {{outlet}}
 </div>
