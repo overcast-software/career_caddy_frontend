@@ -57,6 +57,13 @@ Router.map(function () {
       function () {
         this.route('job-applications', function () {
           this.route('new');
+          this.route('show', {
+            path: '/:job_application_id'
+          }, function() {
+            this.route('questions', function() {
+              this.route('new');
+            });
+          });
         });
         this.route('questions', function() {
           this.route('new');
