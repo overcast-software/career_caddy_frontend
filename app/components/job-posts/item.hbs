@@ -17,7 +17,7 @@
         {{if this.showFullDescription "Show Less" "Show All"}}
       </button>
       <button type="button" class="btn btn-sm" {{on "click" this.copyToClipboard}}>
-        Copy to Clipboard
+        {{this.copyButtonText}}
       </button>
     </div>
     <p class="muted">

@@ -10,6 +10,7 @@ export default class JobPostsItemComponent extends Component {
 
   @tracked selectedResumeId = null;
   @tracked showFullDescription = false;
+  @tracked copyButtonText = 'Copy to Clipboard';
 
   get loggedInUser() {
     return this.currentUser.user;
@@ -76,7 +77,10 @@ export default class JobPostsItemComponent extends Component {
   async copyToClipboard() {
     try {
       await navigator.clipboard.writeText(this.args.jobPost.description);
-      // You might want to show a flash message here
+      this.copyButtonText = 'Copied';
+      setTimeout(() => {
+        this.copyButtonText = 'Copy to Clipboard';
+      }, 2000);
     } catch (err) {
       console.error('Failed to copy text: ', err);
     }
