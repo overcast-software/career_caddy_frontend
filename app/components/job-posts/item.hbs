@@ -13,15 +13,27 @@
 
   <section class="job-post-description">
     <div class="description-controls">
-      <button type="button" class="btn btn-sm" {{on "click" this.toggleDescription}}>
+      <button
+        type="button"
+        class="btn btn-sm"
+        {{on "click" this.toggleDescription}}
+      >
         {{if this.showFullDescription "Show Less" "Show All"}}
       </button>
-      <button type="button" class="btn btn-sm" {{on "click" this.copyToClipboard}}>
+      <button
+        type="button"
+        class="btn btn-sm"
+        {{on "click" this.copyToClipboard}}
+      >
         {{this.copyButtonText}}
       </button>
     </div>
     <p class="muted">
-      {{if this.showFullDescription @jobPost.description (truncate @jobPost.description 2000)}}
+      {{if
+        this.showFullDescription
+        @jobPost.description
+        (truncate @jobPost.description 2000)
+      }}
     </p>
   </section>
 
@@ -35,10 +47,14 @@
           {{score.resume.name}}
           —
           <span class="muted">Score:</span>
-          <LinkTo @route="scores.show" @model={{score}}>{{or
-              score.score
-              "thinking"
-            }}</LinkTo>
+          {{#if score.score}}
+            <LinkTo
+              @route="scores.show"
+              @model={{score}}
+            >{{score.score}}</LinkTo>
+          {{else}}
+            thinking
+          {{/if}}
         </li>
       {{/each}}
     </ul>

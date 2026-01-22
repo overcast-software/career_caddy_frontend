@@ -1,10 +1,16 @@
 <form class="builder-form" {{on "submit" this.submitEdit}}>
   <div class="field">
 
-    <Companies::SelectOrCreate
-      @companies={{@companies}}
-      @companyCallback={{this.addCompanyToJobPost}}
-      />
+    <PowerSelectWithCreate
+      @options={{this.companies}}
+      @searchField="name"
+      @onCreate={{this.addCompanyToJobPost}}
+      @onChange={{this.updateCompany}}
+      @selected={{this.selectedCompany}}
+      as |company|
+    >
+      {{company.name}}
+    </PowerSelectWithCreate>
   </div>
 
   <div class="field">
@@ -40,6 +46,10 @@
 
   <div class="form-actions">
     <button type="submit" class="btn primary">Save</button>
-    <button class="btn danger" type="button" {{on 'click' this.submitDelete }}>Delete</button>
+    <button
+      class="btn danger"
+      type="button"
+      {{on "click" this.submitDelete}}
+    >Delete</button>
   </div>
 </form>

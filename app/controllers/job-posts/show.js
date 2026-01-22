@@ -19,6 +19,7 @@ export default class JobPostsShowController extends Controller {
       appliedAt: new Date(),
       status: 'interested',
       jobPost: this.model,
+      company: this.model.company,
     });
 
     await jobApplication.save();

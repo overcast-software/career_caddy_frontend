@@ -1,39 +1,41 @@
-{{page-title 'New Application'}}
+{{page-title "New Application"}}
 <Menus::SubnavBar>
-  <button type="button" {{on 'click' this.honk}}>honk</button>
 
-  <br/>
-  <span class='loader'></span>
+  <br />
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
+<BarCart @flashMessages={{this.flashMessages}} />
 <div class="fairway">
   <div class="builder-form">
     <div class="field">
-      <label class="field-label" >Job post:</label>
+      <label class="field-label">Job post:</label>
       <PowerSelect
         @options={{this.jobPosts}}
         @onChange={{this.updateJobPost}}
         @selected={{this.selectedJobPost}}
         as |jobPost|
       >
-        {{jobPost.title}} at {{jobPost.company.name}}
+        {{jobPost.title}}
+        at
+        {{jobPost.company.name}}
       </PowerSelect>
     </div>
 
     <div class="field">
-      <label class="field-label" >Resume to use:</label>
+      <label class="field-label">Resume to use:</label>
       <PowerSelect
         @options={{this.resumes}}
         @onChange={{this.updateResume}}
         @selected={{this.selectedResume}}
         as |resume|
       >
-        {{resume.title}} - {{resume.notes}}
+        {{resume.title}}
+        -
+        {{resume.notes}}
       </PowerSelect>
     </div>
 
     <div class="field">
-      <label class="field-label" >Cover letter:</label>
+      <label class="field-label">Cover letter:</label>
       <PowerSelect
         @options={{this.coverLetters}}
         @onChange={{this.updateCoverLetter}}
@@ -45,7 +47,7 @@
     </div>
 
     <div class="field">
-      <label class="field-label" >Status</label>
+      <label class="field-label">Status</label>
       <PowerSelect
         @options={{this.statusOptions}}
         @onChange={{this.updateStatus}}
@@ -57,7 +59,7 @@
     </div>
     {{#if this.showAppliedAt}}
       <div class="field">
-        <label class="field-label" >Applied At</label>
+        <label class="field-label">Applied At</label>
         <input
           type="date"
           value={{format-date this.model.appliedAt}}
@@ -67,7 +69,7 @@
     {{/if}}
 
     <div class="field">
-      <label class="field-label" >Tracking URL</label>
+      <label class="field-label">Tracking URL</label>
       <input
         type="url"
         value={{this.model.trackingUrl}}
@@ -76,7 +78,7 @@
     </div>
 
     <div class="field">
-      <label class="field-label" >Notes</label>
+      <label class="field-label">Notes</label>
 
       <textarea
         value={{this.model.notes}}

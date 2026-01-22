@@ -6,37 +6,21 @@ export default class JobPostsFormComponent extends Component {
   @service router;
   @service store;
   @service flashMessages;
-  @tracked errorMessage = null;
   @tracked form_toggle = false; // false = "by url", true = "manual"
   @tracked selectedCompany = null;
   @tracked newCompanyName = '';
 
-  constructor() {
-    super(...arguments);
-    this.args.jobPost.company.then((company) => {
-      if (company) {
-        this.selectedCompany = company;
-      }
-    });
+  @action updateCompany(company) {
+    this.selectedCompany = company;
   }
 
   get companies() {
-    return this.args.companies || this.store.peekAll('company')
+    return this.args.companies || this.store.peekAll('company');
   }
 
   @action
   onModeChange(event) {
     this.form_toggle = event.target.value === 'manual';
-  }
-
-  @action
-  handleCompanyChoice(company) {
-    this.selectedCompany = company;
-  }
-
-  @action
-  updateNewCompanyName(event) {
-    this.newCompanyName = event.target.value;
   }
 
   @action
@@ -48,14 +32,24 @@ export default class JobPostsFormComponent extends Component {
     this.url = event.target.value;
   }
 
+  @action addCompanyToJobPost(companyName) {
+    const company = this.store.createRecord('company', { name: companyName });
+    company
+      .save()
+      .then((this.selectedCompany = company))
+      .then((this.args.jobPost.company = company))
+      .then(this.flashMessages.success('created company ' + company.name));
+  }
+
   @action
   async submitEdit(event) {
     event.preventDefault();
-    this.args.jobPost.save()
-        .catch((error)=>this.flashMessages.alert(error))
-        .then(()=> this.router.transitionTo('job-posts.show', this.args.jobPost))
-        .then(()=> this.flashMessages.success('successfully saved job post'))
-
+    this.args.jobPost.company = this.selectedCompany;
+    this.args.jobPost
+      .save()
+      .catch((error) => this.flashMessages.alert(error))
+      .then(() => this.router.transitionTo('job-posts.show', this.args.jobPost))
+      .then(() => this.flashMessages.success('successfully saved job post'));
   }
   @action
   async submitDelete(event) {

@@ -3,7 +3,6 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 export default class QuestionsFormComponent extends Component {
-  @tracked errorMessage = null;
   @tracked selectedCompany = null;
   @tracked selectedJobApplication = null;
   @service store;
@@ -13,7 +12,7 @@ export default class QuestionsFormComponent extends Component {
   get jobApplications() {
     // TODO if company, reduce options
     // for some reason I can't make it work
-      return this.store.peekAll('job-application');
+    return this.store.peekAll('job-application');
   }
 
   get companies() {
@@ -30,6 +29,16 @@ export default class QuestionsFormComponent extends Component {
 
   @action updateCompany(company) {
     this.selectedCompany = company;
+  }
+
+  @action addCompanyToQuestion(companyName) {
+    //the user creates a new company and we attache the question
+    const company = this.store.createRecord('company', { name: companyName });
+    company
+      .save()
+      .then((this.selectedCompany = company))
+      .then((this.args.question.company = company))
+      .then(this.flashMessages.success('created company ' + company.name));
   }
 
   @action updateJobApplication(jobApplication) {
@@ -57,10 +66,10 @@ export default class QuestionsFormComponent extends Component {
           queryParams: { companyId: this.selectedCompany.id },
         });
       })
-      .then(()=>{
-        this.args.question.createRecord("question")
-        this.args.question.company = this.selectedCompany
-      })
+      .then(() => {
+        this.args.question.createRecord('question');
+        this.args.question.company = this.selectedCompany;
+      });
   }
 
   @action cancel(event) {

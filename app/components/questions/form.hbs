@@ -3,17 +3,27 @@
   <form class="questions-form" {{on "submit" this.save}}>
 
     <div class="field">
-      <Companies::SelectOrCreate
-        @companies={{this.companies}}
-        @companyCallback={{this.updateCompany}}
-      />
+      <label>Company</label>
+      {{#if @jobPost}}
+        <input type="text" value={{@jobPost.company.name}} disabled="true" />
+      {{else}}
+        <PowerSelectWithCreate
+          @options={{this.companies}}
+          @searchField="Company Name"
+          @onCreate={{this.addCompanyToQuestion}}
+          @onChange={{this.updateCompany}}
+          @selected={{this.selectedCompany}}
+          as |company|
+        >
+          {{company.name}}
+        </PowerSelectWithCreate>
+      {{/if}}
     </div>
     <div class="field">
       <label for="question-content">Question</label>
       <textarea
         id="question-content"
         class="textarea"
-
         value={{@question.content}}
         {{on "input" this.updateContent}}
         placeholder="Enter your question here"
@@ -48,17 +58,21 @@
 
     </div>
     <div class="actions">
-      <button type="submit" class="button is-primary" disabled={{@question.isSaving}}>
+      <button
+        type="submit"
+        class="button is-primary"
+        disabled={{@question.isSaving}}
+      >
         Save
       </button>
       <button type="button" class="button" {{on "click" this.cancel}}>
         Cancel
       </button>
       {{#if (and this.selectedCompany.id @question.content)}}
-        <button
-          class="btn" type="submit" {{on 'click' this.saveAndNew}}
-        >
-          save an new {{this.selectedCompany.name}} Question
+        <button class="btn" type="submit" {{on "click" this.saveAndNew}}>
+          save an new
+          {{this.selectedCompany.name}}
+          Question
         </button>
       {{/if}}
     </div>

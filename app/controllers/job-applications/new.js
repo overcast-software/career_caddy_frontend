@@ -32,19 +32,6 @@ export default class JobApplicationsNewController extends Controller {
     return this.store.peekAll('job-post');
   }
 
-  @action async honk() {
-    const token = this.spinner.begin({ label: 'Honk honk', delayMs: 0 });
-    try {
-      this.flashMessages.success('honk honk', {
-        showProgress: true,
-        sticky: true,
-      });
-      await new Promise((r) => setTimeout(r, 3000));
-    } finally {
-      this.spinner.end(token);
-    }
-  }
-
   get statuses() {
     return [
       'Saved',

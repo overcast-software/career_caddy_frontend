@@ -1,36 +1,38 @@
 {{page-title "Index"}}
 <Menus::SubnavBar>
-  <LinkTo
-    class='nav-link'
-    @route='questions.new'
-  >new
+  <LinkTo class="nav-link" @route="questions.new">new question
   </LinkTo>
   <LinkTo
-    class='nav-link'
-    @route='questions.edit'
-    @model={{this.model}}
+    class="nav-link"
+    @route="questions.edit"
+    @model={{this.model.question}}
   >edit
   </LinkTo>
   <LinkTo
-    class='nav-link'
-    @route='questions.show.answers.new'
-    @model={{this.model}}
+    class="nav-link"
+    @route="questions.show.answers.new"
+    @model={{this.model.question}}
   >answer
   </LinkTo>
-  <LinkTo @route="questions.delete" @model={{this.model}}
-          class='danger nav-link'
-          {{on "click" this.deleteQuestion}}
+  <LinkTo
+    @route="questions.delete"
+    @model={{this.model.question}}
+    class="danger nav-link"
+    {{on "click" this.deleteQuestion}}
   >delete
   </LinkTo>
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
+<BarCart @flashMessages={{this.flashMessages}} />
 <Panel::Card>
   <h3>answers</h3>
+  <p>
+    {{this.model.question.jobPost}}
+  </p>
 </Panel::Card>
-{{#each this.model as |answer|}}
+{{#each this.model.answers as |answer|}}
   <Panel::Card>
-    <MarkdownToHtml @markdown={{answer.content}}/>
-    <LinkTo @route='answers.edit' @model={{answer}}>edit</LinkTo>
+    <MarkdownToHtml @markdown={{answer.content}} />
+    <LinkTo @route="answers.edit" @model={{answer}}>edit</LinkTo>
   </Panel::Card>
 {{/each}}
 

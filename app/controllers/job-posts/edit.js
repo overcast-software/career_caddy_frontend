@@ -4,12 +4,12 @@ import { service } from '@ember/service';
 export default class JobPostsEditController extends Controller {
   @service store;
 
-  get companies(){
-    return this.store.findAll('company')
+  get companies() {
+    return this.store.findAll('company');
   }
 
   @action addCompanyToJobPost(company) {
-    debugger
+    debugger;
     this.model.company = company;
   }
 }

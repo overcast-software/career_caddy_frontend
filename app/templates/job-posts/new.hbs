@@ -1,8 +1,8 @@
 <Menus::SubnavBar>
-  <LinkTo @route="job-posts.scrape" class='btn'>scrape</LinkTo>
+  <LinkTo @route="job-posts.scrape" class="btn">scrape</LinkTo>
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
-<div class='fairway'>
+<BarCart @flashMessages={{this.flashMessages}} />
+<div class="fairway">
   <form class="builder-form" {{on "submit" this.submitJobPost}}>
     <label>Company</label>
     <PowerSelectWithCreate
@@ -48,8 +48,16 @@
 
     <div class="form-actions">
       <button type="submit" class="btn primary">Save</button>
-      <button {{on 'click' this.createAndApply}}type="button" class="btn primary">Save and apply</button>
-      <button class="btn danger" type="button" {{on 'click' this.submitDelete }}>Delete</button>
+      <button
+        {{on "click" this.createAndApply}}
+        type="button"
+        class="btn primary"
+      >Save and apply</button>
+      <button
+        class="btn danger"
+        type="button"
+        {{on "click" this.submitDelete}}
+      >Delete</button>
     </div>
   </form>
 </div>

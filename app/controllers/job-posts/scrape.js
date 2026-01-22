@@ -6,6 +6,7 @@ export default class JobPostsScrapeController extends Controller {
   @service store;
   @service flashMessages;
   @service router;
+  @service spinner;
 
   @action
   updateUrl(event) {
@@ -16,12 +17,13 @@ export default class JobPostsScrapeController extends Controller {
   submitScrape(event) {
     event.preventDefault();
     let scrape = this.store.createRecord('scrape', { url: this.url });
-    scrape
-      .save()
-      .catch((error) => {
-        debugger
-        this.flashMessages.danger(error?.errors[0]?.detail);
-      })
-      .then(() => this.router.transitionTo('job-posts.index'));
+    this.spinner.wrap(
+      scrape
+        .save()
+        .catch((error) => {
+          this.flashMessages.danger(error?.errors[0]?.detail);
+        })
+        .then(() => this.router.transitionTo('job-posts.index')),
+    );
   }
 }

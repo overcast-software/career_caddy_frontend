@@ -1,6 +1,10 @@
 <article class="panel-card">
   <h3 class="panel-title">Cover Letter</h3>
-  <p class="text-muted">for resume: <LinkTo @route="resumes.show" @model={{@coverLetter.resume}}>{{@coverLetter.resume.name}}</LinkTo></p>
+  <p class="text-muted">for resume:
+    <LinkTo
+      @route="resumes.show"
+      @model={{@coverLetter.resume}}
+    >{{@coverLetter.resume.name}}</LinkTo></p>
   <p class="text-muted">
     for jobpost:
     <LinkTo
@@ -25,6 +29,9 @@
   <div class="panel-body">
     <div class="rich-text pre-wrap">
       {{@coverLetter.content}}
+    </div>
+    <div>
+      {{!-- favorite boolean --}}
     </div>
   </div>
 </article>

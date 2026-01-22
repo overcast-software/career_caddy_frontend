@@ -11,13 +11,17 @@ Router.map(function () {
   this.route('logout');
   this.route('setup');
   this.route('job-applications', function () {
-    this.route('show', {
-      path: '/:application_id',
-    }, function() {
-      this.route('questions', function() {
-        this.route('new');
-      });
-    });
+    this.route(
+      'show',
+      {
+        path: '/:application_id',
+      },
+      function () {
+        this.route('questions', function () {
+          this.route('new');
+        });
+      },
+    );
     this.route('new');
 
     this.route('edit', {
@@ -59,15 +63,19 @@ Router.map(function () {
       function () {
         this.route('job-applications', function () {
           this.route('new');
-          this.route('show', {
-            path: '/:job_application_id'
-          }, function() {
-            this.route('questions', function() {
-              this.route('new');
-            });
-          });
+          this.route(
+            'show',
+            {
+              path: '/:job_application_id',
+            },
+            function () {
+              this.route('questions', function () {
+                this.route('new');
+              });
+            },
+          );
         });
-        this.route('questions', function() {
+        this.route('questions', function () {
           this.route('new');
         });
       },
@@ -150,16 +158,18 @@ Router.map(function () {
   this.route('about');
   this.route('questions', function () {
     this.route('new');
-    this.route('show', {
-      path: '/:question_id'
-    },
+    this.route(
+      'show',
+      {
+        path: '/:question_id',
+      },
       function () {
         this.route('answers', function () {
           this.route('new');
-          this.route('edit', {path: '/:answer_id/edit'})
+          this.route('edit', { path: '/:answer_id/edit' });
         });
       },
-   );
+    );
     this.route('edit', {
       path: '/:question_id/edit',
     });
@@ -167,7 +177,8 @@ Router.map(function () {
       path: '/:question_id/delete',
     });
   });
-  this.route('answers', function() {
-    this.route('edit', {path: '/:answer_id/edit'});
+  this.route('answers', function () {
+    this.route('edit', { path: '/:answer_id/edit' });
+    this.route('show', { path: '/:answer_id' });
   });
 });

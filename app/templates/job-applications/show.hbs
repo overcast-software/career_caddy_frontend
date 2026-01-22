@@ -28,7 +28,7 @@
 </div>
 <div class="fairway">
   <Panel::Card
-    @title="{{this.model.jobPost.title}} at {{this.model.jobPost.company.name}}"
+    @title="{{this.model.jobPost.title}} at {{this.model.company}}"
     @collapsible={{true}}
     @startCollapsed={{true}}
   >
@@ -44,57 +44,57 @@
     </:top>
     <:default>
       <div class="builder-form">
-      <section class="job-post-description">
+        <section class="job-post-description">
+          <div class="field">
+            <div class="field-label">Resume:</div>
+            {{#if this.model.resume}}
+              {{this.model.resume.name}}
+            {{else}}
+              -
+            {{/if}}
+          </div>
+        </section>
+
+        <section>
+          <div class="field">
+            <div class="field-label">Cover Letter</div>
+            {{#if this.model.coverLetter}}
+              {{this.model.coverLetter.createdAt}}
+            {{else}}
+              no cover letter recorded
+            {{/if}}
+          </div>
+        </section>
+
+        <section>
+          <div class="field">
+            <div class="field-label">Applied At</div>
+            {{format-date this.model.appliedAt}}
+          </div>
+
+        </section>
         <div class="field">
-          <div class="field-label">Resume:</div>
-          {{#if this.model.resume}}
-            {{this.model.resume.name}}
+          <div class="field-label">Status</div>
+          {{this.model.status}}
+        </div>
+
+        <div class="field">
+          <div class="field-label">Tracking URL</div>
+          {{#if this.model.trackingUrl}}
+            <a
+              href={{this.model.trackingUrl}}
+              target="_blank"
+              rel="noopener noreferrer"
+            >{{this.model.trackingUrl}}</a>
           {{else}}
             -
           {{/if}}
         </div>
-      </section>
 
-      <section>
         <div class="field">
-          <div class="field-label">Cover Letter</div>
-          {{#if this.model.coverLetter}}
-            {{this.model.coverLetter.createdAt}}
-          {{else}}
-            no cover letter recorded
-          {{/if}}
+          <div class="field-label">Notes</div>
+          {{this.model.notes}}
         </div>
-      </section>
-
-      <section>
-        <div class="field">
-          <div class="field-label">Applied At</div>
-          {{format-date this.model.appliedAt}}
-        </div>
-
-      </section>
-      <div class="field">
-        <div class="field-label">Status</div>
-        {{this.model.status}}
-      </div>
-
-      <div class="field">
-        <div class="field-label">Tracking URL</div>
-        {{#if this.model.trackingUrl}}
-          <a
-            href={{this.model.trackingUrl}}
-            target="_blank"
-            rel="noopener noreferrer"
-          >{{this.model.trackingUrl}}</a>
-        {{else}}
-          -
-        {{/if}}
-      </div>
-
-      <div class="field">
-        <div class="field-label">Notes</div>
-        {{this.model.notes}}
-      </div>
 
         <div class="form-actions">
           {{yield}}

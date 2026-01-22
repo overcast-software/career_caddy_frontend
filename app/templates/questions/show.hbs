@@ -1,30 +1,27 @@
 {{page-title "Show"}}
 <Menus::SubnavBar>
-  questions show
-  <button type='button' class='btn' {{on "click" this.deleteQuestion}}>Delete</button>
-  <LinkTo
-    class='btn'
-    @route='questions.new'
-  >new
+  <button
+    type="button"
+    class="btn"
+    {{on "click" this.deleteQuestion}}
+  >Delete</button>
+  <LinkTo class="btn" @route="questions.new">new
+  </LinkTo>
+  <LinkTo class="btn" @route="questions.edit" @model={{this.model}}>edit
   </LinkTo>
   <LinkTo
-    class='btn'
-    @route='questions.edit'
+    class="btn"
+    @route="questions.show.answers.new"
     @model={{this.model}}
-  >edit
+  >manually answer
   </LinkTo>
-  <LinkTo
-    class='btn'
-    @route='questions.show.answers.new'
-    @model={{this.model}}
-  >manully answer
+  <LinkTo class="btn" @route="questions.show.answers" @model={{this.model}}>
+    answers
   </LinkTo>
+
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
-<div class='fairway'>
-  <Questions::Item
-    @question={{this.model}}
-    @askAI={{this.askAI}}
-  />
+<BarCart @flashMessages={{this.flashMessages}} />
+<div class="fairway">
+  <Questions::Item @question={{this.model}} @askAI={{this.askAI}} />
   {{outlet}}
 </div>

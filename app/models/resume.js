@@ -6,6 +6,7 @@ export default class ResumeModel extends Model {
   @attr('string') title;
   @attr('string') name;
   @attr('string') notes;
+  @attr('boolean') favorite;
   @belongsTo('user', { async: true, inverse: 'resumes' }) user;
   @hasMany('score', { async: true, inverse: 'resume' }) scores;
   @hasMany('cover-letter', { async: true, inverse: 'resume' }) coverLetters;
