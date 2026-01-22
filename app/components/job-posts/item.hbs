@@ -13,7 +13,7 @@
 
   <section class="job-post-description">
     <p class="muted">
-      {{truncate @jobPost.description}}
+      {{truncate @jobPost.description 2000}}
     </p>
   </section>
 
@@ -27,16 +27,16 @@
           {{score.resume.name}}
           —
           <span class="muted">Score:</span>
-          <LinkTo @route="scores.show" @model={{score}}>{{or score.score "thinking"}}</LinkTo>
+          <LinkTo @route="scores.show" @model={{score}}>{{or
+              score.score
+              "thinking"
+            }}</LinkTo>
         </li>
       {{/each}}
     </ul>
   </section>
 
   {{#if @showControls}}
-    <JobPosts::Actions
-      @jobPost={{@jobPost}}
-      @resumes={{@resumes}}
-    />
+    <JobPosts::Actions @jobPost={{@jobPost}} @resumes={{@resumes}} />
   {{/if}}
 </Panel::Card>
