@@ -1,0 +1,30 @@
+<div class="fairway">
+  <Panel::Card @title="New Question">
+    <div class='builder-form'>
+      <div class="field">
+        <label class="field-label" for="question-text">Question</label>
+        <textarea
+          id="question-text"
+          class="field-input"
+          placeholder="Enter your question..."
+          rows="4"
+        ></textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="question-notes">Notes</label>
+        <textarea
+          id="question-notes"
+          class="field-input"
+          placeholder="Additional notes or context..."
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary">Save Question</button>
+        <LinkTo @route="job-applications.show" @model={{this.model.jobApplication}} class="btn btn-secondary">Cancel</LinkTo>
+      </div>
+    </div>
+  </Panel::Card>
+</div>

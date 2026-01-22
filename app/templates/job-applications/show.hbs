@@ -19,12 +19,8 @@
   {{/each}}
 </div>
 <div class="fairway">
-  <Panel::Card>
+  <Panel::Card @title="{{this.model.jobPost.title}} at {{this.model.jobPost.company.name}}" @collapsible={{true}}>
     <div class='builder-form'>
-      <div class="field">
-        <h1>{{this.model.jobPost.title}} at {{this.model.jobPost.company.name}}</h1>
-      </div>
-
       <section class='job-post-description'>
         <div class="field">
           <div class="field-label">Resume:</div>
