@@ -42,7 +42,8 @@
         Details
       </button>
     </:top>
-    <div class="builder-form">
+    <:default>
+      <div class="builder-form">
       <section class="job-post-description">
         <div class="field">
           <div class="field-label">Resume:</div>
@@ -95,10 +96,11 @@
         {{this.model.notes}}
       </div>
 
-      <div class="form-actions">
-        {{yield}}
+        <div class="form-actions">
+          {{yield}}
+        </div>
       </div>
-    </div>
+    </:default>
   </Panel::Card>
 
   {{outlet}}
