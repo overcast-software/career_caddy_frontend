@@ -8,8 +8,8 @@ export default class JobPostsShowController extends Controller {
   @service flashMessages;
   @service router;
   showControls = true;
-  get resumes(){
-    return this.store.findAll('resume')
+  get resumes() {
+    return this.store.findAll('resume');
   }
 
   @action
@@ -18,12 +18,14 @@ export default class JobPostsShowController extends Controller {
     const jobApplication = this.store.createRecord('job-application', {
       appliedAt: new Date(),
       status: 'interested',
-      jobPost: this.model
+      jobPost: this.model,
     });
-    
+
     await jobApplication.save();
-    
+
+    const jaid = jobApplication.id;
+    console.log(jobApplication.id);
     // Navigate to the job-applications questions route
-    this.router.transitionTo('job-applications.show.questions.new', jobApplication.id);
+    this.router.transitionTo('job-applications.show.questions.new', jaid);
   }
 }
