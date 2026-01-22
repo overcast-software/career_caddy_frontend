@@ -1,0 +1,71 @@
+* +title: Todo
+* Inbox
+** DONE I want to have the ability to start a new question from a job-post.  it will make a templated job-application for job-post then attach the quesiton to it
+CLOSED: [2026-01-21 Wed 21:25]
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-posts/show.hbs::</div>]]
+** DONE [#A] http://localhost:4200/questions/34/answers/
+CLOSED: [2026-01-21 Wed 21:24]
+this needs work
+save doesn't do the right thing
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/questions/show.hbs::</div>]]
+** TODO job-application/:id/edit
+if coming from another page resume doesn't populate
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/authenticators/jwt.js::const url = `${this.baseUrl}${this.authConfig.TOKEN_PATH}`;]]
+** TODO [#B] job-post/scrape needs loading
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/README.md::career-caddy-frontend]]
+** TODO [#B] `/questions/:id/answer` has a new button but it doesn't mean new answer, it means new question.
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/cover-letter.js]]
+** TODO when ai returns answer.  add it to the list in questions/:id/answers
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js]]
+** TODO [#A] AI answer should have a way to add your own thing to the prompt
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js::@attr favorite;]]
+** TODO favorites should be a path
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js::@attr favorite;]]
+** DONE check the prompt file
+CLOSED: [2026-01-21 Wed 18:45]
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
+** TODO [#A] the upload button should be disabled after upload successfull
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
+** TODO create new summary in UI is missing
+mostly AI generated but would be nice to create one manually
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
+** TODO edit resume is broken  edit.js
+serializeAttribute application.js:22
+** TODO /resumes/index favorite button needs work
+will not reflect favorite status
+is outside of the card
+
+** TODO thinking for resume import
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
+
+*** TODO should also disable button
+
+** TODO should route job_post
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
+** TODO The adding of a new resume is borked
+I go to edit a resume when I should be cloning
+** TODO [#B] copy to clipboard for summary/show
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
+** TODO don't let the token expire too early
+this is a
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
+** DONE check prompt
+CLOSED: [2026-01-16 Fri 17:54]
+:LOGBOOK:
+- Note taken on [2026-01-16 Fri 17:54] \\
+  prompt looks good now.  code reviewed
+:END:
+** TODO descriptions should have descriptions
+make a join table so that a description can describe a description
