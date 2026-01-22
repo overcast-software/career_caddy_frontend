@@ -9,6 +9,7 @@ export default class JobPostsItemComponent extends Component {
   @service currentUser;
 
   @tracked selectedResumeId = null;
+  @tracked showFullDescription = false;
 
   get loggedInUser() {
     return this.currentUser.user;
@@ -64,5 +65,20 @@ export default class JobPostsItemComponent extends Component {
 
   toggleLoading() {
     this.args.showLoading = !this.args.showLoading;
+  }
+
+  @action
+  toggleDescription() {
+    this.showFullDescription = !this.showFullDescription;
+  }
+
+  @action
+  async copyToClipboard() {
+    try {
+      await navigator.clipboard.writeText(this.args.jobPost.description);
+      // You might want to show a flash message here
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
   }
 }
