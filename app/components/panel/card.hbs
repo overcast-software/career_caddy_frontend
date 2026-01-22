@@ -22,10 +22,20 @@
   {{#if @collapsible}}
     <div class="collapsible-body">
       <div>
-        {{yield}}
+        {{yield
+          (hash
+          collapsed=this.collapsed
+          toggleCollapsed=this.toggleCollapsed
+          )
+        }}
       </div>
     </div>
   {{else}}
-    {{yield}}
+    {{yield
+      (hash
+      collapsed=this.collapsed
+      toggleCollapsed=this.toggleCollapsed
+      )
+    }}
   {{/if}}
 </div>

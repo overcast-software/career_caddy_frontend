@@ -32,14 +32,16 @@
     @collapsible={{true}}
     @startCollapsed={{true}}
   >
-    <button
-      type="button"
-      {{on "click" this.toggleCollapsed}}
-      class="btn btn-sm"
-    >
-      {{if this.collapsed "Show" "Hide"}}
-      Details
-    </button>
+    <:top as |card|>
+      <button
+        type="button"
+        {{on "click" card.toggleCollapsed}}
+        class="btn btn-sm"
+      >
+        {{if card.collapsed "Show" "Hide"}}
+        Details
+      </button>
+    </:top>
     <div class="builder-form">
       <section class="job-post-description">
         <div class="field">
