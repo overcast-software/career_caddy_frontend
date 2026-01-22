@@ -6,21 +6,21 @@
   >Edit</LinkTo>
   <LinkTo
     class="nav-link"
-    @route='job-posts.show.questions.new'
+    @route="job-posts.show.questions.new"
     @model={{this.model}}
   >
-    new question
+    New question
   </LinkTo>
   <LinkTo
     class="nav-link"
-    @route='job-posts.show.job-applications.index'
+    @route="job-posts.show.job-applications.index"
     @model={{this.model}}
   >
-    applications
+    Applications
   </LinkTo>
 
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
+<BarCart @flashMessages={{this.flashMessages}} />
 <div class="fairway">
   <JobPosts::Item
     @showControls={{this.showControls}}
