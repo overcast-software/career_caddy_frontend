@@ -22,13 +22,32 @@
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}} />
 <div class="fairway">
-  <JobPosts::Item
-    @showControls={{this.showControls}}
-    @jobPost={{this.model}}
-    @showLoading={{this.showLoading}}
-    @resumeSetter={{this.resumeSetter}}
-    @resume={{this.model.resume}}
-    @resumes={{this.resumes}}
-  />
+  <Panel::Card
+    @title="{{this.model.title}} at {{this.model.company.name}}"
+    @collapsible={{true}}
+    @startCollapsed={{true}}
+  >
+    <:top as |card|>
+      <button
+        type="button"
+        {{on "click" card.toggleCollapsed}}
+        class="btn btn-sm"
+      >
+        {{if card.collapsed "Show" "Hide"}}
+        Details
+      </button>
+    </:top>
+    <:default>
+      <JobPosts::Item
+        @showControls={{this.showControls}}
+        @jobPost={{this.model}}
+        @showLoading={{this.showLoading}}
+        @resumeSetter={{this.resumeSetter}}
+        @resume={{this.model.resume}}
+        @resumes={{this.resumes}}
+      />
+    </:default>
+  </Panel::Card>
+
   {{outlet}}
 </div>
