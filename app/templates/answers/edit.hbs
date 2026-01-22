@@ -23,7 +23,7 @@
           <input
             type="checkbox"
             checked={{this.model.favorite}}
-            {{on mut this.model.favorite}}
+            {{on "change" this.updateFavorite}}
           />
           ⭐ Favorite
         </label>
