@@ -5,7 +5,8 @@ export default class JobPostsShowJobApplicationsShowQuestionsNewRoute extends Ro
   @service store;
 
   async model() {
-    const { job_post_id, job_application_id } = this.paramsFor('job-posts.show.job-applications.show');
+    const { job_post_id } = this.paramsFor('job-posts.show');
+    const { job_application_id } = this.paramsFor('job-posts.show.job-applications.show');
     const jobApplication = this.store.peekRecord('job-application', job_application_id);
     const jobPost = this.store.peekRecord('job-post', job_post_id);
     
