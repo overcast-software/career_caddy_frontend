@@ -4,13 +4,13 @@
     @route="job-posts.edit"
     @model={{this.model}}
   >Edit</LinkTo>
-  <LinkTo
-    class="nav-link"
-    @route="job-posts.show.questions.new"
-    @model={{this.model}}
+  <button
+    class="nav-link btn btn-link"
+    type="button"
+    {{on "click" this.createQuestionWithApplication}}
   >
     New question
-  </LinkTo>
+  </button>
   <LinkTo
     class="nav-link"
     @route="job-posts.show.job-applications.index"
