@@ -19,7 +19,12 @@
   {{/each}}
 </div>
 <div class="fairway">
-  <Panel::Card @title="{{this.model.jobPost.title}} at {{this.model.jobPost.company.name}}" @collapsible={{true}}>
+  <Panel::Card @title="{{this.model.jobPost.title}} at {{this.model.jobPost.company.name}}" @collapsible={{true}} @startCollapsed={{true}}>
+    <:top as |card|>
+      <button type="button" {{on "click" card.toggleCollapsed}} class="btn btn-sm">
+        {{if card.collapsed "Show" "Hide"}} Details
+      </button>
+    </:top>
     <div class='builder-form'>
       <section class='job-post-description'>
         <div class="field">
@@ -79,4 +84,6 @@
       </div>
     </div>
   </Panel::Card>
+  
+  {{outlet}}
 </div>
