@@ -25,7 +25,7 @@ export default class JobPostsShowController extends Controller {
 
     const jaid = jobApplication.id;
     console.log(jobApplication.id);
-    // Navigate to the job-applications questions route
-    this.router.transitionTo('job-applications.show.questions.new', jaid);
+    // Navigate to the job-applications questions route with full page refresh
+    window.location.href = `/job-applications/${jaid}/questions/new`;
   }
 }
