@@ -1,0 +1,31 @@
+{{page-title "Answer"}}
+<Menus::SubnavBar>
+  answer details
+  {{#if this.model.favorite}}
+    ⭐
+  {{/if}}
+</Menus::SubnavBar>
+<BarCart @flashMessages={{this.flashMessages}}/>
+<div class='fairway'>
+  <div class='panel-card'>
+    <div class='field'>
+      <h3>Question:</h3>
+      {{this.model.question.content.content}}
+    </div>
+    <div class='field'>
+      <h3>Answer:</h3>
+      <div class='answer-content'>
+        {{this.model.content}}
+      </div>
+      {{#if this.model.favorite}}
+        <div class='favorite-indicator'>
+          ⭐ Favorite Answer
+        </div>
+      {{/if}}
+    </div>
+    <div class='actions'>
+      <LinkTo @route='answers.edit' @model={{this.model}} class='btn'>Edit</LinkTo>
+    </div>
+  </div>
+  {{outlet}}
+</div>
