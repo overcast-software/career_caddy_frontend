@@ -11,9 +11,20 @@
     <form {{on 'submit' this.saveAnswer}}>
     <div class='field'>
       <label>
-        <textarea {{on 'change' this.updateContent}}>
-          {{this.model.content}}
-        </textarea>
+        <textarea 
+          {{on 'change' this.updateContent}}
+          style="min-height: 200px; resize: vertical; field-sizing: content;"
+          rows="{{this.textareaRows}}">{{this.model.content}}</textarea>
+      </label>
+    </div>
+    <div class='field'>
+      <label>
+        <input 
+          type="checkbox" 
+          checked={{this.model.favorite}}
+          {{on 'change' this.updateFavorite}}
+        />
+        ⭐ Favorite
       </label>
     </div>
     <button type='submit' class='btn'>save</button>
