@@ -26,16 +26,17 @@ export default class ResumesImportController extends Controller {
     const url = `${this.api.baseUrl}resumes/ingest/`;
     const headers = this.api.headers();
 
-    try {
-      this.spinner.wrap(
-        await new UploadFile(file).upload({
+    await this.spinner.wrap(
+      new UploadFile(file)
+        .upload({
           url,
           headers,
+        })
+        .then(() => this.flashMessages.success('Resume imported'))
+        .catch((error) => {
+          this.flashMessages.clearMessages();
+          this.flashMessages.danger(`Resume failed ${error}`);
         }),
-      );
-    } catch (error) {
-      this.flashMessages.clearMessages();
-      this.flashMessages.danger(`Resume failed ${error}`);
-    }
+    );
   }
 }
