@@ -2,9 +2,9 @@
   <label>ingest list</label>
   ingestion
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
+<BarCart @flashMessages={{this.flashMessages}} />
 {{page-title "Import"}}
-<div class='fairway'>
-<UploadForm @onUpload={{this.ingestResume}} />
-{{outlet}}
+<div class="fairway">
+  <UploadForm @onUpload={{this.ingestResume}} />
+  {{outlet}}
 </div>

@@ -1,5 +1,6 @@
 import Controller from '@ember/controller';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 import { UploadFile } from 'ember-file-upload';
 import { service } from '@ember/service';
 
@@ -9,8 +10,11 @@ export default class ResumesImportController extends Controller {
   @service flashMessages;
   @service api;
 
+  @tracked isUploading = false;
+
   @action
   async ingestResume(file) {
+    this.isUploading = true;
     this.flashMessages.info(
       'Uploading Resume to cloud to be parsed.  this could take a moment.',
     );
@@ -26,17 +30,21 @@ export default class ResumesImportController extends Controller {
     const url = `${this.api.baseUrl}resumes/ingest/`;
     const headers = this.api.headers();
 
-    await this.spinner.wrap(
-      new UploadFile(file)
-        .upload({
-          url,
-          headers,
-        })
-        .then(() => this.flashMessages.success('Resume imported'))
-        .catch((error) => {
-          this.flashMessages.clearMessages();
-          this.flashMessages.danger(`Resume failed ${error}`);
-        }),
-    );
+    try {
+      await this.spinner.wrap(
+        new UploadFile(file)
+          .upload({
+            url,
+            headers,
+          })
+          .then(() => this.flashMessages.success('Resume imported'))
+          .catch((error) => {
+            this.flashMessages.clearMessages();
+            this.flashMessages.danger(`Resume failed ${error}`);
+          }),
+      );
+    } finally {
+      this.isUploading = false;
+    }
   }
 }

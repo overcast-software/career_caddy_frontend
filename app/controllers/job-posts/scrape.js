@@ -14,16 +14,18 @@ export default class JobPostsScrapeController extends Controller {
   }
 
   @action
-  submitScrape(event) {
+  async submitScrape(event) {
     event.preventDefault();
     let scrape = this.store.createRecord('scrape', { url: this.url });
-    this.spinner.wrap(
+    await this.spinner.wrap(
       scrape
         .save()
         .catch((error) => {
           this.flashMessages.danger(error?.errors[0]?.detail);
         })
-        .then(() => this.router.transitionTo('job-posts.index')),
+        .then(() => {
+          this.flashMessages('Successfully scraped website');
+        }),
     );
   }
 }

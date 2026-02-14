@@ -1,83 +1,38 @@
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
-import { later, cancel } from '@ember/runloop';
 
 export default class SpinnerService extends Service {
   @tracked isShowing = false;
   @tracked label = null;
   
   _count = 0;
-  _delayTimer = null;
-  _minDurationTimer = null;
-  _showStartTime = null;
-  _tokenCounter = 0;
 
   begin(options = {}) {
-    const { label = null, delayMs = 200, minDurationMs = 300 } = options;
-    const token = ++this._tokenCounter;
+    const { label = null } = options;
     
     this._count++;
     
     if (this._count === 1) {
       this.label = label;
-      
-      // Cancel any existing delay timer
-      if (this._delayTimer) {
-        cancel(this._delayTimer);
-      }
-      
-      // Show spinner after delay to avoid flicker
-      this._delayTimer = later(() => {
-        this.isShowing = true;
-        this._showStartTime = Date.now();
-        this._delayTimer = null;
-      }, delayMs);
+      this.isShowing = true;
     }
     
-    return token;
+    return this._count;
   }
 
-  end(token = null) {
+  end() {
     if (this._count <= 0) return;
     
     this._count--;
     
     if (this._count === 0) {
-      const hideSpinner = () => {
-        this.isShowing = false;
-        this.label = null;
-        this._showStartTime = null;
-      };
-      
-      // If delay timer is still running, cancel it and hide immediately
-      if (this._delayTimer) {
-        cancel(this._delayTimer);
-        this._delayTimer = null;
-        hideSpinner();
-        return;
-      }
-      
-      // If spinner is showing, respect minimum duration
-      if (this.isShowing && this._showStartTime) {
-        const elapsed = Date.now() - this._showStartTime;
-        const minDurationMs = 300;
-        
-        if (elapsed < minDurationMs) {
-          this._minDurationTimer = later(() => {
-            hideSpinner();
-            this._minDurationTimer = null;
-          }, minDurationMs - elapsed);
-        } else {
-          hideSpinner();
-        }
-      } else {
-        hideSpinner();
-      }
+      this.isShowing = false;
+      this.label = null;
     }
   }
 
   async wrap(taskOrPromise, options = {}) {
-    const token = this.begin(options);
+    this.begin(options);
     
     try {
       let result;
@@ -88,7 +43,7 @@ export default class SpinnerService extends Service {
       }
       return result;
     } finally {
-      this.end(token);
+      this.end();
     }
   }
 
@@ -96,16 +51,5 @@ export default class SpinnerService extends Service {
     this._count = 0;
     this.isShowing = false;
     this.label = null;
-    this._showStartTime = null;
-    
-    if (this._delayTimer) {
-      cancel(this._delayTimer);
-      this._delayTimer = null;
-    }
-    
-    if (this._minDurationTimer) {
-      cancel(this._minDurationTimer);
-      this._minDurationTimer = null;
-    }
   }
 }

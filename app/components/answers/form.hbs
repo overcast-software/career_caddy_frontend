@@ -1,27 +1,54 @@
 <form class="builder-form">
-  <label>
-    <div class="field">
-      Answer to question:
-      {{!content.content because content is reserved word}}
-      {{@answer.question.content.content}}
-      <textarea
-        {{on "change" this.updateContent}}
-      >{{@answer.content}}</textarea>
+  <div class="field">
+    <button
+      type="button"
+      class="btn {{if this.useAI 'btn-primary' 'btn-secondary'}}"
+      {{on "click" this.toggleAI}}
+    >
+      {{if this.useAI "✓ Ask AI to answer" "Ask AI to answer"}}
+    </button>
+  </div>
 
-      <button
-        type="button"
-        class="favorite-btn {{if @answer.favorite 'favorited'}}"
-        {{on "click" (fn this.toggleFavorite @answer)}}
-        title="{{if
-          @answer.favorite
-          'Remove from favorites'
-          'Add to favorites'
-        }}"
-      >
-        {{#if @answer.favorite}}★{{else}}☆{{/if}}
-      </button>
+  {{#if this.useAI}}
+    <label>
+      <div class="field">
+        Additional prompt for AI:
+        <textarea
+          placeholder="Add any additional context or instructions for the AI..."
+          {{on "change" this.updateAdditionalPrompt}}
+        >{{this.additionalPrompt}}</textarea>
+      </div>
+    </label>
+
+    <div class="field">
+      <p><strong>Question:</strong> {{@answer.question.content.content}}</p>
+      <p><em>AI will generate an answer based on the question and your additional prompt.</em></p>
     </div>
-  </label>
+  {{else}}
+    <label>
+      <div class="field">
+        Answer to question:
+        {{!content.content because content is reserved word}}
+        {{@answer.question.content.content}}
+        <textarea
+          {{on "change" this.updateContent}}
+        >{{@answer.content}}</textarea>
+
+        <button
+          type="button"
+          class="favorite-btn {{if @answer.favorite 'favorited'}}"
+          {{on "click" (fn this.toggleFavorite @answer)}}
+          title="{{if
+            @answer.favorite
+            'Remove from favorites'
+            'Add to favorites'
+          }}"
+        >
+          {{#if @answer.favorite}}★{{else}}☆{{/if}}
+        </button>
+      </div>
+    </label>
+  {{/if}}
 
   <button {{on "click" this.save}} type="submit" class="btn">save</button>
 </form>

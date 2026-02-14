@@ -14,7 +14,8 @@ ask ai broken?
 ** DONE should not truncate
 CLOSED: [2026-02-13 Fri 18:39]
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/summaries/item.hbs::<Panel::Card>]]
-** TODO
+** DONE
+CLOSED: [2026-02-13 Fri 20:52]
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/company.js::@hasMany('job-application', { async: true, inverse: 'company' })]]
 ** DONE make an admin webpage for managing api keys
