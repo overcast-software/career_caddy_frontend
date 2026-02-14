@@ -181,4 +181,8 @@ Router.map(function () {
     this.route('edit', { path: '/:answer_id/edit' });
     this.route('show', { path: '/:answer_id' });
   });
+  this.route('admin', function () {
+    this.route('new');
+    this.route('show', { path: '/:api_key_id' });
+  });
 });

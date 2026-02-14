@@ -1,15 +1,28 @@
-<div class='builder-form'>
-  <form {{on 'submit' this.saveCoverLetter}}>
-    <div class='field'>
+<div class="builder-form">
+  <form {{on "submit" this.saveCoverLetter}}>
+    <div class="field">
       Body:
       <textarea
         rows="30"
-        aria-label='update-content'
-        {{on 'change' this.updateContent}}>
+        aria-label="update-content"
+        {{on "change" this.updateContent}}
+      >
         {{@coverLetter.content}}
       </textarea>
-      <button type="submit" class='btn primary'>Save</button>
     </div>
+    <button
+      type="button"
+      class="favorite-btn {{if @coverLetter.favorite 'favorited'}}"
+      {{on "click" (fn this.toggleFavorite @coverLetter)}}
+      title="{{if
+        @coverLetter.favorite
+        'Remove from favorites'
+        'Add to favorites'
+      }}"
+    >
+      {{#if @coverLetter.favorite}}★{{else}}☆{{/if}}
+    </button>
+    <button type="submit" class="btn primary">Save</button>
   </form>
   {{yield}}
 </div>

@@ -4,6 +4,7 @@ import { UploadFile } from 'ember-file-upload';
 import { service } from '@ember/service';
 
 export default class ResumesImportController extends Controller {
+  @service spinner;
   @service session;
   @service flashMessages;
   @service api;
@@ -13,7 +14,7 @@ export default class ResumesImportController extends Controller {
     this.flashMessages.info(
       'Uploading Resume to cloud to be parsed.  this could take a moment.',
     );
-    
+
     if (!this.session.accessToken && this.session.refreshToken) {
       try {
         await this.session.refresh();
@@ -24,14 +25,14 @@ export default class ResumesImportController extends Controller {
 
     const url = `${this.api.baseUrl}resumes/ingest/`;
     const headers = this.api.headers();
-    
+
     try {
-      const resume = await new UploadFile(file).upload({
-        url,
-        headers,
-      });
-      console.log(resume);
-      this.flashMessages.success('Resume imported');
+      this.spinner.wrap(
+        await new UploadFile(file).upload({
+          url,
+          headers,
+        }),
+      );
     } catch (error) {
       this.flashMessages.clearMessages();
       this.flashMessages.danger(`Resume failed ${error}`);

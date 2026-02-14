@@ -1,5 +1,39 @@
 * +title: Todo
 * Inbox
+** TODO AI answer returning 500 from server
+ask ai broken?
+{
+	"errors": [
+		{
+			"detail": "AI assist failed: 'list' object has no attribute 'question'"
+		}
+	]
+}
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/answers/form.js::import Component from '@glimmer/component';]]
+** DONE should not truncate
+CLOSED: [2026-02-13 Fri 18:39]
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/summaries/item.hbs::<Panel::Card>]]
+** TODO
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/company.js::@hasMany('job-application', { async: true, inverse: 'company' })]]
+** DONE make an admin webpage for managing api keys
+CLOSED: [2026-02-13 Fri 18:39]
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/notes.org::*\[2026-01-13 Tue 17:08\]][[2026-01-13 Tue 17:08]​]]
+** DONE validate project works in export resume
+CLOSED: [2026-02-13 Fri 18:40]
+the template may or may not have that data
+while the export is the same, there is another jinja template that serves career_data
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/questions/show.js::}]]
+** TODO if scrape fails the loading is still showing
+on error is broken for spinnier.wrap()?
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/questions/show.js::@service router;]]
+** TODO saving a new manual answer stays in /new should reroute to show
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-posts/scrape.hbs]]
 ** DONE I want to have the ability to start a new question from a job-post.  it will make a templated job-application for job-post then attach the quesiton to it
 CLOSED: [2026-01-21 Wed 21:25]
 
@@ -10,7 +44,10 @@ this needs work
 save doesn't do the right thing
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/questions/show.hbs::</div>]]
-** TODO job-application/:id/edit
+** STRT job-application/:id/edit
+:LOGBOOK:
+CLOCK: [2026-02-13 Fri 18:42]--[2026-02-13 Fri 18:43] =>  0:01
+:END:
 if coming from another page resume doesn't populate
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/authenticators/jwt.js::const url = `${this.baseUrl}${this.authConfig.TOKEN_PATH}`;]]

@@ -1,6 +1,6 @@
 {{page-title "Edit"}}
 <Menus::SubnavBar>
-  <button {{on "click" this.save}}class="btn" type="button">save</button>
+  <button {{on "click" this.save}} class="btn" type="button">save</button>
   <button class="btn" type="button">cancel</button>
 </Menus::SubnavBar>
 <div class="bar-cart">
@@ -9,8 +9,11 @@
   {{/each}}
 </div>
 <div class="fairway">
+
   <JobApplications::Edit
-    @jobApplication={{this.model}}
+    @jobApplication={{this.model.jobApplication}}
+    @resumes={{this.model.resumes}}
+    @coverLetters={{this.model.coverLetters}}
   />
   {{outlet}}
 </div>

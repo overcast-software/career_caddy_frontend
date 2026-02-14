@@ -1,17 +1,33 @@
 {{yield}}
 <article class="panel-card">
-  <h3 >
+  <h3>
     <LinkTo @route="resumes.show" @model={{@resume}}>
       {{@resume.name}}
     </LinkTo>
   </h3>
 
   <p>
-    Used in {{@resume.jobApplications.length}} job appliations
+    Used in
+    {{@resume.jobApplications.length}}
+    job appliations
   </p>
   <p>
-    Note: {{or @resume.notes "N/A"}}
+    Note:
+    {{or @resume.notes "N/A"}}
   </p>
-  <LinkTo @route="resumes.edit" @model={{@resume}} class='btn'>Edit</LinkTo>
+  <LinkTo @route="resumes.edit" @model={{@resume}} class="btn">Edit</LinkTo>
+  <button
+    type="button"
+    class="btn danger"
+    {{on "click" this.deleteResume}}
+  >delete</button>
+  <button
+    type="button"
+    class="favorite-btn {{if @resume.favorite 'favorited'}}"
+    {{on "click" (fn this.toggleFavorite @resume)}}
+    title="{{if @resume.favorite 'Remove from favorites' 'Add to favorites'}}"
+  >
+    {{#if @resume.favorite}}★{{else}}☆{{/if}}
+  </button>
 </article>
 {{yield}}

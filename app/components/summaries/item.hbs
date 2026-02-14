@@ -18,12 +18,17 @@
   </div>
 
   {{#if @summary.content}}
-    <p class="summary-content clamp-4">
-      {{@summary.content}}
-    </p>
+    <div class="summary-content-wrapper">
+      <p class="summary-content">
+        {{@summary.content}}
+      </p>
+      <button type="button" class="btn btn-sm btn-outline-secondary" {{on "click" this.copyToClipboard}}>
+        {{this.copyButtonText}}
+      </button>
+    </div>
   {{else}}
-    <p class="summary-content clamp-4">
-      <span class='loader'></span>
+    <p class="summary-content">
+      <span class="loader"></span>
     </p>
   {{/if}}
 </Panel::Card>

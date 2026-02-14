@@ -1,0 +1,167 @@
+<div class="max-w-2xl mx-auto p-6">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Create API Key</h1>
+    <p class="mt-2 text-sm text-gray-600">
+      Create a new API key to access your account programmatically.
+    </p>
+  </div>
+
+  {{#if this.createdKey}}
+    <div class="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg
+            class="h-5 w-5 text-green-400"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-green-800">API Key Created
+            Successfully</h3>
+          <div class="mt-2 text-sm text-green-700">
+            <p class="font-medium">Your API key:</p>
+            <div
+              class="mt-2 p-3 bg-gray-100 rounded border font-mono text-sm break-all"
+            >
+              {{this.createdKey.key}}
+            </div>
+            <p class="mt-2 text-xs">
+              <strong>Important:</strong>
+              This is the only time you'll see the full API key. Make sure to
+              copy it and store it securely.
+            </p>
+          </div>
+          <div class="mt-4">
+            <button
+              type="button"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+              {{on "click" this.goToIndex}}
+            >
+              Go to API Keys
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{else}}
+    <form {{on "submit" this.save}}>
+      <div class="bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="space-y-6">
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700">
+                Name
+              </label>
+              <div class="mt-1">
+                <Input
+                  @type="text"
+                  @value={{this.model.name}}
+                  id="name"
+                  class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                  placeholder="e.g., Production API Key"
+                  required
+                />
+              </div>
+              <p class="mt-2 text-sm text-gray-500">
+                A descriptive name to help you identify this API key.
+              </p>
+            </div>
+
+            <div>
+              <label
+                for="expires_days"
+                class="block text-sm font-medium text-gray-700"
+              >
+                Expires in (days)
+              </label>
+              <div class="mt-1">
+                <Input
+                  @type="number"
+                  @value={{this.model.expiresDays}}
+                  id="expires_days"
+                  class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                  placeholder="30"
+                  min="1"
+                  max="365"
+                />
+              </div>
+              <p class="mt-2 text-sm text-gray-500">
+                Leave empty for no expiration. Maximum 365 days.
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">
+                Scopes
+              </label>
+              <div class="mt-2 space-y-2">
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={{this.canRead}}
+                    id="scope_read"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    {{on "change" (fn this.toggleScope "read")}}
+                  />
+                  <label
+                    for="scope_read"
+                    class="ml-2 block text-sm text-gray-900"
+                  >
+                    Read access
+                  </label>
+                </div>
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={{this.canWrite}}
+                    id="scope_write"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    {{on "change" (fn this.toggleScope "write")}}
+                  />
+                  <label
+                    for="scope_write"
+                    class="ml-2 block text-sm text-gray-900"
+                  >
+                    Write access
+                  </label>
+                </div>
+              </div>
+              <p class="mt-2 text-sm text-gray-500">
+                Select the permissions this API key should have.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 space-x-3">
+          <button
+            type="button"
+            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            {{on "click" this.cancel}}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            disabled={{this.isSubmitting}}
+            {{on "click" this.derp}}
+          >
+            {{#if this.isSubmitting}}
+              Creating...
+            {{else}}
+              Create API Key
+            {{/if}}
+          </button>
+        </div>
+      </div>
+    </form>
+  {{/if}}
+</div>

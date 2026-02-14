@@ -9,47 +9,31 @@ export default class JobApplicationsEdit extends Component {
   @service flashMessages;
   @tracked selectedCompany = null;
   @tracked disableCompanySelector = false;
-  constructor() {
-    super(...arguments);
 
-    const company = this.args.jobApplication.get('company')
-    if (company) {
-      this.selectedCompany = company;
-      this.disableCompanySelector = true;
-    }
+  get resumes() {
+    return this.args.resumes || [];
   }
 
-  get resumes(){
-    return this.store.fineAll('resume')
-  }
-
-  get coverLetters(){
-    return this.store.findAll('cover-letter')
+  get coverLetters() {
+    return this.args.coverLetters || [];
   }
 
   @action updateNotes(event) {
     this.args.jobApplication.notes = event.target.value;
   }
+
   get user() {
     return this.currentUser.user;
   }
   get companies() {
     return this.store.findAll('company');
   }
+
   get jobApplication() {
     return this.args.jobApplication;
   }
-  @action updateCoverLetter(event) {
-    const id = event.target.value;
-    if (id === '') {
-      this.jobApplication.coverLetter = null;
-      return;
-    }
 
-    let coverLetter = this.store.peekRecord('cover-letter', id);
-    if (!coverLetter) {
-      coverLetter = this.store.findRecord('cover-letter', id);
-    }
+  @action updateCoverLetter(coverLetter) {
     this.jobApplication.coverLetter = coverLetter;
   }
 
@@ -57,17 +41,7 @@ export default class JobApplicationsEdit extends Component {
     this.jobApplication.save().then(() => this.flashMessages.success('saved'));
   }
 
-  @action updateResume(event) {
-    const id = event.target.value;
-    if (id === '') {
-      this.jobApplication.resume = null;
-      return;
-    }
-
-    let resume = this.store.peekRecord('resume', id);
-    if (!resume) {
-      resume = this.store.findRecord('resume', id);
-    }
+  @action updateResume(resume) {
     this.jobApplication.resume = resume;
   }
 

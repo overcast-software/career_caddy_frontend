@@ -10,14 +10,14 @@ export default class JobApplicationsEditRoute extends Route {
       //navigate back to new
       this.router.transitionTo('job-applications.new');
     }
-    const jobApplication = this.store.findRecord(
+    const jobApplication = await this.store.findRecord(
       'job-application',
       application_id,
-      {include: 'job-post,company'},
+      { include: 'job-post,company' },
     );
 
-    this.store.findAll('resume');
-    this.store.findAll('cover-letter')
-    return jobApplication
+    const resumes = this.store.findAll('resume');
+    const coverLetters = this.store.findAll('cover-letter');
+    return { jobApplication, resumes, coverLetters };
   }
 }

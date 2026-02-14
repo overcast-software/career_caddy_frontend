@@ -11,31 +11,36 @@
     </div>
 
     <div class="field">
-      <label class="field-label" for={{this.resumeSelectId}}>Resume</label>
-      <select id={{this.resumeSelectId}} {{on "change" this.updateResume}}>
-        {{#each @resumes as |resume|}}
-          <option value={{resume.id}}>
-            {{resume.name}}
-          </option>
-        {{/each}}
-      </select>
+      <PowerSelect
+        @options={{this.resumes}}
+        @onChange={{this.updateResume}}
+        @searchEnabled={{true}}
+        @searchField="name"
+        @selected={{@jobApplication.resume}}
+        @placeholder="Select a Resume"
+        @labelText="Resume"
+        as |resume|
+      >
+        {{resume.name}}
+      </PowerSelect>
     </div>
 
     <div class="field">
-      <label class="field-label" for={{this.coverLetterSelectId}}>Cover Letter</label>
-      <select
-        id={{this.coverLetterSelectId}}
-        {{on "change" this.updateCoverLetter}}
+      <PowerSelect
+        @options={{this.coverLetters}}
+        @onChange={{this.updateCoverLetter}}
+        @searchEnabled={{true}}
+        @searchField="jobPost.title"
+        @selected={{@jobApplication.coverLetter}}
+        @placeholder="Select a Cover Letter"
+        @labelText="Cover Letter"
+        as |coverLetter|
       >
-        {{#each this.coverLetterOptions as |coverLetter|}}
-          <option value={{coverLetter.id}}>
-            cover letter for
-            {{coverLetter.jobPost.title}}
-            -
-            {{format-date coverLetter.createdAt}}
-          </option>
-        {{/each}}
-      </select>
+        cover letter for
+        {{coverLetter.jobPost.title}}
+        -
+        {{format-date coverLetter.createdAt}}
+      </PowerSelect>
     </div>
 
     <div class="field">

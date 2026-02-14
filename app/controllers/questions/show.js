@@ -4,6 +4,7 @@ import { action } from '@ember/object';
 export default class QuestionsShowController extends Controller {
   @service flashMessages;
   @service store;
+  @service router;
   @service spinner;
   @action deleteQuestion() {
     this.model
