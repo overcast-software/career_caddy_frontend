@@ -2,6 +2,15 @@
   <h1>Career Data</h1>
 
   {{#if @model.data}}
+    <div class="markdown-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        {{on "click" (fn this.copyToClipboard @model.data)}}
+      >
+        {{this.copyButtonText}}
+      </button>
+    </div>
     <div class="markdown-content">
       <MarkdownToHtml @markdown={{@model.data}} />
     </div>

@@ -1,5 +1,13 @@
 * +title: Todo
 * Inbox
+** DONE Need a copy to clipboard
+CLOSED: [2026-02-18 Wed 11:25]
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/career-data/index.hbs::<MarkdownToHtml @markdown={{@model.data}} />]]
+** TODO need a favorites route
+answers
+coverletters
+resumes
 ** DONE Implement /api/v1/career-data endpoint integration
 CLOSED: [2026-02-18 Tue]
 The API endpoint returns markdown content in the structure: {data: <markdown>}
