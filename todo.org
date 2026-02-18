@@ -1,5 +1,61 @@
 * +title: Todo
 * Inbox
+** DONE Implement /api/v1/career-data endpoint integration
+CLOSED: [2026-02-18 Tue]
+The API endpoint returns markdown content in the structure: {data: <markdown>}
+This is a read-only model (postgres view) with no id field.
+
+*** DONE Create career-data model
+CLOSED: [2026-02-18 Tue]
+- Created app/models/career-data.js
+- Defined as read-only model with 'data' attribute
+
+*** DONE Create career-data adapter
+CLOSED: [2026-02-18 Tue]
+- Created app/adapters/career-data.js
+- Overrode urlForQueryRecord to point to /career-data
+- Uses queryRecord() since there's no id
+
+*** DONE Create career-data serializer
+CLOSED: [2026-02-18 Tue]
+- Created app/serializers/career-data.js
+- Handles the {data: <markdown>} response structure
+- Generates synthetic id 'singleton' for Ember Data
+
+*** DONE Create career-data route
+CLOSED: [2026-02-18 Tue]
+- Created app/routes/career-data/index.js
+- Uses store.queryRecord() to fetch the data
+
+*** DONE Create career-data template
+CLOSED: [2026-02-18 Tue]
+- Created app/templates/career-data/index.hbs
+- Displays markdown content (currently as pre-formatted text)
+- TODO: Install markdown rendering addon for proper HTML rendering
+
+*** DONE Add router entry
+CLOSED: [2026-02-18 Tue]
+- Added career-data route to app/router.js
+
+*** DONE Handle markdown rendering
+CLOSED: [2026-02-18 Tue]
+- Installed ember-cli-showdown
+- Updated template to use markdown-to-html helper
+- Helper provides XSS protection by default
+
+*** TODO Add navigation link
+- Add link to career-data in main navigation
+- Consider where it fits in the app's information architecture
+** TODO /job-post//:jp_id/questions
+might want to make this a feature
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/questions/form.hbs::as |company|]]
+** TODO powerselect not finding Toptal???
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/questions/form.hbs::<article class="panel-card builder-form">]]
+** TODO job post needs includes and await.
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/routes/job-posts/show.js::}]]
 ** TODO AI answer returning 500 from server
 ask ai broken?
 {

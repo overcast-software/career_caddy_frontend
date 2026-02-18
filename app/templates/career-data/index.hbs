@@ -1,0 +1,11 @@
+<div class="career-data-container">
+  <h1>Career Data</h1>
+
+  {{#if @model.data}}
+    <div class="markdown-content">
+      <MarkdownToHtml @markdown={{@model.data}} />
+    </div>
+  {{else}}
+    <p>No career data available.</p>
+  {{/if}}
+</div>
