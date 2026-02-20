@@ -1,3 +1,8 @@
 import Route from '@ember/routing/route';
-
-export default class ScrapesRoute extends Route {}
+import { service } from '@ember/service';
+export default class ScrapesRoute extends Route {
+  @service store;
+  async model() {
+    return this.store.findAll('scrape');
+  }
+}

@@ -11,6 +11,15 @@
     {{/if}}
   </h1>
 
+  <div class="job-dates">
+    {{#if @jobPost.postedDate}}
+      <span class="muted">Posted: {{moment-format @jobPost.postedDate "MMM D, YYYY"}}</span>
+    {{/if}}
+    {{#if @jobPost.createdAt}}
+      <span class="muted">Created: {{moment-format @jobPost.createdAt "MMM D, YYYY"}}</span>
+    {{/if}}
+  </div>
+
   <section class="job-post-description">
     <div class="description-controls">
       <button

@@ -1,0 +1,198 @@
+<div class="favorites-container">
+  <h1>Favorites</h1>
+
+  <div class="favorites-controls">
+    <button
+      type="button"
+      class="btn {{if this.showOnlyFavorites 'btn-primary' 'btn-secondary'}}"
+      {{on "click" this.toggleFilterMode}}
+    >
+      {{if this.showOnlyFavorites "Show All" "Show Favorites Only"}}
+    </button>
+  </div>
+
+  <div class="tabs">
+    <button
+      type="button"
+      class="tab-button {{if (eq this.activeTab 'resumes') 'active'}}"
+      {{on "click" (fn this.setActiveTab "resumes")}}
+    >
+      Resumes ({{this.filteredResumes.length}})
+    </button>
+    <button
+      type="button"
+      class="tab-button {{if (eq this.activeTab 'coverLetters') 'active'}}"
+      {{on "click" (fn this.setActiveTab "coverLetters")}}
+    >
+      Cover Letters ({{this.filteredCoverLetters.length}})
+    </button>
+    <button
+      type="button"
+      class="tab-button {{if (eq this.activeTab 'answers') 'active'}}"
+      {{on "click" (fn this.setActiveTab "answers")}}
+    >
+      Answers ({{this.filteredAnswers.length}})
+    </button>
+  </div>
+
+  <div class="tab-content">
+    {{#if (eq this.activeTab "resumes")}}
+      <div class="table-container">
+        <h2>Resumes</h2>
+        {{#if this.filteredResumes.length}}
+          <table class="favorites-table">
+            <thead>
+              <tr>
+                <th>Favorite</th>
+                <th>Name</th>
+                <th>Notes</th>
+                <th>Job Applications</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each this.filteredResumes as |resume|}}
+                <tr>
+                  <td>
+                    <button
+                      type="button"
+                      class="favorite-btn {{if resume.favorite 'favorited'}}"
+                      {{on "click" (fn this.toggleFavorite resume)}}
+                      title="{{if resume.favorite 'Remove from favorites' 'Add to favorites'}}"
+                    >
+                      {{#if resume.favorite}}★{{else}}☆{{/if}}
+                    </button>
+                  </td>
+                  <td>
+                    <LinkTo @route="resumes.show" @model={{resume}}>
+                      {{resume.name}}
+                    </LinkTo>
+                  </td>
+                  <td>{{or resume.notes "N/A"}}</td>
+                  <td>{{resume.jobApplications.length}}</td>
+                  <td>
+                    <LinkTo @route="resumes.edit" @model={{resume}} class="btn btn-sm">
+                      Edit
+                    </LinkTo>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{else}}
+          <p>No resumes found.</p>
+        {{/if}}
+      </div>
+    {{/if}}
+
+    {{#if (eq this.activeTab "coverLetters")}}
+      <div class="table-container">
+        <h2>Cover Letters</h2>
+        {{#if this.filteredCoverLetters.length}}
+          <table class="favorites-table">
+            <thead>
+              <tr>
+                <th>Favorite</th>
+                <th>Name</th>
+                <th>Content Preview</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each this.filteredCoverLetters as |coverLetter|}}
+                <tr>
+                  <td>
+                    <button
+                      type="button"
+                      class="favorite-btn {{if coverLetter.favorite 'favorited'}}"
+                      {{on "click" (fn this.toggleFavorite coverLetter)}}
+                      title="{{if coverLetter.favorite 'Remove from favorites' 'Add to favorites'}}"
+                    >
+                      {{#if coverLetter.favorite}}★{{else}}☆{{/if}}
+                    </button>
+                  </td>
+                  <td>
+                    <LinkTo @route="cover-letters.show" @model={{coverLetter}}>
+                      {{coverLetter.name}}
+                    </LinkTo>
+                  </td>
+                  <td class="preview-text">
+                    {{#if coverLetter.content}}
+                      {{truncate coverLetter.content 100}}
+                    {{else}}
+                      N/A
+                    {{/if}}
+                  </td>
+                  <td>
+                    <LinkTo @route="cover-letters.edit" @model={{coverLetter}} class="btn btn-sm">
+                      Edit
+                    </LinkTo>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{else}}
+          <p>No cover letters found.</p>
+        {{/if}}
+      </div>
+    {{/if}}
+
+    {{#if (eq this.activeTab "answers")}}
+      <div class="table-container">
+        <h2>Answers</h2>
+        {{#if this.filteredAnswers.length}}
+          <table class="favorites-table">
+            <thead>
+              <tr>
+                <th>Favorite</th>
+                <th>Question</th>
+                <th>Answer Preview</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each this.filteredAnswers as |answer|}}
+                <tr>
+                  <td>
+                    <button
+                      type="button"
+                      class="favorite-btn {{if answer.favorite 'favorited'}}"
+                      {{on "click" (fn this.toggleFavorite answer)}}
+                      title="{{if answer.favorite 'Remove from favorites' 'Add to favorites'}}"
+                    >
+                      {{#if answer.favorite}}★{{else}}☆{{/if}}
+                    </button>
+                  </td>
+                  <td>
+                    {{#if answer.question}}
+                      <LinkTo @route="questions.show" @model={{answer.question}}>
+                        {{truncate answer.question.text 50}}
+                      </LinkTo>
+                    {{else}}
+                      N/A
+                    {{/if}}
+                  </td>
+                  <td class="preview-text">
+                    {{#if answer.text}}
+                      {{truncate answer.text 100}}
+                    {{else}}
+                      N/A
+                    {{/if}}
+                  </td>
+                  <td>
+                    <LinkTo @route="answers.edit" @model={{answer}} class="btn btn-sm">
+                      Edit
+                    </LinkTo>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{else}}
+          <p>No answers found.</p>
+        {{/if}}
+      </div>
+    {{/if}}
+  </div>
+</div>

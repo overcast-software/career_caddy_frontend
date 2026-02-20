@@ -24,7 +24,7 @@ export default class JobPostsScrapeController extends Controller {
           this.flashMessages.danger(error?.errors[0]?.detail);
         })
         .then(() => {
-          this.flashMessages('Successfully scraped website');
+          this.flashMessages.success('Successfully scraped website');
         }),
     );
   }

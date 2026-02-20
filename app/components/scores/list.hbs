@@ -1,7 +1,11 @@
 <ul>
   {{#each @scores as |score|}}
-        <Panel::Card @title={{score.jobPost.title}} @collapsible={{false}}>
-          <h3>Score: <LinkTo @route="scores.show" @model={{score}}>{{score.score}}</LinkTo></h3>
-        </Panel::Card>
+    <Panel::Card @title={{this.score_title score}} @collapsible={{false}}>
+      <h3>Score:
+        <LinkTo
+          @route="scores.show"
+          @model={{score}}
+        >{{score.score}}</LinkTo></h3>
+    </Panel::Card>
   {{/each}}
 </ul>

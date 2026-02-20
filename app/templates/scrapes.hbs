@@ -1,6 +1,25 @@
 <Menus::SubnavBar>
   scrapes/index
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
+<BarCart @flashMessages={{this.flashMessages}} />
 <Scrapes::Form @scrape={{this.model}} />
+{{#each this.model as |scrape|}}
+  <Panel::Card>
+    {{scrape.id}}
+    --
+    {{scrape.status}}
+    --
+    {{scrape.parseMethod}}
+    --
+    <br />
+    <a href={{scrape.url}}>external link</a>
+    <button
+      type="button"
+      class="btn btn-primary"
+      {{on "click" (fn this.retryScrape this.model)}}
+    >
+      Retry Scrape
+    </button>
+  </Panel::Card>
+{{/each}}
 {{outlet}}

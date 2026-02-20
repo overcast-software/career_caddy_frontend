@@ -3,12 +3,12 @@ import { service } from '@ember/service';
 export default class JobApplicationsNewRoute extends Route {
   @service store;
   jobId = null;
-  setupController(controller, model){
+  setupController(controller, model) {
     controller.selectedJobPost = model.jobPost;
     controller.selectedResume = model.resume;
     controller.selectedCoverLetter = model.coverLetter;
     controller.selectedStatus = model.status;
-    controller.model = model
+    controller.model = model;
   }
   async model(_params, transition) {
     // Look for params that specifiy we already know the
@@ -16,10 +16,11 @@ export default class JobApplicationsNewRoute extends Route {
     // if those are absent just load them all and
     // let the user decide
     const { jobId, resumeId } = transition.to.queryParams;
-    this.store.findAll('job-post', { include: "company" });
     const jobApplication = this.store.createRecord('job-application');
     if (jobId) {
-      const jobPost = this.store.peekRecord('job-post', jobId);
+      const jobPost = await this.store.findRecord('job-post', jobId, {
+        include: 'company',
+      });
       jobApplication.jobPost = jobPost;
     }
     this.store.findAll('cover-letter');

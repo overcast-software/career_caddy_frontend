@@ -10,5 +10,13 @@
         <a href="{{@jobPost.link}}">➚</a>
       {{/if}}
     </h3>
+    <div class="job-dates">
+      {{#if @jobPost.postedDate}}
+        <span class="muted">Posted: {{moment-format @jobPost.postedDate "MMM D, YYYY"}}</span>
+      {{/if}}
+      {{#if @jobPost.createdAt}}
+        <span class="muted">Created: {{moment-format @jobPost.createdAt "MMM D, YYYY"}}</span>
+      {{/if}}
+    </div>
     <LinkTo @route="job-posts.edit" class="btn" @model={{@jobPost}}>Edit</LinkTo>
 </article>

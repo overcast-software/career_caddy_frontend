@@ -186,4 +186,5 @@ Router.map(function () {
     this.route('show', { path: '/:api_key_id' });
   });
   this.route('career-data', function () {});
+  this.route('favorites');
 });

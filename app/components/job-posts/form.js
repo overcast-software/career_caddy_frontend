@@ -7,11 +7,10 @@ export default class JobPostsFormComponent extends Component {
   @service store;
   @service flashMessages;
   @tracked form_toggle = false; // false = "by url", true = "manual"
-  @tracked selectedCompany = null;
   @tracked newCompanyName = '';
 
   @action updateCompany(company) {
-    this.selectedCompany = company;
+    this.args.jobPost.company = company;
   }
 
   get companies() {
@@ -44,7 +43,6 @@ export default class JobPostsFormComponent extends Component {
   @action
   async submitEdit(event) {
     event.preventDefault();
-    this.args.jobPost.company = this.selectedCompany;
     this.args.jobPost
       .save()
       .catch((error) => this.flashMessages.alert(error))

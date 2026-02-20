@@ -2,7 +2,7 @@ import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 
-export default class ScrapesController extends Controller {
+export default class ScrapesShowController extends Controller {
   @service spinner;
   @service flashMessages;
   @service store;

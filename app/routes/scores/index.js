@@ -6,6 +6,6 @@ export default class ScoresIndexRoute extends Route {
   @service currentUser;
 
   async model() {
-    return await this.currentUser.user.scores;
+    return await this.store.findAll('score', { include: 'company' });
   }
 }

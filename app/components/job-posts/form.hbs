@@ -6,7 +6,7 @@
       @searchField="name"
       @onCreate={{this.addCompanyToJobPost}}
       @onChange={{this.updateCompany}}
-      @selected={{this.selectedCompany}}
+      @selected={{@jobPost.company}}
       as |company|
     >
       {{company.name}}

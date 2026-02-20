@@ -19,7 +19,7 @@ export default class JobApplicationsEdit extends Component {
   }
 
   @action updateNotes(event) {
-    this.args.jobApplication.notes = event.target.value;
+    this.jobApplication.set('notes', event.target.value);
   }
 
   get user() {
@@ -38,7 +38,8 @@ export default class JobApplicationsEdit extends Component {
   }
 
   @action async saveApplication() {
-    this.jobApplication.save().then(() => this.flashMessages.success('saved'));
+    await this.jobApplication.save();
+    this.flashMessages.success('saved');
   }
 
   @action updateResume(resume) {

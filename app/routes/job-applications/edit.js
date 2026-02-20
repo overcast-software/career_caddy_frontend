@@ -13,11 +13,11 @@ export default class JobApplicationsEditRoute extends Route {
     const jobApplication = await this.store.findRecord(
       'job-application',
       application_id,
-      { include: 'job-post,company' },
+      { include: ['job-post', 'company'] },
     );
 
-    const resumes = this.store.findAll('resume');
-    const coverLetters = this.store.findAll('cover-letter');
+    const resumes = await this.store.findAll('resume');
+    const coverLetters = await this.store.findAll('cover-letter');
     return { jobApplication, resumes, coverLetters };
   }
 }

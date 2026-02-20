@@ -1,5 +1,8 @@
 * +title: Todo
 * Inbox
+** TODO [#A] fix the refresh bug
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/scrape.js::scrape]]
 ** DONE Need a copy to clipboard
 CLOSED: [2026-02-18 Wed 11:25]
 
@@ -8,6 +11,8 @@ CLOSED: [2026-02-18 Wed 11:25]
 answers
 coverletters
 resumes
+** TODO when not authed, adding company still shows success
+** TODO if you don't supply a resume when filling out job application it silently fails
 ** DONE Implement /api/v1/career-data endpoint integration
 CLOSED: [2026-02-18 Tue]
 The API endpoint returns markdown content in the structure: {data: <markdown>}
@@ -53,6 +58,8 @@ CLOSED: [2026-02-18 Tue]
 
 *** TODO Add navigation link
 - Add link to career-data in main navigation
+- add link to favorites
+- add link to scrapes
 - Consider where it fits in the app's information architecture
 ** TODO /job-post//:jp_id/questions
 might want to make this a feature

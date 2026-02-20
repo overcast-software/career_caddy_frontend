@@ -1,1 +1,4 @@
 <Scrapes::Item @scrape={{this.model}} />
+<button type="button" class="btn btn-primary" {{on "click" (fn this.retryScrape this.model)}}>
+  Retry Scrape
+</button>
