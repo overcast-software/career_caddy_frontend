@@ -1,128 +1,8 @@
 * +title: Todo
 * Inbox
-** TODO [#A] fix the refresh bug
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/scrape.js::scrape]]
-** DONE Need a copy to clipboard
-CLOSED: [2026-02-18 Wed 11:25]
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/career-data/index.hbs::<MarkdownToHtml @markdown={{@model.data}} />]]
-** TODO need a favorites route
-answers
-coverletters
-resumes
-** TODO when not authed, adding company still shows success
-** TODO if you don't supply a resume when filling out job application it silently fails
-** DONE Implement /api/v1/career-data endpoint integration
-CLOSED: [2026-02-18 Tue]
-The API endpoint returns markdown content in the structure: {data: <markdown>}
-This is a read-only model (postgres view) with no id field.
-
-*** DONE Create career-data model
-CLOSED: [2026-02-18 Tue]
-- Created app/models/career-data.js
-- Defined as read-only model with 'data' attribute
-
-*** DONE Create career-data adapter
-CLOSED: [2026-02-18 Tue]
-- Created app/adapters/career-data.js
-- Overrode urlForQueryRecord to point to /career-data
-- Uses queryRecord() since there's no id
-
-*** DONE Create career-data serializer
-CLOSED: [2026-02-18 Tue]
-- Created app/serializers/career-data.js
-- Handles the {data: <markdown>} response structure
-- Generates synthetic id 'singleton' for Ember Data
-
-*** DONE Create career-data route
-CLOSED: [2026-02-18 Tue]
-- Created app/routes/career-data/index.js
-- Uses store.queryRecord() to fetch the data
-
-*** DONE Create career-data template
-CLOSED: [2026-02-18 Tue]
-- Created app/templates/career-data/index.hbs
-- Displays markdown content (currently as pre-formatted text)
-- TODO: Install markdown rendering addon for proper HTML rendering
-
-*** DONE Add router entry
-CLOSED: [2026-02-18 Tue]
-- Added career-data route to app/router.js
-
-*** DONE Handle markdown rendering
-CLOSED: [2026-02-18 Tue]
-- Installed ember-cli-showdown
-- Updated template to use markdown-to-html helper
-- Helper provides XSS protection by default
-
-*** TODO Add navigation link
-- Add link to career-data in main navigation
-- add link to favorites
-- add link to scrapes
-- Consider where it fits in the app's information architecture
-** TODO /job-post//:jp_id/questions
-might want to make this a feature
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/questions/form.hbs::as |company|]]
-** TODO powerselect not finding Toptal???
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/questions/form.hbs::<article class="panel-card builder-form">]]
-** TODO job post needs includes and await.
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/routes/job-posts/show.js::}]]
-** TODO AI answer returning 500 from server
-ask ai broken?
-{
-	"errors": [
-		{
-			"detail": "AI assist failed: 'list' object has no attribute 'question'"
-		}
-	]
-}
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/answers/form.js::import Component from '@glimmer/component';]]
-** DONE should not truncate
-CLOSED: [2026-02-13 Fri 18:39]
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/summaries/item.hbs::<Panel::Card>]]
-** DONE
-CLOSED: [2026-02-13 Fri 20:52]
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/company.js::@hasMany('job-application', { async: true, inverse: 'company' })]]
-** DONE make an admin webpage for managing api keys
-CLOSED: [2026-02-13 Fri 18:39]
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/notes.org::*\[2026-01-13 Tue 17:08\]][[2026-01-13 Tue 17:08]​]]
-** DONE validate project works in export resume
-CLOSED: [2026-02-13 Fri 18:40]
-the template may or may not have that data
-while the export is the same, there is another jinja template that serves career_data
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/questions/show.js::}]]
-** TODO if scrape fails the loading is still showing
-on error is broken for spinnier.wrap()?
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/questions/show.js::@service router;]]
-** TODO saving a new manual answer stays in /new should reroute to show
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-posts/scrape.hbs]]
-** DONE I want to have the ability to start a new question from a job-post.  it will make a templated job-application for job-post then attach the quesiton to it
-CLOSED: [2026-01-21 Wed 21:25]
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-posts/show.hbs::</div>]]
-** DONE [#A] http://localhost:4200/questions/34/answers/
-CLOSED: [2026-01-21 Wed 21:24]
-this needs work
-save doesn't do the right thing
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/questions/show.hbs::</div>]]
-** STRT job-application/:id/edit
-:LOGBOOK:
-CLOCK: [2026-02-13 Fri 18:42]--[2026-02-13 Fri 18:43] =>  0:01
-:END:
-if coming from another page resume doesn't populate
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/authenticators/jwt.js::const url = `${this.baseUrl}${this.authConfig.TOKEN_PATH}`;]]
+** WAIT if you don't supply a resume when filling out job application it silently fails
+where is a fix right now
+refresh was the root cause but this will warn if no company is assigned
 ** TODO [#B] job-post/scrape needs loading
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/README.md::career-caddy-frontend]]
@@ -132,22 +12,9 @@ if coming from another page resume doesn't populate
 ** TODO when ai returns answer.  add it to the list in questions/:id/answers
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js]]
-** TODO [#A] AI answer should have a way to add your own thing to the prompt
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js::@attr favorite;]]
-** TODO favorites should be a path
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js::@attr favorite;]]
-** DONE check the prompt file
-CLOSED: [2026-01-21 Wed 18:45]
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
 ** TODO [#A] the upload button should be disabled after upload successfull
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
-** TODO create new summary in UI is missing
-mostly AI generated but would be nice to create one manually
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
 ** TODO edit resume is broken  edit.js
 serializeAttribute application.js:22
 ** TODO /resumes/index favorite button needs work
@@ -164,17 +31,113 @@ is outside of the card
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
 ** TODO The adding of a new resume is borked
 I go to edit a resume when I should be cloning
-** TODO [#B] copy to clipboard for summary/show
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
-** TODO don't let the token expire too early
+** WAIT don't let the token expire too early
 this is a
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
-** DONE check prompt
-CLOSED: [2026-01-16 Fri 17:54]
-:LOGBOOK:
-- Note taken on [2026-01-16 Fri 17:54] \\
-  prompt looks good now.  code reviewed
-:END:
 ** TODO descriptions should have descriptions
 make a join table so that a description can describe a description
+this is a feature for STAR on bullet points
+* features
+** IDEA /job-post//:jp_id/questions
+might want to make this a feature
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/questions/form.hbs::as |company|]]
+** IDEA create new summary in UI is missing
+mostly AI generated but would be nice to create one manually
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
+* bugs
+** TODO AI answer returning 500 from server
+ask ai broken?
+{
+	"errors": [
+		{
+			"detail": "AI assist failed: 'list' object has no attribute 'question'"
+		}
+	]
+}
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/answers/form.js::import Component from '@glimmer/component';]]
+** TODO if scrape fails the loading is still showing
+on error is broken for spinnier.wrap()?
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/questions/show.js::@service router;]]
+** TODO job-application/:id/edit
+:LOGBOOK:
+CLOCK: [2026-02-13 Fri 18:42]--[2026-02-13 Fri 18:43] =>  0:01
+:END:
+if coming from another page resume doesn't populate
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/authenticators/jwt.js::const url = `${this.baseUrl}${this.authConfig.TOKEN_PATH}`;]]
+
+*** TODO get a user story for this
+** TODO saving a new manual answer stays in /new should reroute to show :bug:
+* projects
+** TODO chat
+** TODO UI revampt
+* PROJ UI revamp
+** Phase 1: Analysis & Design System
+*** TODO Document target site structure and components
+- [ ] Screenshot all key pages from jobops.dakheera47.com
+- [ ] Document color palette, typography, spacing system
+- [ ] List all UI components needed (buttons, cards, forms, etc.)
+- [ ] Map out navigation structure and routing
+- [ ] Identify reusable component patterns
+
+*** DONE Create design tokens/variables
+- [X] Define CSS custom properties for colors
+- [X] Define spacing scale
+- [X] Define typography scale
+- [X] Define breakpoints for responsive design
+
+** Phase 2: Component Library Foundation
+*** TODO Build base UI components
+- [X] Button component with variants (using Materialize)
+- [X] Added Materialize CSS framework
+- [X] Added Material Icons
+- [ ] Card component
+- [ ] Form input components
+- [ ] Navigation components
+- [ ] Layout components (containers, grids)
+
+*** DONE Update application styles
+- [X] Create new base stylesheet
+- [X] Add CSS reset/normalize
+- [X] Implement design tokens
+- [X] Integrated Materialize CSS
+- [X] Created dark theme overrides for Materialize
+
+** Phase 3: Page-by-Page Migration
+*** TODO Identify page migration order
+- [ ] List all current routes
+- [ ] Prioritize by user flow importance
+- [ ] Plan data/state management changes if needed
+
+*** TODO Migrate core pages (in order)
+- [ ] Index/dashboard page
+- [ ] Job applications list/index
+- [ ] Job application detail/show
+- [ ] Questions list/index
+- [ ] Question detail with answers
+- [ ] Resume management pages
+- [ ] Cover letter pages
+
+*** TODO Migrate secondary pages
+- [ ] Settings/admin pages
+- [ ] Setup/onboarding flow
+- [ ] About page
+
+** Phase 4: Testing & Polish
+*** TODO Cross-browser testing
+*** TODO Responsive design testing
+*** TODO Accessibility audit
+*** TODO Performance optimization
+*** TODO User acceptance testing
+
+** Phase 5: Deployment
+*** TODO Staging deployment
+*** TODO Production deployment
+*** TODO Monitor for issues
+
+** Notes
+- Need actual screenshots/details from jobops.dakheera47.com to proceed
+- Consider using a feature flag to toggle between old/new UI during development
+- May need to update Ember dependencies if using newer component patterns

@@ -86,11 +86,18 @@ export default class JwtAuthenticator extends Base {
   }
 
   async refresh(data) {
+    // Get the latest authenticated data from session if data not provided
+    const authData = data || this.session.data?.authenticated;
+
+    if (!authData || !authData.refresh) {
+      throw new Error('No refresh token available');
+    }
+
     if (this.refreshInFlight) {
       return this.refreshInFlight;
     }
 
-    this.refreshInFlight = this._performRefresh(data);
+    this.refreshInFlight = this._performRefresh(authData);
     try {
       return await this.refreshInFlight;
     } finally {
@@ -99,6 +106,10 @@ export default class JwtAuthenticator extends Base {
   }
 
   async _performRefresh(data) {
+    if (!data || !data.refresh) {
+      throw new Error('No refresh token available');
+    }
+
     const url = `${this.baseUrl}${this.authConfig.REFRESH_PATH}`;
     const response = await fetch(url, {
       method: 'POST',

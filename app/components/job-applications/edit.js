@@ -55,6 +55,8 @@ export default class JobApplicationsEdit extends Component {
   }
 
   get jobPostAtCompany() {
+    // this is because I wasn't using await
+    // or because company wasn't reported as a relationship to job-post
     const jobPost = this.jobApplication.jobPost;
     const company = jobPost.company;
     if (!jobPost) return '';
@@ -63,6 +65,7 @@ export default class JobApplicationsEdit extends Component {
   }
 
   get coverLetterOptions() {
+    // this should get refactored out
     const coverLetters = this.user?.coverLetters;
     let coverLetterArray = [];
 
