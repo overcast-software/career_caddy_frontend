@@ -26,3 +26,4 @@ docker-compose.override.yml
 
 # Local Caddy configs
 infra/caddy/*.local.caddy
+public/assets/*
