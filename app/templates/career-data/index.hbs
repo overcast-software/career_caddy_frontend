@@ -1,16 +1,15 @@
 <div class="career-data-container">
-  <h1>Career Data</h1>
+  {{page-title "Supporting Career Data"}}
 
   {{#if @model.data}}
-    <div class="markdown-actions">
-      <button
-        type="button"
-        class="btn btn-secondary"
-        {{on "click" (fn this.copyToClipboard @model.data)}}
-      >
-        {{this.copyButtonText}}
-      </button>
-    </div>
+    <button
+      type="button"
+      class="rounded-l-sm border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
+      style="float:right"
+      {{on "click" (fn this.copyToClipboard @model.data)}}
+    >
+      {{this.copyButtonText}}
+    </button>
     <div class="markdown-content">
       <MarkdownToHtml @markdown={{@model.data}} />
     </div>
