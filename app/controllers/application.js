@@ -8,11 +8,11 @@ export default class ApplicationController extends Controller {
   @service flashMessages;
   @service currentUser;
   @service router;
-  @tracked loading = false
+  @tracked loading = false;
 
   get isProduction() {
     const cfg = getOwner(this).resolveRegistration('config:environment');
-    return (cfg && cfg.environment === 'production');
+    return cfg && cfg.environment === 'production';
   }
 
   @action
@@ -20,7 +20,18 @@ export default class ApplicationController extends Controller {
     await this.session.invalidate();
   }
 
-  @action setLoading(loading){
-    this.loading = loading
+  @action setLoading(loading) {
+    this.loading = loading;
+  }
+  @tracked sidebarOpen = false;
+
+  @action
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  @action
+  closeSidebar() {
+    this.sidebarOpen = false;
   }
 }

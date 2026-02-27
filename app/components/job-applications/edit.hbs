@@ -1,16 +1,27 @@
-<Panel::Card>
-  <div class="builder-form">
-    <div class="field">
-      <label class="field-label" for="jobPost">Job Post</label>
+<form class="w-full max-w-lg">
+  {{! Job Post (left) and Resume (right) }}
+  <div class="flex flex-wrap -mx-3 mb-6">
+    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+      <label
+        class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+        for="jobPost"
+      >
+        Job Post
+      </label>
       <input
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
         type="text"
         id="jobPost"
         value={{@jobApplication.jobPost.title}}
         disabled="true"
       />
     </div>
-
-    <div class="field">
+    <div class="w-full md:w-1/2 px-3">
+      <label
+        class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+      >
+        Resume
+      </label>
       <PowerSelect
         @options={{this.resumes}}
         @onChange={{this.updateResume}}
@@ -18,14 +29,21 @@
         @searchField="name"
         @selected={{@jobApplication.resume}}
         @placeholder="Select a Resume"
-        @labelText="Resume"
         as |resume|
       >
         {{resume.name}}
       </PowerSelect>
     </div>
+  </div>
 
-    <div class="field">
+  {{! Cover Letter (left) and Applied At (right) }}
+  <div class="flex flex-wrap -mx-3 mb-6">
+    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+      <label
+        class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+      >
+        Cover Letter
+      </label>
       <PowerSelect
         @options={{this.coverLetters}}
         @onChange={{this.updateCoverLetter}}
@@ -33,7 +51,6 @@
         @searchField="jobPost.title"
         @selected={{@jobApplication.coverLetter}}
         @placeholder="Select a Cover Letter"
-        @labelText="Cover Letter"
         as |coverLetter|
       >
         cover letter for
@@ -42,59 +59,103 @@
         {{format-date coverLetter.createdAt}}
       </PowerSelect>
     </div>
-
-    <div class="field">
-      <label class="field-label" for={{this.appliedAtInputId}}>Applied At</label>
+    <div class="w-full md:w-1/2 px-3">
+      <label
+        class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+        for={{this.appliedAtInputId}}
+      >
+        Applied At
+      </label>
       <input
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
         type="date"
         id={{this.appliedAtInputId}}
         value={{format-date @jobApplication.appliedAt}}
         {{on "change" (fn this.updateField "appliedAt")}}
       />
     </div>
+  </div>
 
-    <div class="field">
-      <label class="field-label" for={{this.statusSelectId}}>Status</label>
-      <select
-        id={{this.statusSelectId}}
-        {{on "change" (fn this.updateField "status")}}
+  {{! Status (left) and Tracking URL (right) }}
+  <div class="flex flex-wrap -mx-3 mb-6">
+    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+      <label
+        class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+        for={{this.statusSelectId}}
       >
-        <option value="">{{@jobApplication.status}}</option>
-        {{#each this.statusOptions as |status|}}
-          <option value={{status}}>
-            {{status}}
-          </option>
-        {{/each}}
-      </select>
+        Status
+      </label>
+      <div class="relative">
+        <select
+          class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          id={{this.statusSelectId}}
+          {{on "change" (fn this.updateField "status")}}
+        >
+          <option value="">{{@jobApplication.status}}</option>
+          {{#each this.statusOptions as |status|}}
+            <option value={{status}}>
+              {{status}}
+            </option>
+          {{/each}}
+        </select>
+        <div
+          class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
+        >
+          <svg
+            class="fill-current h-4 w-4"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+          ><path
+              d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
+            /></svg>
+        </div>
+      </div>
     </div>
-
-    <div class="field">
-      <label class="field-label" for={{this.trackingUrlInputId}}>Tracking URL</label>
+    <div class="w-full md:w-1/2 px-3">
+      <label
+        class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+        for={{this.trackingUrlInputId}}
+      >
+        Tracking URL
+      </label>
       <input
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
         type="url"
         id={{this.trackingUrlInputId}}
         value={{@jobApplication.trackingUrl}}
         {{on "input" (fn this.updateField "trackingUrl")}}
       />
     </div>
+  </div>
 
-    <div class="field">
-      <label class="field-label" for={{this.notesTextareaId}}>Notes</label>
-
+  {{! Notes (full width) }}
+  <div class="flex flex-wrap -mx-3 mb-6">
+    <div class="w-full px-3">
+      <label
+        class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+        for={{this.notesTextareaId}}
+      >
+        Notes
+      </label>
       <textarea
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
         id={{this.notesTextareaId}}
         value={{@jobApplication.notes}}
         {{on "input" (fn this.updateField "notes")}}
+        rows="4"
       ></textarea>
     </div>
+  </div>
 
-    <div class="form-actions">
+  {{! Actions }}
+  <div class="flex flex-wrap -mx-3 mb-2">
+    <div class="w-full px-3">
       {{yield}}
       <button
         type="button"
-        class="btn"
+        class="border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
         {{on "click" this.saveApplication}}
       >Save</button>
     </div>
   </div>
-</Panel::Card>
+</form>

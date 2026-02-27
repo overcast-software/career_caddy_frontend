@@ -8,10 +8,15 @@ export default class JobApplicationsCompact extends Component {
   get jobApplication() {
     return this.args.jobApplication;
   }
+  get jobPost() {
+    return this.jobApplication.jobPost;
+  }
   @action delete() {
     const message = `${this.jobApplication.get('jobPost.title')}`;
     const allowed = confirm(`Are you sure you want to delete ${message}`);
-    if (!allowed) { return }
+    if (!allowed) {
+      return;
+    }
     this.args.jobApplication
       .destroyRecord()
       .then((record) => {

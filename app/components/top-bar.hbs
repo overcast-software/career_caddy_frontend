@@ -1,21 +1,30 @@
-<div class="header-content">
-  <div class="brand-with-spinner">
-    <LinkTo @route="index" class="brand">Career Caddy</LinkTo>
-    <SpinnerIndicator class="spinner-indicator--topbar" />
+<nav
+  class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between"
+>
+  <button
+    class="p-2 rounded hover:bg-gray-100"
+    type="button"
+    {{on "click" @onToggle}}
+  >
+    ☰
+  </button>
+  <div class="text-xl font-bold">
+    CareerCaddy
   </div>
-  <nav class="nav" aria-label="loggedout">
-    <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
-    <LinkTo @route="about" class="nav-link">About</LinkTo>
-    <a
-      href="https://github.com/overcast-software/career_caddy_frontend"
-      class="nav-link"
-      target="_blank"
-      rel="noopener noreferrer"
-    >GitHub</a>
-  </nav>
-  {{#if this.authed}}
-    <button type="button" {{on "click" this.invalidateSession}}>Log out</button>
+
+  {{! Desktop Links }}
+  <div class="hidden md:flex gap-6">
+    <LinkTo @route="index" class="hover:text-blue-600">Cover letters</LinkTo>
+    <LinkTo @route="index" class="hover:text-blue-600">Jobs</LinkTo>
+    <LinkTo @route="index" class="hover:text-blue-600">Stats</LinkTo>
+  </div>
+
+  {{#if this.session.isAuthenticated}}
+    <LinkTo @route="index" {{on "click" this.invalidateSession}}>Logout</LinkTo>
   {{else}}
-    <LinkTo @route="login">Login</LinkTo>
+    <LinkTo @route="login" {{on "click" this.invalidateSession}}>Login</LinkTo>
   {{/if}}
-</div>
+  {{! Mobile Hamburger }}
+</nav>
+
+{{yield}}

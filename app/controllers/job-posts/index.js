@@ -4,7 +4,7 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 export default class JobPostsIndexController extends Controller {
   @tracked query = '';
-  @tracked compact = false;
+  @tracked compact = true;
   @service flashMessages;
 
   showControls = false;
@@ -18,7 +18,7 @@ export default class JobPostsIndexController extends Controller {
     this.compact = !!compact;
   }
 
-  get filteredCompanies(){
+  get filteredCompanies() {
     // XXX not implemented
     const list = ArrayProxy.create({ content: this.model });
     // Filter if query is provided
@@ -44,17 +44,25 @@ export default class JobPostsIndexController extends Controller {
     const items = Array.isArray(filteredList)
       ? filteredList
       : filteredList?.toArray
-      ? filteredList.toArray()
-      : [];
+        ? filteredList.toArray()
+        : [];
 
     items.sort((a, b) => {
       const aDate = a.get ? a.get('postedDate') : a.postedDate;
       const bDate = b.get ? b.get('postedDate') : b.postedDate;
 
       const aTime =
-        aDate instanceof Date ? aDate.getTime() : (aDate ? new Date(aDate).getTime() : 0);
+        aDate instanceof Date
+          ? aDate.getTime()
+          : aDate
+            ? new Date(aDate).getTime()
+            : 0;
       const bTime =
-        bDate instanceof Date ? bDate.getTime() : (bDate ? new Date(bDate).getTime() : 0);
+        bDate instanceof Date
+          ? bDate.getTime()
+          : bDate
+            ? new Date(bDate).getTime()
+            : 0;
 
       return bTime - aTime; // DESC: newest first
     });

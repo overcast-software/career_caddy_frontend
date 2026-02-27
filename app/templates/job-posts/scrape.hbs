@@ -1,15 +1,20 @@
-<Menus::SubnavBar>
-  Scrape is an experimental feature.
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
-<div class='fairway'>
-  <form class="builder-form" {{on "submit" this.submitScrape}}>
-    <div class="field">
-      <label class="field-label" for="url">Url</label>
-      <input id="url" type="text" {{on "change" this.updateUrl}} required />
-    </div>
-    <div class="form-actions">
-      <button type="submit" class="btn primary">Scrape the page</button>
-    </div>
+<BarCart @flashMessages={{this.flashMessages}} />
+<div class="fairway">
+  <form class="w-full max-w-lg">
+    <label
+      class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+    >
+
+      <span class="text-sm font-medium text-gray-700"> Link (URL) </span>
+
+      <input
+        type="url"
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+      />
+    </label>
+    <button
+      type="submit"
+      class="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+    >Scrape the page</button>
   </form>
 </div>

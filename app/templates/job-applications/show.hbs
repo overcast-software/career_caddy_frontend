@@ -1,107 +1,91 @@
-<Menus::SubnavBar>
-  <LinkTo
-    @route="job-applications.edit"
-    @model={{this.model}}
-    class="nav-link"
-  >edit</LinkTo>
-  <LinkTo
-    {{on "click" this.destroyRecord}}
-    @route="job-applications.edit"
-    @model={{this.model}}
-    class="nav-link"
-  >destroy</LinkTo>
-  <LinkTo
-    class="nav-link"
-    @route="job-posts.show"
-    @model={{this.model.jobPost}}
-  >job post</LinkTo>
-  <LinkTo
-    class="nav-link"
-    @route="job-applications.show.questions.index"
-    @model={{this.model}}
-  >questions</LinkTo>
-</Menus::SubnavBar>
 <div class="bar-cart">
   {{#each this.flashMessages.queue as |flash|}}
     <FlashMessage @flash={{flash}} />
   {{/each}}
 </div>
-<div class="fairway">
-  <Panel::Card
-    @title="Application for {{this.model.jobPost.title}} at {{this.model.company.name}}"
-    @collapsible={{true}}
-    @startCollapsed={{true}}
-  >
-    <:top as |card|>
-      <button
-        type="button"
-        {{on "click" card.toggleCollapsed}}
-        class="btn btn-sm"
-      >
-        {{if card.collapsed "Show" "Hide"}}
-        Details
-      </button>
-    </:top>
-    <:default>
-      <div class="builder-form">
-        <section class="job-post-description">
-          <div class="field">
-            <div class="field-label">Resume:</div>
-            {{#if this.model.resume}}
-              {{this.model.resume.name}}
-            {{else}}
-              -
-            {{/if}}
-          </div>
-        </section>
+<div class="flow-root">
+  <dl class="-my-3 divide-y divide-gray-200 text-sm">
+    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <dt class="font-medium text-gray-900">Application for</dt>
 
-        <section>
-          <div class="field">
-            <div class="field-label">Cover Letter</div>
-            {{#if this.model.coverLetter}}
-              {{this.model.coverLetter.createdAt}}
-            {{else}}
-              no cover letter recorded
-            {{/if}}
-          </div>
-        </section>
+      <dd class="text-gray-700 sm:col-span-2">
+        {{this.model.jobPost.title}}
+        at
+        {{this.model.company.name}}"
+      </dd>
+    </div>
 
-        <section>
-          <div class="field">
-            <div class="field-label">Applied At</div>
-            {{format-date this.model.appliedAt}}
-          </div>
+    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <dt class="font-medium text-gray-900">Resume</dt>
 
-        </section>
-        <div class="field">
-          <div class="field-label">Status</div>
-          {{this.model.status}}
-        </div>
+      <dd class="text-gray-700 sm:col-span-2">
 
-        <div class="field">
-          <div class="field-label">Tracking URL</div>
-          {{#if this.model.trackingUrl}}
-            <a
-              href={{this.model.trackingUrl}}
-              target="_blank"
-              rel="noopener noreferrer"
-            >{{this.model.trackingUrl}}</a>
-          {{else}}
-            -
-          {{/if}}
-        </div>
+        {{#if this.model.resume}}
+          {{this.model.resume.name}}
+        {{else}}
+          N/A
+        {{/if}}
+      </dd>
+    </div>
 
-        <div class="field">
-          <div class="field-label">Notes</div>
-          {{this.model.notes}}
-        </div>
+    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <dt class="font-medium text-gray-900">Day applied</dt>
 
-        <div class="form-actions">
-          {{yield}}
-        </div>
-      </div>
-    </:default>
-  </Panel::Card>
+      <dd class="text-gray-700 sm:col-span-2">
 
-  {{outlet}}
+        {{format-date this.model.appliedAt}}
+      </dd>
+    </div>
+
+    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <dt class="font-medium text-gray-900">Status</dt>
+
+      <dd class="text-gray-700 sm:col-span-2">
+
+        {{this.model.status}}
+      </dd>
+    </div>
+
+    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <dt class="font-medium text-gray-900">Link</dt>
+
+      <dd class="text-gray-700 sm:col-span-2">
+
+        {{this.model.trackingUrl}}
+      </dd>
+    </div>
+    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <dt class="font-medium text-gray-900">Notes</dt>
+
+      <dd class="text-gray-700 sm:col-span-2">
+        {{this.model.notes}}
+      </dd>
+    </div>
+  </dl>
+  <div class="inline-flex">
+
+    <LinkTo
+      @route="job-applications.edit"
+      @model={{this.model}}
+      class="rounded-l-sm border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
+    >Edit</LinkTo>
+    <LinkTo
+      {{on "click" this.destroyRecord}}
+      @route="job-applications.edit"
+      @model={{this.model}}
+      class="rounded-l-sm border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
+    >Destroy</LinkTo>
+
+    <LinkTo
+      class="-ml-px rounded-r-sm border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
+      @route="job-posts.show"
+      @model={{this.model.jobPost}}
+    >Job Post</LinkTo>
+
+    <LinkTo
+      class="-ml-px rounded-r-sm border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
+      @route="job-applications.show.questions.index"
+      @model={{this.model}}
+    >Questions</LinkTo>
+  </div>
 </div>

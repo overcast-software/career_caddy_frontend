@@ -1,8 +1,23 @@
+<tr class="*:text-gray-900 *:first:font-medium">
+  <td
+    class="px-3 py-2 whitespace-nowrap max-w-xs truncate"
+  >{{this.jobPost.title}}</td>
+  <td class="px-3 py-2 whitespace-nowrap">{{this.jobPost.company.name}}</td>
+  <td class="px-3 py-2 whitespace-nowrap">{{@jobApplication.status}}</td>
+  <td class="px-3 py-2 whitespace-nowrap">
+    <LinkTo
+      @route="job-applications.show"
+      @model={{@jobApplication.id}}
+      class="text-blue-600 hover:underline"
+    >show</LinkTo>
+    {{" "}}
+    <LinkTo
+      @route="job-applications.edit"
+      @model={{@jobApplication.id}}
+      class="text-blue-600 hover:underline"
+    >edit</LinkTo>
+    {{" "}}
+    <button type="button" class="text-red-600 hover:underline">delete</button>
+  </td>
+</tr>
 {{yield}}
-<Panel::Card>
-job application for {{@jobApplication.jobPost.title}} at {{@jobApplication.jobPost.company.name}}
-  <LinkTo @route='job-applications.show' @model={{@jobApplication}}>show</LinkTo>
-  <LinkTo @route='job-applications.edit' @model={{@jobApplication}}>edit</LinkTo>
-  <a href="#" {{on 'click' this.delete}}>delete</a>
-  Status: {{@jobApplication.status}}
-</Panel::Card>

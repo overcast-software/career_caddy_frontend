@@ -1,13 +1,19 @@
 {{page-title "Career Caddy"}}
-<MainApplication>
-  <div class='greens'>
+<Sidebar @open={{this.sidebarOpen}} @onClose={{this.closeSidebar}} />
+<MainApplication @onToggleSidebar={{this.toggleSidebar}}>
+  <div class="greens">
     {{outlet}}
   </div>
   <footer>
     copyleft 2025
     {{#if this.isProduction}}
-      <script defer data-domain="careercaddy.online" src="https://analytics.wedgewoodmanor.org/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"></script>
-      <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+      <script
+        defer
+        data-domain="careercaddy.online"
+        src="https://analytics.wedgewoodmanor.org/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
+      ></script>
+      <script>window.plausible = window.plausible || function() {
+        (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
     {{/if}}
   </footer>
 </MainApplication>

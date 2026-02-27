@@ -1,9 +1,28 @@
-{{#each this.jobPosts as |jobPost|}}
-  {{#unless jobPost.isNew}}
-    {{#if @compact}}
-      <JobPosts::Compact @jobPost={{jobPost}} @showLoading={{@showLoading}} />
-    {{else}}
-      <JobPosts::Item @jobPost={{jobPost}} @showLoading={{@showLoading}} />
-    {{/if}}
-  {{/unless}}
-{{/each}}
+{{#if @compact}}
+  <div class="overflow-x-auto rounded border border-gray-300 shadow-sm">
+    <table class="min-w-full divide-y-2 divide-gray-200">
+      <thead class="ltr:text-left rtl:text-right">
+        <tr class="*:font-medium *:text-gray-900">
+          <th class="px-3 py-2 whitespace-nowrap max-w-xs">Title</th>
+          <th class="px-3 py-2 whitespace-nowrap">Company</th>
+          <th class="px-3 py-2 whitespace-nowrap">Posted</th>
+          <th class="px-3 py-2 whitespace-nowrap">Controls</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        {{#each this.jobPosts as |jobPost|}}
+          {{#unless jobPost.isNew}}
+            <JobPosts::Compact
+              @jobPost={{jobPost}}
+              @showLoading={{@showLoading}}
+            />
+          {{/unless}}
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  {{#each this.jobPosts as |jobPost|}}
+    <JobPosts::Item @jobPost={{jobPost}} @showLoading={{@showLoading}} />
+  {{/each}}
+{{/if}}

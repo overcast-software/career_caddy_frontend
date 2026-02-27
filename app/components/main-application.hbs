@@ -1,6 +1,6 @@
 <div class="course">
   <header>
-    <TopBar @showLoading={{this.showLoading}}/>
+    <TopBar @showLoading={{this.showLoading}} @onToggle={{@onToggleSidebar}} />
   </header>
   {{yield}}
 </div>
