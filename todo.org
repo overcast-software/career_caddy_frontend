@@ -1,53 +1,63 @@
-* +title: Todo
+# +title: Todo
+#+startup: show2levels
 * Inbox
+** TODO need link to manual entry :UI:
+** TODO career-data
 ** WAIT if you don't supply a resume when filling out job application it silently fails
 where is a fix right now
 refresh was the root cause but this will warn if no company is assigned
-** TODO [#B] job-post/scrape needs loading
+** NO [#B] job-post/scrape needs loading
+Scrape is returning fast, but we need to poll it to get results
+CLOSED: [2026-02-26 Thu 17:49]
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/README.md::career-caddy-frontend]]
-** TODO [#B] `/questions/:id/answer` has a new button but it doesn't mean new answer, it means new question.
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/cover-letter.js]]
 ** TODO when ai returns answer.  add it to the list in questions/:id/answers
-
+maybe I meant redirect
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js]]
 ** TODO [#A] the upload button should be disabled after upload successfull
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
-** TODO edit resume is broken  edit.js
-serializeAttribute application.js:22
-** TODO /resumes/index favorite button needs work
+** DONE /resumes/index favorite button needs work
+CLOSED: [2026-02-26 Thu 17:51]
 will not reflect favorite status
 is outside of the card
 
+
+** [?] [#B] should route job_post
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
+** DONE don't let the token expire too early
+CLOSED: [2026-02-26 Thu 17:55]
+this is a
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
+* resume [0/4] [0/4]
+** TODO The adding of a new resume is borked :resume:
+Adding new resume is ok.  cloning is for customizing
+I go to edit a resume when I should be cloning
+** TODO descriptions should have descriptions :resume:
+make a join table so that a description can describe a description
+this is a feature for STAR on bullet points
 ** TODO thinking for resume import
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
 
-*** TODO should also disable button
-
-** TODO should route job_post
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
-** TODO The adding of a new resume is borked
-I go to edit a resume when I should be cloning
-** WAIT don't let the token expire too early
-this is a
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
-** TODO descriptions should have descriptions
-make a join table so that a description can describe a description
-this is a feature for STAR on bullet points
+*** TODO should also disable button for upload so you can't upload twice
+** TODO [#B] edit resume is broken  edit.js
+lowered priority b/c we don't actually need it
+serializeAttribute application.js:22
 * features
 ** IDEA /job-post//:jp_id/questions
 might want to make this a feature
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/questions/form.hbs::as |company|]]
-** IDEA create new summary in UI is missing
+** IDEA when you create a scrape got to the scrape show page.  maybe add a poll
+** IDEA "create-new-summary" action in UI is missing
 mostly AI generated but would be nice to create one manually
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
+** TODO [#B] `/questions/:id/answer` has a "new" button but it doesn't mean new answer, it means new question.
+
 * bugs
 ** TODO AI answer returning 500 from server
-ask ai broken?
+"ask ai" answer service is broken?
 {
 	"errors": [
 		{
@@ -60,6 +70,7 @@ ask ai broken?
 ** TODO if scrape fails the loading is still showing
 on error is broken for spinnier.wrap()?
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/questions/show.js::@service router;]]
+*** after rewrite they are all breaking
 ** TODO job-application/:id/edit
 :LOGBOOK:
 CLOCK: [2026-02-13 Fri 18:42]--[2026-02-13 Fri 18:43] =>  0:01
@@ -70,6 +81,7 @@ if coming from another page resume doesn't populate
 
 *** TODO get a user story for this
 ** TODO saving a new manual answer stays in /new should reroute to show :bug:
+** IDEA the refresh bug is that @route='model' should be @route='model.id' for /resume/edit//:id/
 * projects
 ** TODO chat
 ** TODO UI revampt

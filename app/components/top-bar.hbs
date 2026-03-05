@@ -8,15 +8,11 @@
   >
     ☰
   </button>
-  <div class="text-xl font-bold">
-    CareerCaddy
-  </div>
 
-  {{! Desktop Links }}
-  <div class="hidden md:flex gap-6">
-    <LinkTo @route="index" class="hover:text-blue-600">Cover letters</LinkTo>
-    <LinkTo @route="index" class="hover:text-blue-600">Jobs</LinkTo>
-    <LinkTo @route="index" class="hover:text-blue-600">Stats</LinkTo>
+  <div class="text-xl font-bold">
+    <LinkTo @route="index">
+      CareerCaddy
+    </LinkTo>
   </div>
 
   {{#if this.session.isAuthenticated}}

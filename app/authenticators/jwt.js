@@ -145,7 +145,7 @@ export default class JwtAuthenticator extends Base {
       if (refreshTimeMs <= 0) {
         // Token is near/past expiry, refresh immediately
         this.refresh(data).then((refreshedData) => {
-          this.session.set('data.authenticated', refreshedData);
+          this.session.data.authenticated = refreshedData;
           this.scheduleRefresh(refreshedData);
         }).catch((error) => {
           console.warn('Immediate token refresh failed:', error);
@@ -157,7 +157,7 @@ export default class JwtAuthenticator extends Base {
         try {
           const latest = this.session.data?.authenticated || data;
           const refreshedData = await this.refresh(latest);
-          this.session.set('data.authenticated', refreshedData);
+          this.session.data.authenticated = refreshedData;
           this.scheduleRefresh(refreshedData); // Reschedule for next cycle
         } catch (error) {
           console.warn('Background token refresh failed:', error);

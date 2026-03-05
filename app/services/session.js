@@ -26,8 +26,8 @@ export default class SessionService extends Service {
     }
 
     const authenticator = getOwner(this).lookup('authenticator:jwt');
-    const newData = await authenticator.refresh(this.data.isAuthenticated);
-    this.set('data.isAuthenticated', newData);
+    const newData = await authenticator.refresh(this.data.authenticated);
+    this.data.authenticated = newData;
     authenticator.scheduleRefresh(newData);
     return newData;
   }
