@@ -27,3 +27,11 @@ docker-compose.override.yml
 # Local Caddy configs
 infra/caddy/*.local.caddy
 public/assets/*
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
