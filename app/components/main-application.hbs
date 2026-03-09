@@ -1,6 +1,17 @@
-<div class="course">
-  <header>
-    <TopBar @showLoading={{this.showLoading}} @onToggle={{@onToggleSidebar}} />
-  </header>
-  {{yield}}
-</div>
+<MobileMenuWrapper @isOpen={{false}} as |mmw|>
+  <mmw.MobileMenu as |mm|>
+    <Sidebar @onClose={{mm.actions.close}} />
+  </mmw.MobileMenu>
+
+  <mmw.Content>
+    <div class="course">
+      <header>
+        <TopBar
+          @showLoading={{this.showLoading}}
+          @onToggle={{mmw.actions.toggle}}
+        />
+      </header>
+      {{yield}}
+    </div>
+  </mmw.Content>
+</MobileMenuWrapper>

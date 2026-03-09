@@ -2,7 +2,11 @@
 #+startup: show2levels
 * Inbox
 ** TODO need link to manual entry :UI:
+manual entry what?  for sure summaries.
+sidebar doesn't have link to manual job post entry.
 ** TODO career-data
+find out why duplication occurs
+
 ** WAIT if you don't supply a resume when filling out job application it silently fails
 where is a fix right now
 refresh was the root cause but this will warn if no company is assigned
@@ -14,8 +18,8 @@ CLOSED: [2026-02-26 Thu 17:49]
 ** TODO when ai returns answer.  add it to the list in questions/:id/answers
 maybe I meant redirect
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js]]
+This should happen anyway.  
 ** TODO [#A] the upload button should be disabled after upload successfull
-
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
 ** DONE /resumes/index favorite button needs work
 CLOSED: [2026-02-26 Thu 17:51]

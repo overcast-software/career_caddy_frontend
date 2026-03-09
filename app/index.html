@@ -8,12 +8,13 @@
 
     {{content-for "head"}}
 
-    <link integrity="" rel="stylesheet" href="{{rootURL}}assets/vendor.css" />
-    <!-- <link
-         integrity=""
-         rel="stylesheet"
-         href="{{rootURL}}assets/career-caddy-frontend.css"
-         /> -->
+    <!-- <link integrity="" rel="stylesheet" href="{{rootURL}}assets/vendor.css" /> -->
+    <link integrity="" href="{{rootURL}}assets/tailwind.css" rel="stylesheet" />
+    <link
+      integrity=""
+      rel="stylesheet"
+      href="{{rootURL}}assets/career-caddy-frontend.css"
+    />
 
     <!-- Open Graph metadata -->
     <meta property="og:site_name" content="Career Caddy" />
@@ -58,7 +59,6 @@
 
     <!-- Canonical URL -->
     <link rel="canonical" href="https://careercaddy.online/" />
-    <link integrity="" href="{{rootURL}}assets/tailwind.css" rel="stylesheet" />
     {{content-for "head-footer"}}
   </head>
   <body>
