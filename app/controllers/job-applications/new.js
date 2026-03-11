@@ -87,7 +87,7 @@ export default class JobApplicationsNewController extends Controller {
       ? this.store.peekRecord('cover-letter', this.selectedCoverLetter.id)
       : undefined;
 
-    if (this.model.company === nil) {
+    if (this.model.company === null) {
       this.flashMessages.warn('No company provided');
       return;
     }
