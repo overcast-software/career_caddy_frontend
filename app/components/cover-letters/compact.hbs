@@ -1,12 +1,16 @@
 <article class="panel-card">
-  <h3 >
+  <h3>
     Cover Letter
     <LinkTo @route="cover-letters.show" @model={{@coverLetter}}>
       #{{@coverLetter.id}}
     </LinkTo>
   </h3>
   <p>
-  Using resume: <LinkTo @route="resumes.show" @model={{@coverLetter.resume}}>{{@coverLetter.resume.name}}</LinkTo>
+    Using resume:
+    <LinkTo
+      @route="resumes.show"
+      @model={{@coverLetter.resume}}
+    >{{@coverLetter.resume.name}}</LinkTo>
     for jobpost:
     <LinkTo
       @route="job-posts.show"

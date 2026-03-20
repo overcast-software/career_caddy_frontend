@@ -7,7 +7,11 @@
   >{{@score.jobPost.title}}</LinkTo>
 </h2>
 <h2>
-  At <LinkTo @route="companies.show" @model={{@score.jobPost.company}}>{{@score.jobPost.company.name}}</LinkTo>
+  At
+  <LinkTo
+    @route="companies.show"
+    @model={{@score.jobPost.company}}
+  >{{@score.jobPost.company.name}}</LinkTo>
 </h2>
 <h2>
   Resume scored:
@@ -17,6 +21,7 @@
   >{{@score.resume.name}}</LinkTo>
 </h2>
 <h2>
-  score: {{@score.score}}
+  score:
+  {{@score.score}}
 </h2>
-  <MarkdownToHtml @markdown={{@score.explanation}}/>
+<MarkdownToHtml @markdown={{@score.explanation}} />

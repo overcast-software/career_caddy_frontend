@@ -16,9 +16,9 @@ export default class JobPostsNewController extends Controller {
     this.model[field] = event.target.value;
   }
 
-  @action updateCompany(company){
-    this.model.company = company
-    this.selectedCompany = company
+  @action updateCompany(company) {
+    this.model.company = company;
+    this.selectedCompany = company;
   }
 
   @action submitDelete() {
@@ -28,11 +28,12 @@ export default class JobPostsNewController extends Controller {
   }
 
   @action addCompanyToJobPost(companyName) {
-    const company = this.store.createRecord("company", {name: companyName})
-    company.save()
-           .then(this.selectedCompany = company)
-           .then(this.model.company = company)
-           .then(this.flashMessages.success('created company ' + company.name))
+    const company = this.store.createRecord('company', { name: companyName });
+    company
+      .save()
+      .then((this.selectedCompany = company))
+      .then((this.model.company = company))
+      .then(this.flashMessages.success('created company ' + company.name));
   }
 
   @action submitJobPost(event) {

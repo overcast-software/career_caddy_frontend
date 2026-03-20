@@ -13,7 +13,7 @@ export default class CompaniesListComponent extends Component {
     const source = this.args.companies ?? [];
     const list = ArrayProxy.create({ content: source });
 
-    const q = ((this.args.query ?? this.query) ?? '').trim().toLowerCase();
+    const q = (this.args.query ?? this.query ?? '').trim().toLowerCase();
 
     let filteredList = list;
 
@@ -34,8 +34,8 @@ export default class CompaniesListComponent extends Component {
     const items = Array.isArray(filteredList)
       ? filteredList
       : filteredList?.toArray
-      ? filteredList.toArray()
-      : [];
+        ? filteredList.toArray()
+        : [];
 
     items.sort((a, b) => {
       const an =

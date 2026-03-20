@@ -11,7 +11,7 @@ export default class AnswersIndexController extends Controller {
       await answer.save();
       const status = answer.favorite ? 'added to' : 'removed from';
       this.flashMessages.success(`Answer ${status} favorites`);
-    } catch (error) {
+    } catch {
       answer.rollbackAttributes();
       this.flashMessages.danger('Failed to update favorite status');
     }

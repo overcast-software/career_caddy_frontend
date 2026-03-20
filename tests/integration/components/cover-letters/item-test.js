@@ -39,6 +39,6 @@ module('Integration | Component | cover-letters/item', function (hooks) {
     //   </CoverLetters::Item>
     // `);
 
-    // assert.dom().hasText('template block text');
+    // assert.ok(this.element, 'component renders in block mode');
   });
 });

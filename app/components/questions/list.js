@@ -16,9 +16,9 @@ export default class QuestionsList extends Component {
   get companyQuestions() {
     //return all the questions a company asked in their job posts
     if (this.selectedCompany) {
-      return this.selectedCompany.questions
+      return this.selectedCompany.questions;
     } else {
-      return this.args.questions
+      return this.args.questions;
     }
   }
 }

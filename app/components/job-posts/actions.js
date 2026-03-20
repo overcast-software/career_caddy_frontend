@@ -6,7 +6,6 @@ export default class JobPostsActions extends Component {
   @service store;
   @service router;
   @service currentUser;
-  @service router;
   @service spinner;
   @service flashMessages;
   @tracked selectedResume = null;
@@ -25,11 +24,13 @@ export default class JobPostsActions extends Component {
     const summary = this.store.createRecord('summary', { resume, jobPost });
 
     this.spinner.wrap(
-    summary
-      .save()
-      .then((summary) => this.router.transitionTo('summaries.show', summary.id))
-      .catch(this.flashMessages.danger('failed to create summary'))
-    )
+      summary
+        .save()
+        .then((summary) =>
+          this.router.transitionTo('summaries.show', summary.id),
+        )
+        .catch(this.flashMessages.danger('failed to create summary')),
+    );
   }
   @action
   createCoverLetter() {

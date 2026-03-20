@@ -4,20 +4,19 @@ import { action } from '@ember/object';
 export default class CoverLettersNewController extends Controller {
   @service store;
   @service flashMessages;
-  @action saveCoverLetter(){
-    this.model.save()
-        .then(()=> this.flashMessages.success('saved'))
+  @action saveCoverLetter() {
+    this.model.save().then(() => this.flashMessages.success('saved'));
   }
 
-  get jobPosts(){
+  get jobPosts() {
     return this.store.peekAll('job-post');
   }
 
-  @action updateCoverLetter(event){
+  @action updateCoverLetter(event) {
     this.model.content = event.target.value;
   }
 
-  @action addJobPostToCoverLetter(jobPost){
-    this.model.jobPost = jobPost
+  @action addJobPostToCoverLetter(jobPost) {
+    this.model.jobPost = jobPost;
   }
 }

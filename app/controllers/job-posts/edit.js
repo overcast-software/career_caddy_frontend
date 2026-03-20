@@ -9,7 +9,6 @@ export default class JobPostsEditController extends Controller {
   }
 
   @action addCompanyToJobPost(company) {
-    debugger;
     this.model.company = company;
   }
 }

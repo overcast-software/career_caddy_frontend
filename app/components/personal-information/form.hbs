@@ -12,13 +12,13 @@
       />
     </label>
     <label class="field">
-    <span class="field-label">Phone</span>
-    <input
-      type="tel"
-      name="phone"
-      value={{@user.phone}}
-      {{on "input" this.updatePhone}}
-    />
+      <span class="field-label">Phone</span>
+      <input
+        type="tel"
+        name="phone"
+        value={{@user.phone}}
+        {{on "input" this.updatePhone}}
+      />
     </label>
   </div>
 
@@ -31,7 +31,6 @@
       {{on "input" this.updateEmail}}
     />
   </label>
-
 
   {{yield}}
 </form>

@@ -11,7 +11,7 @@ export default class ResumesIndexController extends Controller {
       await resume.save();
       const status = resume.favorite ? 'added to' : 'removed from';
       this.flashMessages.success(`Resume ${status} favorites`);
-    } catch (error) {
+    } catch {
       resume.rollbackAttributes();
       this.flashMessages.danger('Failed to update favorite status');
     }

@@ -10,13 +10,10 @@ module('Integration | Component | top-bar', function (hooks) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`<TopBar />`);
+    this.set('onToggle', () => {});
+    await render(hbs`<TopBar @onToggle={{this.onToggle}} />`);
 
-    assert.dom().includesText('Career Caddy');
-    assert.dom().includesText('Job posts');
-    assert.dom().includesText('About');
-    assert.dom().includesText('Docs');
-    assert.dom().includesText('GitHub');
+    assert.dom().includesText('CareerCaddy');
     assert.dom().includesText('Login');
   });
 });

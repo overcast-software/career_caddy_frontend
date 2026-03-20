@@ -3,10 +3,12 @@
 
 {{#each this.model.jobApplications as |jobApplication|}}
   <Panel::Card>
-    <LinkTo @route='job-applications.show' @model={{jobApplication.id}}>
-    {{jobApplication.id}}
+    <LinkTo @route="job-applications.show" @model={{jobApplication.id}}>
+      {{jobApplication.id}}
     </LinkTo>
-    -- applied at {{format-date jobApplication.createdAt}}
-    status: {{jobApplication.status}}
+    -- applied at
+    {{format-date jobApplication.createdAt}}
+    status:
+    {{jobApplication.status}}
   </Panel::Card>
 {{/each}}

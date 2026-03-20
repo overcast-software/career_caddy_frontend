@@ -13,10 +13,12 @@
 
   <div class="job-dates">
     {{#if @jobPost.postedDate}}
-      <span class="muted">Posted: {{moment-format @jobPost.postedDate "MMM D, YYYY"}}</span>
+      <span class="muted">Posted:
+        {{moment-format @jobPost.postedDate "MMM D, YYYY"}}</span>
     {{/if}}
     {{#if @jobPost.createdAt}}
-      <span class="muted">Created: {{moment-format @jobPost.createdAt "MMM D, YYYY"}}</span>
+      <span class="muted">Created:
+        {{moment-format @jobPost.createdAt "MMM D, YYYY"}}</span>
     {{/if}}
   </div>
 

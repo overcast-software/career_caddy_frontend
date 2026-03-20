@@ -17,8 +17,8 @@ export default class JobApplicationsIndexController extends Controller {
   @tracked statusSelectFilter = this.store.peekAll('job-application');
   @tracked selectedStatus = null;
   @tracked selectedCompany = null;
-  @tracked labelText = "Select a company"
-  @tracked proposedCompanyName = null
+  @tracked labelText = 'Select a company';
+  @tracked proposedCompanyName = null;
   get fullFilter() {
     return this.companySelectFilter.filter((jobApplication) =>
       this.statusSelectFilter.includes(jobApplication),
@@ -43,20 +43,23 @@ export default class JobApplicationsIndexController extends Controller {
       return jobApp.status === status;
     });
   }
-  @action selectInput(text, select, event){
-    console.log(text)
-    console.log(select.results)
-    console.log(event)
-    if (select.results.length === 0){
-      this.labelText = `Press Enter to create a company ${text}`
-      this.proposedCompanyName = text
+  @action selectInput(text, select, event) {
+    console.log(text);
+    console.log(select.results);
+    console.log(event);
+    if (select.results.length === 0) {
+      this.labelText = `Press Enter to create a company ${text}`;
+      this.proposedCompanyName = text;
     }
   }
-  @action companyKeydown(dropdown, e){
-    if ( dropdown.results.length === 0 && e.key === "Enter" ){
-      const company = this.store.createRecord('company',{name: this.proposedCompanyName})
-      company.save()
-             .then(this.flashMessages.success(`created company ${company.name}` ))
+  @action companyKeydown(dropdown, e) {
+    if (dropdown.results.length === 0 && e.key === 'Enter') {
+      const company = this.store.createRecord('company', {
+        name: this.proposedCompanyName,
+      });
+      company
+        .save()
+        .then(this.flashMessages.success(`created company ${company.name}`));
     }
   }
 }

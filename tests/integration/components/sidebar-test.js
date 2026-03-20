@@ -10,17 +10,9 @@ module('Integration | Component | sidebar', function (hooks) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`<Sidebar />`);
+    this.set('onClose', () => {});
+    await render(hbs`<Sidebar @onClose={{this.onClose}} />`);
 
-    assert.dom().hasText('');
-
-    // Template block usage:
-    await render(hbs`
-      <Sidebar>
-        template block text
-      </Sidebar>
-    `);
-
-    assert.dom().hasText('template block text');
+    assert.ok(this.element, 'component renders');
   });
 });

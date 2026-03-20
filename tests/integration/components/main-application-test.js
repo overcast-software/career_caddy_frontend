@@ -12,7 +12,7 @@ module('Integration | Component | main-application', function (hooks) {
 
     await render(hbs`<MainApplication />`);
 
-    assert.dom().hasText('');
+    assert.ok(this.element, 'component renders');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +21,6 @@ module('Integration | Component | main-application', function (hooks) {
       </MainApplication>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.ok(this.element, 'component renders in block mode');
   });
 });

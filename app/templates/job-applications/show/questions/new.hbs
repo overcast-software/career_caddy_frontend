@@ -1,6 +1,6 @@
 <div class="fairway">
   <Panel::Card @title="New Question">
-    <div class='builder-form'>
+    <div class="builder-form">
       <div class="field">
         <label class="field-label" for="question-text">Question</label>
         <textarea
@@ -23,7 +23,11 @@
 
       <div class="form-actions">
         <button type="button" class="btn btn-primary">Save Question</button>
-        <LinkTo @route="job-applications.show" @model={{this.model.jobApplication}} class="btn btn-secondary">Cancel</LinkTo>
+        <LinkTo
+          @route="job-applications.show"
+          @model={{this.model.jobApplication}}
+          class="btn btn-secondary"
+        >Cancel</LinkTo>
       </div>
     </div>
   </Panel::Card>

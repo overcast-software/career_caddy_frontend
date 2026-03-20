@@ -5,7 +5,6 @@ export default class LogoutRoute extends Route {
   @service router;
   beforeModel() {
     //ensure invalidate
-    debugger;
     this.session.authService
       .invalidate({})
       .then(() => this.router.transistionTo('index'));

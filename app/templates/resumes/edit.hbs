@@ -5,24 +5,21 @@
         Save
       </button>
     {{/if}}
-    <button
-      type="button"
-      class="btn danger"
-      {{on "click" this.deleteResume}}
-    >
+    <button type="button" class="btn danger" {{on "click" this.deleteResume}}>
       Delete
     </button>
     <button type="button" class="btn" {{on "click" this.cloneResume}}>
       Clone Resume
     </button>
     <button type="button" class="btn">
-      <LinkTo @route='resumes.show' @model={{this.model}} class="btn">Preview</LinkTo>
+      <LinkTo
+        @route="resumes.show"
+        @model={{this.model}}
+        class="btn"
+      >Preview</LinkTo>
     </button>
-    <button
-      type="button"
-      class="btn"
-      {{on "click" this.exportToWord}}
-    >Export to Word</button>
+    <button type="button" class="btn" {{on "click" this.exportToWord}}>Export to
+      Word</button>
   </div>
 </Menus::SubnavBar>
 <div class="bar-cart">
@@ -41,15 +38,14 @@
         <PersonalInformation::Form @user={{this.model.user}} />
       </Panel::Card>
 
-      <Panel::Card @title="Summary" @collapsible={{true}} >
+      <Panel::Card @title="Summary" @collapsible={{true}}>
         <:top as |panel|>
           <Panel::Navigation
             @recordArray={{this.model.summaries}}
             @collapsible={{true}}
             @collapsed={{panel.collapsed}}
             @toggleCollapsed={{panel.toggleCollapsed}}
-          >
-          </Panel::Navigation>
+          />
         </:top>
         <:default>
           <Summaries::List @summaries={{this.model.summaries}} />

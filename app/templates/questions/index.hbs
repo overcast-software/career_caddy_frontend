@@ -1,9 +1,9 @@
 {{page-title "Index"}}
 <Menus::SubnavBar>
-  <LinkTo @route="questions.new" class='btn'>New</LinkTo>
+  <LinkTo @route="questions.new" class="btn">New</LinkTo>
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
-<div class='fairway'>
+<BarCart @flashMessages={{this.flashMessages}} />
+<div class="fairway">
   <Panel::Card>
     <PowerSelect
       @options={{this.companies}}
@@ -18,26 +18,38 @@
       {{company.name}}
     </PowerSelect>
     {{#each this.companyQuestions as |question|}}
-      <div class='panel-card'>
+      <div class="panel-card">
         <div class="question-header">
-          <button 
-            type="button" 
+          <button
+            type="button"
             class="favorite-btn {{if question.favorite 'favorited'}}"
             {{on "click" (fn this.toggleFavorite question)}}
-            title="{{if question.favorite 'Remove from favorites' 'Add to favorites'}}"
+            title="{{if
+              question.favorite
+              'Remove from favorites'
+              'Add to favorites'
+            }}"
           >
             {{#if question.favorite}}★{{else}}☆{{/if}}
           </button>
           <p>
-            {{question.company.name}}: {{question.jobApplication.jobPost.name}}{{question.content}}
+            {{question.company.name}}:
+            {{question.jobApplication.jobPost.name}}{{question.content}}
           </p>
         </div>
         <p>
-          answers: {{question.answers.length}}
+          answers:
+          {{question.answers.length}}
         </p>
-        <br/>
-        <LinkTo @route='questions.show.answers' @model={{question}}>show</LinkTo>
-        <LinkTo @route='questions.show.answers.new' @model={{question}}>answer</LinkTo>
+        <br />
+        <LinkTo
+          @route="questions.show.answers"
+          @model={{question}}
+        >show</LinkTo>
+        <LinkTo
+          @route="questions.show.answers.new"
+          @model={{question}}
+        >answer</LinkTo>
       </div>
     {{/each}}
   </Panel::Card>

@@ -6,8 +6,8 @@ export default class JobPostsShowJobApplicationsIndexRoute extends Route {
   @service currentUser;
   async model() {
     const { job_post_id } = this.paramsFor('job-posts.show');
-    const jobPost = this.store.peekRecord('job-post', job_post_id)
-    const jobApplications = jobPost.jobApplications
-    return {jobPost, jobApplications}
+    const jobPost = this.store.peekRecord('job-post', job_post_id);
+    const jobApplications = jobPost.jobApplications;
+    return { jobPost, jobApplications };
   }
 }

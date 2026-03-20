@@ -1,25 +1,25 @@
-  <form class="builder-form" {{on 'submit' this.saveCompany}}>
-    <div class='field'>
-      <label class='field-label'>
-        Company name
-      </label>
-      <input
-        type="text"
-        id="companyName"
-        value={{@company.name}}
-        {{on "change" this.updateCompanyName}}
-      />
-    </div>
-    <br/>
-    <div class='field'>
-      <label class='field-label'>
-        Notes
-        <textarea {{on "change" this.updateCompanyNote}}>
-          {{@company.note}}
+<form class="builder-form" {{on "submit" this.saveCompany}}>
+  <div class="field">
+    <label class="field-label">
+      Company name
+    </label>
+    <input
+      type="text"
+      id="companyName"
+      value={{@company.name}}
+      {{on "change" this.updateCompanyName}}
+    />
+  </div>
+  <br />
+  <div class="field">
+    <label class="field-label">
+      Notes
+      <textarea {{on "change" this.updateCompanyNote}}>
+        {{@company.note}}
 
-        </textarea>
-      </label>
-    </div>
-    <button type='submit' class='btn' >save</button>
-  </form>
+      </textarea>
+    </label>
+  </div>
+  <button type="submit" class="btn">save</button>
+</form>
 {{yield}}

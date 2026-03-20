@@ -1,7 +1,7 @@
 import ApplicationSerializer from './application';
 
 export default class CareerDataSerializer extends ApplicationSerializer {
-  normalizeQueryRecordResponse(store, primaryModelClass, payload, id, requestType) {
+  normalizeQueryRecordResponse(store, primaryModelClass, payload) {
     // The API returns {data: <markdown>} without an id
     // Transform to JSON:API format with a fixed id
     const normalized = {

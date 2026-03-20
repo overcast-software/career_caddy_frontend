@@ -29,10 +29,12 @@
   >
     <:subtitle>
       {{#if this.model.postedDate}}
-        <span class="muted">Posted: {{moment-format this.model.postedDate "MMM D, YYYY"}}</span>
+        <span class="muted">Posted:
+          {{moment-format this.model.postedDate "MMM D, YYYY"}}</span>
       {{/if}}
       {{#if this.model.createdAt}}
-        <span class="muted">Created: {{moment-format this.model.createdAt "MMM D, YYYY"}}</span>
+        <span class="muted">Created:
+          {{moment-format this.model.createdAt "MMM D, YYYY"}}</span>
       {{/if}}
     </:subtitle>
     <:top as |card|>

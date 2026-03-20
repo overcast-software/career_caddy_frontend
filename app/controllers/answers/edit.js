@@ -22,6 +22,9 @@ export default class AnswersEditController extends Controller {
     this.model.destroyRecord().then(() => {
       this.flashMessages.success('Answer deleted');
     });
-    this.router.transitionTo('questions.show.answers.index', this.model.question);
+    this.router.transitionTo(
+      'questions.show.answers.index',
+      this.model.question,
+    );
   }
 }

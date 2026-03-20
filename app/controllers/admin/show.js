@@ -9,8 +9,12 @@ export default class ApiKeysShowController extends Controller {
   @action
   async revokeKey() {
     const apiKey = this.model;
-    
-    if (!confirm(`Are you sure you want to revoke the API key "${apiKey.name}"? This cannot be undone.`)) {
+
+    if (
+      !confirm(
+        `Are you sure you want to revoke the API key "${apiKey.name}"? This cannot be undone.`,
+      )
+    ) {
       return;
     }
 

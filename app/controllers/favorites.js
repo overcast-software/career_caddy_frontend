@@ -5,15 +5,13 @@ import { service } from '@ember/service';
 
 export default class FavoritesController extends Controller {
   @service flashMessages;
-  
+
   @tracked showOnlyFavorites = true;
   @tracked activeTab = 'resumes';
 
   get filteredResumes() {
     const resumes = this.model.resumes || [];
-    return this.showOnlyFavorites
-      ? resumes.filter((r) => r.favorite)
-      : resumes;
+    return this.showOnlyFavorites ? resumes.filter((r) => r.favorite) : resumes;
   }
 
   get filteredCoverLetters() {
@@ -25,9 +23,7 @@ export default class FavoritesController extends Controller {
 
   get filteredAnswers() {
     const answers = this.model.answers || [];
-    return this.showOnlyFavorites
-      ? answers.filter((a) => a.favorite)
-      : answers;
+    return this.showOnlyFavorites ? answers.filter((a) => a.favorite) : answers;
   }
 
   @action
@@ -47,7 +43,7 @@ export default class FavoritesController extends Controller {
       await item.save();
       const status = item.favorite ? 'added to' : 'removed from';
       this.flashMessages.success(`Item ${status} favorites`);
-    } catch (error) {
+    } catch {
       item.rollbackAttributes();
       this.flashMessages.danger('Failed to update favorite status');
     }

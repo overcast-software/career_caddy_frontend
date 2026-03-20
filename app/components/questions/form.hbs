@@ -5,7 +5,12 @@
     <div class="field">
       <label>Company</label>
       {{#if @jobPost}}
-        <input type="text" value={{@jobPost.company.name}} disabled="true" />
+        <input
+          type="text"
+          value={{@jobPost.company.name}}
+          disabled="true"
+          aria-label="Company"
+        />
       {{else}}
         <PowerSelectWithCreate
           @options={{this.companies}}
@@ -69,7 +74,7 @@
         Cancel
       </button>
       {{#if (and this.selectedCompany.id @question.content)}}
-        <button class="btn" type="submit" {{on "click" this.saveAndNew}}>
+        <button class="btn" type="button" {{on "click" this.saveAndNew}}>
           save an new
           {{this.selectedCompany.name}}
           Question

@@ -6,7 +6,6 @@ export default class JobApplicationsNewController extends Controller {
   @service store;
   @service router;
   @service flashMessages;
-  @service spinner;
   @tracked selectedJobPost;
   @tracked selectedResume;
   @tracked selectedStatus;

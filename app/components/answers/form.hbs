@@ -1,4 +1,4 @@
-<form class="builder-form">
+<form class="builder-form" {{on "submit" this.save}}>
   <div class="field">
     <button
       type="button"
@@ -22,7 +22,8 @@
 
     <div class="field">
       <p><strong>Question:</strong> {{@answer.question.content.content}}</p>
-      <p><em>AI will generate an answer based on the question and your additional prompt.</em></p>
+      <p><em>AI will generate an answer based on the question and your
+          additional prompt.</em></p>
     </div>
   {{else}}
     <label>
@@ -33,23 +34,18 @@
         <textarea
           {{on "change" this.updateContent}}
         >{{@answer.content}}</textarea>
-
-        <button
-          type="button"
-          class="favorite-btn {{if @answer.favorite 'favorited'}}"
-          {{on "click" (fn this.toggleFavorite @answer)}}
-          title="{{if
-            @answer.favorite
-            'Remove from favorites'
-            'Add to favorites'
-          }}"
-        >
-          {{#if @answer.favorite}}★{{else}}☆{{/if}}
-        </button>
       </div>
     </label>
+    <button
+      type="button"
+      class="favorite-btn {{if @answer.favorite 'favorited'}}"
+      {{on "click" (fn this.toggleFavorite @answer)}}
+      title="{{if @answer.favorite 'Remove from favorites' 'Add to favorites'}}"
+    >
+      {{#if @answer.favorite}}★{{else}}☆{{/if}}
+    </button>
   {{/if}}
 
-  <button {{on "click" this.save}} type="submit" class="btn">save</button>
+  <button type="submit" class="btn">save</button>
 </form>
 {{yield}}

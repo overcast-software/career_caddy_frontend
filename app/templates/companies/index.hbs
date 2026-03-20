@@ -3,14 +3,14 @@
     <label>search by name: </label>
     <input
       type="search"
-      aria-label='search'
+      aria-label="search"
       placeholder="Search companies..."
       value={{this.query}}
       {{on "input" this.onInput}}
     />
   </div>
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
-<div class='fairway'>
+<BarCart @flashMessages={{this.flashMessages}} />
+<div class="fairway">
   <Companies::List @companies={{this.companies}} />
 </div>

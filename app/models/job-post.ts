@@ -1,6 +1,6 @@
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
-import type { Type } from "@warp-drive/core-types/symbols";
-import CustomType from "@my-app/transforms/custom-transform";
+import type { Type } from '@warp-drive/core-types/symbols';
+import CustomType from '@my-app/transforms/custom-transform';
 
 export default class JobPostModel extends Model {
   declare [Type]: 'job-post';

@@ -14,9 +14,12 @@ export default class CompaniesFastCreate extends Component {
     if (this.args.customSubmit) {
       this.args.customSubmit();
     } else {
-      this.store.createRecord('company', {name: this.companyName})
-          .save()
-          .then((company)=> this.flashMessages.success(`created company: ${company.name}`))
+      this.store
+        .createRecord('company', { name: this.companyName })
+        .save()
+        .then((company) =>
+          this.flashMessages.success(`created company: ${company.name}`),
+        );
     }
   }
 }

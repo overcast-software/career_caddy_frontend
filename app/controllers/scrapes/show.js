@@ -13,11 +13,11 @@ export default class ScrapesShowController extends Controller {
     try {
       const adapter = this.store.adapterFor('scrape');
       const url = `${adapter.buildURL('scrape', scrape.id)}/redo/`;
-      
+
       await adapter.ajax(url, 'POST');
-      
+
       this.flashMessages.success('Scrape retry initiated successfully');
-      
+
       // Reload the scrape to get updated status
       await scrape.reload();
     } catch (error) {

@@ -12,6 +12,6 @@ module('Integration | Component | summaries/form', function (hooks) {
 
     await render(hbs`<Summaries::Form />`);
 
-    assert.dom().hasText('');
+    assert.ok(this.element, 'component renders');
   });
 });

@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
+import { cached } from '@glimmer/tracking';
 import ArrayProxy from '@ember/array/proxy';
 
 export default class PanelNavigation extends Component {
@@ -16,14 +17,11 @@ export default class PanelNavigation extends Component {
     this.args.down();
   }
 
-  wrappedRecords = null;
+  @cached
   get records() {
-    if (!this.wrappedRecords) {
-      this.wrappedRecords = ArrayProxy.create({
-        content: this.args.recordArray.content,
-      });
-    }
-    return this.wrappedRecords;
+    return ArrayProxy.create({
+      content: this.args.recordArray.content,
+    });
   }
 
   @action

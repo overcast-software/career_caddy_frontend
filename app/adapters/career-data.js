@@ -1,7 +1,7 @@
 import ApplicationAdapter from './application';
 
 export default class CareerDataAdapter extends ApplicationAdapter {
-  urlForQueryRecord(query, modelName) {
+  urlForQueryRecord() {
     return `${this.buildURL()}/career-data`;
   }
 }

@@ -1,18 +1,15 @@
 <div
   class="panel-card
-         {{if @collapsible 'collapsible'}}
-         {{if this.collapsed 'collapsed'}}
-         {{if @sandtrap 'sandtrap'}}"
+    {{if @collapsible 'collapsible'}}
+    {{if this.collapsed 'collapsed'}}
+    {{if @sandtrap 'sandtrap'}}"
 >
   <div class="collapsible-head">
     <div class="panel-title">{{@title}}</div>
     {{#if (has-block "top")}}
       <div class="panel-actions">
         {{yield
-          (hash
-          collapsed=this.collapsed
-          toggleCollapsed=this.toggleCollapsed
-          )
+          (hash collapsed=this.collapsed toggleCollapsed=this.toggleCollapsed)
           to="top"
         }}
       </div>
@@ -23,19 +20,13 @@
     <div class="collapsible-body">
       <div>
         {{yield
-          (hash
-          collapsed=this.collapsed
-          toggleCollapsed=this.toggleCollapsed
-          )
+          (hash collapsed=this.collapsed toggleCollapsed=this.toggleCollapsed)
         }}
       </div>
     </div>
   {{else}}
     {{yield
-      (hash
-      collapsed=this.collapsed
-      toggleCollapsed=this.toggleCollapsed
-      )
+      (hash collapsed=this.collapsed toggleCollapsed=this.toggleCollapsed)
     }}
   {{/if}}
 </div>

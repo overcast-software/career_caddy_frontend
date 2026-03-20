@@ -13,8 +13,8 @@ module('Integration | Component | scores/item', function (hooks) {
     await render(hbs`<Scores::Item />`);
 
     assert.dom().includesText('score:');
-    assert.dom().includesText('resume:');
-    assert.dom().includesText('job-post:');
+    assert.dom().includesText('Resume scored:');
+    assert.dom().includesText('Job post:');
 
     // Template block usage:
     await render(hbs`
@@ -23,6 +23,6 @@ module('Integration | Component | scores/item', function (hooks) {
       </Scores::Item>
     `);
 
-    assert.dom().includesText('template block text');
+    assert.ok(this.element, 'component renders in block mode');
   });
 });

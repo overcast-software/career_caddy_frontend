@@ -4,11 +4,13 @@
     @compact={{this.compact}}
     @onFilterChange={{this.onFilterChange}}
     @onCompactToggle={{this.onCompactToggle}}
-    @showLoading={{this.showLoading}} // not implemented
+    @showLoading={{this.showLoading}}
+    not
+    implemented
   />
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
-<div class='fairway'>
+<BarCart @flashMessages={{this.flashMessages}} />
+<div class="fairway">
   <JobPosts::List
     @jobPosts={{this.model}}
     @query={{this.query}}

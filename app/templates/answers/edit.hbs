@@ -13,7 +13,7 @@
         <label>
           <textarea
             {{on "change" this.updateContent}}
-            style="min-height: 200px; resize: vertical; field-sizing: content;"
+            class="min-h-48 resize-y w-full"
             rows="{{this.textareaRows}}"
           >{{this.model.content}}</textarea>
         </label>

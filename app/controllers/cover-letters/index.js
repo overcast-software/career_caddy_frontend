@@ -11,7 +11,7 @@ export default class CoverLettersIndexController extends Controller {
       await coverLetter.save();
       const status = coverLetter.favorite ? 'added to' : 'removed from';
       this.flashMessages.success(`Cover letter ${status} favorites`);
-    } catch (error) {
+    } catch {
       coverLetter.rollbackAttributes();
       this.flashMessages.danger('Failed to update favorite status');
     }

@@ -1,9 +1,12 @@
-
 <Menus::SubnavBar>
   scrapes/index
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
+<BarCart @flashMessages={{this.flashMessages}} />
 <Scrapes::Form @scrape={{this.model}} />
-<button type="button" class="btn btn-primary" {{on "click" (fn this.retryScrape this.model)}}>
+<button
+  type="button"
+  class="btn btn-primary"
+  {{on "click" (fn this.retryScrape this.model)}}
+>
   Retry Scrape
 </button>

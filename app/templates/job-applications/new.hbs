@@ -59,8 +59,9 @@
     </div>
     {{#if this.showAppliedAt}}
       <div class="field">
-        <label class="field-label">Applied At</label>
+        <label class="field-label" for="applied-at">Applied At</label>
         <input
+          id="applied-at"
           type="date"
           value={{format-date this.model.appliedAt}}
           {{on "change" (fn this.updateField "appliedAt")}}
@@ -69,8 +70,9 @@
     {{/if}}
 
     <div class="field">
-      <label class="field-label">Tracking URL</label>
+      <label class="field-label" for="tracking-url">Tracking URL</label>
       <input
+        id="tracking-url"
         type="url"
         value={{this.model.trackingUrl}}
         {{on "input" (fn this.updateField "trackingUrl")}}
@@ -78,9 +80,9 @@
     </div>
 
     <div class="field">
-      <label class="field-label">Notes</label>
-
+      <label class="field-label" for="notes">Notes</label>
       <textarea
+        id="notes"
         value={{this.model.notes}}
         {{on "input" (fn this.updateField "notes")}}
       ></textarea>

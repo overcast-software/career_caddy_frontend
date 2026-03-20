@@ -14,7 +14,7 @@ export default class ApiService extends Service {
       return {};
     }
     return {
-      Authorization: this.session.authorizationHeader
+      Authorization: this.session.authorizationHeader,
     };
   }
 }

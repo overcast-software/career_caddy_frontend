@@ -5,7 +5,7 @@ export function decodeExp(token) {
       atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
     );
     return decoded.exp;
-  } catch (error) {
+  } catch {
     throw new Error('Failed to decode JWT token');
   }
 }

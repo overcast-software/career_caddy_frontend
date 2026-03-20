@@ -1,7 +1,10 @@
 <Menus::SubnavBar>
-  <LinkTo @route="cover-letters.new" class='btn'>New Cover Letter</LinkTo>
+  <LinkTo @route="cover-letters.new" class="btn">New Cover Letter</LinkTo>
 </Menus::SubnavBar>
 <div class="fairway">
-  <CoverLetters::List @coverLetters={{this.model}} @toggleFavorite={{this.toggleFavorite}} />
+  <CoverLetters::List
+    @coverLetters={{this.model}}
+    @toggleFavorite={{this.toggleFavorite}}
+  />
   {{outlet}}
 </div>

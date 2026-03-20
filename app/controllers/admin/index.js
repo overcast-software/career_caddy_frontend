@@ -8,7 +8,11 @@ export default class ApiKeysIndexController extends Controller {
 
   @action
   async revokeKey(apiKey) {
-    if (!confirm(`Are you sure you want to revoke the API key "${apiKey.name}"? This cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to revoke the API key "${apiKey.name}"? This cannot be undone.`,
+      )
+    ) {
       return;
     }
 

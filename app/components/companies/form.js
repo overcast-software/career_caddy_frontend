@@ -16,7 +16,7 @@ export default class CompaniesForm extends Component {
   }
 
   @action saveCompany(event) {
-    event.preventDefault()
+    event.preventDefault();
     this.company.save();
     this.flashMessages.success('success');
   }

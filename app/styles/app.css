@@ -95,7 +95,6 @@ a {
   pointer-events: auto;
 }
 
-
 .builder-form {
   display: grid;
   gap: var(--space-5);
@@ -1216,8 +1215,8 @@ header {
   min-height: 3lh;
 }
 
-.ember-power-select-trigger{
-    position: static;
+.ember-power-select-trigger {
+  position: static;
 }
 
 .brand {
@@ -1238,10 +1237,9 @@ header {
   padding: 6px;
   padding-left: 1.6em;
   padding-right: 1.6em;
-  margin-left: .6em;
-  margin-right: .1em;
+  margin-left: 0.6em;
+  margin-right: 0.1em;
   border-radius: 6px;
-
 }
 
 .nav-link + .nav-link {

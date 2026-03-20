@@ -9,7 +9,7 @@ export default class SpinnerIndicatorComponent extends Component {
 
   constructor() {
     super(...arguments);
-    
+
     this._intervalId = setInterval(() => {
       if (this.spinner.isShowing && this.displayWord.length > 0) {
         this.currentIndex = (this.currentIndex + 1) % this.displayWord.length;
@@ -30,7 +30,7 @@ export default class SpinnerIndicatorComponent extends Component {
   get letters() {
     return Array.from(this.displayWord).map((ch, idx) => ({
       ch,
-      active: idx === this.currentIndex
+      active: idx === this.currentIndex,
     }));
   }
 }

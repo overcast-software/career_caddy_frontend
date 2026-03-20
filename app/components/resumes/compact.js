@@ -7,9 +7,10 @@ export default class ResumesCompact extends Component {
   @service flashMessages;
   @action toggleFavorite(resume) {
     resume.favorite = !resume.favorite;
-    
+
     // Reload the resume to ensure all relationships are properly loaded
-    resume.reload()
+    resume
+      .reload()
       .then(() => resume.save())
       .then(() => {
         const status = resume.favorite ? 'added to' : 'removed from';
@@ -18,8 +19,11 @@ export default class ResumesCompact extends Component {
       .catch((error) => {
         console.error('Error saving resume favorite status:', error);
         resume.rollbackAttributes();
-        const errorMessage = error.message || error.toString() || 'Unknown error';
-        this.flashMessages.danger(`Failed to update favorite status: ${errorMessage}`);
+        const errorMessage =
+          error.message || error.toString() || 'Unknown error';
+        this.flashMessages.danger(
+          `Failed to update favorite status: ${errorMessage}`,
+        );
       });
   }
   @action async deleteResume() {

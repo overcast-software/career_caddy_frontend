@@ -7,7 +7,7 @@ import { decodeExp, now } from 'career-caddy-frontend/utils/jwt';
 export default class JwtAuthenticator extends Base {
   @service router;
   @service session;
-  
+
   refreshTimerId = null;
   refreshInFlight = null;
 
@@ -46,7 +46,7 @@ export default class JwtAuthenticator extends Base {
     const authenticatedData = {
       access: data.access,
       refresh: data.refresh,
-      exp: exp
+      exp: exp,
     };
 
     this.scheduleRefresh(authenticatedData);
@@ -64,7 +64,7 @@ export default class JwtAuthenticator extends Base {
     }
 
     const nowTime = now();
-    
+
     if (data.exp && nowTime < data.exp) {
       this.scheduleRefresh(data);
       return data;
@@ -75,7 +75,7 @@ export default class JwtAuthenticator extends Base {
       const refreshedData = await this.refresh(data);
       this.scheduleRefresh(refreshedData);
       return refreshedData;
-    } catch (error) {
+    } catch {
       throw new Error('Token refresh failed');
     }
   }
@@ -128,12 +128,12 @@ export default class JwtAuthenticator extends Base {
 
     const responseData = await response.json();
     const exp = decodeExp(responseData.access);
-    
+
     return {
       ...data,
       access: responseData.access,
       refresh: responseData.refresh || data.refresh,
-      exp: exp
+      exp: exp,
     };
   }
 
@@ -141,18 +141,20 @@ export default class JwtAuthenticator extends Base {
     this.cancelRefresh();
     if (data.exp) {
       const refreshTimeMs = (data.exp - now() - 60) * 1000;
-      
+
       if (refreshTimeMs <= 0) {
         // Token is near/past expiry, refresh immediately
-        this.refresh(data).then((refreshedData) => {
-          this.session.data.authenticated = refreshedData;
-          this.scheduleRefresh(refreshedData);
-        }).catch((error) => {
-          console.warn('Immediate token refresh failed:', error);
-        });
+        this.refresh(data)
+          .then((refreshedData) => {
+            this.session.data.authenticated = refreshedData;
+            this.scheduleRefresh(refreshedData);
+          })
+          .catch((error) => {
+            console.warn('Immediate token refresh failed:', error);
+          });
         return;
       }
-      
+
       this.refreshTimerId = setTimeout(async () => {
         try {
           const latest = this.session.data?.authenticated || data;
@@ -172,5 +174,4 @@ export default class JwtAuthenticator extends Base {
       this.refreshTimerId = null;
     }
   }
-
 }

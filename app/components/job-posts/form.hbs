@@ -6,7 +6,10 @@
       {{! Title (left) and Company (right) }}
       <div class="flex flex-wrap -mx-3 mb-6">
         <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-          <label for="Title" class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+          <label
+            for="Title"
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+          >
             Title
           </label>
           <input
@@ -19,7 +22,9 @@
           />
         </div>
         <div class="w-full md:w-1/2 px-3">
-          <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Company</label>
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+          >Company</label>
           <PowerSelectWithCreate
             @options={{this.companies}}
             @searchField="name"
@@ -36,7 +41,10 @@
       {{! Description (full width) }}
       <div class="flex flex-wrap -mx-3 mb-6">
         <div class="w-full px-3">
-          <label for="Description" class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+          <label
+            for="Description"
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+          >
             Description
           </label>
           <textarea
@@ -52,7 +60,10 @@
       {{! URL (left) and Buttons (right) }}
       <div class="flex flex-wrap -mx-3 mb-2">
         <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-          <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="url">URL</label>
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="url"
+          >URL</label>
           <input
             id="url"
             type="text"

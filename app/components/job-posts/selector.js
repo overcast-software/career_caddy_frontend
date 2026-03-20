@@ -9,26 +9,27 @@ export default class JobPostsSelector extends Component {
 
   constructor() {
     super(...arguments);
-    this.groupedSelect;
+    this._loadGroupedData();
   }
 
-  get groupedSelect() {
-    //not working
-    const stuff = []
-    this.store.findAll('company').then((companies) => {
-      companies.forEach((company) => {
-
-        let group = {
-          groupName: company.name,
-          options: company.jobPosts.content.map((p)=> p),
-        };
-
-        if ( !stuff.includes(group) && company.jobPosts.length > 0){
-          stuff.push(group)
-        }
-      })
-    })
-        .then(()=> { this.postsByCompany = stuff })
+  async _loadGroupedData() {
+    const stuff = [];
+    let companies;
+    try {
+      companies = await this.store.findAll('company');
+    } catch {
+      return;
+    }
+    companies.forEach((company) => {
+      let group = {
+        groupName: company.name,
+        options: company.jobPosts.content.map((p) => p),
+      };
+      if (!stuff.includes(group) && company.jobPosts.length > 0) {
+        stuff.push(group);
+      }
+    });
+    this.postsByCompany = stuff;
   }
 
   @action updateJobPost(jobPost) {

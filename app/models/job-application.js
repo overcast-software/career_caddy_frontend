@@ -13,10 +13,10 @@ export default class JobApplicationModel extends Model {
   @hasMany('question', { async: true, inverse: 'jobApplication' }) questions;
   @belongsTo('company', { async: true, inverse: 'jobApplications' }) company;
   get name() {
-    return `${this.get('jobPost.title')} `;
+    return `${this.jobPost.title} `;
   }
   get jobPostCompany() {
-    return this.get('jobPost.company');
+    return this.jobPost.company;
   }
 
   get fetchCompany() {

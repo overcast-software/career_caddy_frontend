@@ -1,30 +1,24 @@
 <Menus::SubnavBar>
   {{this.model.name}}
-  <LinkTo
-    @route="companies.show.job-posts"
-    @model={{this.model}}
-    class='btn'
-  >
+  <LinkTo @route="companies.show.job-posts" @model={{this.model}} class="btn">
     Job Posts
   </LinkTo>
-  <LinkTo
-    @route="companies.edit"
-    @model={{this.model}}
-    class='btn'
-  >
+  <LinkTo @route="companies.edit" @model={{this.model}} class="btn">
     edit
   </LinkTo>
 </Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}}/>
-<div class='fairway'>
+<BarCart @flashMessages={{this.flashMessages}} />
+<div class="fairway">
 
   <Panel::Card>
     {{this.model.name}}
-    <br/>
-    job posts: {{this.model.jobPosts.length}}
-    <br/>
-    job applications: {{this.model.jobApplications.length}}
-    <br/>
+    <br />
+    job posts:
+    {{this.model.jobPosts.length}}
+    <br />
+    job applications:
+    {{this.model.jobApplications.length}}
+    <br />
   </Panel::Card>
   {{outlet}}
 </div>

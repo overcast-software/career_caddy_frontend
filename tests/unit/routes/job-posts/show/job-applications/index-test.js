@@ -8,9 +8,9 @@ module(
 
     test('it exists', function (assert) {
       let route = this.owner.lookup(
-        'route:job-posts/show/job-applications/index'
+        'route:job-posts/show/job-applications/index',
       );
       assert.ok(route);
     });
-  }
+  },
 );

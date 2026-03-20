@@ -1,21 +1,21 @@
-  <LinkTo @route="job-posts.new" class='nav-link'>Create new</LinkTo>
-  <label>
-    Search:
-    <input
-      type="text"
-      value={{this.query}}
-      {{on "input" this.updateQuery}}
-      placeholder="Filter job posts..."
-    />
-  </label>
+<LinkTo @route="job-posts.new" class="nav-link">Create new</LinkTo>
+<label>
+  Search:
+  <input
+    type="text"
+    value={{this.query}}
+    {{on "input" this.updateQuery}}
+    placeholder="Filter job posts..."
+  />
+</label>
 
-  <label>
-    <input
-      type="checkbox"
-      checked={{this.compact}}
-      {{on "change" this.toggleCompact}}
-    />
-    Compact view
-  </label>
+<label>
+  <input
+    type="checkbox"
+    checked={{this.compact}}
+    {{on "change" this.toggleCompact}}
+  />
+  Compact view
+</label>
 
 {{yield}}

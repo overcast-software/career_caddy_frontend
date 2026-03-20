@@ -6,7 +6,7 @@ export default class QuestionsIndexController extends Controller {
   @service store;
   @service flashMessages;
   @tracked selectedCompany;
-  
+
   @action updateCompany(company) {
     this.selectedCompany = company;
   }
@@ -17,7 +17,7 @@ export default class QuestionsIndexController extends Controller {
       await question.save();
       const status = question.favorite ? 'added to' : 'removed from';
       this.flashMessages.success(`Question ${status} favorites`);
-    } catch (error) {
+    } catch {
       question.rollbackAttributes();
       this.flashMessages.danger('Failed to update favorite status');
     }

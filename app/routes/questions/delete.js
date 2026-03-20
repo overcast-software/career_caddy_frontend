@@ -15,10 +15,12 @@ export default class QuestionsDeleteRoute extends Route {
     }
 
     try {
-      const question = await this.store.findRecord('question', question_id, { reload: true });
+      const question = await this.store.findRecord('question', question_id, {
+        reload: true,
+      });
       await question.destroyRecord();
       this.flashMessages?.success?.('Question deleted.');
-    } catch (e) {
+    } catch {
       this.flashMessages?.danger?.('Failed to delete question.');
     }
 

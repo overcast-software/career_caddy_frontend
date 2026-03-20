@@ -24,7 +24,7 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
     if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
       try {
         await this.session.ensureFreshToken(90);
-      } catch (error) {
+      } catch {
         // Let it proceed - the 401 handler below will catch and retry
       }
     }
@@ -38,7 +38,7 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
             await this.session.refresh();
             options._retried = true;
             return await super.ajax(url, method, options);
-          } catch (refreshError) {
+          } catch {
             // Refresh failed, proceed with logout
           }
         }

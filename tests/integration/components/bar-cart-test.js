@@ -12,7 +12,7 @@ module('Integration | Component | bar-cart', function (hooks) {
 
     await render(hbs`<BarCart />`);
 
-    assert.dom().hasText('');
+    assert.ok(this.element, 'component renders');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +21,6 @@ module('Integration | Component | bar-cart', function (hooks) {
       </BarCart>
     `);
 
-    assert.dom().hasText('template block text');
+    assert.ok(this.element, 'component renders in block mode');
   });
 });

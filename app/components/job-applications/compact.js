@@ -9,7 +9,7 @@ export default class JobApplicationsCompact extends Component {
     return this.args.jobApplication;
   }
   get jobPost() {
-    return this.jobApplication.jobPost;
+    return this.jobApplication?.jobPost;
   }
   @action delete() {
     const message = `${this.jobApplication.get('jobPost.title')}`;
@@ -22,7 +22,7 @@ export default class JobApplicationsCompact extends Component {
       .then((record) => {
         this.flashMessages.success(`removed application #${record.id}`);
       })
-      .catch((error) => {
+      .catch(() => {
         this.flashMessages.alert(`problem deleting`);
       });
   }

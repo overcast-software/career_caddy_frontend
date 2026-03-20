@@ -66,6 +66,11 @@ export default class ApiKeysNewController extends Controller {
     }
   }
   @action
+  updateField(field, event) {
+    this.model[field] = event.target.value;
+  }
+
+  @action
   derp(event) {
     event.preventDefault();
 

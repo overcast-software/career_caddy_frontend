@@ -7,9 +7,9 @@
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}} />
 <div class="fairway">
-  <div class='builder-form'>
+  <div class="builder-form">
     <Panel::Card>
-      <label >Select a job post</label>
+      <label>Select a job post</label>
       <JobPosts::Selector
         @jobPosts={{this.jobPosts}}
         @jobPostCallback={{this.addJobPostToCoverLetter}}
@@ -17,8 +17,6 @@
     </Panel::Card>
   </div>
   <Panel::Card @collapable={{true}}>
-    <CoverLetters::Form
-      @coverLetter={{this.model}}
-    />
+    <CoverLetters::Form @coverLetter={{this.model}} />
   </Panel::Card>
 </div>

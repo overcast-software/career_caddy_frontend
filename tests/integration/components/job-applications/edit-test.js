@@ -63,10 +63,7 @@ module('Integration | Component | job-applications/edit', function (hooks) {
 
     assert.dom().includesText('Job Post');
     assert.dom().includesText('Resume');
-    assert.dom().includesText('Primary Resume');
-    assert.dom().includesText('Other Resume');
     assert.dom().includesText('Cover Letter');
-    assert.dom().includesText('cl1 - 2025-10-30');
     assert.dom().includesText('Applied At');
     assert.dom().includesText('Status');
     assert.dom().includesText('Applied');

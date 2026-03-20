@@ -60,13 +60,14 @@
                 Name
               </label>
               <div class="mt-1">
-                <Input
-                  @type="text"
-                  @value={{this.model.name}}
+                <input
+                  type="text"
+                  value={{this.model.name}}
                   id="name"
                   class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                   placeholder="e.g., Production API Key"
                   required
+                  {{on "change" (fn this.updateField "name")}}
                 />
               </div>
               <p class="mt-2 text-sm text-gray-500">
@@ -82,14 +83,15 @@
                 Expires in (days)
               </label>
               <div class="mt-1">
-                <Input
-                  @type="number"
-                  @value={{this.model.expiresDays}}
+                <input
+                  type="number"
+                  value={{this.model.expiresDays}}
                   id="expires_days"
                   class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                   placeholder="30"
                   min="1"
                   max="365"
+                  {{on "change" (fn this.updateField "expiresDays")}}
                 />
               </div>
               <p class="mt-2 text-sm text-gray-500">
@@ -152,7 +154,6 @@
             type="submit"
             class="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             disabled={{this.isSubmitting}}
-            {{on "click" this.derp}}
           >
             {{#if this.isSubmitting}}
               Creating...

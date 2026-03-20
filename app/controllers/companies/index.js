@@ -4,8 +4,8 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import ArrayProxy from '@ember/array/proxy';
 export default class CompaniesIndexController extends Controller {
-  @service flashMessages
-  @service store
+  @service flashMessages;
+  @service store;
   @tracked query = '';
 
   onInput = (event) => {
@@ -13,7 +13,7 @@ export default class CompaniesIndexController extends Controller {
   };
 
   get companies() {
-    const source = this.model
+    const source = this.model;
     const list = ArrayProxy.create({ content: source });
     const q = this.query.trim().toLowerCase();
     let filteredList = list;
@@ -34,8 +34,8 @@ export default class CompaniesIndexController extends Controller {
     const items = Array.isArray(filteredList)
       ? filteredList
       : filteredList?.toArray
-      ? filteredList.toArray()
-      : [];
+        ? filteredList.toArray()
+        : [];
 
     items.sort((a, b) => {
       const an =
@@ -52,18 +52,18 @@ export default class CompaniesIndexController extends Controller {
     return items;
   }
 
-  @action async deleteCompany(company){
-    console.log(company)
+  @action async deleteCompany(company) {
+    console.log(company);
     const name = company.name;
     try {
       await company.destroyRecord();
       this.flashMessages.success(`deleted ${name}`);
-    } catch (error) {
+    } catch {
       this.flashMessages.danger('Failed to delete company');
     }
   }
 
-  get sortedCompanies(){
+  get sortedCompanies() {
     const list = this.model;
     if (!list || typeof list.length !== 'number') return [];
     const copy = Array.prototype.slice.call(list);
@@ -78,5 +78,4 @@ export default class CompaniesIndexController extends Controller {
       return String(a.id).localeCompare(String(b.id)) * -1;
     });
   }
-
 }

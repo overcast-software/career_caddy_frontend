@@ -12,11 +12,7 @@ export default class JobApplicationsEditController extends Controller {
   resumeSelectId() {
     return 1;
   }
-  @action updateResume() {
-    debugger;
-  }
-  @action updateCoverLetter() {
-    debugger;
-  }
+  @action updateResume() {}
+  @action updateCoverLetter() {}
   @action updateField() {}
 }

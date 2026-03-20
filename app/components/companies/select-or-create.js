@@ -7,7 +7,9 @@ export default class CompaniesSelectOrCreate extends Component {
   @service flashMessages;
   @tracked showCreate = false;
   @tracked selectedCompany = null;
-  @tracked companySelectFilter = this.args.companies;
+  get companySelectFilter() {
+    return this.args.companies;
+  }
   @tracked proposedCompanyName = null;
   @tracked labelText = 'Select a company (option to create if no results)';
 
