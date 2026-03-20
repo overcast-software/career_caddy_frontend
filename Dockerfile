@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=node /usr/local /usr/local
 
-# Enable pnpm via Corepack as root
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm
+RUN npm install -g pnpm
 
 WORKDIR /app
 
