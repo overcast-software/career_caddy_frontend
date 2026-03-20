@@ -45,6 +45,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
     CMD curl -fsS http://127.0.0.1:4200/ >/dev/null && (curl -fsS http://127.0.0.1:8000/api/v1/healthcheck >/dev/null || curl -fsS http://127.0.0.1:8000/ >/dev/null || curl -fsS http://127.0.0.1:8000/api/ >/dev/null) || exit 1
 
 WORKDIR /app
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
