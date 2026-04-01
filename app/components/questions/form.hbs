@@ -1,9 +1,10 @@
 <article class="panel-card builder-form">
-  Questions from an application you want AI to answer
+  <h3 class="form-title">Add Interview Question</h3>
+  <p class="form-hint">Capture questions from an application so AI can help draft answers.</p>
   <form class="questions-form" {{on "submit" this.save}}>
 
     <div class="field">
-      <label>Company</label>
+      <label class="field-label">Company <span class="required">*</span></label>
       {{#if @jobPost}}
         <input
           type="text"
@@ -14,7 +15,8 @@
       {{else}}
         <PowerSelectWithCreate
           @options={{this.companies}}
-          @searchField="Company Name"
+          @searchField="name"
+          @placeholder="Search or create a company…"
           @onCreate={{this.addCompanyToQuestion}}
           @onChange={{this.updateCompany}}
           @selected={{this.selectedCompany}}
@@ -24,14 +26,49 @@
         </PowerSelectWithCreate>
       {{/if}}
     </div>
+
+    {{#if this.isLoadingRelated}}
+      <p class="loading-hint">Loading job posts and applications…</p>
+    {{/if}}
+
     <div class="field">
-      <label for="question-content">Question</label>
+      <label class="field-label">Job Post</label>
+      <PowerSelect
+        @options={{this.loadedJobPosts}}
+        @onChange={{this.updateJobPost}}
+        @selected={{this.selectedJobPost}}
+        @placeholder={{if this.selectedCompany "Select a job post (optional)" "Select a company first"}}
+        @allowClear={{true}}
+        @disabled={{not this.selectedCompany}}
+        as |jobPost|
+      >
+        {{jobPost.title}}
+      </PowerSelect>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Job Application</label>
+      <PowerSelect
+        @options={{this.filteredJobAppOptions}}
+        @onChange={{this.updateJobApplication}}
+        @selected={{this.selectedJobAppOption}}
+        @placeholder={{if this.selectedCompany "Select an application (optional)" "Select a company first"}}
+        @allowClear={{true}}
+        @disabled={{not this.selectedCompany}}
+        as |opt|
+      >
+        {{opt.label}}
+      </PowerSelect>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="question-content">Question <span class="required">*</span></label>
       <textarea
         id="question-content"
         class="textarea"
         value={{@question.content}}
         {{on "input" this.updateContent}}
-        placeholder="Enter your question here"
+        placeholder="Paste the interview question here…"
         rows="4"
       ></textarea>
     </div>
@@ -43,43 +80,29 @@
           checked={{@question.favorite}}
           {{on "change" this.updateFavorite}}
         />
-        Favorite
+        Mark as favorite
       </label>
     </div>
 
-    <div class="field">
-
-      <PowerSelect
-        @options={{this.jobApplications}}
-        @onChange={{this.updateJobApplication}}
-        @selected={{this.selectedJobApplication}}
-        @placeHolder="Select job application"
-        @allowClear={{true}}
-        @labelText="Job application"
-        as |jobApplication|
-      >
-        {{jobApplication.name}}
-      </PowerSelect>
-
-    </div>
     <div class="actions">
       <button
         type="submit"
-        class="button is-primary"
+        class="btn primary"
         disabled={{@question.isSaving}}
       >
         Save
       </button>
-      <button type="button" class="button" {{on "click" this.cancel}}>
+      <button
+        type="button"
+        class="btn primary"
+        disabled={{or @question.isSaving (not (and this.selectedCompany.id @question.content))}}
+        {{on "click" this.saveAndNew}}
+      >
+        Save &amp; Add Another
+      </button>
+      <button type="button" class="btn" {{on "click" this.cancel}}>
         Cancel
       </button>
-      {{#if (and this.selectedCompany.id @question.content)}}
-        <button class="btn" type="button" {{on "click" this.saveAndNew}}>
-          save an new
-          {{this.selectedCompany.name}}
-          Question
-        </button>
-      {{/if}}
     </div>
   </form>
 </article>

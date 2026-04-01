@@ -1,15 +1,57 @@
-<div class="fairway">
-  {{#each @companies as |company|}}
-    <Panel::Card>
-      <LinkTo
-        @route="companies.show"
-        @model={{company}}
-      >{{company.name}}</LinkTo>
-      <LinkTo
-        class="nav-link"
-        @route="companies.edit"
-        @model={{company}}
-      >Edit</LinkTo>
-    </Panel::Card>
-  {{/each}}
-</div>
+{{#if @companies.length}}
+  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Name</th>
+          <th class="px-4 py-3 text-center font-semibold text-gray-600">Job
+            Posts</th>
+          <th
+            class="px-4 py-3 text-center font-semibold text-gray-600"
+          >Applications</th>
+          <th
+            class="px-4 py-3 text-right font-semibold text-gray-600"
+          >Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {{#each @companies as |company|}}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-900">
+              <LinkTo @route="companies.show" @model={{company}}>
+                {{company.name}}
+              </LinkTo>
+            </td>
+            <td class="px-4 py-3 text-center text-gray-600">
+              {{company.jobPosts.length}}
+            </td>
+            <td class="px-4 py-3 text-center text-gray-600">
+              {{company.jobApplications.length}}
+            </td>
+            <td class="px-4 py-3 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <LinkTo
+                  @route="companies.show"
+                  @model={{company}}
+                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                >View</LinkTo>
+                <LinkTo
+                  @route="companies.edit"
+                  @model={{company}}
+                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                >Edit</LinkTo>
+                <button
+                  type="button"
+                  class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
+                  {{on "click" (fn @onDelete company)}}
+                >Delete</button>
+              </div>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <p class="text-gray-500 text-sm py-6 text-center">No companies found.</p>
+{{/if}}

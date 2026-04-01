@@ -26,6 +26,7 @@
   <section>
     <h2>Experience</h2>
     <hr />
+    {{log @resume.experiences}}
     {{#each @resume.experiences as |exp|}}
       <article class="experience">
         <div class="job-header">
@@ -60,6 +61,7 @@
 
         <ul class="desc-list">
           {{#each exp.descriptions as |desc|}}
+    {{log desc}}
             <li class="desc-item">{{desc.content}}</li>
           {{/each}}
         </ul>

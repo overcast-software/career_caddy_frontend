@@ -23,11 +23,9 @@
   >delete</button>
   <button
     type="button"
-    class="favorite-btn {{if @resume.favorite 'favorited'}}"
+    class="btn favorite {{if @resume.favorite 'favorited'}}"
+    data-tooltip="Favorited items appear in Career Data"
     {{on "click" (fn this.toggleFavorite @resume)}}
-    title="{{if @resume.favorite 'Remove from favorites' 'Add to favorites'}}"
-  >
-    {{#if @resume.favorite}}★{{else}}☆{{/if}}
-  </button>
+  >★</button>
 </article>
 {{yield}}

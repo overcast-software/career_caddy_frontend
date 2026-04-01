@@ -6,10 +6,16 @@ export default class JobPostsControlsComponent extends Component {
   @tracked query = this.args.query ?? '';
   @tracked compact = this.args.compact ?? false;
 
+  #debounceTimer = null;
+
   @action
   updateQuery(event) {
-    this.query = event.target.value;
-    this.args.onFilterChange?.({ query: this.query });
+    const value = event.target.value;
+    this.query = value;
+    clearTimeout(this.#debounceTimer);
+    this.#debounceTimer = setTimeout(() => {
+      this.args.onFilterChange?.({ query: value });
+    }, 300);
   }
 
   @action
