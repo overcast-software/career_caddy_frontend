@@ -11,18 +11,6 @@ export default class QuestionsIndexController extends Controller {
     this.selectedCompany = company;
   }
 
-  @action async toggleFavorite(question) {
-    question.favorite = !question.favorite;
-    try {
-      await question.save();
-      const status = question.favorite ? 'added to' : 'removed from';
-      this.flashMessages.success(`Question ${status} favorites`);
-    } catch {
-      question.rollbackAttributes();
-      this.flashMessages.danger('Failed to update favorite status');
-    }
-  }
-
   get companies() {
     return this.store.peekAll('company');
   }

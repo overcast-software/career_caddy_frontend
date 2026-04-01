@@ -9,14 +9,14 @@ export default class QuestionsShowController extends Controller {
   @action deleteQuestion() {
     this.model
       .destroyRecord()
-      .then(this.flashMessages.success('deleted question'));
+      .then(() => this.flashMessages.success('Question deleted'));
   }
   get answers() {
     return this.model.answers;
   }
 
   @action askAI(question) {
-    this.flashMessages.success('asking AI');
+    this.flashMessages.success('Asking AI...');
     const answer = this.store.createRecord('answer', {
       question,
       ai_assist: true,
@@ -24,8 +24,8 @@ export default class QuestionsShowController extends Controller {
     this.spinner.wrap(
       answer
         .save()
-        .then(this.flashMessages.success('answer returned'))
-        .then(this.router.transitionTo('questions.show.answers')),
+        .then(() => this.flashMessages.success('Answer returned'))
+        .then(() => this.router.transitionTo('questions.show.answers')),
     );
   }
 }

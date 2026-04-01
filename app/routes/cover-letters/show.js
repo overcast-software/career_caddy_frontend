@@ -14,4 +14,9 @@ export default class CoverLettersShowRoute extends Route {
     // await coverLetter.resume
     return coverLetter;
   }
+
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    controller.startPollingIfNeeded(model);
+  }
 }

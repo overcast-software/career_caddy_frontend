@@ -1,11 +1,67 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
+
+const TERMINAL_STATUSES = ['completed', 'done', 'failed', 'error'];
+const POLL_INTERVAL_MS = 3000;
+
 export default class CoverLettersShowController extends Controller {
   @service flashMessages;
   @service store;
   @service session;
   isExporting = false;
+
+  _pollTimeout = null;
+
+  willDestroy() {
+    super.willDestroy(...arguments);
+    this._stopPolling();
+  }
+
+  _stopPolling() {
+    if (this._pollTimeout) {
+      clearTimeout(this._pollTimeout);
+      this._pollTimeout = null;
+    }
+  }
+
+  async _pollCoverLetter(coverLetter) {
+    try {
+      await coverLetter.reload();
+    } catch {
+      this.flashMessages.danger('Lost connection while waiting for cover letter.');
+      return;
+    }
+
+    if (TERMINAL_STATUSES.includes(coverLetter.status)) {
+      if (coverLetter.status === 'failed' || coverLetter.status === 'error') {
+        this.flashMessages.danger('Cover letter generation failed.');
+      }
+      return;
+    }
+
+    this._pollTimeout = setTimeout(() => this._pollCoverLetter(coverLetter), POLL_INTERVAL_MS);
+  }
+
+  startPollingIfNeeded(coverLetter) {
+    this._stopPolling();
+    if (coverLetter.status && !TERMINAL_STATUSES.includes(coverLetter.status)) {
+      this.flashMessages.info('Generating cover letter — waiting for results…');
+      this._pollCoverLetter(coverLetter);
+    }
+  }
+  @action async toggleFavorite() {
+    this.model.favorite = !this.model.favorite;
+    try {
+      await this.model.save();
+      const status = this.model.favorite ? 'added to' : 'removed from';
+      this.flashMessages.success(`Cover letter ${status} favorites`);
+    } catch {
+      this.model.favorite = !this.model.favorite;
+      this.flashMessages.danger('Failed to update favorite status');
+    }
+  }
+
   @action async exportToDocx() {
     if (this.isExporting) {
       this.flashMessages.warn('already exporting. calm down.');

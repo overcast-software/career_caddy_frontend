@@ -8,8 +8,8 @@ export default class AnswersEditController extends Controller {
   @action updateContent(event) {
     this.model.content = event.target.value;
   }
-  @action updateFavorite(event) {
-    this.model.favorite = event.target.checked;
+  @action toggleFavorite() {
+    this.model.favorite = !this.model.favorite;
   }
   @action saveAnswer(event) {
     event.preventDefault();

@@ -1,17 +1,19 @@
 import ApplicationSerializer from './application';
 
 export default class ExperienceSerializer extends ApplicationSerializer {
-  attrs = {
-    descriptions: { serialize: true, embedded: 'always' },
-  };
-
   normalize(typeClass, hash) {
-    if (hash.descriptions) {
-      hash.descriptions = this.store.normalize(
-        'description',
-        hash.descriptions,
-      );
-    }
+    // XXX did not need this -fixed on back end
+    // API returns data:[] for descriptions even when unloaded.
+    // Remove the empty data so Ember Data follows the related link instead.
+    // const descriptionsRel = hash.relationships?.descriptions;
+    // if (
+    //   descriptionsRel &&
+    //   Array.isArray(descriptionsRel.data) &&
+    //   descriptionsRel.data.length === 0 &&
+    //   descriptionsRel.links?.related
+    // ) {
+    //   delete descriptionsRel.data;
+    // }
     return super.normalize(typeClass, hash);
   }
 }
