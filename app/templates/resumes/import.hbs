@@ -1,10 +1,9 @@
-<Menus::SubnavBar>
-  <label>ingest list</label>
-  ingestion
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
 {{page-title "Import"}}
-<div class="fairway">
-  <UploadForm @onUpload={{this.ingestResume}} />
-  {{outlet}}
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    ingestion
+  </:subnav>
+  <:main>
+    <UploadForm @onUpload={{this.ingestResume}} />
+  </:main>
+</RouteLayout>

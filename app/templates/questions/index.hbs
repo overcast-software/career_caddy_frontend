@@ -1,57 +1,31 @@
 {{page-title "Index"}}
-<Menus::SubnavBar>
-  <LinkTo @route="questions.new" class="btn">New</LinkTo>
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
-  <Panel::Card>
-    <PowerSelect
-      @options={{this.companies}}
-      @onChange={{this.updateCompany}}
-      @searchEnabled={{true}}
-      @searchField="name"
-      @selected={{this.selectedCompany}}
-      @placeholder="Select a Company"
-      @labelText="Filter by Company"
-      as |company|
-    >
-      {{company.name}}
-    </PowerSelect>
-    {{#each this.companyQuestions as |question|}}
-      <div class="panel-card">
-        <div class="question-header">
-          <button
-            type="button"
-            class="favorite-btn {{if question.favorite 'favorited'}}"
-            {{on "click" (fn this.toggleFavorite question)}}
-            title="{{if
-              question.favorite
-              'Remove from favorites'
-              'Add to favorites'
-            }}"
-          >
-            {{#if question.favorite}}★{{else}}☆{{/if}}
-          </button>
-          <p>
-            {{question.company.name}}:
-            {{question.jobApplication.jobPost.name}}{{question.content}}
-          </p>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="questions.new" class="btn">New</LinkTo>
+  </:subnav>
+  <:main>
+    <Panel::Card>
+      <PowerSelect
+        @options={{this.companies}}
+        @onChange={{this.updateCompany}}
+        @searchEnabled={{true}}
+        @searchField="name"
+        @selected={{this.selectedCompany}}
+        @placeholder="Select a Company"
+        @labelText="Filter by Company"
+        as |company|
+      >{{company.name}}</PowerSelect>
+      {{#each this.companyQuestions as |question|}}
+        <div class="panel-card">
+          <div class="question-header">
+            <p>{{question.company.name}}: {{question.jobApplication.jobPost.name}}{{question.content}}</p>
+          </div>
+          <p>answers: {{question.answers.length}}</p>
+          <br />
+          <LinkTo @route="questions.show.answers" @model={{question}}>show</LinkTo>
+          <LinkTo @route="questions.show.answers.new" @model={{question}}>answer</LinkTo>
         </div>
-        <p>
-          answers:
-          {{question.answers.length}}
-        </p>
-        <br />
-        <LinkTo
-          @route="questions.show.answers"
-          @model={{question}}
-        >show</LinkTo>
-        <LinkTo
-          @route="questions.show.answers.new"
-          @model={{question}}
-        >answer</LinkTo>
-      </div>
-    {{/each}}
-  </Panel::Card>
-  {{yield}}
-</div>
+      {{/each}}
+    </Panel::Card>
+  </:main>
+</RouteLayout>

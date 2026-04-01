@@ -1,8 +1,8 @@
-<Menus::SubnavBar>
-  new<button type="button" class="btn">save</button>
-</Menus::SubnavBar>
-
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
-  <Companies::Form @company={{this.model}} />
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    new company
+  </:subnav>
+  <:main>
+    <Companies::Form @company={{this.model}} />
+  </:main>
+</RouteLayout>

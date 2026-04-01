@@ -1,25 +1,7 @@
 {{page-title "Career Caddy"}}
-<Menus::SubnavBar>
-  <div class="submenu-buttons">
-    {{#if this.session.isAuthenticated}}
-      <LinkTo @route="job-posts.index" class="nav-link">Job posts</LinkTo>
-      <LinkTo @route="cover-letters.index" class="nav-link">Cover letters</LinkTo>
-      <LinkTo @route="resumes.index" class="nav-link">Resumes</LinkTo>
-      <LinkTo @route="summaries.index" class="nav-link">Summaries</LinkTo>
-      <LinkTo @route="scores.index" class="nav-link">Scores</LinkTo>
-      <LinkTo @route="questions.index" class="nav-link">Questions</LinkTo>
-      <LinkTo
-        @route="job-applications.index"
-        class="nav-link"
-      >Applications</LinkTo>
-      <LinkTo @route="companies.index" class="nav-link">Companies</LinkTo>
-    {{else}}
-      <h2>Welcome to Career Caddy</h2>
-    {{/if}}
-  </div>
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav></:subnav>
+  <:main>
   <div class="landing-page">
     <br />
     <p>Your personal career management assistant</p>
@@ -162,5 +144,6 @@
       </div>
     {{/if}}
   </div>
-</div>
+  </:main>
+</RouteLayout>
 {{outlet}}

@@ -1,3 +1,11 @@
 <div class="tee-box">
-  {{yield}}
+  <div class="tee-left">
+    {{yield to="left"}}
+  </div>
+  <div class="tee-center">
+    {{yield to="center"}}
+  </div>
+  <div class="tee-right">
+    {{yield to="right"}}
+  </div>
 </div>

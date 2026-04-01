@@ -1,6 +1,5 @@
 <Menus::SubnavBar>
   <div class="controls">
-    <label>search by name: </label>
     <input
       type="search"
       aria-label="search"
@@ -8,9 +7,10 @@
       value={{this.query}}
       {{on "input" this.onInput}}
     />
+    <LinkTo @route="companies.new" class="btn">+ New Company</LinkTo>
   </div>
 </Menus::SubnavBar>
 <BarCart @flashMessages={{this.flashMessages}} />
 <div class="fairway">
-  <Companies::List @companies={{this.companies}} />
+  <Companies::List @companies={{this.companies}} @onDelete={{this.deleteCompany}} />
 </div>

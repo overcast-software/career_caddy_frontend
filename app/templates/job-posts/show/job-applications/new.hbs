@@ -1,12 +1,7 @@
 {{page-title "New Application"}}
 <div class="container">
   <JobApplications::Edit
-    @jobApplication={{this.model}}
-    @resume={{this.jobPostResume}}
-    @resumeSetter={{this.resumeSetter}}
+    @jobApplication={{this.jobApplication}}
+    @resumes={{this.resumes}}
   />
-
-  <Panel::Card>
-    new
-  </Panel::Card>
 </div>

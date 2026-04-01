@@ -1,28 +1,20 @@
-<Menus::SubnavBar>
-
-  <LinkTo @route="resumes.import" class="btn">Import resume</LinkTo>
-
-  <br />
-</Menus::SubnavBar>
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
-<div class="fairway">
-  {{#if this.noResumes}}
-    <p>no resumes
-      <LinkTo @route="resumes.import">import</LinkTo>
-      one to start.</p>
-  {{else}}
-    {{#if this.model}}
-      {{#each this.model as |resume|}}
-        <div class="resume-item">
-          <Resumes::Compact @resume={{resume}} />
-        </div>
-      {{/each}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="resumes.import" class="btn">Import resume</LinkTo>
+  </:subnav>
+  <:main>
+    {{#if this.noResumes}}
+      <p>no resumes — <LinkTo @route="resumes.import">import</LinkTo> one to start.</p>
     {{else}}
-      loading...
+      {{#if this.model}}
+        {{#each this.model as |resume|}}
+          <div class="resume-item">
+            <Resumes::Compact @resume={{resume}} />
+          </div>
+        {{/each}}
+      {{else}}
+        loading...
+      {{/if}}
     {{/if}}
-  {{/if}}
-</div>
+  </:main>
+</RouteLayout>

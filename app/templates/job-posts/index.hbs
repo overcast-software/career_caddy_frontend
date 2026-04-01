@@ -1,20 +1,21 @@
-<Menus::SubnavBar>
-  <JobPosts::Controls
-    @query={{this.query}}
-    @compact={{this.compact}}
-    @onFilterChange={{this.onFilterChange}}
-    @onCompactToggle={{this.onCompactToggle}}
-    @showLoading={{this.showLoading}}
-    not
-    implemented
-  />
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
-  <JobPosts::List
-    @jobPosts={{this.model}}
-    @query={{this.query}}
-    @compact={{this.compact}}
-    @showLoading={{this.showLoading}}
-  />
-</div>
+{{page-title "Job Posts"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <JobPosts::Controls
+      @query={{this.search}}
+      @compact={{this.compact}}
+      @onFilterChange={{this.onFilterChange}}
+      @onCompactToggle={{this.onCompactToggle}}
+    />
+  </:subnav>
+  <:main>
+    {{#if this.isSearching}}
+      <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+    {{else}}
+      <JobPosts::List @jobPosts={{this.model}} @compact={{this.compact}} />
+      <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
+        <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
+      </InfinityLoader>
+    {{/if}}
+  </:main>
+</RouteLayout>

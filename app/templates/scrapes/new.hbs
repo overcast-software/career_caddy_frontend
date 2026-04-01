@@ -1,5 +1,8 @@
-<Menus::SubnavBar>
-  scrapes/new
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<Scrapes::Form @scrape={{this.model}} />
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    new scrape
+  </:subnav>
+  <:main>
+    <Scrapes::Form @scrape={{this.model}} />
+  </:main>
+</RouteLayout>

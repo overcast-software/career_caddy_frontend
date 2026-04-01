@@ -1,6 +1,5 @@
-<Menus::SubnavBar />
-<BarCart />
-<div class="fairway">
-  <Summaries::Item @summary={{this.model}} />
-  {{outlet}}
-</div>
+<RouteLayout>
+  <:main>
+    <Summaries::Item @summary={{this.model}} />
+  </:main>
+</RouteLayout>

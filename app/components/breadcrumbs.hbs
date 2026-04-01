@@ -1,0 +1,12 @@
+<nav class="breadcrumbs" aria-label="breadcrumb">
+  {{#each this.crumbs as |crumb|}}
+    {{#unless crumb.isFirst}}
+      <span class="breadcrumb-sep">/</span>
+    {{/unless}}
+    {{#if crumb.url}}
+      <a href={{crumb.url}} class="breadcrumb-link">{{crumb.label}}</a>
+    {{else}}
+      <span class="breadcrumb-link">{{crumb.label}}</span>
+    {{/if}}
+  {{/each}}
+</nav>

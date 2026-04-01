@@ -1,9 +1,9 @@
 {{page-title "New"}}
-<Menus::SubnavBar>
-  new question
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
-  {{outlet}}
-  <Questions::Form @question={{this.model}} />
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    new question
+  </:subnav>
+  <:main>
+    <Questions::Form @question={{this.model}} />
+  </:main>
+</RouteLayout>

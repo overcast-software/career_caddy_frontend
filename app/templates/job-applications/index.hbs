@@ -1,45 +1,41 @@
 {{page-title "Applications"}}
-<Menus::SubnavBar>
-  <LinkTo @route="job-applications.new" class="btn">New Application</LinkTo>
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
-  <Panel::Card>
-    <Companies::Selector
-      @companies={{this.companies}}
-      @companyCallback={{this.companyFilter}}
-      @onInput={{this.selectInput}}
-      @labelText={{this.labelText}}
-      @onKeydown={{this.companyKeydown}}
-    />
-
-    <PowerSelect
-      @options={{this.statuses}}
-      @onChange={{this.statusFilter}}
-      @selected={{this.selectedStatus}}
-      @labelText="Find by status"
-      as |status|
-    >
-      {{status}}
-    </PowerSelect>
-  </Panel::Card>
-
-  <div class="overflow-x-auto rounded border border-gray-300 shadow-sm">
-    <table class="min-w-full divide-y-2 divide-gray-200">
-      <thead class="ltr:text-left rtl:text-right">
-        <tr class="*:font-medium *:text-gray-900">
-          <th class="px-3 py-2 whitespace-nowrap max-w-xs">Title</th>
-          <th class="px-3 py-2 whitespace-nowrap">Company</th>
-          <th class="px-3 py-2 whitespace-nowrap">Current Status</th>
-          <th class="px-3 py-2 whitespace-nowrap">Controls</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        {{#each this.fullFilter as |application|}}
-          <JobApplications::Compact @jobApplication={{application}} />
-        {{/each}}
-      </tbody>
-    </table>
-  </div>
-  {{outlet}}
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="job-applications.new" class="btn">New Application</LinkTo>
+  </:subnav>
+  <:main>
+    <Panel::Card>
+      <Companies::Selector
+        @companies={{this.companies}}
+        @companyCallback={{this.companyFilter}}
+        @onInput={{this.selectInput}}
+        @labelText={{this.labelText}}
+        @onKeydown={{this.companyKeydown}}
+      />
+      <PowerSelect
+        @options={{this.statuses}}
+        @onChange={{this.statusFilter}}
+        @selected={{this.selectedStatus}}
+        @labelText="Find by status"
+        as |status|
+      >{{status}}</PowerSelect>
+    </Panel::Card>
+    <div class="overflow-x-auto rounded border border-gray-300 shadow-sm">
+      <table class="min-w-full divide-y-2 divide-gray-200">
+        <thead class="ltr:text-left rtl:text-right">
+          <tr class="*:font-medium *:text-gray-900">
+            <th class="px-3 py-2 whitespace-nowrap max-w-xs">Title</th>
+            <th class="px-3 py-2 whitespace-nowrap">Company</th>
+            <th class="px-3 py-2 whitespace-nowrap">Current Status</th>
+            <th class="px-3 py-2 whitespace-nowrap">Controls</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {{#each this.fullFilter as |application|}}
+            <JobApplications::Compact @jobApplication={{application}} />
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </:main>
+</RouteLayout>

@@ -1,39 +1,17 @@
-{{page-title "Index"}}
-<Menus::SubnavBar>
-  <LinkTo class="nav-link" @route="questions.new">new question
-  </LinkTo>
-  <LinkTo
-    class="nav-link"
-    @route="questions.edit"
-    @model={{this.model.question}}
-  >edit
-  </LinkTo>
-  <LinkTo
-    class="nav-link"
-    @route="questions.show.answers.new"
-    @model={{this.model.question}}
-  >answer
-  </LinkTo>
-  <LinkTo
-    @route="questions.delete"
-    @model={{this.model.question}}
-    class="danger nav-link"
-    {{on "click" this.deleteQuestion}}
-  >delete
-  </LinkTo>
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<Panel::Card>
-  <h3>answers</h3>
-  <p>
-    {{this.model.question.jobPost}}
-  </p>
-</Panel::Card>
-{{#each this.model.answers as |answer|}}
-  <Panel::Card>
-    <MarkdownToHtml @markdown={{answer.content}} />
-    <LinkTo @route="answers.edit" @model={{answer}}>edit</LinkTo>
-  </Panel::Card>
-{{/each}}
-
-{{outlet}}
+{{page-title "Answers"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo class="btn" @route="questions.show.answers.new" @model={{this.model.question}}>new answer</LinkTo>
+    <LinkTo class="btn" @route="questions.edit" @model={{this.model.question}}>edit question</LinkTo>
+  </:subnav>
+  <:main>
+    {{#each this.model.answers as |answer|}}
+      <Panel::Card>
+        <MarkdownToHtml @markdown={{answer.content}} />
+        <LinkTo @route="answers.edit" @model={{answer}}>edit</LinkTo>
+      </Panel::Card>
+    {{else}}
+      <p class="text-gray-500 text-sm">No answers yet.</p>
+    {{/each}}
+  </:main>
+</RouteLayout>

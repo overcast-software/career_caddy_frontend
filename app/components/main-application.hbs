@@ -1,17 +1,28 @@
-<MobileMenuWrapper @isOpen={{false}} as |mmw|>
-  <mmw.MobileMenu as |mm|>
-    <Sidebar @onClose={{mm.actions.close}} />
-  </mmw.MobileMenu>
+{{#if this.sidebarOpen}}
+  <div
+    class="mobile-overlay"
+    role="presentation"
+    {{on "click" this.close}}
+  ></div>
+  <div class="mobile-drawer">
+    <Sidebar @onClose={{this.close}} />
+  </div>
+{{/if}}
 
-  <mmw.Content>
-    <div class="course">
-      <header>
-        <TopBar
-          @showLoading={{this.showLoading}}
-          @onToggle={{mmw.actions.toggle}}
-        />
-      </header>
+<div class="course {{if this.sidebarOpen "course--sidebar-open"}}">
+  <header>
+    <TopBar
+      @showLoading={{this.showLoading}}
+      @onToggle={{this.toggle}}
+    />
+  </header>
+  <div class="course-body">
+    <aside class="course-sidebar">
+      <Sidebar @onClose={{this.noop}} />
+    </aside>
+    <div class="course-main">
+      <div id="subnav-portal"></div>
       {{yield}}
     </div>
-  </mmw.Content>
-</MobileMenuWrapper>
+  </div>
+</div>

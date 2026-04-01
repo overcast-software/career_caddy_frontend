@@ -1,47 +1,33 @@
-<Menus::SubnavBar>
-  <div class="submenu-buttons">
-    {{#if this.isDirty}}
-      <button type="button" class="btn" {{on "click" this.saveResume}}>
-        Save
-      </button>
-    {{/if}}
-    <LinkTo
-      @route="resumes.edit"
-      @model={{this.model}}
-      class="btn"
-    >Edit</LinkTo>
-    <button type="button" class="btn danger" {{on "click" this.deleteResume}}>
-      Delete
-    </button>
-    <button type="button" class="btn" {{on "click" this.cloneResume}}>
-      Clone Resume
-    </button>
-    <LinkTo @route="resumes.import" class="btn">Import new resume</LinkTo>
-    <button type="button" class="btn" {{on "click" this.exportToWord}}>Export to
-      Word</button>
-    <span class="submenu-field">
-      <span class="submenu-label">Name:</span>
-      <span class="submenu-value">{{#if
-          this.model.name
-        }}{{this.model.name}}{{else}}N/A{{/if}}</span>
-    </span>
-    <span class="submenu-field">
-      <span class="submenu-label">Notes:</span>
-      <span class="submenu-value">{{#if
-          this.model.name
-        }}{{this.model.notes}}{{else}}N/A{{/if}}</span>
-    </span>
-  </div>
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
-  <div class="container">
-    <div class="builder-layout">
-      <main class="preview-panel">
-        <div class="resume-preview">
-          <Resumes::Item @resume={{this.model}} />
-        </div>
-      </main>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <div class="submenu-buttons">
+      {{#if this.isDirty}}
+        <button type="button" class="btn" {{on "click" this.saveResume}}>Save</button>
+      {{/if}}
+      <LinkTo @route="resumes.edit" @model={{this.model}} class="btn">Edit</LinkTo>
+      <button type="button" class="btn danger" {{on "click" this.deleteResume}}>Delete</button>
+      <button type="button" class="btn" {{on "click" this.cloneResume}}>Clone Resume</button>
+      <LinkTo @route="resumes.import" class="btn">Import new resume</LinkTo>
+      <button type="button" class="btn" {{on "click" this.exportToWord}}>Export to Word</button>
+      <span class="submenu-field">
+        <span class="submenu-label">Name:</span>
+        <span class="submenu-value">{{if this.model.name this.model.name "N/A"}}</span>
+      </span>
+      <span class="submenu-field">
+        <span class="submenu-label">Notes:</span>
+        <span class="submenu-value">{{if this.model.name this.model.notes "N/A"}}</span>
+      </span>
     </div>
-  </div>
-</div>
+  </:subnav>
+  <:main>
+    <div class="container">
+      <div class="builder-layout">
+        <main class="preview-panel">
+          <div class="resume-preview">
+            <Resumes::Item @resume={{this.model}} />
+          </div>
+        </main>
+      </div>
+    </div>
+  </:main>
+</RouteLayout>

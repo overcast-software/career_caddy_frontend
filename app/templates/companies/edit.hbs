@@ -1,5 +1,5 @@
-<Menus::SubnavBar />
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
-  <Companies::Form @company={{this.model}} />
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:main>
+    <Companies::Form @company={{this.model}} />
+  </:main>
+</RouteLayout>

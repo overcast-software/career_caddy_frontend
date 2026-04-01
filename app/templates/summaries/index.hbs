@@ -1,21 +1,18 @@
 {{page-title "Summaries"}}
-<Menus::SubnavBar>
-  Summaries
-</Menus::SubnavBar>
-<div class="fairway">
-  {{#if this.model.length}}
-    {{#each this.model as |summary|}}
-      <Panel::Card>
-        <Summaries::Item @summary={{summary}} />
-        <LinkTo
-          class="btn"
-          @route="summaries.show"
-          @model={{summary}}
-        >show</LinkTo>
-      </Panel::Card>
-
-    {{/each}}
-  {{else}}
-    <p class="muted">No summaries yet.</p>
-  {{/if}}
-</div>
+<RouteLayout>
+  <:subnav>
+    Summaries
+  </:subnav>
+  <:main>
+    {{#if this.model.length}}
+      {{#each this.model as |summary|}}
+        <Panel::Card>
+          <Summaries::Item @summary={{summary}} />
+          <LinkTo class="btn" @route="summaries.show" @model={{summary}}>show</LinkTo>
+        </Panel::Card>
+      {{/each}}
+    {{else}}
+      <p class="muted">No summaries yet.</p>
+    {{/if}}
+  </:main>
+</RouteLayout>

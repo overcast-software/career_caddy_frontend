@@ -1,10 +1,14 @@
-<Menus::SubnavBar>
-  <LinkTo @route="cover-letters.new" class="btn">New Cover Letter</LinkTo>
-</Menus::SubnavBar>
-<div class="fairway">
-  <CoverLetters::List
-    @coverLetters={{this.model}}
-    @toggleFavorite={{this.toggleFavorite}}
-  />
-  {{outlet}}
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="cover-letters.new" class="btn">New Cover Letter</LinkTo>
+  </:subnav>
+  <:main>
+    <CoverLetters::List
+      @coverLetters={{this.model}}
+      @toggleFavorite={{this.toggleFavorite}}
+    />
+  </:main>
+  <:outlet>
+    {{outlet}}
+  </:outlet>
+</RouteLayout>

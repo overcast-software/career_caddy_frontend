@@ -1,19 +1,14 @@
 {{page-title "Edit"}}
-<Menus::SubnavBar>
-  <button {{on "click" this.save}} class="btn" type="button">save</button>
-  <button class="btn" type="button">cancel</button>
-</Menus::SubnavBar>
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
-<div class="fairway">
-
-  <JobApplications::Edit
-    @jobApplication={{this.model.jobApplication}}
-    @resumes={{this.model.resumes}}
-    @coverLetters={{this.model.coverLetters}}
-  />
-  {{outlet}}
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <button {{on "click" this.save}} class="btn" type="button">save</button>
+    <button class="btn" type="button">cancel</button>
+  </:subnav>
+  <:main>
+    <JobApplications::Edit
+      @jobApplication={{this.model.jobApplication}}
+      @resumes={{this.model.resumes}}
+      @coverLetters={{this.model.coverLetters}}
+    />
+  </:main>
+</RouteLayout>

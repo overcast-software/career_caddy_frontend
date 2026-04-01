@@ -1,63 +1,41 @@
-<Menus::SubnavBar>
-  <LinkTo
-    class="nav-link"
-    @route="job-posts.edit"
-    @model={{this.model}}
-  >Edit</LinkTo>
-  <button
-    class="nav-link btn btn-link"
-    type="button"
-    {{on "click" this.createQuestionWithApplication}}
-  >
-    New question
-  </button>
-  <LinkTo
-    class="nav-link"
-    @route="job-posts.show.job-applications.index"
-    @model={{this.model}}
-  >
-    Applications
-  </LinkTo>
-
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
-  <Panel::Card
-    @title="{{this.model.title}} at {{this.model.company.name}}"
-    @collapsible={{true}}
-    @startCollapsed={{true}}
-  >
-    <:subtitle>
-      {{#if this.model.postedDate}}
-        <span class="muted">Posted:
-          {{moment-format this.model.postedDate "MMM D, YYYY"}}</span>
-      {{/if}}
-      {{#if this.model.createdAt}}
-        <span class="muted">Created:
-          {{moment-format this.model.createdAt "MMM D, YYYY"}}</span>
-      {{/if}}
-    </:subtitle>
-    <:top as |card|>
-      <button
-        type="button"
-        {{on "click" card.toggleCollapsed}}
-        class="btn btn-sm"
-      >
-        {{if card.collapsed "Show" "Hide"}}
-        Details
-      </button>
-    </:top>
-    <:default>
-      <JobPosts::Item
-        @showControls={{this.showControls}}
-        @jobPost={{this.model}}
-        @showLoading={{this.showLoading}}
-        @resumeSetter={{this.resumeSetter}}
-        @resume={{this.model.resume}}
-        @resumes={{this.resumes}}
-      />
-    </:default>
-  </Panel::Card>
-
-  {{outlet}}
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo class="btn" @route="job-posts.edit" @model={{this.model}}>Edit</LinkTo>
+    <button class="btn" type="button" {{on "click" this.createQuestionWithApplication}}>New question</button>
+    <LinkTo class="btn" @route="job-posts.show.job-applications.index" @model={{this.model}}>Applications</LinkTo>
+  </:subnav>
+  <:main>
+    <Panel::Card
+      @title="{{this.model.title}} at {{this.model.company.name}}"
+      @collapsible={{true}}
+      @startCollapsed={{true}}
+    >
+      <:subtitle>
+        {{#if this.model.postedDate}}
+          <span class="muted">Posted: {{moment-format this.model.postedDate "MMM D, YYYY"}}</span>
+        {{/if}}
+        {{#if this.model.createdAt}}
+          <span class="muted">Created: {{moment-format this.model.createdAt "MMM D, YYYY"}}</span>
+        {{/if}}
+      </:subtitle>
+      <:top as |card|>
+        <button type="button" {{on "click" card.toggleCollapsed}} class="btn btn-sm">
+          {{if card.collapsed "Show" "Hide"}} Details
+        </button>
+      </:top>
+      <:default>
+        <JobPosts::Item
+          @showControls={{this.showControls}}
+          @jobPost={{this.model}}
+          @showLoading={{this.showLoading}}
+          @resumeSetter={{this.resumeSetter}}
+          @resume={{this.model.resume}}
+          @resumes={{this.resumes}}
+        />
+      </:default>
+    </Panel::Card>
+  </:main>
+  <:outlet>
+    {{outlet}}
+  </:outlet>
+</RouteLayout>

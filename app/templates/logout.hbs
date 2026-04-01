@@ -1,11 +1,8 @@
-<Menus::SubnavBar>
-  <label>bye bye</label>
-</Menus::SubnavBar>
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
-<div class="fairway">
-  <h1>You have successfully logged out.</h1>
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    bye bye
+  </:subnav>
+  <:main>
+    <h1>You have successfully logged out.</h1>
+  </:main>
+</RouteLayout>

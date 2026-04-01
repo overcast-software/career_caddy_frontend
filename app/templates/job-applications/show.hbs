@@ -1,91 +1,41 @@
-<div class="bar-cart">
-  {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} />
-  {{/each}}
-</div>
-<div class="flow-root">
-  <dl class="-my-3 divide-y divide-gray-200 text-sm">
-    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-      <dt class="font-medium text-gray-900">Application for</dt>
-
-      <dd class="text-gray-700 sm:col-span-2">
-        {{this.model.jobPost.title}}
-        at
-        {{this.model.company.name}}"
-      </dd>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="job-applications.edit" @model={{this.model.id}} class="btn">Edit</LinkTo>
+    <button type="button" class="btn" {{on "click" this.destroyRecord}}>Destroy</button>
+    <LinkTo @route="job-posts.show" @model={{this.model.jobPost}} class="btn">Job Post</LinkTo>
+    <LinkTo @route="job-applications.show.questions.index" @model={{this.model}} class="btn">Questions</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="flow-root">
+      <dl class="-my-3 divide-y divide-gray-200 text-sm">
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Application for</dt>
+          <dd class="text-gray-700 sm:col-span-2">{{this.model.jobPost.title}} at {{this.model.company.name}}</dd>
+        </div>
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Resume</dt>
+          <dd class="text-gray-700 sm:col-span-2">{{#if this.model.resume}}{{this.model.resume.name}}{{else}}N/A{{/if}}</dd>
+        </div>
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Day applied</dt>
+          <dd class="text-gray-700 sm:col-span-2">{{format-date this.model.appliedAt}}</dd>
+        </div>
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Status</dt>
+          <dd class="text-gray-700 sm:col-span-2">{{this.model.status}}</dd>
+        </div>
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Link</dt>
+          <dd class="text-gray-700 sm:col-span-2">{{this.model.trackingUrl}}</dd>
+        </div>
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Notes</dt>
+          <dd class="text-gray-700 sm:col-span-2">{{this.model.notes}}</dd>
+        </div>
+      </dl>
     </div>
-
-    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-      <dt class="font-medium text-gray-900">Resume</dt>
-
-      <dd class="text-gray-700 sm:col-span-2">
-
-        {{#if this.model.resume}}
-          {{this.model.resume.name}}
-        {{else}}
-          N/A
-        {{/if}}
-      </dd>
-    </div>
-
-    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-      <dt class="font-medium text-gray-900">Day applied</dt>
-
-      <dd class="text-gray-700 sm:col-span-2">
-
-        {{format-date this.model.appliedAt}}
-      </dd>
-    </div>
-
-    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-      <dt class="font-medium text-gray-900">Status</dt>
-
-      <dd class="text-gray-700 sm:col-span-2">
-
-        {{this.model.status}}
-      </dd>
-    </div>
-
-    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-      <dt class="font-medium text-gray-900">Link</dt>
-
-      <dd class="text-gray-700 sm:col-span-2">
-
-        {{this.model.trackingUrl}}
-      </dd>
-    </div>
-    <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-      <dt class="font-medium text-gray-900">Notes</dt>
-
-      <dd class="text-gray-700 sm:col-span-2">
-        {{this.model.notes}}
-      </dd>
-    </div>
-  </dl>
-  <div class="inline-flex">
-
-    <LinkTo
-      @route="job-applications.edit"
-      @model={{this.model.id}}
-      class="rounded-l-sm border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
-    >Edit</LinkTo>
-    <LinkTo
-      {{on "click" this.destroyRecord}}
-      @route="job-applications.edit"
-      @model={{this.model}}
-      class="rounded-l-sm border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
-    >Destroy</LinkTo>
-
-    <LinkTo
-      class="-ml-px rounded-r-sm border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
-      @route="job-posts.show"
-      @model={{this.model.jobPost}}
-    >Job Post</LinkTo>
-
-    <LinkTo
-      class="-ml-px rounded-r-sm border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white focus:outline-none disabled:pointer-events-auto disabled:opacity-50"
-      @route="job-applications.show.questions.index"
-      @model={{this.model}}
-    >Questions</LinkTo>
-  </div>
-</div>
+  </:main>
+  <:outlet>
+    {{outlet}}
+  </:outlet>
+</RouteLayout>
