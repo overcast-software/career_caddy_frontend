@@ -4,7 +4,7 @@ import { action } from '@ember/object';
 export default class JobApplicationsEditController extends Controller {
   @service flashMessages;
   @action save() {
-    this.model
+    this.model.jobApplication
       .save()
       .catch((error) => this.flashMessages.alert(error))
       .then(() => this.flashMessages.success('save complete'));

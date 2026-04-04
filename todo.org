@@ -1,16 +1,40 @@
 # +title: Todo
 #+startup: show2levels
 * Inbox
-** TODO need link to manual entry :UI:
+** TODO hide details is not appropriate.  there should be a 'show details' when in a child relationship like job-posts/id/job-applications so that it gets the details out of the way.
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/job-posts/item.hbs::</LinkTo>]]
+** TODO scrapes.  need to see if one exists..  make a scrape action if one does not exist.
+
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/job-posts/item.hbs::</LinkTo>]]
+** TODO would like a parse button/action in case it needs to be done. requires backend to support scrapes/id/parse
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/scrapes/item.hbs::</dl>]]
+** TODO we want to surface any scrapes related as well as summaries.  be able to link.
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-posts/show.hbs::{{this.resumes}}]]
+** TODO add a score creation button/actions
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/job-posts/list.hbs::</div>]]
+** TODO invalid dates should not be at the top.  find out why they are invalid and fix
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-applications/index.hbs::<:subnav>]]
+** TODO application edit should have the same ability to edit statuses
+
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-applications/edit.hbs::{{page-title "Edit"}}]]
+** DONE need link to manual entry :UI:
+CLOSED: [2026-04-01 Wed 18:49]
 manual entry what?  for sure summaries.
 sidebar doesn't have link to manual job post entry.
-** TODO career-data
+** DONE career-data
+CLOSED: [2026-04-01 Wed 18:49]
 find out why duplication occurs
 
 ** WAIT if you don't supply a resume when filling out job application it silently fails
 where is a fix right now
 refresh was the root cause but this will warn if no company is assigned
-** NO [#B] job-post/scrape needs loading
+** DONE [#B] job-post/scrape needs loading
 Scrape is returning fast, but we need to poll it to get results
 CLOSED: [2026-02-26 Thu 17:49]
 
@@ -18,7 +42,7 @@ CLOSED: [2026-02-26 Thu 17:49]
 ** TODO when ai returns answer.  add it to the list in questions/:id/answers
 maybe I meant redirect
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js]]
-This should happen anyway.  
+This should happen anyway.
 ** TODO [#A] the upload button should be disabled after upload successfull
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
 ** DONE /resumes/index favorite button needs work
@@ -28,7 +52,8 @@ is outside of the card
 
 
 ** [?] [#B] should route job_post
-
+maybe I mean that after save go to job-post/<id>
+*** TODO find what it does now
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
 ** DONE don't let the token expire too early
 CLOSED: [2026-02-26 Thu 17:55]
@@ -38,14 +63,15 @@ this is a
 ** TODO The adding of a new resume is borked :resume:
 Adding new resume is ok.  cloning is for customizing
 I go to edit a resume when I should be cloning
-** TODO descriptions should have descriptions :resume:
+*** projects need to be tested :api:
+** WAIT descriptions should have descriptions :resume:
 make a join table so that a description can describe a description
 this is a feature for STAR on bullet points
-** TODO thinking for resume import
+this is what the q&a portion does
+** TODO thinking for resume import.
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
-
 *** TODO should also disable button for upload so you can't upload twice
-** TODO [#B] edit resume is broken  edit.js
+** STRT [#B] edit resume is broken  edit.js
 lowered priority b/c we don't actually need it
 serializeAttribute application.js:22
 * features
@@ -53,7 +79,8 @@ serializeAttribute application.js:22
 might want to make this a feature
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/questions/form.hbs::as |company|]]
-** IDEA when you create a scrape got to the scrape show page.  maybe add a poll
+** DONE when you create a scrape got to the scrape show page.  maybe add a poll
+CLOSED: [2026-04-01 Wed 18:53]
 ** IDEA "create-new-summary" action in UI is missing
 mostly AI generated but would be nice to create one manually
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
@@ -71,21 +98,34 @@ mostly AI generated but would be nice to create one manually
 }
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/answers/form.js::import Component from '@glimmer/component';]]
-** TODO if scrape fails the loading is still showing
+** NO if scrape fails the loading is still showing
+CLOSED: [2026-04-01 Wed 18:54]
 on error is broken for spinnier.wrap()?
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/questions/show.js::@service router;]]
 *** after rewrite they are all breaking
-** TODO job-application/:id/edit
+** TODO when polling for a scrape the scrape should have an alternate component indicating its working
+** TODO when polling for a score the score should have an alternate component indicating its working
+** TODO when polling for a resume the resume should have an alternate component indicating its working
+** DONE job-application/:id/edit
+CLOSED: [2026-04-01 Wed 18:57]
 :LOGBOOK:
+- Note taken on [2026-04-01 Wed 18:57] \\
+  fixed with json:api compliance
 CLOCK: [2026-02-13 Fri 18:42]--[2026-02-13 Fri 18:43] =>  0:01
 :END:
 if coming from another page resume doesn't populate
 
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/authenticators/jwt.js::const url = `${this.baseUrl}${this.authConfig.TOKEN_PATH}`;]]
 
-*** TODO get a user story for this
+*** DONE get a user story for this
+CLOSED: [2026-04-01 Wed 18:57]
 ** TODO saving a new manual answer stays in /new should reroute to show :bug:
-** IDEA the refresh bug is that @route='model' should be @route='model.id' for /resume/edit//:id/
+** DONE the refresh bug is that @route='model' should be @route='model.id' for /resume/edit//:id/
+CLOSED: [2026-04-01 Wed 18:58]
+:LOGBOOK:
+- Note taken on [2026-04-01 Wed 18:58] \\
+  this is also fixed via json:api standard.  returning [] for data told ember that there was no data to fetch.
+:END:
 * production readiness
 ** Synopsis (as of 2026-03-20)
 - 36/165 QUnit tests failing; CI blocks on push to main
@@ -157,8 +197,22 @@ Verify a manual ~workflow_dispatch~ run completes without the "secret is not set
 - Dockerfile: confirm static assets are built with ~npm run build~ (not ~start~) and served via nginx
 
 * projects
-** TODO chat
+** PROJ /plan bootstrap
+** PROJ chat
+that would be kinda cool to have a chat in the webpage
 ** TODO UI revampt
+*** DONE job-application/edit save Uncaught TypeError: this.model.save is not a function
+CLOSED: [2026-04-01 Wed 20:08]
+*** DONE Resume/id/edit Collapse education to begin with
+CLOSED: [2026-04-01 Wed 20:08]
+*** use career-data to score, maybe by entering resume_id 0 :api:
+*** when displaying resume if no summary wasn't presented then don't show the header tag
+*** answer/show application response should be a label and the text inside an outlinded round container
+***  bug: job-application/new resume alt names aren't showing up
+*** feature gitflow like status for failure conditions
+*** create a statuses for job-application
+*** job-application/show show's collected status
+
 * PROJ UI revamp
 ** Phase 1: Analysis & Design System
 *** TODO Document target site structure and components
@@ -222,8 +276,3 @@ Verify a manual ~workflow_dispatch~ run completes without the "secret is not set
 *** TODO Staging deployment
 *** TODO Production deployment
 *** TODO Monitor for issues
-
-** Notes
-- Need actual screenshots/details from jobops.dakheera47.com to proceed
-- Consider using a feature flag to toggle between old/new UI during development
-- May need to update Ember dependencies if using newer component patterns

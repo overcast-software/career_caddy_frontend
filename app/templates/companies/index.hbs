@@ -1,16 +1,24 @@
-<Menus::SubnavBar>
-  <div class="controls">
-    <input
-      type="search"
-      aria-label="search"
-      placeholder="Search companies..."
-      value={{this.query}}
-      {{on "input" this.onInput}}
-    />
-    <LinkTo @route="companies.new" class="btn">+ New Company</LinkTo>
-  </div>
-</Menus::SubnavBar>
-<BarCart @flashMessages={{this.flashMessages}} />
-<div class="fairway">
-  <Companies::List @companies={{this.companies}} @onDelete={{this.deleteCompany}} />
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <div class="controls">
+      <input
+        type="search"
+        aria-label="search"
+        placeholder="Search companies..."
+        value={{this.search}}
+        {{on "input" this.onSearchInput}}
+      />
+      <LinkTo @route="companies.new" class="btn">+ New Company</LinkTo>
+    </div>
+  </:subnav>
+  <:main>
+    {{#if this.isSearching}}
+      <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+    {{else}}
+      <Companies::List @companies={{this.model}} @onDelete={{this.deleteCompany}} />
+      <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
+        <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
+      </InfinityLoader>
+    {{/if}}
+  </:main>
+</RouteLayout>

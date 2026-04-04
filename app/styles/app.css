@@ -187,13 +187,27 @@ a {
 
 .builder-form {
   display: grid;
-  gap: var(--space-5);
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--space-4);
+  row-gap: var(--space-3);
+  align-items: center;
   padding: var(--space-6);
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
+/* Non-field direct children (buttons, field-rows, etc.) span both columns */
+.builder-form > *:not(.field) {
+  grid-column: 1 / -1;
+}
+
+/* Direct .field children dissolve into the grid so label+control align */
+.builder-form > .field {
+  display: contents;
+}
+
+/* Nested .field elements (inside .field-row) stay as flex rows */
 .builder-form .field {
   display: flex;
   align-items: center;
@@ -258,19 +272,36 @@ a {
   font-size: 0.9rem;
   color: var(--muted);
   letter-spacing: 0.02em;
+  min-width: 7rem;
+  flex-shrink: 0;
 }
 
 .builder-form .field-row {
   display: flex;
   gap: var(--space-4);
+  grid-column: 1 / -1;
 }
 
 .builder-form .field-row .field {
   flex: 1;
+  min-width: 0;
 }
 
 .builder-form .field-row .field:last-child {
   align-items: flex-end;
+}
+
+/* Stack field-rows when the editor panel is too narrow (e.g. sidebar open) */
+@container editor (width < 420px) {
+  .builder-form .field-row {
+    flex-direction: column;
+  }
+
+  .builder-form .field-row .field,
+  .builder-form .field-row label.field {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 .present-indicator {
@@ -587,52 +618,97 @@ p.tee {
   gap: var(--space-3);
 }
 
-/* Two-column builder form variant */
-.builder-form.two-col {
+/* Experience accordion header */
+.exp-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-5);
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin: calc(-1 * var(--space-5));
+  margin-bottom: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
 }
 
-/* .builder-form.two-col .field { */
-
-/*   flex: 1 1 calc(50% - var(--space-5)); */
-
-/*   min-width: 300px; */
-
-/* } */
-
-.builder-form.two-col .form-actions {
-  flex: 1 0 100%;
+.exp-header:hover {
+  background: var(--surface-hover, #f3f4f6);
 }
 
-/* Compact inputs within two-column builder forms */
-.builder-form.two-col .field input,
-.builder-form.two-col .field select,
-.builder-form.two-col .field textarea {
-  padding: var(--space-2) var(--space-3);
-  font-size: 0.95rem;
-  border-radius: 4px;
-  margin: 0 var(--space-1);
-  width: calc(100% - (var(--space-1) * 2));
+.exp-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.builder-form.two-col .field select {
-  background-color: var(--card);
+.exp-header-title {
+  font-weight: 600;
+  font-size: 0.9rem;
   color: var(--text);
-  appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='none'><path d='M5 7l5 5 5-5' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 28px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exp-header-company {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.exp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.exp-delete {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.exp-delete:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.exp-chevron {
+  color: var(--muted);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.exp-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+/* Two-column builder form variant */
+/* Two-column tile layout: equal-width fields tiling across 2 columns */
+.builder-form.two-col {
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: var(--space-5);
+}
+
+/* In two-col, .field is a grid cell (label stacked above input) */
+.builder-form.two-col > .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 @media (width <= 640px) {
-  .builder-form.two-col .field {
-    flex-basis: 100%;
-    min-width: 0;
-    width: 100%;
+  .builder-form.two-col {
+    grid-template-columns: 1fr;
   }
 
   .experience .job-header {
@@ -1011,6 +1087,16 @@ footer {
     display: block;
   }
 
+  .builder-form {
+    grid-template-columns: 1fr;
+  }
+
+  .builder-form > .field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .builder-form .field {
     flex-direction: column;
     align-items: stretch;
@@ -1063,6 +1149,8 @@ footer {
   top: 16px;
   gap: var(--space-4);
   align-self: start;
+  container-type: inline-size;
+  container-name: editor;
 }
 
 .preview-panel {
@@ -1277,6 +1365,7 @@ pre {
     min-height: 0;
     overflow-y: auto;
     position: static; /* override sticky on large screens */
+    padding-bottom: 4em; /* clear fixed footer */
   }
 
   .preview-panel {
@@ -1403,6 +1492,12 @@ header {
 
 .breadcrumb-link:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 639px) {
+  .breadcrumbs {
+    display: none;
+  }
 }
 
 /* Spinner status (subnav right) */

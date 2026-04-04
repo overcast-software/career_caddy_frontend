@@ -9,4 +9,8 @@ export default class JobPostsShowRoute extends Route {
       include: ['company', 'job-application', 'question'],
     });
   }
+
+  async afterModel() {
+    await this.store.findAll('resume');
+  }
 }

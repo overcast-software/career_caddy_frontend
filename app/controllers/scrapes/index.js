@@ -1,0 +1,42 @@
+import Controller from '@ember/controller';
+import { tracked } from '@glimmer/tracking';
+import { action } from '@ember/object';
+import { service } from '@ember/service';
+
+export default class ScrapesIndexController extends Controller {
+  queryParams = ['search'];
+
+  @service flashMessages;
+  @service store;
+  @service spinner;
+  @tracked search = '';
+  @tracked isSearching = false;
+
+  #debounceTimer = null;
+
+  @action
+  onSearchInput(event) {
+    const value = event.target.value;
+    this.isSearching = true;
+    clearTimeout(this.#debounceTimer);
+    this.#debounceTimer = setTimeout(() => {
+      this.search = value;
+    }, 300);
+  }
+
+  @action
+  async retryScrape(scrape) {
+    this.spinner.begin({ label: 'Retrying scrape...' });
+    try {
+      const adapter = this.store.adapterFor('scrape');
+      const url = `${adapter.buildURL('scrape', scrape.id)}/redo/`;
+      await adapter.ajax(url, 'POST');
+      this.flashMessages.success('Scrape retry initiated');
+      await scrape.reload();
+    } catch (error) {
+      this.flashMessages.danger('Failed to retry scrape: ' + error.message);
+    } finally {
+      this.spinner.end();
+    }
+  }
+}

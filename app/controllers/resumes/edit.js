@@ -1,13 +1,11 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
-import { tracked } from '@glimmer/tracking';
 
 export default class ResumesEditController extends Controller {
   @service store;
   @service router;
   @service flashMessages;
-  @tracked summaryIndex = 0;
 
   @action
   async cloneResume() {
@@ -39,8 +37,6 @@ export default class ResumesEditController extends Controller {
     try {
       await this.model.save();
     } catch (e) {
-      // Optional: surface error to the user
-
       console.error('Failed to save resume', e);
     }
   }
@@ -53,6 +49,7 @@ export default class ResumesEditController extends Controller {
       this.flashMessages.success('successfully deleted resume.');
     });
   }
+
   @action
   async exportToWord() {
     if (this.isExporting) return;
@@ -60,19 +57,15 @@ export default class ResumesEditController extends Controller {
     try {
       const id = this.model.id;
       const adapter = this.store.adapterFor('resume');
-      // buildURL returns a trailing slash; append 'export'
-      const base = adapter.buildURL('resume', id); // e.g. /api/v1/resume/1/
-      const url = `${base}export`; // -> /api/v1/resume/1/export
+      const base = adapter.buildURL('resume', id);
+      const url = `${base}export`;
 
       const resp = await fetch(url, { method: 'GET', credentials: 'include' });
       if (!resp.ok) throw new Error(`Export failed (${resp.status})`);
 
-      // If the API returns the docx file, trigger a download
       const ct = resp.headers.get('content-type') || '';
       if (
-        ct.includes(
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        ) ||
+        ct.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
         ct.includes('application/octet-stream')
       ) {
         const blob = await resp.blob();
@@ -84,7 +77,6 @@ export default class ResumesEditController extends Controller {
         URL.revokeObjectURL(link.href);
         link.remove();
       } else {
-        // If API returns JSON with a URL, follow it (optional fallback)
         try {
           const data = await resp.json();
           if (data?.url) window.location.assign(data.url);
@@ -105,28 +97,11 @@ export default class ResumesEditController extends Controller {
     if (!rel.includes(exp)) rel.unshiftObject(exp);
   };
 
+  get resumeSummaries() {
+    return this.store.peekAll('summary')
+  }
+
   get isDirty() {
     return this.model?.isNew || this.model?.hasDirtyAttributes;
-  }
-
-  @action
-  updateSummaryIndex(newIndex) {
-    this.summaryIndex = newIndex;
-  }
-
-  @action
-  onSummaryDirection(dir) {
-    const list =
-      this.model.summaries?.toArray?.() ??
-      Array.from(this.model.summaries ?? []);
-    const count = list.length;
-
-    if (count < 2) return;
-
-    if (dir === 'left') {
-      this.summaryIndex = (this.summaryIndex - 1 + count) % count;
-    } else if (dir === 'right') {
-      this.summaryIndex = (this.summaryIndex + 1) % count;
-    }
   }
 }

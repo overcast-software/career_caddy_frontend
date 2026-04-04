@@ -12,7 +12,7 @@ export default class ScrapesController extends Controller {
     this.spinner.begin({ label: 'Retrying scrape...' });
     try {
       const adapter = this.store.adapterFor('scrape');
-      const url = `${adapter.buildURL('scrape', scrape.id)}/redo/`;
+      const url = `${adapter.buildURL('scrape', scrape.id)}redo/`;
 
       await adapter.ajax(url, 'POST');
 

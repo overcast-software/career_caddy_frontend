@@ -20,6 +20,7 @@
             <button
               type="button"
               class="btn primary small"
+              disabled={{@disabled}}
               {{on "click" (fn this.handleFiles queue.files)}}
             >
               Upload

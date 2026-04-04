@@ -1,9 +1,24 @@
+{{page-title "Scrapes"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    scrapes
+    <div class="controls">
+      <input
+        type="search"
+        aria-label="search"
+        placeholder="Search scrapes..."
+        value={{this.search}}
+        {{on "input" this.onSearchInput}}
+      />
+    </div>
   </:subnav>
   <:main>
-    <Scrapes::Form @scrape={{this.model}} />
-    <button type="button" class="btn btn-primary" {{on "click" (fn this.retryScrape this.model)}}>Retry Scrape</button>
+    {{#if this.isSearching}}
+      <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+    {{else}}
+      <Scrapes::List @scrapes={{this.model}} @onRetry={{this.retryScrape}} />
+      <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
+        <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
+      </InfinityLoader>
+    {{/if}}
   </:main>
 </RouteLayout>

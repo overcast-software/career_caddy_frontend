@@ -1,32 +1,25 @@
-{{page-title "Edit"}}
+{{page-title "Edit Answer"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
     answer edit
   </:subnav>
   <:main>
-    <div class="panel-card builder-form">
-      <div class="field">{{this.model.question.content.content}}</div>
-      <form {{on "submit" this.saveAnswer}}>
-        <div class="field">
-          <label>
-            <textarea
-              {{on "change" this.updateContent}}
-              class="min-h-48 resize-y w-full"
-              rows="{{this.textareaRows}}"
-            >{{this.model.content}}</textarea>
-          </label>
-        </div>
-        <div class="field">
-          <button
-            type="button"
-            class="btn favorite {{if this.model.favorite 'favorited'}}"
-            data-tooltip="Favorited answers appear in Career Data"
-            {{on "click" this.toggleFavorite}}
-          >★</button>
-        </div>
-        <button type="submit" class="btn">save</button>
-        <button {{on "click" this.deleteAnswer}} type="button" class="btn">delete</button>
-      </form>
-    </div>
+    <form class="builder-form" {{on "submit" this.saveAnswer}}>
+      <p class="muted">{{this.model.question.content.content}}</p>
+      <textarea
+        {{on "change" this.updateContent}}
+        rows="{{this.textareaRows}}"
+      >{{this.model.content}}</textarea>
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn favorite {{if this.model.favorite 'favorited'}}"
+          data-tooltip="Favorited answers appear in Career Data"
+          {{on "click" this.toggleFavorite}}
+        >★</button>
+        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn danger" {{on "click" this.deleteAnswer}}>Delete</button>
+      </div>
+    </form>
   </:main>
 </RouteLayout>

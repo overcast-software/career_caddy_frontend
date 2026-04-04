@@ -7,7 +7,7 @@ export default class ScrapeModel extends Model {
   @attr('string') externalLink;
   @attr('string') parseMethod;
   @attr('date') scrapedAt;
-  @attr('string') state;
+  @attr('string') status;
   @attr('string') html;
   @belongsTo('job-post', { async: false, inverse: 'scrapes' }) jobPost;
   @belongsTo('company', { async: false, inverse: 'scrapes' }) company;

@@ -2,7 +2,7 @@
   <div>
     <label for="resume-select">Select a resume: </label>
     <PowerSelect
-      @options={{@resumes}}
+      @options={{this.resumeOptions}}
       @onChange={{this.updateResume}}
       @selected={{this.selectedResume}}
       as |resume|
@@ -13,7 +13,7 @@
   {{#if this.selectedResume}}
     <div class="actions">
       <button type="button" class="btn" {{on "click" this.scoreResume}}>Score
-        resume against job post</button>
+        against job post</button>
       <button type="button" class="btn" {{on "click" this.createSummary}}>Create
         new resume summary</button>
       <button

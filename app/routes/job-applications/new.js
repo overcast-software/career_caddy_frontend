@@ -24,6 +24,7 @@ export default class JobApplicationsNewRoute extends Route {
       jobApplication.jobPost = jobPost;
     }
     this.store.findAll('cover-letter');
+    this.store.findAll('job-post');
     if (resumeId) {
       const resume = this.store.peekRecord('resume', resumeId);
       jobApplication.resume = resume;

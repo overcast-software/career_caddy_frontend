@@ -6,33 +6,51 @@
     <LinkTo @route="job-applications.show.questions.index" @model={{this.model}} class="btn">Questions</LinkTo>
   </:subnav>
   <:main>
-    <div class="flow-root">
-      <dl class="-my-3 divide-y divide-gray-200 text-sm">
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900">Application for</dt>
-          <dd class="text-gray-700 sm:col-span-2">{{this.model.jobPost.title}} at {{this.model.company.name}}</dd>
-        </div>
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900">Resume</dt>
-          <dd class="text-gray-700 sm:col-span-2">{{#if this.model.resume}}{{this.model.resume.name}}{{else}}N/A{{/if}}</dd>
-        </div>
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900">Day applied</dt>
-          <dd class="text-gray-700 sm:col-span-2">{{format-date this.model.appliedAt}}</dd>
-        </div>
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900">Status</dt>
-          <dd class="text-gray-700 sm:col-span-2">{{this.model.status}}</dd>
-        </div>
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900">Link</dt>
-          <dd class="text-gray-700 sm:col-span-2">{{this.model.trackingUrl}}</dd>
-        </div>
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900">Notes</dt>
-          <dd class="text-gray-700 sm:col-span-2">{{this.model.notes}}</dd>
-        </div>
-      </dl>
+    <div class="space-y-4">
+    <div class="panel-card space-y-6">
+      <JobApplications::StatusFlow @current={{this.model.status}} />
+
+      <div class="flow-root">
+        <dl class="-my-3 divide-y divide-gray-200 text-sm">
+          <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <dt class="font-medium text-gray-900">Application for</dt>
+            <dd class="text-gray-700 sm:col-span-2">{{this.model.jobPost.title}} at {{this.model.company.name}}</dd>
+          </div>
+          <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <dt class="font-medium text-gray-900">Resume</dt>
+            <dd class="text-gray-700 sm:col-span-2">{{#if this.model.resume}}{{this.model.resume.name}}{{else}}N/A{{/if}}</dd>
+          </div>
+          <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <dt class="font-medium text-gray-900">Day applied</dt>
+            <dd class="text-gray-700 sm:col-span-2">{{format-date this.model.appliedAt}}</dd>
+          </div>
+          <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <dt class="font-medium text-gray-900">Status</dt>
+            <dd class="text-gray-700 sm:col-span-2">{{this.model.status}}</dd>
+          </div>
+          {{#if this.model.trackingUrl}}
+            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+              <dt class="font-medium text-gray-900">Link</dt>
+              <dd class="text-gray-700 sm:col-span-2">
+                <a href={{this.model.trackingUrl}} target="_blank" rel="noopener noreferrer" class="hover:underline break-all">
+                  {{this.model.trackingUrl}}
+                </a>
+              </dd>
+            </div>
+          {{/if}}
+          {{#if this.model.notes}}
+            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+              <dt class="font-medium text-gray-900">Notes</dt>
+              <dd class="text-gray-700 sm:col-span-2">{{this.model.notes}}</dd>
+            </div>
+          {{/if}}
+        </dl>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <JobApplications::StatusLog @jobApplication={{this.model}} />
+    </div>
     </div>
   </:main>
   <:outlet>

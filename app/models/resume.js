@@ -17,7 +17,4 @@ export default class ResumeModel extends Model {
   @hasMany('summary', { async: true, inverse: 'resume' }) summaries;
   @hasMany('certification', { async: true, inverse: 'resume' }) certifications;
   @hasMany('skill', { async: true, inverse: 'resume' }) skills;
-  get activeSummary() {
-    return this.summaries?.content?.find((summary) => summary.active) ?? null;
-  }
 }

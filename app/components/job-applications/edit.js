@@ -89,7 +89,23 @@ export default class JobApplicationsEdit extends Component {
   }
 
   get statuses() {
-    return ['Applied', 'Interviewing', 'Rejected', 'Offer', 'Withdrawn'];
+    return [
+      'Unvetted',
+      'Vetted Good',
+      'Applied',
+      'Contact',
+      'Interview Scheduled',
+      'Interviewed',
+      'Technical Test',
+      'Awaiting Decision',
+      'Offer',
+      'Accepted',
+      'Declined',
+      'Vetted Bad',
+      'Rejected',
+      'Expired',
+      'Archived',
+    ];
   }
 
   get baseId() {

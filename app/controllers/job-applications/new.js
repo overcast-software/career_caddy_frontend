@@ -13,7 +13,6 @@ export default class JobApplicationsNewController extends Controller {
 
   get coverLetters() {
     const coverLetters = this.store.peekAll('cover-letter');
-    console.log(coverLetters);
     if (this.selectedJobPost) {
       return coverLetters.filter(
         (cl) => cl.jobPost.id === this.selectedJobPost.id,
@@ -33,18 +32,20 @@ export default class JobApplicationsNewController extends Controller {
 
   get statuses() {
     return [
-      'Saved',
+      'Unvetted',
+      'Vetted Good',
       'Applied',
-      'Researching',
-      'Drafting Application',
-      'Awaiting Response',
-      'Phone Screen',
+      'Contact',
       'Interview Scheduled',
-      'Interview Completed',
-      'Negotiating',
-      'Offer Accepted',
-      'Offer Declined',
-      'Application Withdrawn',
+      'Interviewed',
+      'Technical Test',
+      'Awaiting Decision',
+      'Offer',
+      'Accepted',
+      'Declined',
+      'Vetted Bad',
+      'Rejected',
+      'Expired',
       'Archived',
     ];
   }
@@ -71,7 +72,8 @@ export default class JobApplicationsNewController extends Controller {
     this.showAppliedAt = this.model.status === 'Applied';
   }
 
-  @action saveApplication() {
+  @action saveApplication(event) {
+    event?.preventDefault();
     if (!this.selectedJobPost) {
       this.flashMessages.warn('please select a job.');
       return;

@@ -7,4 +7,9 @@ export default class ScrapesShowRoute extends Route {
   model({ scrape_id }) {
     return this.store.findRecord('scrape', scrape_id);
   }
+
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    controller.startPollingIfNeeded(model);
+  }
 }

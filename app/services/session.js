@@ -2,6 +2,8 @@ import Service from 'ember-simple-auth/services/session';
 import { service } from '@ember/service';
 import { getOwner } from '@ember/application';
 import { decodeExp, now } from 'career-caddy-frontend/utils/jwt';
+import { buildBaseUrl } from 'career-caddy-frontend/utils/base-url';
+import config from 'career-caddy-frontend/config/environment';
 
 export default class SessionService extends Service {
   @service router;
@@ -60,6 +62,29 @@ export default class SessionService extends Service {
         await this.refresh();
       }
     }
+  }
+
+  async bootstrapSuperuser(formData) {
+    const bootstrapPath =
+      config.APP.AUTH?.BOOTSTRAP_PATH ?? 'users/bootstrap-superuser/';
+    const url = `${buildBaseUrl()}${bootstrapPath}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      const err = new Error(
+        data.detail || data.message || 'Failed to create account',
+      );
+      err.status = response.status;
+      throw err;
+    }
+
+    return response.json();
   }
 
   startActivityWatch() {

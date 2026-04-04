@@ -1,32 +1,35 @@
 <form class="builder-form">
   {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
-  <label class="field-row field">Issuer
+  <div class="field">
+    <label class="field-label">Issuer</label>
     <input
       type="text"
       value={{@certification.issuer}}
       {{on "input" (fn this.updateField "issuer")}}
     />
-  </label>
-  <label class="field-row field">Title
+  </div>
+  <div class="field">
+    <label class="field-label">Title</label>
     <input
       type="text"
       value={{@certification.title}}
       {{on "input" (fn this.updateField "title")}}
     />
-  </label>
-  <label class="field">Issue Date
+  </div>
+  <div class="field">
+    <label class="field-label">Issue Date</label>
     <input
       type="date"
       value={{this.formattedIssueDate}}
       {{on "input" (fn this.updateField "issueDate")}}
     />
-  </label>
-
-  <label class="field">Content
+  </div>
+  <div class="field">
+    <label class="field-label">Content</label>
     <textarea
       class="certification-content-textarea"
       value={{@certification.content}}
       {{on "input" (fn this.updateField "content")}}
     ></textarea>
-  </label>
+  </div>
 </form>

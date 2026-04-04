@@ -2,14 +2,31 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
+
+const CAREER_DATA_OPTION = { id: '0', name: 'Career Data (internal)' };
+
 export default class JobPostsActions extends Component {
   @service store;
   @service router;
   @service currentUser;
   @service spinner;
   @service flashMessages;
-  @tracked selectedResume = null;
+  @tracked selectedResume = CAREER_DATA_OPTION;
+
+  get resumeOptions() {
+    const resumes = this.args.resumes;
+    // Read .length to establish a tracking dependency on the RecordArray's contents.
+    // Without this, Glimmer won't re-run this getter when findAll resolves.
+    if (!resumes?.length) return [CAREER_DATA_OPTION];
+    return [CAREER_DATA_OPTION, ...Array.from(resumes)];
+  }
+
+  get isCareerDataSelected() {
+    return this.selectedResume?.id === '0';
+  }
+
   @tracked coverLetterInProgress = false;
+
   @action updateResume(resume) {
     this.args.resumeCallback?.(resume);
     this.selectedResume = resume;
@@ -56,15 +73,10 @@ export default class JobPostsActions extends Component {
   async scoreResume() {
     const jobPost = this.args.jobPost;
     const user = this.currentUser.user;
-    const resumeId = this.selectedResume.id;
+    // peekRecord returns null for id='0' (career data) — serializer handles that case
+    const resume = this.store.peekRecord('resume', this.selectedResume.id);
 
-    let resume = this.store.peekRecord('resume', resumeId);
-    const newScore = this.store.createRecord('score', {
-      resume,
-      jobPost,
-      user,
-    });
-
+    const newScore = this.store.createRecord('score', { resume, jobPost, user });
     try {
       //like summary above.  score is missing the content and
       //api will reach out to chatgpt to fill it in using user

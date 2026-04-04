@@ -1,18 +1,34 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <button type="button" class="btn" {{on "click" this.saveCoverLetter}}>Save</button>
+    <button type="button" class="btn primary" {{on "click" this.saveCoverLetter}}>Save</button>
   </:subnav>
   <:main>
-    <div class="builder-form">
+    <Panel::Card>
+      <label>Select a resume</label>
+      <PowerSelect
+        @options={{this.resumeOptions}}
+        @onChange={{this.updateResume}}
+        @selected={{this.selectedResume}}
+        as |resume|
+      >
+        {{or resume.name resume.title}}
+      </PowerSelect>
+    </Panel::Card>
+    <Panel::Card>
+      <label>Select a job post</label>
+      <JobPosts::Selector
+        @jobPosts={{this.jobPosts}}
+        @jobPostCallback={{this.addJobPostToCoverLetter}}
+      />
+    </Panel::Card>
+    {{#if this.model.jobPost}}
       <Panel::Card>
-        <label>Select a job post</label>
-        <JobPosts::Selector
-          @jobPosts={{this.jobPosts}}
-          @jobPostCallback={{this.addJobPostToCoverLetter}}
-        />
+        <button type="button" class="btn primary" {{on "click" this.saveCoverLetter}}>
+          Create Cover Letter
+        </button>
       </Panel::Card>
-    </div>
-    <Panel::Card @collapable={{true}}>
+    {{/if}}
+    <Panel::Card @collapsible={{true}}>
       <CoverLetters::Form @coverLetter={{this.model}} />
     </Panel::Card>
   </:main>

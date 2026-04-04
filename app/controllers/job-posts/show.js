@@ -7,8 +7,15 @@ export default class JobPostsShowController extends Controller {
   @service flashMessages;
   @service router;
   showControls = true;
+
+  get isOnJobApplicationsRoute() {
+    return this.router.currentRouteName?.startsWith(
+      'job-posts.show.job-applications',
+    );
+  }
+
   get resumes() {
-    return this.store.findAll('resume');
+    return this.store.peekAll('resume');
   }
 
   @action
@@ -24,7 +31,6 @@ export default class JobPostsShowController extends Controller {
     await jobApplication.save();
 
     const jaid = jobApplication.id;
-    console.log(jobApplication.id);
     // Navigate to the job-applications questions route with full page refresh
     window.location.href = `/job-applications/${jaid}/questions/new`;
   }

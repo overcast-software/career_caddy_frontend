@@ -1,11 +1,5 @@
-<div class="summaries-carousel">
-  <div class="summaries-viewport">
-    <div class="summaries-track">
-      {{#each @summaries as |summary|}}
-        {{summary}}
-        yo
-        <Summary::Form @summary={{summary}} />
-      {{/each}}
-    </div>
-  </div>
-</div>
+<textarea
+  class="w-full"
+  rows="6"
+  {{on "input" this.updateContent}}
+>{{@summary.content}}</textarea>

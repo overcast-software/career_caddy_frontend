@@ -10,12 +10,15 @@ export default class ExperiencesEditorForm extends Component {
   @tracked errorMessage = null;
   @tracked editingDesc = null;
   @tracked editingDraft = '';
-  @tracked isExpanded = true;
+  @tracked isExpanded = false;
   @tracked currentlyWorking = false;
 
   constructor() {
     super(...arguments);
     this.currentlyWorking = !this.experience?.endDate;
+    if (this.args.experience?.isNew) {
+      this.isExpanded = true;
+    }
   }
 
   get experience() {
@@ -113,6 +116,11 @@ export default class ExperiencesEditorForm extends Component {
   @action
   toggleExperience() {
     this.isExpanded = !this.isExpanded;
+  }
+
+  @action
+  stopPropagation(event) {
+    event.stopPropagation();
   }
 
   @action async commitDescription(index, desc) {

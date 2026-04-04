@@ -1,20 +1,4 @@
 <nav class="toolbar" role="navigation" aria-label="Directional toolbar">
-  {{#if @recordArray}}
-    <div class="group">
-      <button
-        type="button"
-        data-dir="left"
-        aria-label="Left"
-        {{on "click" this.selectPrevious}}
-      >←</button>
-      <button
-        type="button"
-        data-dir="right"
-        aria-label="Right"
-        {{on "click" this.selectNext}}
-      >→</button>
-    </div>
-  {{/if}}
   {{yield}}
   {{#if @collapsible}}
     <button type="button" class="btn small" {{on "click" @toggleCollapsed}}>

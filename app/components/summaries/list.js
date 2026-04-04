@@ -1,54 +1,57 @@
 import Component from '@glimmer/component';
-import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-import ArrayProxy from '@ember/array/proxy';
+import { action } from '@ember/object';
 
 export default class SummariesList extends Component {
-  @tracked lastDirection = '';
+  @tracked _currentIndex = null;
 
-  get activeSummaryIndex() {
-    return ArrayProxy.create({ content: this.args.summaries.content }).indexOf(
-      this.activeSummary,
-    );
+  _at(summaries, idx) {
+    if (typeof summaries.objectAt === 'function') return summaries.objectAt(idx);
+    return summaries[idx];
   }
 
-  get activeSummary() {
-    const summary = ArrayProxy.create({
-      content: this.args.summaries.content,
-    }).findBy('active');
-    return summary;
-  }
-
-  @action
-  async selectPrevious() {
-    const length = this.args.summaries.length;
-    const currIndex = this.activeSummaryIndex;
-    let newIndex = currIndex - 1;
-    if (newIndex < 0) {
-      newIndex = length - 1;
+  get currentIndex() {
+    if (this._currentIndex !== null) return this._currentIndex;
+    const summaries = this.args.summaries;
+    if (!summaries?.length) return 0;
+    for (let i = 0; i < summaries.length; i++) {
+      if (this._at(summaries, i)?.active) return i;
     }
-    const summariesProxies = ArrayProxy.create({
-      content: this.args.summaries.content,
-    });
-    const oldSummary = summariesProxies.objectAt(currIndex);
-    const newSummary = summariesProxies.objectAt(newIndex);
-    oldSummary.active = false;
-    newSummary.active = true;
-    oldSummary.save().then(() => newSummary.save());
+    return 0;
+  }
+
+  get currentSummary() {
+    const summaries = this.args.summaries;
+    if (!summaries?.length) return null;
+    return this._at(summaries, this.currentIndex) ?? this._at(summaries, 0);
   }
 
   @action
-  selectNext() {
-    const length = this.args.summaries.length;
-    const currIndex = this.activeSummaryIndex;
-    const newIndex = (currIndex + 1) % length;
-    const summariesProxies = ArrayProxy.create({
-      content: this.args.summaries.content,
-    });
-    const oldSummary = summariesProxies.objectAt(currIndex);
-    const newSummary = summariesProxies.objectAt(newIndex);
-    oldSummary.active = false;
-    newSummary.active = true;
-    oldSummary.save().then(() => newSummary.save());
+  prev() {
+    const summaries = this.args.summaries;
+    const count = summaries?.length ?? 0;
+    if (count < 2) return;
+    const newIndex = (this.currentIndex - 1 + count) % count;
+    this._navigate(newIndex);
+  }
+
+  @action
+  next() {
+    const summaries = this.args.summaries;
+    const count = summaries?.length ?? 0;
+    if (count < 2) return;
+    const newIndex = (this.currentIndex + 1) % count;
+    this._navigate(newIndex);
+  }
+
+  async _navigate(newIndex) {
+    const resume = this.args.resume;
+    const newSummary = this._at(this.args.summaries, newIndex);
+    this._currentIndex = newIndex;
+    if (resume && newSummary) {
+      const rel = await resume.summaries;
+      if (!rel.includes(newSummary)) rel.push(newSummary);
+      await resume.save();
+    }
   }
 }

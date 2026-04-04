@@ -1,10 +1,10 @@
 <article class="panel-card builder-form">
-  <h3 class="form-title">Add Interview Question</h3>
+  <h3 class="form-title">{{if this.isEditing "Edit Question" "Add Interview Question"}}</h3>
   <p class="form-hint">Capture questions from an application so AI can help draft answers.</p>
   <form class="questions-form" {{on "submit" this.save}}>
 
     <div class="field">
-      <label class="field-label">Company <span class="required">*</span></label>
+      <label class="field-label w-36 flex-none">Company <span class="required">*</span></label>
       {{#if @jobPost}}
         <input
           type="text"
@@ -32,7 +32,7 @@
     {{/if}}
 
     <div class="field">
-      <label class="field-label">Job Post</label>
+      <label class="field-label w-36 flex-none">Job Post</label>
       <PowerSelect
         @options={{this.loadedJobPosts}}
         @onChange={{this.updateJobPost}}
@@ -47,7 +47,7 @@
     </div>
 
     <div class="field">
-      <label class="field-label">Job Application</label>
+      <label class="field-label w-36 flex-none">Job Application</label>
       <PowerSelect
         @options={{this.filteredJobAppOptions}}
         @onChange={{this.updateJobApplication}}
@@ -62,7 +62,7 @@
     </div>
 
     <div class="field">
-      <label class="field-label" for="question-content">Question <span class="required">*</span></label>
+      <label class="field-label w-36 flex-none" for="question-content">Question <span class="required">*</span></label>
       <textarea
         id="question-content"
         class="textarea"
@@ -73,18 +73,11 @@
       ></textarea>
     </div>
 
-    <div class="field">
-      <label class="checkbox">
-        <input
-          type="checkbox"
-          checked={{@question.favorite}}
-          {{on "change" this.updateFavorite}}
-        />
-        Mark as favorite
-      </label>
-    </div>
-
     <div class="actions">
+      <span
+        class="btn favorite {{if @question.favorite 'favorited'}}"
+        title="A question is favorited when it has a favorited answer. You cannot favorite a question directly."
+      >★</span>
       <button
         type="submit"
         class="btn primary"
@@ -92,14 +85,16 @@
       >
         Save
       </button>
-      <button
-        type="button"
-        class="btn primary"
-        disabled={{or @question.isSaving (not (and this.selectedCompany.id @question.content))}}
-        {{on "click" this.saveAndNew}}
-      >
-        Save &amp; Add Another
-      </button>
+      {{#unless this.isEditing}}
+        <button
+          type="button"
+          class="btn primary"
+          disabled={{or @question.isSaving (not (and this.selectedCompany.id @question.content))}}
+          {{on "click" this.saveAndNew}}
+        >
+          Save &amp; Add Another
+        </button>
+      {{/unless}}
       <button type="button" class="btn" {{on "click" this.cancel}}>
         Cancel
       </button>

@@ -11,6 +11,11 @@ export default class ResumesImportController extends Controller {
   @service api;
 
   @tracked isUploading = false;
+  @tracked uploadSucceeded = false;
+
+  get uploadDisabled() {
+    return this.isUploading || this.uploadSucceeded;
+  }
 
   @action
   async ingestResume(file) {
@@ -37,7 +42,10 @@ export default class ResumesImportController extends Controller {
             url,
             headers,
           })
-          .then(() => this.flashMessages.success('Resume imported'))
+          .then(() => {
+            this.uploadSucceeded = true;
+            this.flashMessages.success('Resume imported');
+          })
           .catch((error) => {
             this.flashMessages.clearMessages();
             this.flashMessages.danger(`Resume failed ${error}`);

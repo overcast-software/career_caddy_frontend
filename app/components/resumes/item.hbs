@@ -1,11 +1,15 @@
 <div class="resume-content">
   <Resumes::Header @user={{@resume.user}} @resume={{@resume}} />
 
-  <section>
-    <h2>Summary</h2>
-    <hr />
-    <div class="summary">{{@resume.activeSummary.content}}</div>
-  </section>
+  {{#each @resume.summaries as |summary|}}
+    {{#if summary.active}}
+      <section>
+        <h2>Summary</h2>
+        <hr />
+        <div class="summary">{{summary.content}}</div>
+      </section>
+    {{/if}}
+  {{/each}}
   {{#if this.hasSkills}}
     <section>
       <h2>Skills</h2>
@@ -26,7 +30,6 @@
   <section>
     <h2>Experience</h2>
     <hr />
-    {{log @resume.experiences}}
     {{#each @resume.experiences as |exp|}}
       <article class="experience">
         <div class="job-header">
@@ -61,7 +64,6 @@
 
         <ul class="desc-list">
           {{#each exp.descriptions as |desc|}}
-    {{log desc}}
             <li class="desc-item">{{desc.content}}</li>
           {{/each}}
         </ul>

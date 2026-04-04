@@ -15,6 +15,69 @@ export default class QuestionsFormComponent extends Component {
   @service flashMessages;
   @service router;
 
+  constructor(owner, args) {
+    super(owner, args);
+    const q = args.question;
+    if (q && !q.isNew) {
+      const company = q.belongsTo('company').value();
+      if (company) {
+        this.selectedCompany = company;
+        this._preloadCompanyRelated(company, q);
+      }
+      const jobPost = q.belongsTo('jobPost').value();
+      if (jobPost) {
+        this.selectedJobPost = jobPost;
+        this.loadedJobPosts = [jobPost];
+      }
+      const jobApp = q.belongsTo('jobApplication').value();
+      if (jobApp) {
+        const jp = jobApp.belongsTo('jobPost').value();
+        const label = jp
+          ? `${jp.title} — ${jobApp.status}`
+          : `Application #${jobApp.id} (${jobApp.status})`;
+        this.selectedJobAppOption = { record: jobApp, label };
+        this.loadedJobAppOptions = [this.selectedJobAppOption];
+      }
+    }
+  }
+
+  async _preloadCompanyRelated(company, question) {
+    this.isLoadingRelated = true;
+    try {
+      const loaded = await this.store.findRecord('company', company.id, {
+        include: 'job-posts,job-applications.job-post',
+        reload: true,
+      });
+      const jobPosts = await loaded.jobPosts;
+      this.loadedJobPosts = jobPosts.slice();
+
+      const jobApps = await loaded.jobApplications;
+      this.loadedJobAppOptions = jobApps.slice().map((ja) => {
+        const jp = ja.belongsTo('jobPost').value();
+        const label = jp
+          ? `${jp.title} — ${ja.status}`
+          : `Application #${ja.id} (${ja.status})`;
+        return { record: ja, label };
+      });
+
+      // Re-align the selected job application to its full option object
+      if (question) {
+        const jobApp = question.belongsTo('jobApplication').value();
+        if (jobApp) {
+          this.selectedJobAppOption =
+            this.loadedJobAppOptions.find((opt) => opt.record.id === jobApp.id) ??
+            this.selectedJobAppOption;
+        }
+      }
+    } finally {
+      this.isLoadingRelated = false;
+    }
+  }
+
+  get isEditing() {
+    return this.args.question && !this.args.question.isNew;
+  }
+
   get companies() {
     return this.store.peekAll('company');
   }
@@ -28,10 +91,6 @@ export default class QuestionsFormComponent extends Component {
 
   @action updateContent(event) {
     this.args.question.content = event.target.value;
-  }
-
-  @action updateFavorite(event) {
-    this.args.question.favorite = event.target.checked;
   }
 
   @action async updateCompany(company) {
@@ -106,12 +165,15 @@ export default class QuestionsFormComponent extends Component {
     await this.args.question.save();
     this.flashMessages.success('Question saved');
     this.router.transitionTo('questions.new', {
-      queryParams: { companyId: this.selectedCompany.id },
+      queryParams: { companyId: this.selectedCompany?.id },
     });
   }
 
   @action cancel(event) {
     event?.preventDefault();
     this.args.question.rollbackAttributes?.();
+    if (this.isEditing) {
+      this.router.transitionTo('questions.show', this.args.question.id);
+    }
   }
 }

@@ -1,46 +1,85 @@
 {{page-title "New Application"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
-    <div class="builder-form">
-      <div class="field">
-        <label class="field-label">Job post:</label>
-        <PowerSelect @options={{this.jobPosts}} @onChange={{this.updateJobPost}} @selected={{this.selectedJobPost}} as |jobPost|>
-          {{jobPost.title}} at {{jobPost.company.name}}
-        </PowerSelect>
-      </div>
-      <div class="field">
-        <label class="field-label">Resume to use:</label>
-        <PowerSelect @options={{this.resumes}} @onChange={{this.updateResume}} @selected={{this.selectedResume}} as |resume|>
-          {{resume.title}} - {{resume.notes}}
-        </PowerSelect>
-      </div>
-      <div class="field">
-        <label class="field-label">Cover letter:</label>
-        <PowerSelect @options={{this.coverLetters}} @onChange={{this.updateCoverLetter}} @selected={{this.selectedCoverLetter}} as |coverLetter|>
-          {{coverLetter}}
-        </PowerSelect>
-      </div>
-      <div class="field">
-        <label class="field-label">Status</label>
-        <PowerSelect @options={{this.statusOptions}} @onChange={{this.updateStatus}} @selected={{this.selectedStatus}} as |status|>
-          {{status}}
-        </PowerSelect>
-      </div>
-      {{#if this.showAppliedAt}}
+    <form class="builder-form" {{on "submit" this.saveApplication}}>
+      <div class="field-row">
         <div class="field">
-          <label class="field-label" for="applied-at">Applied At</label>
-          <input id="applied-at" type="date" value={{format-date this.model.appliedAt}} {{on "change" (fn this.updateField "appliedAt")}} />
+          <label class="field-label">Job post</label>
+          <JobPosts::Selector @jobPostCallback={{this.updateJobPost}} />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Resume</label>
+          <PowerSelect
+            @options={{this.resumes}}
+            @onChange={{this.updateResume}}
+            @selected={{this.selectedResume}}
+            @searchEnabled={{true}}
+            @searchField="name"
+            @placeholder="Select a resume"
+            as |resume|
+          >
+            {{resume.name}}{{#if resume.notes}} - {{resume.notes}}{{/if}}
+          </PowerSelect>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Cover letter</label>
+          <PowerSelect
+            @options={{this.coverLetters}}
+            @onChange={{this.updateCoverLetter}}
+            @selected={{this.selectedCoverLetter}}
+            @searchEnabled={{true}}
+            @placeholder="Select a cover letter"
+            as |coverLetter|
+          >
+            cover letter for {{coverLetter.jobPost.title}} - {{format-date coverLetter.createdAt}}
+          </PowerSelect>
+        </div>
+        <div class="field">
+          <label class="field-label">Status</label>
+          <PowerSelect
+            @options={{this.statusOptions}}
+            @onChange={{this.updateStatus}}
+            @selected={{this.selectedStatus}}
+            @placeholder="Select a status"
+            as |status|
+          >
+            {{status}}
+          </PowerSelect>
+        </div>
+      </div>
+
+      {{#if this.showAppliedAt}}
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="applied-at">Applied At</label>
+            <input id="applied-at" type="date" value={{format-date this.model.appliedAt}} {{on "change" (fn this.updateField "appliedAt")}} />
+          </div>
         </div>
       {{/if}}
-      <div class="field">
-        <label class="field-label" for="tracking-url">Tracking URL</label>
-        <input id="tracking-url" type="url" value={{this.model.trackingUrl}} {{on "input" (fn this.updateField "trackingUrl")}} />
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="tracking-url">Tracking URL</label>
+          <input id="tracking-url" type="url" value={{this.model.trackingUrl}} {{on "input" (fn this.updateField "trackingUrl")}} />
+        </div>
       </div>
-      <div class="field">
-        <label class="field-label" for="notes">Notes</label>
-        <textarea id="notes" value={{this.model.notes}} {{on "input" (fn this.updateField "notes")}}></textarea>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="notes">Notes</label>
+          <textarea id="notes" rows="4" value={{this.model.notes}} {{on "input" (fn this.updateField "notes")}}></textarea>
+        </div>
       </div>
-      <button type="button" class="btn" disabled={{this.invalid}} {{on "click" this.saveApplication}}>Save</button>
-    </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn">Save</button>
+      </div>
+    </form>
   </:main>
 </RouteLayout>

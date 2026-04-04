@@ -3,8 +3,8 @@
     {{#unless crumb.isFirst}}
       <span class="breadcrumb-sep">/</span>
     {{/unless}}
-    {{#if crumb.url}}
-      <a href={{crumb.url}} class="breadcrumb-link">{{crumb.label}}</a>
+    {{#if crumb.routeName}}
+      <LinkTo @route={{crumb.routeName}} @models={{crumb.routeModels}} class="breadcrumb-link">{{crumb.label}}</LinkTo>
     {{else}}
       <span class="breadcrumb-link">{{crumb.label}}</span>
     {{/if}}

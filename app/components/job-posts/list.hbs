@@ -1,28 +1,65 @@
-{{#if @compact}}
-  <div class="overflow-x-auto rounded border border-gray-300 shadow-sm">
-    <table class="min-w-full divide-y-2 divide-gray-200">
-      <thead class="ltr:text-left rtl:text-right">
-        <tr class="*:font-medium *:text-gray-900">
-          <th class="px-3 py-2 whitespace-nowrap max-w-xs">Title</th>
-          <th class="px-3 py-2 whitespace-nowrap">Company</th>
-          <th class="px-3 py-2 whitespace-nowrap">Posted</th>
-          <th class="px-3 py-2 whitespace-nowrap">Controls</th>
+{{#if this.jobPosts.length}}
+  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Title</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Company</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Posted</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Score</th>
+          <th
+            class="px-4 py-3 text-right font-semibold text-gray-600"
+          >Actions</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-200">
+      <tbody class="divide-y divide-gray-100">
         {{#each this.jobPosts as |jobPost|}}
-          {{#unless jobPost.isNew}}
-            <JobPosts::Compact
-              @jobPost={{jobPost}}
-              @showLoading={{@showLoading}}
-            />
-          {{/unless}}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-900">
+              <LinkTo @route="job-posts.show" @model={{jobPost}}>
+                {{jobPost.title}}
+              </LinkTo>
+            </td>
+            <td class="px-4 py-3 text-gray-600">{{jobPost.company.name}}</td>
+            <td class="px-4 py-3 text-gray-600">
+              {{moment-format jobPost.postedDate "MMM D, YYYY"}}
+            </td>
+            <td class="px-4 py-3 text-gray-600">
+              {{#let (this.bestScore jobPost) as |score|}}
+                {{#if score}}
+                  <span class="font-medium text-blue-600">
+                    <LinkTo @route="scores.show" @model={{score}}>
+                      {{score.score}}
+                    </LinkTo>
+                  </span>
+                {{else}}
+                  <span class="text-gray-300">—</span>
+                {{/if}}
+              {{/let}}
+            </td>
+            <td class="px-4 py-3 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <LinkTo
+                  @route="job-posts.show"
+                  @model={{jobPost}}
+                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                >View</LinkTo>
+                <LinkTo
+                  @route="job-posts.edit"
+                  @model={{jobPost}}
+                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                >Edit</LinkTo>
+              </div>
+            </td>
+          </tr>
         {{/each}}
       </tbody>
     </table>
   </div>
 {{else}}
-  {{#each this.jobPosts as |jobPost|}}
-    <JobPosts::Item @jobPost={{jobPost}} @showLoading={{@showLoading}} />
-  {{/each}}
+  <p class="text-gray-500 text-sm py-6 text-center">No job posts found.</p>
 {{/if}}

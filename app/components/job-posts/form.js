@@ -8,8 +8,14 @@ export default class JobPostsFormComponent extends Component {
   @service flashMessages;
   @tracked form_toggle = false; // false = "by url", true = "manual"
   @tracked newCompanyName = '';
+  @tracked _selectedCompany = null;
+
+  get selectedCompany() {
+    return this._selectedCompany ?? this.args.jobPost?.company;
+  }
 
   @action updateCompany(company) {
+    this._selectedCompany = company;
     this.args.jobPost.company = company;
   }
 
@@ -33,11 +39,12 @@ export default class JobPostsFormComponent extends Component {
 
   @action addCompanyToJobPost(companyName) {
     const company = this.store.createRecord('company', { name: companyName });
+    this._selectedCompany = company;
+    this.args.jobPost.company = company;
     company
       .save()
-      .then((this.selectedCompany = company))
-      .then((this.args.jobPost.company = company))
-      .then(this.flashMessages.success('created company ' + company.name));
+      .then(() => this.flashMessages.success('created company ' + company.name))
+      .catch(() => this.flashMessages.danger('Failed to create company'));
   }
 
   @action
@@ -49,6 +56,12 @@ export default class JobPostsFormComponent extends Component {
       .then(() => this.router.transitionTo('job-posts.show', this.args.jobPost))
       .then(() => this.flashMessages.success('successfully saved job post'));
   }
+  @action
+  cancel(event) {
+    event?.preventDefault?.();
+    this.router.transitionTo('job-posts.show', this.args.jobPost);
+  }
+
   @action
   async submitDelete(event) {
     event.preventDefault();

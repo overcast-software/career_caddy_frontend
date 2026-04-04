@@ -9,47 +9,34 @@ export default class CoverLettersShowController extends Controller {
   @service flashMessages;
   @service store;
   @service session;
+  @service poller;
   isExporting = false;
-
-  _pollTimeout = null;
 
   willDestroy() {
     super.willDestroy(...arguments);
-    this._stopPolling();
-  }
-
-  _stopPolling() {
-    if (this._pollTimeout) {
-      clearTimeout(this._pollTimeout);
-      this._pollTimeout = null;
+    if (this.model) {
+      this.poller.stop(this.model);
     }
-  }
-
-  async _pollCoverLetter(coverLetter) {
-    try {
-      await coverLetter.reload();
-    } catch {
-      this.flashMessages.danger('Lost connection while waiting for cover letter.');
-      return;
-    }
-
-    if (TERMINAL_STATUSES.includes(coverLetter.status)) {
-      if (coverLetter.status === 'failed' || coverLetter.status === 'error') {
-        this.flashMessages.danger('Cover letter generation failed.');
-      }
-      return;
-    }
-
-    this._pollTimeout = setTimeout(() => this._pollCoverLetter(coverLetter), POLL_INTERVAL_MS);
   }
 
   startPollingIfNeeded(coverLetter) {
-    this._stopPolling();
     if (coverLetter.status && !TERMINAL_STATUSES.includes(coverLetter.status)) {
       this.flashMessages.info('Generating cover letter — waiting for results…');
-      this._pollCoverLetter(coverLetter);
+      this.poller.watchRecord(coverLetter, {
+        intervalMs: POLL_INTERVAL_MS,
+        isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
+        onStop: (rec) => {
+          if (rec.status === 'failed' || rec.status === 'error') {
+            this.flashMessages.danger('Cover letter generation failed.');
+          }
+        },
+        onError: () => {
+          this.flashMessages.danger('Lost connection while waiting for cover letter.');
+        },
+      });
     }
   }
+
   @action async toggleFavorite() {
     this.model.favorite = !this.model.favorite;
     try {
@@ -71,9 +58,8 @@ export default class CoverLettersShowController extends Controller {
     try {
       const id = this.model.id;
       const adapter = this.store.adapterFor('cover-letter');
-      // buildURL returns a trailing slash; append 'export'
-      const base = adapter.buildURL('cover-letter', id); // e.g. /api/v1/cover-letters/1/
-      const url = `${base}export`; // -> /api/v1/cover-letters/1/export
+      const base = adapter.buildURL('cover-letter', id);
+      const url = `${base}export`;
 
       const headers = {};
       if (this.session.authorizationHeader) {
@@ -86,7 +72,6 @@ export default class CoverLettersShowController extends Controller {
       });
       if (!resp.ok) throw new Error(`Export failed (${resp.status})`);
 
-      // If the API returns the docx file, trigger a download
       const ct = resp.headers.get('content-type') || '';
       if (
         ct.includes(
@@ -103,7 +88,6 @@ export default class CoverLettersShowController extends Controller {
         URL.revokeObjectURL(link.href);
         link.remove();
       } else {
-        // If API returns JSON with a URL, follow it (optional fallback)
         try {
           const data = await resp.json();
           if (data?.url) window.location.assign(data.url);

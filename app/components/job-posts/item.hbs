@@ -55,7 +55,7 @@
       {{#each @jobPost.scores as |score|}}
         <li class="desc-item">
           <span class="muted">Resume</span>
-          {{score.resume.name}}
+          {{or score.resume.name "Career Data"}}
           —
           <span class="muted">Score:</span>
           {{#if score.score}}

@@ -4,6 +4,6 @@
     ingestion
   </:subnav>
   <:main>
-    <UploadForm @onUpload={{this.ingestResume}} />
+    <UploadForm @onUpload={{this.ingestResume}} @disabled={{this.uploadDisabled}} />
   </:main>
 </RouteLayout>

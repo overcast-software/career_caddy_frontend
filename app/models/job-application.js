@@ -2,7 +2,10 @@ import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 
 export default class JobApplicationModel extends Model {
   @attr('date') appliedAt;
-  @attr('string', { defaultValue: 'Saved' }) status;
+  @attr('string', { defaultValue: 'Unvetted' }) status;
+  // API relationship key: "application-statuses"
+  @hasMany('job-application-status', { async: true, inverse: 'application' })
+  applicationStatuses;
   @attr('string') trackingUrl;
   @attr('string') notes;
   @belongsTo('user', { async: true, inverse: 'jobApplications' }) user;

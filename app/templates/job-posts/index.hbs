@@ -1,18 +1,22 @@
 {{page-title "Job Posts"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <JobPosts::Controls
-      @query={{this.search}}
-      @compact={{this.compact}}
-      @onFilterChange={{this.onFilterChange}}
-      @onCompactToggle={{this.onCompactToggle}}
-    />
+    <div class="controls">
+      <input
+        type="search"
+        aria-label="search"
+        placeholder="Search job posts..."
+        value={{this.search}}
+        {{on "input" this.onSearchInput}}
+      />
+      <LinkTo @route="job-posts.new" class="btn">+ New Job Post</LinkTo>
+    </div>
   </:subnav>
   <:main>
     {{#if this.isSearching}}
       <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
     {{else}}
-      <JobPosts::List @jobPosts={{this.model}} @compact={{this.compact}} />
+      <JobPosts::List @jobPosts={{this.model}} />
       <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
         <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
       </InfinityLoader>

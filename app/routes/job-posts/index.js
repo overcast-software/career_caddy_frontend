@@ -17,7 +17,7 @@ export default class JobPostsIndexRoute extends Route {
     return this.infinity.model('job-post', {
       perPage: 20,
       startingPage: 1,
-      include: 'scores,cover-letters,company',
+      include: 'scores,cover-letters,company,scores.resume',
       sort: '-posted_date',
       ...(search ? { 'filter[query]': search } : {}),
     });

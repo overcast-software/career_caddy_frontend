@@ -1,0 +1,86 @@
+<div class="panel-card space-y-6">
+  <StatusSteps
+    @steps={{this.scrapeSteps}}
+    @current={{this.normalizedState}}
+    @failedStates={{this.failedStates}}
+  />
+
+  <div class="flow-root">
+    <dl class="-my-3 divide-y divide-gray-200 text-sm">
+      {{#if @scrape.url}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">URL</dt>
+          <dd class="text-gray-700 sm:col-span-2 break-all">
+            <a
+              href={{@scrape.url}}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:underline"
+            >{{@scrape.url}}</a>
+          </dd>
+        </div>
+      {{/if}}
+
+      {{#if @scrape.company.name}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Company</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            <LinkTo @route="companies.show" @model={{@scrape.company}}>
+              {{@scrape.company.name}}
+            </LinkTo>
+          </dd>
+        </div>
+      {{/if}}
+
+      {{#if @scrape.jobPost.id}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Job Post</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            <LinkTo @route="job-posts.show" @model={{@scrape.jobPost}}>
+              {{@scrape.jobPost.title}}
+            </LinkTo>
+          </dd>
+        </div>
+      {{/if}}
+
+      {{#if @scrape.scrapedAt}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Scraped At</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            {{moment-format @scrape.scrapedAt "MMM D, YYYY h:mm a"}}
+          </dd>
+        </div>
+      {{/if}}
+
+      {{#if @scrape.parseMethod}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Parse Method</dt>
+          <dd class="text-gray-700 sm:col-span-2">{{@scrape.parseMethod}}</dd>
+        </div>
+      {{/if}}
+
+      {{#if @scrape.externalLink}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">External Link</dt>
+          <dd class="text-gray-700 sm:col-span-2 break-all">
+            <a
+              href={{@scrape.externalLink}}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:underline"
+            >{{@scrape.externalLink}}</a>
+          </dd>
+        </div>
+      {{/if}}
+
+      {{#if @scrape.jobContent}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Job Content</dt>
+          <dd class="text-gray-700 sm:col-span-2 line-clamp-4 overflow-hidden">
+            {{@scrape.jobContent}}
+          </dd>
+        </div>
+      {{/if}}
+    </dl>
+  </div>
+</div>

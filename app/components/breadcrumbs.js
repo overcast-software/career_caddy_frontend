@@ -72,13 +72,16 @@ export default class BreadcrumbsComponent extends Component {
       const label = this._labelFor(info);
 
       if (label) {
-        let url;
+        let routeName = null;
+        let routeModels = null;
         try {
-          url = this.router.urlFor(info.name, ...accumulatedParams, ...segmentParams);
+          this.router.urlFor(info.name, ...accumulatedParams, ...segmentParams);
+          routeName = info.name;
+          routeModels = [...accumulatedParams, ...segmentParams];
         } catch {
-          url = null;
+          // can't build a valid URL, render as plain text
         }
-        crumbs.push({ label, url });
+        crumbs.push({ label, routeName, routeModels });
       }
 
       accumulatedParams.push(...segmentParams);

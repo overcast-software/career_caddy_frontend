@@ -1,11 +1,14 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
-    <form class="w-full max-w-lg">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+    <form class="w-full max-w-lg" {{on "submit" this.submitScrape}}>
+      <label
+        class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+      >
         <span class="text-sm font-medium text-gray-700">Link (URL)</span>
         <input
           type="url"
           class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          {{on "change" this.updateUrl}}
         />
       </label>
       <button

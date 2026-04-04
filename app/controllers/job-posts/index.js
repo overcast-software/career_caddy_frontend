@@ -7,18 +7,18 @@ export default class JobPostsIndexController extends Controller {
   queryParams = ['search'];
 
   @tracked search = '';
-  @tracked compact = true;
   @tracked isSearching = false;
   @service flashMessages;
 
-  @action
-  onFilterChange({ query }) {
-    this.search = query ?? '';
-    this.isSearching = true;
-  }
+  #debounceTimer = null;
 
   @action
-  onCompactToggle(compact) {
-    this.compact = !!compact;
+  onSearchInput(event) {
+    const value = event.target.value;
+    this.isSearching = true;
+    clearTimeout(this.#debounceTimer);
+    this.#debounceTimer = setTimeout(() => {
+      this.search = value;
+    }, 300);
   }
 }
