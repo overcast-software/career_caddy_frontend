@@ -58,7 +58,7 @@ export default class JobPostsShowCoverLettersController extends Controller {
     }
   }
 
-  _pollCoverLetter(cl) {
+  _pollCoverLetter = (cl) => {
     this.pendingIds = new Set([...this.pendingIds, cl.id]);
     this.poller.watchRecord(cl, {
       isTerminal: (rec) => TERMINAL_STATUSES.has(rec.status),
