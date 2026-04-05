@@ -8,31 +8,58 @@
   >
     {{! ── Main track ──────────────────────────────────────────── }}
     {{#each this.mainLineSegments as |seg|}}
-      <line x1={{seg.x1}} y1={{seg.y}} x2={{seg.x2}} y2={{seg.y}} stroke={{seg.stroke}} stroke-width="2" />
+      <line
+        x1={{seg.x1}}
+        y1={{seg.y}}
+        x2={{seg.x2}}
+        y2={{seg.y}}
+        stroke={{seg.stroke}}
+        stroke-width="2"
+      />
     {{/each}}
 
     {{! ── VB branch: vertical drop from Vetted Good ───────────── }}
     <line
-      x1={{this.vbBranchLine.x}} y1={{this.vbBranchLine.y1}}
-      x2={{this.vbBranchLine.x}} y2={{this.vbBranchLine.y2}}
-      stroke={{this.vbBranchLine.stroke}} stroke-width="2"
+      x1={{this.vbBranchLine.x}}
+      y1={{this.vbBranchLine.y1}}
+      x2={{this.vbBranchLine.x}}
+      y2={{this.vbBranchLine.y2}}
+      stroke={{this.vbBranchLine.stroke}}
+      stroke-width="2"
     />
 
     {{! ── Declined branch: short drop from Offer ──────────────── }}
     <line
-      x1={{this.decBranchLine.x}} y1={{this.decBranchLine.y1}}
-      x2={{this.decBranchLine.x}} y2={{this.decBranchLine.y2}}
-      stroke={{this.decBranchLine.stroke}} stroke-width="2"
+      x1={{this.decBranchLine.x}}
+      y1={{this.decBranchLine.y1}}
+      x2={{this.decBranchLine.x}}
+      y2={{this.decBranchLine.y2}}
+      stroke={{this.decBranchLine.stroke}}
+      stroke-width="2"
     />
 
     {{! ── Rejection entries: Contact / Interviewed / TT / AD → rail }}
     {{#each this.rejectionEntries as |entry|}}
-      <line x1={{entry.x}} y1={{entry.y1}} x2={{entry.x}} y2={{entry.y2}} stroke={{entry.stroke}} stroke-width="2" />
+      <line
+        x1={{entry.x}}
+        y1={{entry.y1}}
+        x2={{entry.x}}
+        y2={{entry.y2}}
+        stroke={{entry.stroke}}
+        stroke-width="2"
+      />
     {{/each}}
 
     {{! ── No-go rail horizontal ───────────────────────────────── }}
     {{#each this.nogoRailSegments as |seg|}}
-      <line x1={{seg.x1}} y1={{seg.y}} x2={{seg.x2}} y2={{seg.y}} stroke={{seg.stroke}} stroke-width="2" />
+      <line
+        x1={{seg.x1}}
+        y1={{seg.y}}
+        x2={{seg.x2}}
+        y2={{seg.y}}
+        stroke={{seg.stroke}}
+        stroke-width="2"
+      />
     {{/each}}
 
     {{! ── Main track nodes ────────────────────────────────────── }}
@@ -40,11 +67,24 @@
       <g>
         <title>{{node.label}}</title>
         {{#if node.isActive}}
-          <circle cx={{node.x}} cy={{node.y}} r="13" fill="white" stroke={{node.fill}} stroke-width="2.5" />
+          <circle
+            cx={{node.x}}
+            cy={{node.y}}
+            r="13"
+            fill="white"
+            stroke={{node.fill}}
+            stroke-width="2.5"
+          />
         {{/if}}
         <circle cx={{node.x}} cy={{node.y}} r="8" fill={{node.fill}} />
         <g transform={{node.labelTransform}}>
-          <text x="2" y="0" font-size="10" fill={{node.textFill}} font-weight={{node.fontWeight}}>{{node.label}}</text>
+          <text
+            x="2"
+            y="0"
+            font-size="10"
+            fill={{node.textFill}}
+            font-weight={{node.fontWeight}}
+          >{{node.label}}</text>
         </g>
       </g>
     {{/each}}
@@ -53,13 +93,28 @@
     <g>
       <title>Vetted Bad</title>
       {{#if this.vbNode.isActive}}
-        <circle cx={{this.vbNode.x}} cy={{this.vbNode.y}} r="13" fill="white" stroke="#dc2626" stroke-width="2.5" />
+        <circle
+          cx={{this.vbNode.x}}
+          cy={{this.vbNode.y}}
+          r="13"
+          fill="white"
+          stroke="#dc2626"
+          stroke-width="2.5"
+        />
       {{/if}}
-      <circle cx={{this.vbNode.x}} cy={{this.vbNode.y}} r="8" fill={{this.vbNode.fill}} />
+      <circle
+        cx={{this.vbNode.x}}
+        cy={{this.vbNode.y}}
+        r="8"
+        fill={{this.vbNode.fill}}
+      />
       <text
-        x={{this.vbNode.x}} y={{this.vbNode.labelY}}
-        text-anchor="middle" font-size="10"
-        fill={{this.vbNode.textFill}} font-weight={{this.vbNode.fontWeight}}
+        x={{this.vbNode.x}}
+        y={{this.vbNode.labelY}}
+        text-anchor="middle"
+        font-size="10"
+        fill={{this.vbNode.textFill}}
+        font-weight={{this.vbNode.fontWeight}}
       >Vetted Bad</text>
     </g>
 
@@ -67,13 +122,28 @@
     <g>
       <title>Declined</title>
       {{#if this.decNode.isActive}}
-        <circle cx={{this.decNode.x}} cy={{this.decNode.y}} r="13" fill="white" stroke="#dc2626" stroke-width="2.5" />
+        <circle
+          cx={{this.decNode.x}}
+          cy={{this.decNode.y}}
+          r="13"
+          fill="white"
+          stroke="#dc2626"
+          stroke-width="2.5"
+        />
       {{/if}}
-      <circle cx={{this.decNode.x}} cy={{this.decNode.y}} r="8" fill={{this.decNode.fill}} />
+      <circle
+        cx={{this.decNode.x}}
+        cy={{this.decNode.y}}
+        r="8"
+        fill={{this.decNode.fill}}
+      />
       <text
-        x={{this.decNode.x}} y={{this.decNode.labelY}}
-        text-anchor="middle" font-size="10"
-        fill={{this.decNode.textFill}} font-weight={{this.decNode.fontWeight}}
+        x={{this.decNode.x}}
+        y={{this.decNode.labelY}}
+        text-anchor="middle"
+        font-size="10"
+        fill={{this.decNode.textFill}}
+        font-weight={{this.decNode.fontWeight}}
       >Declined</text>
     </g>
 
@@ -82,13 +152,23 @@
       <g>
         <title>{{node.label}}</title>
         {{#if node.isActive}}
-          <circle cx={{node.x}} cy={{node.y}} r="13" fill="white" stroke="#dc2626" stroke-width="2.5" />
+          <circle
+            cx={{node.x}}
+            cy={{node.y}}
+            r="13"
+            fill="white"
+            stroke="#dc2626"
+            stroke-width="2.5"
+          />
         {{/if}}
         <circle cx={{node.x}} cy={{node.y}} r="8" fill={{node.fill}} />
         <text
-          x={{node.x}} y={{node.labelY}}
-          text-anchor="middle" font-size="10"
-          fill={{node.textFill}} font-weight={{node.fontWeight}}
+          x={{node.x}}
+          y={{node.labelY}}
+          text-anchor="middle"
+          font-size="10"
+          fill={{node.textFill}}
+          font-weight={{node.fontWeight}}
         >{{node.label}}</text>
       </g>
     {{/each}}

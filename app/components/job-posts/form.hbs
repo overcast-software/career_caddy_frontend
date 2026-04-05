@@ -75,8 +75,16 @@
         </div>
         <div class="w-full md:w-1/2 px-3 flex items-end justify-end gap-2">
           <button class="btn primary" type="submit">Save</button>
-          <button class="btn" type="button" {{on "click" this.cancel}}>Cancel</button>
-          <button class="btn danger" type="button" {{on "click" this.submitDelete}}>Delete</button>
+          <button
+            class="btn"
+            type="button"
+            {{on "click" this.cancel}}
+          >Cancel</button>
+          <button
+            class="btn danger"
+            type="button"
+            {{on "click" this.submitDelete}}
+          >Delete</button>
         </div>
       </div>
     </div>

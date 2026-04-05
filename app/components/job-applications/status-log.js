@@ -25,7 +25,13 @@ const STATUS_OPTIONS = [
   'Archived',
 ];
 
-const NOGO = new Set(['Vetted Bad', 'Rejected', 'Declined', 'Expired', 'Archived']);
+const NOGO = new Set([
+  'Vetted Bad',
+  'Rejected',
+  'Declined',
+  'Expired',
+  'Archived',
+]);
 
 // Format a UTC ISO string as a local-time value for <input type="datetime-local">
 // which expects "YYYY-MM-DDTHH:MM" in local time.
@@ -49,9 +55,9 @@ export default class JobApplicationsStatusLogComponent extends Component {
   @tracked isSaving = false;
 
   // Per-entry date/note editor
-  @tracked expandedId = null;  // id of the entry whose edit form is open
-  @tracked editingDate = '';   // datetime-local string being edited
-  @tracked editingNote = '';   // note text being edited
+  @tracked expandedId = null; // id of the entry whose edit form is open
+  @tracked editingDate = ''; // datetime-local string being edited
+  @tracked editingNote = ''; // note text being edited
 
   get statusOptions() {
     return STATUS_OPTIONS;
@@ -83,8 +89,8 @@ export default class JobApplicationsStatusLogComponent extends Component {
       dotClass: NOGO.has(s.status)
         ? 'bg-red-400'
         : s.status === 'Accepted'
-        ? 'bg-green-500'
-        : 'bg-blue-400',
+          ? 'bg-green-500'
+          : 'bg-blue-400',
     }));
   }
 
@@ -137,7 +143,9 @@ export default class JobApplicationsStatusLogComponent extends Component {
       this.args.jobApplication.status = this.selectedStatus;
       this.selectedStatus = null;
       this.flashMessages.success(
-        toLog.length > 1 ? `Logged ${toLog.length} statuses.` : 'Status logged.',
+        toLog.length > 1
+          ? `Logged ${toLog.length} statuses.`
+          : 'Status logged.',
       );
     } catch {
       this.flashMessages.alert('Failed to save status.');

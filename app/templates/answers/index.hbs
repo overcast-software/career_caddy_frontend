@@ -9,7 +9,8 @@
         value={{this.search}}
         {{on "input" this.onSearchInput}}
       />
-      <button type="button" class="btn" {{on "click" this.newAnswer}}>+ New Answer</button>
+      <button type="button" class="btn" {{on "click" this.newAnswer}}>+ New
+        Answer</button>
     </div>
   </:subnav>
   <:main>
@@ -28,7 +29,11 @@
             <div class="flex-1">
               <p>{{answer.content}}</p>
               <div class="flex gap-2 mt-2">
-                <LinkTo @route="answers.edit" @model={{answer}} class="btn small">edit</LinkTo>
+                <LinkTo
+                  @route="answers.edit"
+                  @model={{answer}}
+                  class="btn small"
+                >edit</LinkTo>
                 <LinkTo
                   @route="questions.show.answers.show"
                   @models={{array answer.question.id answer.id}}

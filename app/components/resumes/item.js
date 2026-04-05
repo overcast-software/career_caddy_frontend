@@ -16,7 +16,7 @@ export default class ResumesItemComponent extends Component {
 
   @cached get groupedSkillsMap() {
     const result = {};
-    this.args.resume.skills?.forEach((skill) => {
+    this.args.resume?.skills?.forEach((skill) => {
       const skillType = skill.skillType || 'Other';
       result[skillType] = result[skillType] || [];
       result[skillType].push(skill);

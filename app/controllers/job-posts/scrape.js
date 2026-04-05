@@ -42,7 +42,10 @@ export default class JobPostsScrapeController extends Controller {
       return;
     }
 
-    this._pollTimeout = setTimeout(() => this._pollScrape(scrape), POLL_INTERVAL_MS);
+    this._pollTimeout = setTimeout(
+      () => this._pollScrape(scrape),
+      POLL_INTERVAL_MS,
+    );
   }
 
   @action
@@ -60,11 +63,13 @@ export default class JobPostsScrapeController extends Controller {
     try {
       result = await this.spinner.wrap(scrape.save());
     } catch (error) {
-      this.flashMessages.danger(error?.errors?.[0]?.detail ?? 'Failed to start scrape.');
+      this.flashMessages.danger(
+        error?.errors?.[0]?.detail ?? 'Failed to start scrape.',
+      );
       return;
     }
 
     // After save completes, go to scores/:id of the returned record
-      this.router.transitionTo('job-posts.show', result.jobPost.id);
+    this.router.transitionTo('job-posts.show', result.jobPost.id);
   }
 }

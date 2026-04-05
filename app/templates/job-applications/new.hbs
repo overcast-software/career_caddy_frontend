@@ -37,7 +37,10 @@
             @placeholder="Select a cover letter"
             as |coverLetter|
           >
-            cover letter for {{coverLetter.jobPost.title}} - {{format-date coverLetter.createdAt}}
+            cover letter for
+            {{coverLetter.jobPost.title}}
+            -
+            {{format-date coverLetter.createdAt}}
           </PowerSelect>
         </div>
         <div class="field">
@@ -58,7 +61,12 @@
         <div class="field-row">
           <div class="field">
             <label class="field-label" for="applied-at">Applied At</label>
-            <input id="applied-at" type="date" value={{format-date this.model.appliedAt}} {{on "change" (fn this.updateField "appliedAt")}} />
+            <input
+              id="applied-at"
+              type="date"
+              value={{format-date this.model.appliedAt}}
+              {{on "change" (fn this.updateField "appliedAt")}}
+            />
           </div>
         </div>
       {{/if}}
@@ -66,14 +74,24 @@
       <div class="field-row">
         <div class="field">
           <label class="field-label" for="tracking-url">Tracking URL</label>
-          <input id="tracking-url" type="url" value={{this.model.trackingUrl}} {{on "input" (fn this.updateField "trackingUrl")}} />
+          <input
+            id="tracking-url"
+            type="url"
+            value={{this.model.trackingUrl}}
+            {{on "input" (fn this.updateField "trackingUrl")}}
+          />
         </div>
       </div>
 
       <div class="field-row">
         <div class="field">
           <label class="field-label" for="notes">Notes</label>
-          <textarea id="notes" rows="4" value={{this.model.notes}} {{on "input" (fn this.updateField "notes")}}></textarea>
+          <textarea
+            id="notes"
+            rows="4"
+            value={{this.model.notes}}
+            {{on "input" (fn this.updateField "notes")}}
+          ></textarea>
         </div>
       </div>
 

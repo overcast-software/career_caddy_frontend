@@ -1,14 +1,25 @@
 {{page-title "Answers"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <LinkTo class="btn" @route="questions.show.answers.new" @model={{this.model.question}}>new answer</LinkTo>
-    <LinkTo class="btn" @route="questions.edit" @model={{this.model.question}}>edit question</LinkTo>
+    <LinkTo
+      class="btn"
+      @route="questions.show.answers.new"
+      @model={{this.model.question}}
+    >new answer</LinkTo>
+    <LinkTo
+      class="btn"
+      @route="questions.edit"
+      @model={{this.model.question}}
+    >edit question</LinkTo>
   </:subnav>
   <:main>
     {{#each this.model.answers as |answer|}}
       <Panel::Card>
         <MarkdownToHtml @markdown={{answer.content}} />
-        <LinkTo @route="questions.show.answers.show" @models={{array this.model.question answer}}>view</LinkTo>
+        <LinkTo
+          @route="questions.show.answers.show"
+          @models={{array this.model.question answer}}
+        >view</LinkTo>
       </Panel::Card>
     {{else}}
       <p class="text-gray-500 text-sm">No answers yet.</p>

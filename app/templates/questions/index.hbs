@@ -21,10 +21,19 @@
           <div class="question-header">
             <p>{{question.company.name}}: {{question.content}}</p>
           </div>
-          <p class="text-sm text-gray-500">answers: {{question.answers.length}}</p>
+          <p class="text-sm text-gray-500">answers:
+            {{question.answers.length}}</p>
           <div class="flex gap-2 mt-2">
-            <LinkTo @route="questions.show.answers" @model={{question}} class="btn small">show</LinkTo>
-            <LinkTo @route="questions.show.answers.new" @model={{question}} class="btn small">answer</LinkTo>
+            <LinkTo
+              @route="questions.show.answers"
+              @model={{question}}
+              class="btn small"
+            >show</LinkTo>
+            <LinkTo
+              @route="questions.show.answers.new"
+              @model={{question}}
+              class="btn small"
+            >answer</LinkTo>
           </div>
         </Panel::Card>
       {{else}}

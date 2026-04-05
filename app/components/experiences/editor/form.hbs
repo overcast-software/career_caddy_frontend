@@ -1,45 +1,73 @@
 <form class="builder-form" {{on "submit" this.save}}>
-  <div class="exp-header" role="button" aria-expanded={{if this.isExpanded "true" "false"}} {{on "click" this.toggleExperience}}>
-    <div class="exp-header-info">
-      <span class="exp-header-title">{{if @experience.title @experience.title "New Experience"}}</span>
-      {{#if @experience.company.name}}
-        <span class="exp-header-company">{{@experience.company.name}}</span>
-      {{/if}}
-    </div>
-    <div class="exp-header-actions">
-      <button
-        type="button"
-        class="exp-delete"
-        title="Delete"
-        {{on "click" this.deleteExperience}}
-        {{on "click" this.stopPropagation}}
-      >✕</button>
-      <svg class="exp-chevron {{if this.isExpanded 'expanded'}}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+  <div class="exp-header">
+    <button
+      type="button"
+      class="exp-header-toggle"
+      aria-expanded={{if this.isExpanded "true" "false"}}
+      {{on "click" this.toggleExperience}}
+    >
+      <div class="exp-header-info">
+        <span class="exp-header-title">{{if
+            @experience.title
+            @experience.title
+            "New Experience"
+          }}</span>
+        {{#if @experience.company.name}}
+          <span class="exp-header-company">{{@experience.company.name}}</span>
+        {{/if}}
+      </div>
+      <svg
+        aria-hidden="true"
+        class="exp-chevron {{if this.isExpanded 'expanded'}}"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        width="16"
+        height="16"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+          clip-rule="evenodd"
+        />
       </svg>
-    </div>
+    </button>
+    <button
+      type="button"
+      class="exp-delete"
+      title="Delete"
+      {{on "click" this.deleteExperience}}
+      {{on "click" this.stopPropagation}}
+    >✕</button>
   </div>
   {{#if this.isExpanded}}
     {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
     <input type="hidden" name="resume_id" value={{@experience.resumeId}} />
 
     <div class="field">
-      <label class="field-label">Company</label>
-      <input type="text" value={{@experience.company.name}} disabled />
+      <label class="field-label" for="exp-company">Company</label>
+      <input
+        id="exp-company"
+        type="text"
+        value={{@experience.company.name}}
+        disabled
+      />
     </div>
 
     <div class="field-row">
       <div class="field">
-        <label class="field-label">Title</label>
+        <label class="field-label" for="exp-title">Title</label>
         <input
+          id="exp-title"
           type="text"
           value={{@experience.title}}
           {{on "input" (fn this.updateField "title")}}
         />
       </div>
       <div class="field">
-        <label class="field-label">Location</label>
+        <label class="field-label" for="exp-location">Location</label>
         <input
+          id="exp-location"
           type="text"
           value={{@experience.location}}
           {{on "input" (fn this.updateField "location")}}
@@ -49,8 +77,9 @@
 
     <div class="field-row">
       <div class="field">
-        <label class="field-label">Start Date</label>
+        <label class="field-label" for="exp-start-date">Start Date</label>
         <input
+          id="exp-start-date"
           type="date"
           value={{this.formattedStartDate}}
           {{on "input" (fn this.updateField "startDate")}}
@@ -58,13 +87,14 @@
       </div>
       {{#if this.currentlyWorking}}
         <div class="field">
-          <label class="field-label">End Date</label>
-          <input type="text" value="Present" disabled />
+          <label class="field-label" for="exp-end-date">End Date</label>
+          <input id="exp-end-date" type="text" value="Present" disabled />
         </div>
       {{else}}
         <div class="field">
-          <label class="field-label">End Date</label>
+          <label class="field-label" for="exp-end-date">End Date</label>
           <input
+            id="exp-end-date"
             type="date"
             value={{this.formattedEndDate}}
             {{on "input" (fn this.updateField "endDate")}}
@@ -103,8 +133,16 @@
 
     <div class="form-actions">
       <button type="submit" class="btn primary">Save</button>
-      <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
-      <button type="button" class="btn" {{on "click" this.deleteExperience}}>Delete</button>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" this.cancel}}
+      >Cancel</button>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" this.deleteExperience}}
+      >Delete</button>
     </div>
   {{/if}}
 </form>

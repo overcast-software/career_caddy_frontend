@@ -1,8 +1,16 @@
 {{page-title "Answer"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <LinkTo class="btn" @route="questions.show.answers" @model={{this.model.question}}>all answers</LinkTo>
-    <LinkTo class="btn" @route="questions.show.answers.edit" @models={{array this.model.question this.model.answer}}>edit</LinkTo>
+    <LinkTo
+      class="btn"
+      @route="questions.show.answers"
+      @model={{this.model.question}}
+    >all answers</LinkTo>
+    <LinkTo
+      class="btn"
+      @route="questions.show.answers.edit"
+      @models={{array this.model.question this.model.answer}}
+    >edit</LinkTo>
   </:subnav>
   <:main>
     <Panel::Card>

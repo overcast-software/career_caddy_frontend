@@ -75,7 +75,9 @@ export default class JobPostsActions extends Component {
     const url = jobPost.link ?? '';
     const scrape = this.store.createRecord('scrape', { jobPost, url });
     try {
-      const saved = await this.spinner.wrap(scrape.save(), { label: 'Creating scrape…' });
+      const saved = await this.spinner.wrap(scrape.save(), {
+        label: 'Creating scrape…',
+      });
       this.router.transitionTo('scrapes.show', saved.id);
     } catch {
       scrape.unloadRecord();
@@ -89,13 +91,21 @@ export default class JobPostsActions extends Component {
     const user = this.currentUser.user;
     const resume = this.store.peekRecord('resume', this.selectedResume.id);
 
-    const newScore = this.store.createRecord('score', { resume, jobPost, user });
+    const newScore = this.store.createRecord('score', {
+      resume,
+      jobPost,
+      user,
+    });
     try {
-      await this.spinner.wrap(newScore.save(), { label: 'Scoring, please wait…' });
+      await this.spinner.wrap(newScore.save(), {
+        label: 'Scoring, please wait…',
+      });
       this.router.transitionTo('job-posts.show.scores', jobPost);
     } catch (e) {
       newScore.unloadRecord();
-      this.flashMessages.danger(e?.errors?.[0]?.detail ?? 'Failed to create score.');
+      this.flashMessages.danger(
+        e?.errors?.[0]?.detail ?? 'Failed to create score.',
+      );
     }
   }
 

@@ -11,14 +11,22 @@
         {{this.model.question.content.content}}
       </div>
       <div class="field">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Answer:</label>
-        <div class="rounded-lg border border-gray-300 px-4 py-3 text-gray-800 whitespace-pre-wrap">{{this.model.content}}</div>
+        <label
+          class="block text-sm font-medium text-gray-700 mb-1"
+        >Answer:</label>
+        <div
+          class="rounded-lg border border-gray-300 px-4 py-3 text-gray-800 whitespace-pre-wrap"
+        >{{this.model.content}}</div>
         {{#if this.model.favorite}}
           <div class="favorite-indicator">⭐ Favorite Answer</div>
         {{/if}}
       </div>
       <div class="actions">
-        <LinkTo @route="answers.edit" @model={{this.model}} class="btn">Edit</LinkTo>
+        <LinkTo
+          @route="answers.edit"
+          @model={{this.model}}
+          class="btn"
+        >Edit</LinkTo>
       </div>
     </div>
   </:main>

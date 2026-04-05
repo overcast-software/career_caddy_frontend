@@ -67,10 +67,10 @@ module('Integration | Component | job-applications/edit', function (hooks) {
     assert.dom().includesText('Applied At');
     assert.dom().includesText('Status');
     assert.dom().includesText('Applied');
-    assert.dom().includesText('Interviewing');
+    assert.dom().includesText('Interview Scheduled');
     assert.dom().includesText('Rejected');
     assert.dom().includesText('Offer');
-    assert.dom().includesText('Withdrawn');
+    assert.dom().includesText('Archived');
     assert.dom().includesText('Tracking URL');
     assert.dom().includesText('Notes');
     assert.dom().includesText('Save');

@@ -13,12 +13,20 @@ export default class ResumesEditController extends Controller {
       const adapter = this.store.adapterFor('resume');
       const url = `${adapter.buildURL('resume', this.model.id)}clone/`;
       const payload = await adapter.ajax(url, 'POST');
-      const clone = this.store.push(this.store.serializerFor('resume').normalizeResponse(
-        this.store, this.store.modelFor('resume'), payload, null, 'createRecord'
-      ));
+      const clone = this.store.push(
+        this.store
+          .serializerFor('resume')
+          .normalizeResponse(
+            this.store,
+            this.store.modelFor('resume'),
+            payload,
+            null,
+            'createRecord',
+          ),
+      );
       this.flashMessages.success('Resume successfully cloned');
       this.router.transitionTo('resumes.show', clone.id);
-    } catch (error) {
+    } catch {
       this.flashMessages.warning('Failed to clone resume');
     }
   }
@@ -56,7 +64,9 @@ export default class ResumesEditController extends Controller {
 
       const ct = resp.headers.get('content-type') || '';
       if (
-        ct.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
+        ct.includes(
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ) ||
         ct.includes('application/octet-stream')
       ) {
         const blob = await resp.blob();
@@ -95,7 +105,7 @@ export default class ResumesEditController extends Controller {
   };
 
   get resumeSummaries() {
-    return this.store.peekAll('summary')
+    return this.store.peekAll('summary');
   }
 
   get isDirty() {

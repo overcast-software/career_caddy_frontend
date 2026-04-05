@@ -18,7 +18,11 @@
       {{#each this.model as |summary|}}
         <Panel::Card>
           <Summaries::Item @summary={{summary}} />
-          <LinkTo class="btn" @route="summaries.show" @model={{summary}}>show</LinkTo>
+          <LinkTo
+            class="btn"
+            @route="summaries.show"
+            @model={{summary}}
+          >show</LinkTo>
         </Panel::Card>
       {{else}}
         <p class="muted">No summaries yet.</p>

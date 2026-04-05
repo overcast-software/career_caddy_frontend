@@ -33,9 +33,14 @@ export default class JobPostsShowScrapesController extends Controller {
 
   @action async createScrape() {
     const jobPost = this.jobPost;
-    const scrape = this.store.createRecord('scrape', { jobPost, url: jobPost.link ?? '' });
+    const scrape = this.store.createRecord('scrape', {
+      jobPost,
+      url: jobPost.link ?? '',
+    });
     try {
-      const saved = await this.spinner.wrap(scrape.save(), { label: 'Creating scrape…' });
+      const saved = await this.spinner.wrap(scrape.save(), {
+        label: 'Creating scrape…',
+      });
       if (!TERMINAL_STATUSES.has(saved.status)) {
         this._pollScrape(saved);
       }
@@ -50,7 +55,9 @@ export default class JobPostsShowScrapesController extends Controller {
     this.poller.watchRecord(scrape, {
       isTerminal: (rec) => TERMINAL_STATUSES.has(rec.status),
       onStop: (rec) => {
-        this.pendingIds = new Set([...this.pendingIds].filter((id) => id !== scrape.id));
+        this.pendingIds = new Set(
+          [...this.pendingIds].filter((id) => id !== scrape.id),
+        );
         if (rec.status === 'failed' || rec.status === 'error') {
           this.flashMessages.alert('Scrape failed.');
         } else {
@@ -58,7 +65,9 @@ export default class JobPostsShowScrapesController extends Controller {
         }
       },
       onError: () => {
-        this.pendingIds = new Set([...this.pendingIds].filter((id) => id !== scrape.id));
+        this.pendingIds = new Set(
+          [...this.pendingIds].filter((id) => id !== scrape.id),
+        );
         this.flashMessages.alert('Lost connection while waiting for scrape.');
       },
     });

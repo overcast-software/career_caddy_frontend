@@ -1,6 +1,10 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <button type="button" class="btn" {{on "click" this.saveCoverLetter}}>Save</button>
+    <button
+      type="button"
+      class="btn"
+      {{on "click" this.saveCoverLetter}}
+    >Save</button>
   </:subnav>
   <:main>
     <Panel::Card @collapsible={{true}} @title="Resume (optional)">
@@ -22,7 +26,11 @@
     </Panel::Card>
     {{#if this.model.jobPost}}
       <Panel::Card>
-        <button type="button" class="btn primary" {{on "click" this.saveCoverLetter}}>
+        <button
+          type="button"
+          class="btn primary"
+          {{on "click" this.saveCoverLetter}}
+        >
           AI Craft Cover Letter
         </button>
       </Panel::Card>

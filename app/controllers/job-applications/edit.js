@@ -9,14 +9,20 @@ export default class JobApplicationsEditController extends Controller {
     try {
       await this.model.jobApplication.save();
       this.flashMessages.success('Saved.');
-      this.router.transitionTo('job-applications.show', this.model.jobApplication.id);
+      this.router.transitionTo(
+        'job-applications.show',
+        this.model.jobApplication.id,
+      );
     } catch (error) {
       this.flashMessages.alert(error?.errors?.[0]?.detail ?? 'Save failed.');
     }
   }
 
   @action cancel() {
-    this.router.transitionTo('job-applications.show', this.model.jobApplication.id);
+    this.router.transitionTo(
+      'job-applications.show',
+      this.model.jobApplication.id,
+    );
   }
 
   @action updateResume() {}

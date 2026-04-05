@@ -2,12 +2,26 @@
   <:subnav>
     <div class="submenu-buttons">
       {{#if this.isDirty}}
-        <button type="button" class="btn" {{on "click" this.saveResume}}>Save</button>
+        <button
+          type="button"
+          class="btn"
+          {{on "click" this.saveResume}}
+        >Save</button>
       {{/if}}
-      <button type="button" class="btn danger" {{on "click" this.deleteResume}}>Delete</button>
-      <button type="button" class="btn" {{on "click" this.cloneResume}}>Clone Resume</button>
-      <LinkTo @route="resumes.show" @model={{this.model}} class="btn">Preview</LinkTo>
-      <button type="button" class="btn" {{on "click" this.exportToWord}}>Export to Word</button>
+      <button
+        type="button"
+        class="btn danger"
+        {{on "click" this.deleteResume}}
+      >Delete</button>
+      <button type="button" class="btn" {{on "click" this.cloneResume}}>Clone
+        Resume</button>
+      <LinkTo
+        @route="resumes.show"
+        @model={{this.model}}
+        class="btn"
+      >Preview</LinkTo>
+      <button type="button" class="btn" {{on "click" this.exportToWord}}>Export
+        to Word</button>
     </div>
   </:subnav>
   <:main>
@@ -20,19 +34,30 @@
           <PersonalInformation::Form @user={{this.model.user}} />
         </Panel::Card>
         <Panel::Card @title="Summary" @collapsible={{true}}>
-          <Summaries::List @summaries={{this.resumeSummaries}} @resume={{this.model}} />
+          <Summaries::List
+            @summaries={{this.resumeSummaries}}
+            @resume={{this.model}}
+          />
         </Panel::Card>
         <Panel::Card @title="Skills" @collapsible={{true}}>
           <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
         </Panel::Card>
-        <Panel::Card @title="Education" @collapsible={{true}} @startCollapsed={{true}}>
+        <Panel::Card
+          @title="Education"
+          @collapsible={{true}}
+          @startCollapsed={{true}}
+        >
           <:top as |panel|>
             <Panel::Navigation
               @collapsible={{true}}
               @collapsed={{panel.collapsed}}
               @toggleCollapsed={{panel.toggleCollapsed}}
             >
-              <button type="button" class="btn small" {{on "click" this.addEducation}}>+ Add Education</button>
+              <button
+                type="button"
+                class="btn small"
+                {{on "click" this.addEducation}}
+              >+ Add Education</button>
             </Panel::Navigation>
           </:top>
           <:default>
@@ -48,7 +73,11 @@
               @collapsed={{panel.collapsed}}
               @toggleCollapsed={{panel.toggleCollapsed}}
             >
-              <button type="button" class="btn small" {{on "click" this.addExperience}}>+ Add Experience</button>
+              <button
+                type="button"
+                class="btn small"
+                {{on "click" this.addExperience}}
+              >+ Add Experience</button>
             </Panel::Navigation>
           </:top>
           <:default>

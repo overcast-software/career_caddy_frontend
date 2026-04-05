@@ -14,9 +14,14 @@ export default class JobPostsShowSummariesController extends Controller {
 
   @action async createSummary() {
     const jobPost = this.store.peekRecord('job-post', this.jobPostId);
-    const summary = this.store.createRecord('summary', { jobPost, content: '' });
+    const summary = this.store.createRecord('summary', {
+      jobPost,
+      content: '',
+    });
     try {
-      const saved = await this.spinner.wrap(summary.save(), { label: 'Creating summary…' });
+      const saved = await this.spinner.wrap(summary.save(), {
+        label: 'Creating summary…',
+      });
       this.router.transitionTo('summaries.show', saved);
     } catch {
       summary.unloadRecord();

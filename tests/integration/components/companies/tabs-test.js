@@ -12,15 +12,7 @@ module('Integration | Component | companies/tabs', function (hooks) {
 
     await render(hbs`<Companies::Tabs />`);
 
-    assert.dom().hasText('');
-
-    // Template block usage:
-    await render(hbs`
-      <Companies::Tabs>
-        template block text
-      </Companies::Tabs>
-    `);
-
-    assert.dom().hasText('template block text');
+    assert.dom().includesText('Job Posts');
+    assert.dom().includesText('Applications');
   });
 });

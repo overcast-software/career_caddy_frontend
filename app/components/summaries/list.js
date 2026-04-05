@@ -6,7 +6,8 @@ export default class SummariesList extends Component {
   @tracked _currentIndex = null;
 
   _at(summaries, idx) {
-    if (typeof summaries.objectAt === 'function') return summaries.objectAt(idx);
+    if (typeof summaries.objectAt === 'function')
+      return summaries.objectAt(idx);
     return summaries[idx];
   }
 

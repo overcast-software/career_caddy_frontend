@@ -22,7 +22,10 @@ export default class JobPostsShowJobApplicationsNewController extends Controller
     try {
       await this.jobApplication.save();
       this.flashMessages.success('Application saved.');
-      this.router.transitionTo('job-posts.show.job-applications', this.jobPostId);
+      this.router.transitionTo(
+        'job-posts.show.job-applications',
+        this.jobPostId,
+      );
     } catch {
       this.flashMessages.danger('Failed to save application.');
     }

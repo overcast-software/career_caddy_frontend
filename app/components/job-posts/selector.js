@@ -48,7 +48,10 @@ export default class JobPostsSelector extends Component {
       grouped.get(name).push(post);
     });
     this.#lastTerm = term;
-    this.#lastResults = Array.from(grouped, ([groupName, options]) => ({ groupName, options }));
+    this.#lastResults = Array.from(grouped, ([groupName, options]) => ({
+      groupName,
+      options,
+    }));
     return this.#lastResults;
   };
 

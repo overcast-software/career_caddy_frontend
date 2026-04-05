@@ -1,7 +1,6 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
-import { later } from '@ember/runloop';
 
 const TERMINAL_STATUSES = ['completed', 'done', 'failed', 'error'];
 const POLL_INTERVAL_MS = 3000;
@@ -33,7 +32,10 @@ export default class ScrapesShowController extends Controller {
           this.flashMessages.danger('Scrape failed.');
         } else if (rec.jobPost?.id) {
           this.flashMessages.success('Scrape completed.');
-          later(() => this.router.transitionTo('job-posts.show', rec.jobPost.id), 500);
+          setTimeout(
+            () => this.router.transitionTo('job-posts.show', rec.jobPost.id),
+            500,
+          );
         } else {
           this.flashMessages.success('Scrape completed.');
         }

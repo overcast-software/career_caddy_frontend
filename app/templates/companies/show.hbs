@@ -1,30 +1,54 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
     {{this.model.name}}
-    <LinkTo @route="companies.edit" @model={{this.model}} class="btn">edit</LinkTo>
+    <LinkTo
+      @route="companies.edit"
+      @model={{this.model}}
+      class="btn"
+    >edit</LinkTo>
   </:subnav>
   <:main>
     <Panel::Card @title={{this.model.name}}>
       <dl class="flex flex-wrap gap-y-2 text-sm">
-        <div class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0">
+        <div
+          class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0"
+        >
           <dt class="text-gray-500">Job Posts</dt>
-          <dd class="font-semibold text-gray-900">{{this.model.jobPosts.length}}</dd>
+          <dd
+            class="font-semibold text-gray-900"
+          >{{this.model.jobPosts.length}}</dd>
         </div>
-        <div class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0">
+        <div
+          class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0"
+        >
           <dt class="text-gray-500">Applications</dt>
-          <dd class="font-semibold text-gray-900">{{this.model.jobApplications.length}}</dd>
+          <dd
+            class="font-semibold text-gray-900"
+          >{{this.model.jobApplications.length}}</dd>
         </div>
-        <div class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0">
+        <div
+          class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0"
+        >
           <dt class="text-gray-500">Scrapes</dt>
-          <dd class="font-semibold text-gray-900">{{this.model.scrapes.length}}</dd>
+          <dd
+            class="font-semibold text-gray-900"
+          >{{this.model.scrapes.length}}</dd>
         </div>
-        <div class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0">
+        <div
+          class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0"
+        >
           <dt class="text-gray-500">Questions</dt>
-          <dd class="font-semibold text-gray-900">{{this.model.questions.length}}</dd>
+          <dd
+            class="font-semibold text-gray-900"
+          >{{this.model.questions.length}}</dd>
         </div>
-        <div class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0">
+        <div
+          class="flex items-center gap-2 border-r border-gray-300 pr-4 mr-4 last:border-r-0 last:pr-0 last:mr-0"
+        >
           <dt class="text-gray-500">Scores</dt>
-          <dd class="font-semibold text-gray-900">{{this.model.scores.length}}</dd>
+          <dd
+            class="font-semibold text-gray-900"
+          >{{this.model.scores.length}}</dd>
         </div>
       </dl>
     </Panel::Card>

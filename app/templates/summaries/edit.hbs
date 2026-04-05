@@ -1,14 +1,22 @@
 {{page-title "Edit Summary"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <LinkTo class="btn" @route="summaries.show" @model={{this.model.id}}>View</LinkTo>
+    <LinkTo
+      class="btn"
+      @route="summaries.show"
+      @model={{this.model.id}}
+    >View</LinkTo>
   </:subnav>
   <:main>
     <form class="builder-form" {{on "submit" this.saveSummary}}>
       {{#if this.model.jobPost.title}}
         <p class="muted">{{this.model.jobPost.title}}</p>
       {{/if}}
-      <textarea {{on "input" this.updateContent}} rows="12">{{this.model.content}}</textarea>
+      <textarea
+        aria-label="Summary content"
+        {{on "input" this.updateContent}}
+        rows="12"
+      >{{this.model.content}}</textarea>
       <div class="form-actions">
         <button
           type="button"
@@ -17,7 +25,11 @@
           {{on "click" this.toggleActive}}
         >★</button>
         <button type="submit" class="btn">Save</button>
-        <button type="button" class="btn danger" {{on "click" this.deleteSummary}}>Delete</button>
+        <button
+          type="button"
+          class="btn danger"
+          {{on "click" this.deleteSummary}}
+        >Delete</button>
       </div>
     </form>
   </:main>

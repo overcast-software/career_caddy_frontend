@@ -47,8 +47,7 @@ body {
 .course {
   height: 100vh;
   display: grid;
-  grid-template:
-    "header" auto "main" 1fr / 1fr;
+  grid-template: "header" auto "main" 1fr / 1fr;
   overflow: hidden;
 }
 
@@ -124,10 +123,6 @@ body {
   height: 100%;
   width: min(320px, 75vw);
   z-index: 50;
-}
-
-.course-main {
-  overflow-y: auto;
 }
 
 .sidebar-link.active,
@@ -874,7 +869,7 @@ footer {
 
 .collapsible .collapsible-body > * {
   min-height: 0; /* allow grid row to collapse */
-  min-width: 0;  /* prevent max-content children from overflowing */
+  min-width: 0; /* prevent max-content children from overflowing */
 }
 
 /* Resume landing page styles */
@@ -1600,7 +1595,9 @@ pre {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .markdown-content {
@@ -1621,10 +1618,23 @@ pre {
   color: var(--text);
 }
 
-.markdown-content h1 { font-size: 1.75rem; }
-.markdown-content h2 { font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25em; }
-.markdown-content h3 { font-size: 1.15rem; }
-.markdown-content h4 { font-size: 1rem; }
+.markdown-content h1 {
+  font-size: 1.75rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.25em;
+}
+
+.markdown-content h3 {
+  font-size: 1.15rem;
+}
+
+.markdown-content h4 {
+  font-size: 1rem;
+}
 
 .markdown-content p {
   margin-bottom: 0.9em;
@@ -1636,15 +1646,23 @@ pre {
   margin-bottom: 0.9em;
 }
 
-.markdown-content ul { list-style: disc; }
-.markdown-content ol { list-style: decimal; }
+.markdown-content ul {
+  list-style: disc;
+}
+.markdown-content ol {
+  list-style: decimal;
+}
 
 .markdown-content li {
   margin-bottom: 0.25em;
 }
 
-.markdown-content strong { font-weight: 700; }
-.markdown-content em { font-style: italic; }
+.markdown-content strong {
+  font-weight: 700;
+}
+.markdown-content em {
+  font-style: italic;
+}
 
 .markdown-content code {
   font-family: monospace;

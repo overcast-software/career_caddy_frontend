@@ -12,21 +12,38 @@
   </div>
   <div class="actions">
     {{#if @jobPost.scrapes.length}}
-      <LinkTo @route="scrapes.show" @model={{get @jobPost.scrapes "0"}} class="btn btn-sm">View Scrape</LinkTo>
+      <LinkTo
+        @route="scrapes.show"
+        @model={{get @jobPost.scrapes "0"}}
+        class="btn btn-sm"
+      >View Scrape</LinkTo>
     {{else}}
-      <button type="button" class="btn btn-sm" {{on "click" this.createScrape}}>Create Scrape</button>
+      <button
+        type="button"
+        class="btn btn-sm"
+        {{on "click" this.createScrape}}
+      >Create Scrape</button>
     {{/if}}
   </div>
 
   {{#if this.selectedResume}}
     {{#unless @jobPost.description}}
-      <p class="text-sm text-amber-600">Job description is missing — AI actions are disabled.</p>
+      <p class="text-sm text-amber-600">Job description is missing — AI actions
+        are disabled.</p>
     {{/unless}}
     <div class="actions">
-      <button type="button" class="btn" disabled={{not @jobPost.description}} {{on "click" this.scoreResume}}>Score
-        against job post</button>
-      <button type="button" class="btn" disabled={{not @jobPost.description}} {{on "click" this.createSummary}}>Create
-        new resume summary</button>
+      <button
+        type="button"
+        class="btn"
+        disabled={{not @jobPost.description}}
+        {{on "click" this.scoreResume}}
+      >Score against job post</button>
+      <button
+        type="button"
+        class="btn"
+        disabled={{not @jobPost.description}}
+        {{on "click" this.createSummary}}
+      >Create new resume summary</button>
       <button
         type="button"
         class="btn"

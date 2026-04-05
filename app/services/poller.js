@@ -7,7 +7,9 @@ export default class PollerService extends Service {
 
   watchRecord(record, options = {}) {
     if (!record || typeof record.reload !== 'function') {
-      throw new Error('poller.watchRecord requires an Ember Data record with reload()');
+      throw new Error(
+        'poller.watchRecord requires an Ember Data record with reload()',
+      );
     }
 
     const {

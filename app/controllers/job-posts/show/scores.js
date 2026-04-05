@@ -53,13 +53,17 @@ export default class JobPostsShowScoresController extends Controller {
       user: this.currentUser.user,
     });
     try {
-      const saved = await this.spinner.wrap(newScore.save(), { label: 'Requesting score…' });
+      const saved = await this.spinner.wrap(newScore.save(), {
+        label: 'Requesting score…',
+      });
       if (!saved.status || !TERMINAL_STATUSES.has(saved.status)) {
         this._pollScore(saved);
       }
     } catch (e) {
       newScore.unloadRecord();
-      this.flashMessages.alert(e?.errors?.[0]?.detail ?? 'Failed to create score.');
+      this.flashMessages.alert(
+        e?.errors?.[0]?.detail ?? 'Failed to create score.',
+      );
     }
   }
 
@@ -68,13 +72,17 @@ export default class JobPostsShowScoresController extends Controller {
     this.poller.watchRecord(score, {
       isTerminal: (rec) => TERMINAL_STATUSES.has(rec.status),
       onStop: (rec) => {
-        this.pendingIds = new Set([...this.pendingIds].filter((id) => id !== score.id));
+        this.pendingIds = new Set(
+          [...this.pendingIds].filter((id) => id !== score.id),
+        );
         if (rec.status === 'failed' || rec.status === 'error') {
           this.flashMessages.alert('Scoring failed.');
         }
       },
       onError: () => {
-        this.pendingIds = new Set([...this.pendingIds].filter((id) => id !== score.id));
+        this.pendingIds = new Set(
+          [...this.pendingIds].filter((id) => id !== score.id),
+        );
         this.flashMessages.alert('Lost connection while waiting for score.');
       },
     });

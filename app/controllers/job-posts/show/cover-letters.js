@@ -45,7 +45,10 @@ export default class JobPostsShowCoverLettersController extends Controller {
 
   @action async createCoverLetter() {
     const resume = this.store.peekRecord('resume', this.selectedResume.id);
-    const cl = this.store.createRecord('cover-letter', { resume, jobPost: this.jobPost });
+    const cl = this.store.createRecord('cover-letter', {
+      resume,
+      jobPost: this.jobPost,
+    });
     this.flashMessages.info('Creating cover letter…');
     try {
       const saved = await this.spinner.wrap(cl.save());
@@ -63,7 +66,9 @@ export default class JobPostsShowCoverLettersController extends Controller {
     this.poller.watchRecord(cl, {
       isTerminal: (rec) => TERMINAL_STATUSES.has(rec.status),
       onStop: (rec) => {
-        this.pendingIds = new Set([...this.pendingIds].filter((id) => id !== cl.id));
+        this.pendingIds = new Set(
+          [...this.pendingIds].filter((id) => id !== cl.id),
+        );
         if (rec.status === 'failed' || rec.status === 'error') {
           this.flashMessages.alert('Cover letter generation failed.');
         } else {
@@ -71,9 +76,13 @@ export default class JobPostsShowCoverLettersController extends Controller {
         }
       },
       onError: () => {
-        this.pendingIds = new Set([...this.pendingIds].filter((id) => id !== cl.id));
-        this.flashMessages.alert('Lost connection while waiting for cover letter.');
+        this.pendingIds = new Set(
+          [...this.pendingIds].filter((id) => id !== cl.id),
+        );
+        this.flashMessages.alert(
+          'Lost connection while waiting for cover letter.',
+        );
       },
     });
-  }
+  };
 }

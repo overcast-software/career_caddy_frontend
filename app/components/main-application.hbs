@@ -1,20 +1,18 @@
 {{#if this.sidebarOpen}}
-  <div
+  <button
+    type="button"
     class="mobile-overlay"
-    role="presentation"
+    aria-label="Close menu"
     {{on "click" this.close}}
-  ></div>
+  ></button>
   <div class="mobile-drawer">
     <Sidebar @onClose={{this.close}} />
   </div>
 {{/if}}
 
-<div class="course {{if this.sidebarOpen "course--sidebar-open"}}">
+<div class="course {{if this.sidebarOpen 'course--sidebar-open'}}">
   <header class="site-header">
-    <TopBar
-      @showLoading={{this.showLoading}}
-      @onToggle={{this.toggle}}
-    />
+    <TopBar @showLoading={{this.showLoading}} @onToggle={{this.toggle}} />
   </header>
   <div class="course-body">
     <aside class="course-sidebar">

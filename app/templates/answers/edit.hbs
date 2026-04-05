@@ -7,6 +7,7 @@
     <form class="builder-form" {{on "submit" this.saveAnswer}}>
       <p class="muted">{{this.model.question.content.content}}</p>
       <textarea
+        aria-label="Answer content"
         {{on "change" this.updateContent}}
         rows="{{this.textareaRows}}"
       >{{this.model.content}}</textarea>
@@ -18,7 +19,11 @@
           {{on "click" this.toggleFavorite}}
         >★</button>
         <button type="submit" class="btn">Save</button>
-        <button type="button" class="btn danger" {{on "click" this.deleteAnswer}}>Delete</button>
+        <button
+          type="button"
+          class="btn danger"
+          {{on "click" this.deleteAnswer}}
+        >Delete</button>
       </div>
     </form>
   </:main>

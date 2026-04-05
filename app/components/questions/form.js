@@ -65,8 +65,9 @@ export default class QuestionsFormComponent extends Component {
         const jobApp = question.belongsTo('jobApplication').value();
         if (jobApp) {
           this.selectedJobAppOption =
-            this.loadedJobAppOptions.find((opt) => opt.record.id === jobApp.id) ??
-            this.selectedJobAppOption;
+            this.loadedJobAppOptions.find(
+              (opt) => opt.record.id === jobApp.id,
+            ) ?? this.selectedJobAppOption;
         }
       }
     } finally {
@@ -152,7 +153,8 @@ export default class QuestionsFormComponent extends Component {
     event?.preventDefault();
     this.args.question.company = this.selectedCompany;
     this.args.question.jobPost = this.selectedJobPost;
-    this.args.question.jobApplication = this.selectedJobAppOption?.record ?? null;
+    this.args.question.jobApplication =
+      this.selectedJobAppOption?.record ?? null;
     const q = await this.args.question.save();
     this.flashMessages.success('Question saved');
     this.router.transitionTo('questions.show', q.id);
@@ -161,7 +163,8 @@ export default class QuestionsFormComponent extends Component {
   @action async saveAndNew() {
     this.args.question.company = this.selectedCompany;
     this.args.question.jobPost = this.selectedJobPost;
-    this.args.question.jobApplication = this.selectedJobAppOption?.record ?? null;
+    this.args.question.jobApplication =
+      this.selectedJobAppOption?.record ?? null;
     await this.args.question.save();
     this.flashMessages.success('Question saved');
     this.router.transitionTo('questions.new', {

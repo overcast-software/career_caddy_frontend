@@ -19,16 +19,16 @@ const NOGO_RAIL = ['Rejected', 'Expired', 'Archived'];
 
 // Main flow indices
 const VG_IDX = 1; // Vetted Good — VB branches here
-const C_IDX = 3;  // Contact — first rejection entry
-const I_IDX = 5;  // Interviewed — rejection entry
+const C_IDX = 3; // Contact — first rejection entry
+const I_IDX = 5; // Interviewed — rejection entry
 const TT_IDX = 6; // Technical Test — rejection entry
 const AD_IDX = 7; // Awaiting Decision — last rejection entry, aligns with Rejected node
-const O_IDX = 8;  // Offer — Declined branches here
+const O_IDX = 8; // Offer — Declined branches here
 
 const X0 = 60;
 const DX = 120;
 const MAIN_Y = 80;
-const NOGO_Y = 195;    // VB + rejection rail depth
+const NOGO_Y = 195; // VB + rejection rail depth
 const DECLINE_Y = 145; // shorter branch from Offer (you chose this, less severe)
 const SVG_HEIGHT = 250;
 

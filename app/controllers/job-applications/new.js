@@ -8,7 +8,7 @@ export default class JobApplicationsNewController extends Controller {
   @service flashMessages;
   @tracked selectedJobPost;
   @tracked selectedResume;
-  @tracked selectedStatus = "Unvetted";
+  @tracked selectedStatus = 'Unvetted';
   @tracked selectedCoverLetter;
 
   get coverLetters() {

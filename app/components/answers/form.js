@@ -66,14 +66,19 @@ export default class AnswersForm extends Component {
               this.flashMessages.success('AI answer generated successfully.');
               this.useAI = false;
               if (wasNew && question) {
-                this.router.transitionTo('questions.show.answers.index', question);
+                this.router.transitionTo(
+                  'questions.show.answers.index',
+                  question,
+                );
               }
             }
           },
           onError: () => {
             this.isPolling = false;
             this.spinner.end();
-            this.flashMessages.danger('Lost connection while waiting for AI answer.');
+            this.flashMessages.danger(
+              'Lost connection while waiting for AI answer.',
+            );
           },
         });
       } else {

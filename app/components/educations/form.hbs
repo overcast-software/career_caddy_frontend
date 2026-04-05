@@ -2,8 +2,9 @@
   {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
 
   <div class="field">
-    <label class="field-label">Institution</label>
+    <label class="field-label" for="edu-institution">Institution</label>
     <input
+      id="edu-institution"
       type="text"
       value={{this.education.institution}}
       {{on "input" (fn this.updateField "institution")}}
@@ -12,16 +13,18 @@
 
   <div class="field-row">
     <div class="field">
-      <label class="field-label">Issue Date</label>
+      <label class="field-label" for="edu-issue-date">Issue Date</label>
       <input
+        id="edu-issue-date"
         type="date"
         value={{this.formattedIssueDate}}
         {{on "input" (fn this.updateField "issueDate")}}
       />
     </div>
     <div class="field">
-      <label class="field-label">Degree</label>
+      <label class="field-label" for="edu-degree">Degree</label>
       <input
+        id="edu-degree"
         type="text"
         value={{this.education.degree}}
         {{on "input" (fn this.updateField "degree")}}
@@ -31,16 +34,18 @@
 
   <div class="field-row">
     <div class="field">
-      <label class="field-label">Major</label>
+      <label class="field-label" for="edu-major">Major</label>
       <input
+        id="edu-major"
         type="text"
         value={{this.education.major}}
         {{on "input" (fn this.updateField "major")}}
       />
     </div>
     <div class="field">
-      <label class="field-label">Minor</label>
+      <label class="field-label" for="edu-minor">Minor</label>
       <input
+        id="edu-minor"
         type="text"
         value={{this.education.minor}}
         {{on "input" (fn this.updateField "minor")}}

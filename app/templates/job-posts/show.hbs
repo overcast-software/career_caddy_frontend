@@ -7,26 +7,43 @@
           <h1 class="text-lg font-semibold text-gray-900">
             {{this.model.title}}
             {{#if this.model.link}}
-              <a href={{this.model.link}} target="_blank" rel="noopener noreferrer" class="text-blue-500 text-sm ml-1">↗</a>
+              <a
+                href={{this.model.link}}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-blue-500 text-sm ml-1"
+              >↗</a>
             {{/if}}
           </h1>
           <div class="flex gap-3 text-xs text-gray-400 mt-0.5">
             {{#if this.model.postedDate}}
-              <span>Posted: {{moment-format this.model.postedDate "MMM D, YYYY"}}</span>
+              <span>Posted:
+                {{moment-format this.model.postedDate "MMM D, YYYY"}}</span>
             {{/if}}
             {{#if this.model.createdAt}}
-              <span>Added: {{moment-format this.model.createdAt "MMM D, YYYY"}}</span>
+              <span>Added:
+                {{moment-format this.model.createdAt "MMM D, YYYY"}}</span>
             {{/if}}
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <button type="button" class="btn btn-sm" {{on "click" this.copyDescription}}>
+          <button
+            type="button"
+            class="btn btn-sm"
+            {{on "click" this.copyDescription}}
+          >
             {{this.copyButtonText}}
           </button>
-          <LinkTo class="btn btn-sm" @route="job-posts.edit" @model={{this.model}}>Edit</LinkTo>
+          <LinkTo
+            class="btn btn-sm"
+            @route="job-posts.edit"
+            @model={{this.model}}
+          >Edit</LinkTo>
         </div>
       </div>
-      <p class="text-sm text-gray-600 line-clamp-4 mt-2">{{this.model.description}}</p>
+      <p
+        class="text-sm text-gray-600 line-clamp-4 mt-2"
+      >{{this.model.description}}</p>
     </div>
 
     <Panel::Card>

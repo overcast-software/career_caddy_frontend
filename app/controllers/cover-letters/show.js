@@ -31,7 +31,9 @@ export default class CoverLettersShowController extends Controller {
           }
         },
         onError: () => {
-          this.flashMessages.danger('Lost connection while waiting for cover letter.');
+          this.flashMessages.danger(
+            'Lost connection while waiting for cover letter.',
+          );
         },
       });
     }

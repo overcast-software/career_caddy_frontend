@@ -1,6 +1,10 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <button type="button" class="btn danger" {{on "click" this.deleteCoverLetter}}>Delete</button>
+    <button
+      type="button"
+      class="btn danger"
+      {{on "click" this.deleteCoverLetter}}
+    >Delete</button>
   </:subnav>
   <:main>
     <CoverLetters::Form @coverLetter={{this.model}} />

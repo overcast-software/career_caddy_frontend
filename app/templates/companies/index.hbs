@@ -15,7 +15,10 @@
     {{#if this.isSearching}}
       <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
     {{else}}
-      <Companies::List @companies={{this.model}} @onDelete={{this.deleteCompany}} />
+      <Companies::List
+        @companies={{this.model}}
+        @onDelete={{this.deleteCompany}}
+      />
       <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
         <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
       </InfinityLoader>

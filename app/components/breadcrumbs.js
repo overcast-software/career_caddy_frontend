@@ -4,27 +4,35 @@ import { service } from '@ember/service';
 const LABELS = {
   'job-posts': 'Job Posts',
   'job-applications': 'Applications',
-  'companies': 'Companies',
-  'resumes': 'Resumes',
+  companies: 'Companies',
+  resumes: 'Resumes',
   'cover-letters': 'Cover Letters',
-  'questions': 'Questions',
-  'answers': 'Answers',
-  'scores': 'Scores',
-  'scrapes': 'Scrapes',
-  'summaries': 'Summaries',
+  questions: 'Questions',
+  answers: 'Answers',
+  scores: 'Scores',
+  scrapes: 'Scrapes',
+  summaries: 'Summaries',
   'career-data': 'Career Data',
-  'about': 'About',
-  'new': 'New',
-  'edit': 'Edit',
-  'import': 'Import',
+  about: 'About',
+  new: 'New',
+  edit: 'Edit',
+  import: 'Import',
 };
 
 // Map full route name → { modelName, param key, display attribute }
 const MODEL_MAP = {
   'companies.show': { modelName: 'company', param: 'company_id', attr: 'name' },
-  'job-posts.show': { modelName: 'job-post', param: 'job_post_id', attr: 'title' },
+  'job-posts.show': {
+    modelName: 'job-post',
+    param: 'job_post_id',
+    attr: 'title',
+  },
   'resumes.show': { modelName: 'resume', param: 'resume_id', attr: 'name' },
-  'questions.show': { modelName: 'question', param: 'question_id', attr: 'content' },
+  'questions.show': {
+    modelName: 'question',
+    param: 'question_id',
+    attr: 'content',
+  },
   'job-applications.show': {
     modelName: 'job-application',
     param: 'application_id',
@@ -67,7 +75,9 @@ export default class BreadcrumbsComponent extends Component {
     for (const info of chain) {
       if (info.name === 'application' || info.localName === 'index') continue;
 
-      const segmentParams = info.params ? Object.values(info.params).filter(Boolean) : [];
+      const segmentParams = info.params
+        ? Object.values(info.params).filter(Boolean)
+        : [];
 
       const label = this._labelFor(info);
 

@@ -12,7 +12,9 @@ export default class StatusStepsComponent extends Component {
 
   get currentIndex() {
     const current = (this.args.current ?? '').toLowerCase();
-    return (this.args.steps ?? []).findIndex((s) => s.toLowerCase() === current);
+    return (this.args.steps ?? []).findIndex(
+      (s) => s.toLowerCase() === current,
+    );
   }
 
   get gridStyle() {
