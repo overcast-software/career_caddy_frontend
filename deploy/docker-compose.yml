@@ -2,9 +2,7 @@ version: "3.8"
 
 services:
   cc-frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${IMAGE_REPO}:${IMAGE_TAG:-latest}
     ports:
       - "127.0.0.1:8087:4200"
     restart: unless-stopped
