@@ -66,7 +66,7 @@ export default class SessionService extends Service {
 
   async bootstrapSuperuser(formData) {
     const bootstrapPath =
-      config.APP.AUTH?.BOOTSTRAP_PATH ?? 'users/bootstrap-superuser/';
+      config.APP.AUTH?.BOOTSTRAP_PATH ?? 'initialize';
     const url = `${buildBaseUrl()}${bootstrapPath}`;
 
     const response = await fetch(url, {

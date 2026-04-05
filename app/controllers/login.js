@@ -20,10 +20,10 @@ export default class LoginController extends Controller {
       this.flashMessages.danger(
         error?.error || error?.errors?.[0]?.detail || 'Login failed',
       );
+      return;
     }
-    this.router
-      .transitionTo('index')
-      .then(this.flashMessages.success('Successfully logged in'));
+    this.flashMessages.success('Successfully logged in');
+    this.router.transitionTo('index');
   }
 
   @action updatePassword(e) {

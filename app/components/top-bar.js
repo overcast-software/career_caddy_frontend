@@ -34,11 +34,8 @@ export default class TopBarComponent extends Component {
   }
 
   @action async invalidateSession() {
-    this.session
-      .invalidate()
-      .then(this.flashMessages.success('Successfully logged out.'))
-      .then(() => {
-        this.router.transitionTo('index');
-      });
+    await this.session.invalidate();
+    this.flashMessages.success('Successfully logged out.');
+    this.router.transitionTo('index');
   }
 }
