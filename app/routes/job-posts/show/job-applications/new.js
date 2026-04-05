@@ -10,7 +10,7 @@ export default class JobPostsShowJobApplicationsNewRoute extends Route {
       Promise.resolve(
         this.store.createRecord('job-application', {
           appliedAt: new Date(),
-          status: 'applied',
+          status: 'Applied',
         }),
       ),
       this.store.findAll('resume'),

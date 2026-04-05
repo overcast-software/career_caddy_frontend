@@ -35,7 +35,11 @@ Router.map(function () {
         path: '/:company_id',
       },
       function () {
-        this.route('job-posts', this.route('show'));
+        this.route('job-posts');
+        this.route('job-applications');
+        this.route('scrapes');
+        this.route('answers');
+        this.route('scores');
       },
     );
     this.route('new');
@@ -78,6 +82,10 @@ Router.map(function () {
         this.route('questions', function () {
           this.route('new');
         });
+        this.route('scores');
+        this.route('cover-letters');
+        this.route('scrapes');
+        this.route('summaries');
       },
     );
     this.route('new');
@@ -165,6 +173,7 @@ Router.map(function () {
       function () {
         this.route('answers', function () {
           this.route('new');
+          this.route('show', { path: '/:answer_id' });
           this.route('edit', { path: '/:answer_id/edit' });
         });
       },

@@ -27,7 +27,7 @@ export default class JobPostsShowCoverLettersController extends Controller {
     return this.store.peekRecord('job-post', job_post_id);
   }
 
-  isPending(coverLetter) {
+  @action isPending(coverLetter) {
     return this.pendingIds.has(coverLetter.id);
   }
 

@@ -9,6 +9,7 @@ export default class CompaniesIndexController extends Controller {
   @service flashMessages;
   @service store;
   @tracked search = '';
+  @tracked searchInput = '';
   @tracked isSearching = false;
 
   #debounceTimer = null;
@@ -16,6 +17,7 @@ export default class CompaniesIndexController extends Controller {
   @action
   onSearchInput(event) {
     const value = event.target.value;
+    this.searchInput = value;
     this.isSearching = true;
     clearTimeout(this.#debounceTimer);
     this.#debounceTimer = setTimeout(() => {

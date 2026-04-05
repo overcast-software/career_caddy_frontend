@@ -29,17 +29,15 @@
               {{moment-format jobPost.postedDate "MMM D, YYYY"}}
             </td>
             <td class="px-4 py-3 text-gray-600">
-              {{#let (this.bestScore jobPost) as |score|}}
-                {{#if score}}
-                  <span class="font-medium text-blue-600">
-                    <LinkTo @route="scores.show" @model={{score}}>
-                      {{score.score}}
-                    </LinkTo>
-                  </span>
-                {{else}}
-                  <span class="text-gray-300">—</span>
-                {{/if}}
-              {{/let}}
+              {{#if jobPost.topScore.score}}
+                <span class="font-medium text-blue-600">
+                  <LinkTo @route="scores.show" @model={{jobPost.topScore}}>
+                    {{jobPost.topScore.score}}
+                  </LinkTo>
+                </span>
+              {{else}}
+                <span class="text-gray-300">—</span>
+              {{/if}}
             </td>
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-2">
@@ -53,6 +51,11 @@
                   @model={{jobPost}}
                   class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
                 >Edit</LinkTo>
+                <LinkTo
+                  @route="job-posts.show"
+                  @model={{jobPost}}
+                  class="px-2 py-1 text-xs rounded border border-blue-200 text-blue-600 hover:bg-blue-50"
+                >+Score</LinkTo>
               </div>
             </td>
           </tr>

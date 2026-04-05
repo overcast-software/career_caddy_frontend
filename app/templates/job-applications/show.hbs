@@ -2,13 +2,12 @@
   <:subnav>
     <LinkTo @route="job-applications.edit" @model={{this.model.id}} class="btn">Edit</LinkTo>
     <button type="button" class="btn" {{on "click" this.destroyRecord}}>Destroy</button>
-    <LinkTo @route="job-posts.show" @model={{this.model.jobPost}} class="btn">Job Post</LinkTo>
-    <LinkTo @route="job-applications.show.questions.index" @model={{this.model}} class="btn">Questions</LinkTo>
+    <LinkTo @route="job-posts.show.job-applications" @model={{this.model.jobPost}} class="btn">Job Post</LinkTo>
   </:subnav>
   <:main>
     <div class="space-y-4">
     <div class="panel-card space-y-6">
-      <JobApplications::StatusFlow @current={{this.model.status}} />
+      <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{{this.model.status}}</span>
 
       <div class="flow-root">
         <dl class="-my-3 divide-y divide-gray-200 text-sm">
@@ -51,6 +50,12 @@
     <div class="panel-card">
       <JobApplications::StatusLog @jobApplication={{this.model}} />
     </div>
+
+    {{#if this.model.questions.length}}
+      <LinkTo @route="job-applications.show.questions" @model={{this.model}} class="btn btn-sm">
+        Questions ({{this.model.questions.length}})
+      </LinkTo>
+    {{/if}}
     </div>
   </:main>
   <:outlet>

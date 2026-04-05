@@ -8,7 +8,7 @@
     {{#each this.model.answers as |answer|}}
       <Panel::Card>
         <MarkdownToHtml @markdown={{answer.content}} />
-        <LinkTo @route="answers.edit" @model={{answer}}>edit</LinkTo>
+        <LinkTo @route="questions.show.answers.show" @models={{array this.model.question answer}}>view</LinkTo>
       </Panel::Card>
     {{else}}
       <p class="text-gray-500 text-sm">No answers yet.</p>

@@ -9,7 +9,7 @@ export default class ApiKeyModel extends Model {
   @attr('date') revokedAt;
   @attr('boolean') isRevoked;
   @attr('array') scopes;
-  @belongsTo('user', { async: false, inverse: null }) user;
+  @belongsTo('user', { async: true, inverse: null }) user;
 
   get isExpired() {
     return this.expiresAt && new Date() > this.expiresAt;

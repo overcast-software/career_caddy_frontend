@@ -1,37 +1,23 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 
 export default class JobPostsShowController extends Controller {
   @service store;
   @service flashMessages;
   @service router;
-  showControls = true;
 
-  get isOnJobApplicationsRoute() {
-    return this.router.currentRouteName?.startsWith(
-      'job-posts.show.job-applications',
-    );
-  }
-
-  get resumes() {
-    return this.store.peekAll('resume');
-  }
+  @tracked copyButtonText = 'Copy Description';
 
   @action
-  async createQuestionWithApplication() {
-    // Create and save a templated job-application for this job-post
-    const jobApplication = this.store.createRecord('job-application', {
-      appliedAt: new Date(),
-      status: 'interested',
-      jobPost: this.model,
-      company: this.model.company,
-    });
-
-    await jobApplication.save();
-
-    const jaid = jobApplication.id;
-    // Navigate to the job-applications questions route with full page refresh
-    window.location.href = `/job-applications/${jaid}/questions/new`;
+  async copyDescription() {
+    try {
+      await navigator.clipboard.writeText(this.model.description);
+      this.copyButtonText = 'Copied!';
+      setTimeout(() => (this.copyButtonText = 'Copy Description'), 2000);
+    } catch {
+      this.flashMessages.alert('Failed to copy.');
+    }
   }
 }

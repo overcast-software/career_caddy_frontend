@@ -1,8 +1,7 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
-import { tracked } from '@glimmer/tracking';
+import { tracked, cached } from '@glimmer/tracking';
 import { inject as service } from '@ember/service';
-import ArrayProxy from '@ember/array/proxy';
 
 export default class SkillsFormComponent extends Component {
   @service store;
@@ -14,15 +13,13 @@ export default class SkillsFormComponent extends Component {
     return this.args.skills ?? [];
   }
 
-  get groupedSkillsMap() {
-    const skillsArray = ArrayProxy.create({ content: this.skills.content });
-
-    const result = skillsArray.reduce(function (current, skill) {
+  @cached get groupedSkillsMap() {
+    const result = {};
+    this.args.skills?.forEach((skill) => {
       const skillType = skill.skillType || 'Other';
-      current[skillType] = current[skillType] || [];
-      current[skillType].push(skill);
-      return current;
-    }, {});
+      result[skillType] = result[skillType] || [];
+      result[skillType].push(skill);
+    });
     return result;
   }
 

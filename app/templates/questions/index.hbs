@@ -1,31 +1,38 @@
-{{page-title "Index"}}
+{{page-title "Questions"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <LinkTo @route="questions.new" class="btn">New</LinkTo>
+    <div class="controls">
+      <input
+        type="search"
+        aria-label="search"
+        placeholder="Search questions..."
+        value={{this.search}}
+        {{on "input" this.onSearchInput}}
+      />
+      <LinkTo @route="questions.new" class="btn">+ New Question</LinkTo>
+    </div>
   </:subnav>
   <:main>
-    <Panel::Card>
-      <PowerSelect
-        @options={{this.companies}}
-        @onChange={{this.updateCompany}}
-        @searchEnabled={{true}}
-        @searchField="name"
-        @selected={{this.selectedCompany}}
-        @placeholder="Select a Company"
-        @labelText="Filter by Company"
-        as |company|
-      >{{company.name}}</PowerSelect>
-      {{#each this.companyQuestions as |question|}}
-        <div class="panel-card">
+    {{#if this.isSearching}}
+      <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+    {{else}}
+      {{#each this.model as |question|}}
+        <Panel::Card>
           <div class="question-header">
-            <p>{{question.company.name}}: {{question.jobApplication.jobPost.name}}{{question.content}}</p>
+            <p>{{question.company.name}}: {{question.content}}</p>
           </div>
-          <p>answers: {{question.answers.length}}</p>
-          <br />
-          <LinkTo @route="questions.show.answers" @model={{question}}>show</LinkTo>
-          <LinkTo @route="questions.show.answers.new" @model={{question}}>answer</LinkTo>
-        </div>
+          <p class="text-sm text-gray-500">answers: {{question.answers.length}}</p>
+          <div class="flex gap-2 mt-2">
+            <LinkTo @route="questions.show.answers" @model={{question}} class="btn small">show</LinkTo>
+            <LinkTo @route="questions.show.answers.new" @model={{question}} class="btn small">answer</LinkTo>
+          </div>
+        </Panel::Card>
+      {{else}}
+        <p class="text-gray-500 text-sm py-6 text-center">No questions found.</p>
       {{/each}}
-    </Panel::Card>
+      <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
+        <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
+      </InfinityLoader>
+    {{/if}}
   </:main>
 </RouteLayout>

@@ -3,15 +3,22 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 export default class JobApplicationsEditController extends Controller {
   @service flashMessages;
-  @action save() {
-    this.model.jobApplication
-      .save()
-      .catch((error) => this.flashMessages.alert(error))
-      .then(() => this.flashMessages.success('save complete'));
+  @service router;
+
+  @action async save() {
+    try {
+      await this.model.jobApplication.save();
+      this.flashMessages.success('Saved.');
+      this.router.transitionTo('job-applications.show', this.model.jobApplication.id);
+    } catch (error) {
+      this.flashMessages.alert(error?.errors?.[0]?.detail ?? 'Save failed.');
+    }
   }
-  resumeSelectId() {
-    return 1;
+
+  @action cancel() {
+    this.router.transitionTo('job-applications.show', this.model.jobApplication.id);
   }
+
   @action updateResume() {}
   @action updateCoverLetter() {}
   @action updateField() {}

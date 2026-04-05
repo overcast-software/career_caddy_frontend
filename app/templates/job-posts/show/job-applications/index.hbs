@@ -1,42 +1,41 @@
-{{page-title "Applications"}}
 {{outlet}}
 
-<div class="fairway">
-  {{#if this.model.jobApplications.length}}
-    <div class="flex justify-end mb-4">
-      <LinkTo
-        @route="job-applications.new"
-        @query={{hash jobId=this.model.jobPost.id}}
-        class="btn"
-      >
-        New Application
-      </LinkTo>
-    </div>
-    {{#each this.model.jobApplications as |jobApplication|}}
-      <Panel::Card>
-        <LinkTo @route="job-applications.show" @model={{jobApplication.id}}>
-          {{jobApplication.id}}
-        </LinkTo>
-        -- applied at
-        {{format-date jobApplication.createdAt}}
-        status:
-        {{jobApplication.status}}
-      </Panel::Card>
-    {{/each}}
-  {{else}}
-    <Panel::Card @title="No applications yet">
-      <:top>
-        <LinkTo
-          @route="job-applications.new"
-          @query={{hash jobId=this.model.jobPost.id}}
-          class="btn"
-        >
-          New Application
-        </LinkTo>
-      </:top>
-      <:default>
-        No job applications have been created for this posting.
-      </:default>
-    </Panel::Card>
-  {{/if}}
+<div class="flex items-center justify-between gap-4 mb-4">
+  <div class="flex items-center gap-2 flex-1 max-w-xs">
+    <PowerSelect
+      @options={{this.resumes}}
+      @selected={{this.selectedResume}}
+      @onChange={{this.selectResume}}
+      @placeholder="Select resume…"
+      as |resume|
+    >{{or resume.name resume.title}}</PowerSelect>
+  </div>
+  <LinkTo
+    @route="job-posts.show.job-applications.new"
+    @model={{this.jobPost}}
+    class="btn shrink-0"
+  >Apply</LinkTo>
 </div>
+
+{{#if this.model.jobApplications.length}}
+  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Company</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Applied</th>
+          <th class="px-4 py-3 text-right font-semibold text-gray-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {{#each this.model.jobApplications as |jobApplication|}}
+          <JobApplications::Compact @jobApplication={{jobApplication}} />
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <p class="text-gray-500 text-sm py-6 text-center">No applications for this job post yet.</p>
+{{/if}}

@@ -48,9 +48,10 @@ export default class JobApplicationsStatusLogComponent extends Component {
   @tracked selectedStatus = null;
   @tracked isSaving = false;
 
-  // Per-entry date editor
-  @tracked expandedId = null;  // id of the entry whose date form is open
+  // Per-entry date/note editor
+  @tracked expandedId = null;  // id of the entry whose edit form is open
   @tracked editingDate = '';   // datetime-local string being edited
+  @tracked editingNote = '';   // note text being edited
 
   get statusOptions() {
     return STATUS_OPTIONS;
@@ -151,9 +152,11 @@ export default class JobApplicationsStatusLogComponent extends Component {
     if (this.expandedId === record.id) {
       this.expandedId = null;
       this.editingDate = '';
+      this.editingNote = '';
     } else {
       this.expandedId = record.id;
       this.editingDate = toDatetimeLocal(record.loggedAt || record.createdAt);
+      this.editingNote = record.note || '';
     }
   }
 
@@ -161,21 +164,28 @@ export default class JobApplicationsStatusLogComponent extends Component {
     this.editingDate = event.target.value;
   }
 
-  @action async saveDate(record) {
+  @action updateEditingNote(event) {
+    this.editingNote = event.target.value;
+  }
+
+  @action async saveEntry(record) {
     try {
       record.loggedAt = this.editingDate ? new Date(this.editingDate) : null;
+      record.note = this.editingNote || null;
       await record.save();
       this.expandedId = null;
       this.editingDate = '';
-      this.flashMessages.success('Date updated.');
+      this.editingNote = '';
+      this.flashMessages.success('Entry updated.');
     } catch {
-      this.flashMessages.alert('Failed to update date.');
+      this.flashMessages.alert('Failed to update entry.');
     }
   }
 
   @action cancelEdit() {
     this.expandedId = null;
     this.editingDate = '';
+    this.editingNote = '';
   }
 
   // ── Delete action ─────────────────────────────────────────────────────────

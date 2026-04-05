@@ -56,14 +56,15 @@ export default class JobPostsScrapeController extends Controller {
     this._stopPolling();
 
     let scrape = this.store.createRecord('scrape', { url: this.url });
+    let result;
     try {
-      await this.spinner.wrap(scrape.save());
+      result = await this.spinner.wrap(scrape.save());
     } catch (error) {
       this.flashMessages.danger(error?.errors?.[0]?.detail ?? 'Failed to start scrape.');
       return;
     }
 
-    this.flashMessages.info('Scrape started — waiting for results…');
-    this._pollScrape(scrape);
+    // After save completes, go to scores/:id of the returned record
+      this.router.transitionTo('job-posts.show', result.jobPost.id);
   }
 }

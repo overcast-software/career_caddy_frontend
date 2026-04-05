@@ -1,0 +1,32 @@
+<div class="flex justify-end mb-4">
+  <LinkTo @route="questions.new" class="btn btn-sm">+ New Question</LinkTo>
+</div>
+
+{{#if this.model.length}}
+  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Question</th>
+          <th class="px-4 py-3 text-right font-semibold text-gray-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {{#each this.model as |question|}}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-gray-900 max-w-md truncate">{{question.content}}</td>
+            <td class="px-4 py-3 text-right">
+              <LinkTo
+                @route="questions.show.answers"
+                @model={{question}}
+                class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+              >Answers</LinkTo>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <p class="text-gray-500 text-sm py-6 text-center">No questions for this company.</p>
+{{/if}}

@@ -3,13 +3,18 @@
     <button
       type="button"
       class="btn {{if this.useAI 'btn-primary' 'btn-secondary'}}"
+      disabled={{this.isPolling}}
       {{on "click" this.toggleAI}}
     >
       {{if this.useAI "✓ Ask AI to answer" "Ask AI to answer"}}
     </button>
   </div>
 
-  {{#if this.useAI}}
+  {{#if this.isPolling}}
+    <div class="field">
+      <p><em>AI is generating your answer, please wait…</em></p>
+    </div>
+  {{else if this.useAI}}
     <label>
       <div class="field">
         Additional prompt for AI:
@@ -46,6 +51,6 @@
     </button>
   {{/if}}
 
-  <button type="submit" class="btn">save</button>
+  <button type="submit" class="btn" disabled={{this.isPolling}}>save</button>
 </form>
 {{yield}}

@@ -17,13 +17,15 @@ export default class JobApplicationsCompact extends Component {
     if (!allowed) {
       return;
     }
-    this.args.jobApplication
+    const application = this.args.jobApplication;
+    application
       .destroyRecord()
-      .then((record) => {
-        this.flashMessages.success(`removed application #${record.id}`);
+      .then(() => {
+        this.flashMessages.success('Application removed.');
+        this.args.onDelete?.(application);
       })
       .catch(() => {
-        this.flashMessages.alert(`problem deleting`);
+        this.flashMessages.alert('Problem deleting application.');
       });
   }
 }

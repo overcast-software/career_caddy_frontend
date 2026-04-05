@@ -1,11 +1,1 @@
-<RouteLayout>
-  <:main>
-    {{#if this.model.length}}
-      {{#each this.model as |jobPost|}}
-        <JobPosts::Item @jobPost={{jobPost}} />
-      {{/each}}
-    {{else}}
-      <p class="text-gray-500 text-sm">No job posts for this company.</p>
-    {{/if}}
-  </:main>
-</RouteLayout>
+<JobPosts::List @jobPosts={{this.model.jobPosts}} />

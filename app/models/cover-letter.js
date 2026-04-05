@@ -5,7 +5,7 @@ export default class CoverLetterModel extends Model {
   @attr('string') status;
   @attr('date') createdAt;
   @attr('boolean') favorite;
-  @belongsTo('user', { async: false, inverse: 'coverLetters' }) user;
+  @belongsTo('user', { async: true, inverse: 'coverLetters' }) user;
   @belongsTo('job-post', { async: true, inverse: 'coverLetters' }) jobPost;
   @belongsTo('resume', { async: true, inverse: 'coverLetters' }) resume;
   @belongsTo('job-application', { async: true, inverse: 'coverLetters' })

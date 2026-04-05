@@ -3,8 +3,9 @@ import Model, { attr, belongsTo } from '@ember-data/model';
 export default class ScoreModel extends Model {
   @attr('number') score;
   @attr('string') explanation;
+  @attr('string') status;
   @belongsTo('resume', { async: true, inverse: 'scores' }) resume;
-  @belongsTo('job-post', { async: false, inverse: 'scores' }) jobPost;
+  @belongsTo('job-post', { async: true, inverse: 'scores' }) jobPost;
   @belongsTo('user', { async: true, inverse: 'scores' }) user;
   @belongsTo('company', { async: true, inverse: 'scores' }) company;
 }

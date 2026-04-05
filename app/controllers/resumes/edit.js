@@ -9,27 +9,18 @@ export default class ResumesEditController extends Controller {
 
   @action
   async cloneResume() {
-    const source = this.model;
-    const user = await source.user;
-    this.store
-      .createRecord('resume', {
-        user,
-        title: source.title ? `${source.title} (Copy)` : source.title,
-        filePath: source.filePath ?? null,
-        skills: source.skills.content,
-        educations: source.educations.content,
-        experiences: source.experiences.content,
-        certifications: source.certifications.content,
-        summaries: source.summaries.content,
-      })
-      .save()
-      .then((clone) => {
-        this.router.transitionTo('resumes.show', clone.id);
-      })
-      .then(() => this.flashMessages.success('resume successfully cloned'))
-      .catch((error) => {
-        this.flashMessages.warning(error);
-      });
+    try {
+      const adapter = this.store.adapterFor('resume');
+      const url = `${adapter.buildURL('resume', this.model.id)}clone/`;
+      const payload = await adapter.ajax(url, 'POST');
+      const clone = this.store.push(this.store.serializerFor('resume').normalizeResponse(
+        this.store, this.store.modelFor('resume'), payload, null, 'createRecord'
+      ));
+      this.flashMessages.success('Resume successfully cloned');
+      this.router.transitionTo('resumes.show', clone.id);
+    } catch (error) {
+      this.flashMessages.warning('Failed to clone resume');
+    }
   }
 
   @action
@@ -90,6 +81,12 @@ export default class ResumesEditController extends Controller {
       this.isExporting = false;
     }
   }
+
+  addEducation = async () => {
+    const edu = this.store.createRecord('education', { resume: this.model });
+    const rel = await this.model.educations;
+    if (!rel.includes(edu)) rel.unshiftObject(edu);
+  };
 
   addExperience = async () => {
     const exp = this.store.createRecord('experience', { resume: this.model });

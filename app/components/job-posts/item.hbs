@@ -1,77 +1,14 @@
-<Panel::Card>
-  <h2 class="panel-title">{{@jobPost.company.name}}</h2>
-
-  <h1 class="job-title">
-    <LinkTo @route="job-posts.show" @model={{@jobPost}}>
-      {{@jobPost.title}}
-    </LinkTo>
-    {{#if @jobPost.link}}
-      --
-      <a href="{{@jobPost.link}}">➚</a>
-    {{/if}}
-  </h1>
-
-  <div class="job-dates">
-    {{#if @jobPost.postedDate}}
-      <span class="muted">Posted:
-        {{moment-format @jobPost.postedDate "MMM D, YYYY"}}</span>
-    {{/if}}
-    {{#if @jobPost.createdAt}}
-      <span class="muted">Created:
-        {{moment-format @jobPost.createdAt "MMM D, YYYY"}}</span>
-    {{/if}}
+<section class="job-post-description">
+  <div class="description-controls">
+    <button
+      type="button"
+      class="btn btn-sm"
+      {{on "click" this.copyToClipboard}}
+    >
+      {{this.copyButtonText}}
+    </button>
   </div>
-
-  <section class="job-post-description">
-    <div class="description-controls">
-      <button
-        type="button"
-        class="btn btn-sm"
-        {{on "click" this.toggleDescription}}
-      >
-        {{if this.showFullDescription "Show Less" "Show All"}}
-      </button>
-      <button
-        type="button"
-        class="btn btn-sm"
-        {{on "click" this.copyToClipboard}}
-      >
-        {{this.copyButtonText}}
-      </button>
-    </div>
-    <p class="muted">
-      {{if
-        this.showFullDescription
-        @jobPost.description
-        (truncate @jobPost.description 2000)
-      }}
-    </p>
-  </section>
-
-  <section class="job-post-scores">
-    <h3 class="section-title">Scores</h3>
-    <p class="muted">one score per resume</p>
-    <ul class="desc-list">
-      {{#each @jobPost.scores as |score|}}
-        <li class="desc-item">
-          <span class="muted">Resume</span>
-          {{or score.resume.name "Career Data"}}
-          —
-          <span class="muted">Score:</span>
-          {{#if score.score}}
-            <LinkTo
-              @route="scores.show"
-              @model={{score}}
-            >{{score.score}}</LinkTo>
-          {{else}}
-            thinking
-          {{/if}}
-        </li>
-      {{/each}}
-    </ul>
-  </section>
-
-  {{#if @showControls}}
-    <JobPosts::Actions @jobPost={{@jobPost}} @resumes={{@resumes}} />
-  {{/if}}
-</Panel::Card>
+  <p class="muted">
+    {{@jobPost.description}}
+  </p>
+</section>

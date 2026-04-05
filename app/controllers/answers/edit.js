@@ -5,6 +5,13 @@ export default class AnswersEditController extends Controller {
   @service store;
   @service flashMessages;
   @service router;
+
+  get textareaRows() {
+    const content = this.model?.content ?? '';
+    const lines = content.split('\n').length;
+    return Math.max(8, lines + 2);
+  }
+
   @action updateContent(event) {
     this.model.content = event.target.value;
   }

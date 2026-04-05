@@ -44,7 +44,7 @@
   <button
     type="button"
     class="btn primary"
-    disabled={{this.newSkillText.length}}
+    disabled={{eq this.newSkillText.length 0}}
     {{on "click" this.addSkill}}
   >Add Skill</button>
 

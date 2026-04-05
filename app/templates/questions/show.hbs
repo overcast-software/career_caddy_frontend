@@ -2,7 +2,7 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
     <button type="button" class="btn" {{on "click" this.deleteQuestion}}>Delete</button>
-    <LinkTo class="btn" @route="questions.new">new</LinkTo>
+    <LinkTo class="btn" @route="questions.new">New Question</LinkTo>
     <LinkTo class="btn" @route="questions.edit" @model={{this.model}}>edit</LinkTo>
     <LinkTo class="btn" @route="questions.show.answers.new" @model={{this.model}}>manually answer</LinkTo>
     <LinkTo class="btn" @route="questions.show.answers" @model={{this.model}}>answers</LinkTo>

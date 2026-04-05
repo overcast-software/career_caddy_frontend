@@ -85,16 +85,7 @@
       >
         Save
       </button>
-      {{#unless this.isEditing}}
-        <button
-          type="button"
-          class="btn primary"
-          disabled={{or @question.isSaving (not (and this.selectedCompany.id @question.content))}}
-          {{on "click" this.saveAndNew}}
-        >
-          Save &amp; Add Another
-        </button>
-      {{/unless}}
+      {{!-- Save & Add Another hidden: not useful in current flow --}}
       <button type="button" class="btn" {{on "click" this.cancel}}>
         Cancel
       </button>

@@ -70,19 +70,32 @@ export default class JobPostsActions extends Component {
   }
 
   @action
+  async createScrape() {
+    const jobPost = this.args.jobPost;
+    const url = jobPost.link ?? '';
+    const scrape = this.store.createRecord('scrape', { jobPost, url });
+    try {
+      const saved = await this.spinner.wrap(scrape.save(), { label: 'Creating scrape…' });
+      this.router.transitionTo('scrapes.show', saved.id);
+    } catch {
+      scrape.unloadRecord();
+      this.flashMessages.danger('Failed to create scrape.');
+    }
+  }
+
+  @action
   async scoreResume() {
     const jobPost = this.args.jobPost;
     const user = this.currentUser.user;
-    // peekRecord returns null for id='0' (career data) — serializer handles that case
     const resume = this.store.peekRecord('resume', this.selectedResume.id);
 
     const newScore = this.store.createRecord('score', { resume, jobPost, user });
     try {
-      //like summary above.  score is missing the content and
-      //api will reach out to chatgpt to fill it in using user
-      this.spinner.wrap(newScore.save(), { label: 'scoring, please wait' });
+      await this.spinner.wrap(newScore.save(), { label: 'Scoring, please wait…' });
+      this.router.transitionTo('job-posts.show.scores', jobPost);
     } catch (e) {
-      this.flashMessages.danger(e);
+      newScore.unloadRecord();
+      this.flashMessages.danger(e?.errors?.[0]?.detail ?? 'Failed to create score.');
     }
   }
 

@@ -2,70 +2,80 @@
   <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500">Status History</h3>
 
   {{#if this.sortedStatuses.length}}
-    <ol class="relative ml-3 border-l border-gray-200 space-y-4 pb-1">
+    <ol class="relative space-y-6 before:absolute before:-ms-px before:h-full before:w-0.5 before:rounded-full before:bg-gray-200">
       {{#each this.sortedStatuses as |entry|}}
-        <li class="relative ml-5">
-          {{! dot sits on the border line }}
-          <div class="absolute -left-[1.625rem] top-1 h-3 w-3 rounded-full ring-2 ring-white {{entry.dotClass}}"></div>
+        <li class="relative -ms-1.5 flex items-start gap-4">
+          <span class="size-3 shrink-0 rounded-full mt-1 {{entry.dotClass}}"></span>
 
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex flex-wrap items-baseline gap-x-2">
-              <span class="text-sm {{if entry.isCurrent 'font-semibold text-gray-900' 'font-medium text-gray-600'}}">
-                {{entry.status}}
-              </span>
-              {{#if entry.displayDate}}
-                <span class="text-xs text-gray-400">
-                  {{format-date entry.displayDate "MMM D, YYYY"}}
-                </span>
-              {{/if}}
+          <div class="-mt-0.5 flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                {{#if entry.displayDate}}
+                  <time class="text-xs/none font-medium text-gray-500">
+                    {{format-date entry.displayDate "MMM D, YYYY"}}
+                  </time>
+                {{/if}}
+                <h3 class="mt-0.5 text-sm font-semibold {{if entry.isCurrent 'text-gray-900' 'text-gray-600'}}">
+                  {{entry.status}}
+                </h3>
+                {{#if entry.record.note}}
+                  <p class="mt-0.5 text-xs text-gray-500">{{entry.record.note}}</p>
+                {{/if}}
+              </div>
+
+              <div class="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  title="Adjust date"
+                  class="transition-colors {{if (eq this.expandedId entry.record.id) 'text-blue-500' 'text-gray-300 hover:text-gray-500'}}"
+                  {{on "click" (fn this.toggleExpand entry.record)}}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  title="Remove this entry"
+                  class="text-gray-300 hover:text-red-500 transition-colors"
+                  {{on "click" (fn this.deleteEntry entry.record)}}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
-            {{! Action buttons — always visible but muted; ⋮ turns blue when open }}
-            <div class="flex items-center gap-1 shrink-0 mt-0.5">
-              <button
-                type="button"
-                title="Adjust date"
-                class="transition-colors {{if (eq this.expandedId entry.record.id) 'text-blue-500' 'text-gray-300 hover:text-gray-500'}}"
-                {{on "click" (fn this.toggleExpand entry.record)}}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                title="Remove this entry"
-                class="text-gray-300 hover:text-red-500 transition-colors"
-                {{on "click" (fn this.deleteEntry entry.record)}}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-              </button>
-            </div>
+            {{#if (eq this.expandedId entry.record.id)}}
+              <div class="mt-2 space-y-2">
+                <input
+                  type="datetime-local"
+                  class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  value={{this.editingDate}}
+                  {{on "change" this.updateEditingDate}}
+                />
+                <textarea
+                  rows="2"
+                  placeholder="Add a note…"
+                  class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"
+                  {{on "input" this.updateEditingNote}}
+                >{{this.editingNote}}</textarea>
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    class="btn small"
+                    {{on "click" (fn this.saveEntry entry.record)}}
+                  >Save</button>
+                  <button
+                    type="button"
+                    class="text-xs text-gray-500 hover:text-gray-700"
+                    {{on "click" this.cancelEdit}}
+                  >Cancel</button>
+                </div>
+              </div>
+            {{/if}}
           </div>
-
-          {{! Inline date editor — expands when this entry's ⋮ is active }}
-          {{#if (eq this.expandedId entry.record.id)}}
-            <div class="mt-2 flex flex-wrap items-center gap-2">
-              <input
-                type="datetime-local"
-                class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                value={{this.editingDate}}
-                {{on "change" this.updateEditingDate}}
-              />
-              <button
-                type="button"
-                class="btn small"
-                {{on "click" (fn this.saveDate entry.record)}}
-              >Save</button>
-              <button
-                type="button"
-                class="text-xs text-gray-500 hover:text-gray-700"
-                {{on "click" this.cancelEdit}}
-              >Cancel</button>
-            </div>
-          {{/if}}
         </li>
       {{/each}}
     </ol>

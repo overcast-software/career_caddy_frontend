@@ -1,9 +1,12 @@
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 
 export default class ProjectModel extends Model {
+  @attr('string') title;
+  @attr('string') description;
   @attr('date') startDate;
   @attr('date') endDate;
-  @belongsTo('resume', { async: true, inverse: 'experiences' }) resume;
-  @belongsTo('company', { async: false, inverse: 'experiences' }) company;
-  @hasMany('description', { async: true, inverse: 'experience' }) descriptions;
+  @attr('boolean') isActive;
+  @attr('number') order;
+  @belongsTo('resume', { async: true, inverse: 'projects' }) resume;
+  @hasMany('description', { async: true, inverse: null }) descriptions;
 }

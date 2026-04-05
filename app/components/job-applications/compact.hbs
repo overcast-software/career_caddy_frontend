@@ -7,7 +7,11 @@
   <td class="px-4 py-3 text-gray-600">{{this.jobPost.company.name}}</td>
   <td class="px-4 py-3 text-gray-600">{{@jobApplication.status}}</td>
   <td class="px-4 py-3 text-gray-600">
-    {{moment-format @jobApplication.appliedAt "MMM D, YYYY"}}
+    {{#if @jobApplication.appliedAt}}
+      {{moment-format @jobApplication.appliedAt "MMM D, YYYY"}}
+    {{else}}
+      <span class="text-gray-400">—</span>
+    {{/if}}
   </td>
   <td class="px-4 py-3 text-right">
     <div class="flex items-center justify-end gap-2">

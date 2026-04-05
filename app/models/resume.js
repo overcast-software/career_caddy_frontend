@@ -17,4 +17,5 @@ export default class ResumeModel extends Model {
   @hasMany('summary', { async: true, inverse: 'resume' }) summaries;
   @hasMany('certification', { async: true, inverse: 'resume' }) certifications;
   @hasMany('skill', { async: true, inverse: 'resume' }) skills;
+  @hasMany('project', { async: false, inverse: 'resume' }) projects;
 }

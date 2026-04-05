@@ -1,1 +1,3 @@
 ember s -proxy http://localhost:8000
+claude --resume e98596b1-0ec3-45ae-80ba-c2d4076b5c96
+cat package.json | jq .scripts

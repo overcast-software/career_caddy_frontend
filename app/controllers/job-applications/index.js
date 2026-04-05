@@ -19,4 +19,9 @@ export default class JobApplicationsIndexController extends Controller {
       this.search = value;
     }, 300);
   }
+
+  @action
+  removeApplication(application) {
+    this.model.content.removeObject(application);
+  }
 }

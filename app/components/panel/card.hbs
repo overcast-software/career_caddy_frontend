@@ -13,6 +13,10 @@
           to="top"
         }}
       </div>
+    {{else if @collapsible}}
+      <button type="button" class="panel-caret-btn" {{on "click" this.toggleCollapsed}}>
+        <span class="panel-caret {{if this.collapsed 'rotated'}}">▾</span>
+      </button>
     {{/if}}
   </div>
 

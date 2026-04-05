@@ -46,6 +46,23 @@ export default class ScrapesShowController extends Controller {
   }
 
   @action
+  async parseScrape(scrape) {
+    this.spinner.begin({ label: 'Parsing scrape...' });
+    try {
+      const adapter = this.store.adapterFor('scrape');
+      const url = `${adapter.buildURL('scrape', scrape.id)}/parse/`;
+      await adapter.ajax(url, 'POST');
+      this.flashMessages.success('Parse initiated');
+      await scrape.reload();
+      this.startPollingIfNeeded(scrape);
+    } catch (error) {
+      this.flashMessages.danger('Failed to parse scrape: ' + error.message);
+    } finally {
+      this.spinner.end();
+    }
+  }
+
+  @action
   async retryScrape(scrape) {
     this.spinner.begin({ label: 'Retrying scrape...' });
     try {

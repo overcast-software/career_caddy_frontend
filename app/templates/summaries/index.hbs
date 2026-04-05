@@ -1,18 +1,31 @@
 {{page-title "Summaries"}}
-<RouteLayout>
+<RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    Summaries
+    <div class="controls">
+      <input
+        type="search"
+        aria-label="search"
+        placeholder="Search summaries..."
+        value={{this.search}}
+        {{on "input" this.onSearchInput}}
+      />
+    </div>
   </:subnav>
   <:main>
-    {{#if this.model.length}}
+    {{#if this.isSearching}}
+      <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+    {{else}}
       {{#each this.model as |summary|}}
         <Panel::Card>
           <Summaries::Item @summary={{summary}} />
           <LinkTo class="btn" @route="summaries.show" @model={{summary}}>show</LinkTo>
         </Panel::Card>
+      {{else}}
+        <p class="muted">No summaries yet.</p>
       {{/each}}
-    {{else}}
-      <p class="muted">No summaries yet.</p>
+      <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
+        <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
+      </InfinityLoader>
     {{/if}}
   </:main>
 </RouteLayout>

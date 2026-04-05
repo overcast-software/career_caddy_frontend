@@ -7,6 +7,11 @@
       class="btn"
       {{on "click" (fn this.retryScrape this.model)}}
     >Retry</button>
+    <button
+      type="button"
+      class="btn"
+      {{on "click" (fn this.parseScrape this.model)}}
+    >Parse</button>
   </:subnav>
   <:main>
     <Scrapes::Item @scrape={{this.model}} />

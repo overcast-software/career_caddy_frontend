@@ -5,7 +5,6 @@ export default class CompaniesShowJobPostsRoute extends Route {
   @service store;
   model() {
     const { company_id } = this.paramsFor('companies.show');
-    const company = this.store.peekRecord('company', company_id);
-    return company.jobPosts;
+    return this.store.peekRecord('company', company_id);
   }
 }

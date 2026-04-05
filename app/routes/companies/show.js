@@ -6,7 +6,7 @@ export default class CompaniesShowRoute extends Route {
 
   model({ company_id }) {
     return this.store.findRecord('company', company_id, {
-      include: 'job-post,job-application',
+      include: 'job-posts,job-applications,scrapes,scores,questions',
     });
   }
 }

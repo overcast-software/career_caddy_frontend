@@ -1,131 +1,119 @@
 # +title: Todo
 #+startup: show2levels
 * Inbox
-** TODO hide details is not appropriate.  there should be a 'show details' when in a child relationship like job-posts/id/job-applications so that it gets the details out of the way.
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/job-posts/item.hbs::</LinkTo>]]
-** TODO scrapes.  need to see if one exists..  make a scrape action if one does not exist.
-
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/job-posts/item.hbs::</LinkTo>]]
-** TODO would like a parse button/action in case it needs to be done. requires backend to support scrapes/id/parse
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/scrapes/item.hbs::</dl>]]
-** TODO we want to surface any scrapes related as well as summaries.  be able to link.
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-posts/show.hbs::{{this.resumes}}]]
-** TODO add a score creation button/actions
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/job-posts/list.hbs::</div>]]
-** TODO invalid dates should not be at the top.  find out why they are invalid and fix
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-applications/index.hbs::<:subnav>]]
-** TODO application edit should have the same ability to edit statuses
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-applications/edit.hbs::{{page-title "Edit"}}]]
-** DONE need link to manual entry :UI:
-CLOSED: [2026-04-01 Wed 18:49]
-manual entry what?  for sure summaries.
-sidebar doesn't have link to manual job post entry.
-** DONE career-data
-CLOSED: [2026-04-01 Wed 18:49]
-find out why duplication occurs
-
-** WAIT if you don't supply a resume when filling out job application it silently fails
-where is a fix right now
-refresh was the root cause but this will warn if no company is assigned
-** DONE [#B] job-post/scrape needs loading
-Scrape is returning fast, but we need to poll it to get results
-CLOSED: [2026-02-26 Thu 17:49]
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/README.md::career-caddy-frontend]]
-** TODO when ai returns answer.  add it to the list in questions/:id/answers
-maybe I meant redirect
+* fixes
+** resume [0/4]
+*** TODO thinking for resume import.
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
+**** TODO should also disable button for upload so you can't upload twice
+*** TODO when displaying resume if no summary wasn't presented then don't show the header tag
+*** TODO [#A] the upload button should be disabled after upload started
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
+*** TODO Notes at the subnav level is bad. but I don't know where to put it
+** questions and answers
+*** TODO [#B] `/questions/:id/answer` has a "new" button but it doesn't mean new answer, it means new question.
+*** TODO when ai returns answer.  add it to the list in questions/:id/answers
+maybe I meant redirect but just make sure it works
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js]]
 This should happen anyway.
-** TODO [#A] the upload button should be disabled after upload successfull
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
-** DONE /resumes/index favorite button needs work
-CLOSED: [2026-02-26 Thu 17:51]
-will not reflect favorite status
-is outside of the card
-
-
-** [?] [#B] should route job_post
-maybe I mean that after save go to job-post/<id>
-*** TODO find what it does now
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
-** DONE don't let the token expire too early
-CLOSED: [2026-02-26 Thu 17:55]
-this is a
+*** TODO saving a new manual answer stays in /new should reroute to show :bug:ui:
+this UI is bad
+** summary
+*** IDEA "create-new-summary" action in UI is missing
+mostly AI generated but would be nice to create one manually
 [[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
-* resume [0/4] [0/4]
-** TODO The adding of a new resume is borked :resume:
-Adding new resume is ok.  cloning is for customizing
-I go to edit a resume when I should be cloning
-*** projects need to be tested :api:
-** WAIT descriptions should have descriptions :resume:
+** jobPosts
+
+*** [?] [#B] should route job_post
+maybe I mean that after save go to job-post/<id>
+**** TODO find what it does now
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
+*** index [0/4]
+**** TODO All posts always is highlighted
+**** TODO score went to jobPosts index and didn't actually start grabbing a score
+kick off polling after creating score
+redirect to jobPosts/id/scores
+**** TODO Search at the top is ugly :UI:
+**** TODO cancel should go back to job-posts.show.job-applications
+
+*** Edit [0/2]
+**** TODO can't create company :bug:
+**** TODO you can save without description. :bug:
+**** TODO UI has old look :UI:
+*** show [0/6]
+**** TODO salary and location are being presented
+**** TODO COPY button should say Copy description
+**** TODO Edit should be next to copy description
+remove from subnav
+**** summaries
+***** TODO need ability to create summary from page
+**** scapes
+***** TODO scapes aren't being called.
+*** New [0/3]
+**** TODO check save and apply does it go to job-posts/id/job-applications/new
+**** TODO default 'applied' should be "Applied"
+**** TODO too many boarders. remove the outer one
+*** scrape [0/2]
+**** TODO The font looks weird in the input :ui:
+**** TODO the button doesn't match :ui:
+*** questions [0/2]
+problem with question.  company is known and locked but drop downs for job-application and question dropdown is redundant
+**** TODO test save and add another.  should be for going through old questions and answers and being able to rapidly enter them.  probably can remove.  actually hide.
+**** TODO list row needs show in addition to answer; show still goes to questions/id/answers
+*** applications
+**** TODO resume dropdown needs to be close to apply
+** jobApplications
+*** TODO invalid dates should not be at the top.  find out why they are invalid and fix
+Fixed display (null appliedAt now shows "—" instead of "Invalid date"). Root cause is backend NULL sort order — nulls sort first with -applied_at. Requires backend NULLS LAST fix.
+[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-applications/index.hbs::<:subnav>]]
+**** TODO the button "+New Application" button breaks with warning: WARNING: This link is in an inactive loading state because at least one of its models currently has a null/undefined value, or the provided route name is invalid. 3 ember.js:443:1*
+*** index [0/2]
+**** [?] what does the column applied mean?
+**** TODO deleting a record doesn't remove the row, just the data on that row. action buttons persist but are broken
+*** view [0/4]
+**** TODO remove svg with the statuses or make it smaller
+**** TODO job-application/id/questions is broken
+**** TODO need to test destroy
+**** TODO job post should go to "job-post/id/job-applications"
+*** edit
+**** TODO edit doesn't let you mess with statuses, only show does
+**** TODO cancel button doesn't bring you back to job-application/show
+**** TODO save should take you to job-application show
+**** TODO dropdowns with search look strange on full sized page.
+on smaller dimentions they go full size and stack, but in fullsized they become half sized and share the row with another input.
+however the label sits on the left instead of above.
+** cover-letters
+*** edit [/]
+**** TODO no option to delete
+delete needs to go back to cover-letters/index
+**** TODO favorite button not standard
+*** new [0/3]
+**** TODO don't need to select a resume if you make a manual entry.
+place resume selection on the same panel card as create a cover letterk
+**** TODO rename create cover letter to "AI craft cover letter"
+**** TODO save button is not standard.
+** Companies
+*** TODO answers tab can have a new question action.
+** Questions
+*** TODO infinite scroll
+*** TODO search
+** Answers
+*** TODO answers new button should go to questions and flash, "select question to answer"
+*** TODO search
+** Summaries
+*** TODO if there is no job for the summary, remove the job label
+*** TODO search
+*** TODO inifnite scroll
+
+* features
+*** WAIT descriptions should have descriptions :resume:
 make a join table so that a description can describe a description
 this is a feature for STAR on bullet points
 this is what the q&a portion does
-** TODO thinking for resume import.
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
-*** TODO should also disable button for upload so you can't upload twice
-** STRT [#B] edit resume is broken  edit.js
+* bugs
+*** STRT [#B] edit resume is broken  edit.js
 lowered priority b/c we don't actually need it
 serializeAttribute application.js:22
-* features
-** IDEA /job-post//:jp_id/questions
-might want to make this a feature
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/questions/form.hbs::as |company|]]
-** DONE when you create a scrape got to the scrape show page.  maybe add a poll
-CLOSED: [2026-04-01 Wed 18:53]
-** IDEA "create-new-summary" action in UI is missing
-mostly AI generated but would be nice to create one manually
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
-** TODO [#B] `/questions/:id/answer` has a "new" button but it doesn't mean new answer, it means new question.
-
-* bugs
-** TODO AI answer returning 500 from server
-"ask ai" answer service is broken?
-{
-	"errors": [
-		{
-			"detail": "AI assist failed: 'list' object has no attribute 'question'"
-		}
-	]
-}
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/components/answers/form.js::import Component from '@glimmer/component';]]
-** NO if scrape fails the loading is still showing
-CLOSED: [2026-04-01 Wed 18:54]
-on error is broken for spinnier.wrap()?
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/questions/show.js::@service router;]]
-*** after rewrite they are all breaking
-** TODO when polling for a scrape the scrape should have an alternate component indicating its working
-** TODO when polling for a score the score should have an alternate component indicating its working
-** TODO when polling for a resume the resume should have an alternate component indicating its working
-** DONE job-application/:id/edit
-CLOSED: [2026-04-01 Wed 18:57]
-:LOGBOOK:
-- Note taken on [2026-04-01 Wed 18:57] \\
-  fixed with json:api compliance
-CLOCK: [2026-02-13 Fri 18:42]--[2026-02-13 Fri 18:43] =>  0:01
-:END:
-if coming from another page resume doesn't populate
-
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/authenticators/jwt.js::const url = `${this.baseUrl}${this.authConfig.TOKEN_PATH}`;]]
-
-*** DONE get a user story for this
-CLOSED: [2026-04-01 Wed 18:57]
-** TODO saving a new manual answer stays in /new should reroute to show :bug:
-** DONE the refresh bug is that @route='model' should be @route='model.id' for /resume/edit//:id/
-CLOSED: [2026-04-01 Wed 18:58]
-:LOGBOOK:
-- Note taken on [2026-04-01 Wed 18:58] \\
-  this is also fixed via json:api standard.  returning [] for data told ember that there was no data to fetch.
-:END:
 * production readiness
 ** Synopsis (as of 2026-03-20)
 - 36/165 QUnit tests failing; CI blocks on push to main
@@ -200,19 +188,6 @@ Verify a manual ~workflow_dispatch~ run completes without the "secret is not set
 ** PROJ /plan bootstrap
 ** PROJ chat
 that would be kinda cool to have a chat in the webpage
-** TODO UI revampt
-*** DONE job-application/edit save Uncaught TypeError: this.model.save is not a function
-CLOSED: [2026-04-01 Wed 20:08]
-*** DONE Resume/id/edit Collapse education to begin with
-CLOSED: [2026-04-01 Wed 20:08]
-*** use career-data to score, maybe by entering resume_id 0 :api:
-*** when displaying resume if no summary wasn't presented then don't show the header tag
-*** answer/show application response should be a label and the text inside an outlinded round container
-***  bug: job-application/new resume alt names aren't showing up
-*** feature gitflow like status for failure conditions
-*** create a statuses for job-application
-*** job-application/show show's collected status
-
 * PROJ UI revamp
 ** Phase 1: Analysis & Design System
 *** TODO Document target site structure and components

@@ -1,8 +1,6 @@
 <div class="mx-auto max-w-5xl px-4">
   <form class="" {{on "submit" this.submitEdit}}>
-    <fieldset
-      class="fieldset bg-base-200 border-base-300 rounded-box border p-4"
-    >
+    <div class="space-y-4 py-2">
       {{! Title (left) and URL (right) }}
       <div class="flex flex-wrap -mx-3 mb-6">
         <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
@@ -52,6 +50,7 @@
             value={{@jobPost.description}}
             {{on "input" (fn this.updateField "description")}}
             rows="8"
+            required
           ></textarea>
         </div>
       </div>
@@ -80,6 +79,6 @@
           <button class="btn danger" type="button" {{on "click" this.submitDelete}}>Delete</button>
         </div>
       </div>
-    </fieldset>
+    </div>
   </form>
 </div>

@@ -26,7 +26,20 @@
           <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
         </Panel::Card>
         <Panel::Card @title="Education" @collapsible={{true}} @startCollapsed={{true}}>
-          <Educations::Form @education={{this.model.education}} />
+          <:top as |panel|>
+            <Panel::Navigation
+              @collapsible={{true}}
+              @collapsed={{panel.collapsed}}
+              @toggleCollapsed={{panel.toggleCollapsed}}
+            >
+              <button type="button" class="btn small" {{on "click" this.addEducation}}>+ Add Education</button>
+            </Panel::Navigation>
+          </:top>
+          <:default>
+            {{#each this.model.educations as |edu|}}
+              <Educations::Form @education={{edu}} />
+            {{/each}}
+          </:default>
         </Panel::Card>
         <Panel::Card @title="Experience" @collapsible={{true}}>
           <:top as |panel|>

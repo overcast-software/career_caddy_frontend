@@ -10,20 +10,32 @@
       {{or resume.name resume.title}}
     </PowerSelect>
   </div>
+  <div class="actions">
+    {{#if @jobPost.scrapes.length}}
+      <LinkTo @route="scrapes.show" @model={{get @jobPost.scrapes "0"}} class="btn btn-sm">View Scrape</LinkTo>
+    {{else}}
+      <button type="button" class="btn btn-sm" {{on "click" this.createScrape}}>Create Scrape</button>
+    {{/if}}
+  </div>
+
   {{#if this.selectedResume}}
+    {{#unless @jobPost.description}}
+      <p class="text-sm text-amber-600">Job description is missing — AI actions are disabled.</p>
+    {{/unless}}
     <div class="actions">
-      <button type="button" class="btn" {{on "click" this.scoreResume}}>Score
+      <button type="button" class="btn" disabled={{not @jobPost.description}} {{on "click" this.scoreResume}}>Score
         against job post</button>
-      <button type="button" class="btn" {{on "click" this.createSummary}}>Create
+      <button type="button" class="btn" disabled={{not @jobPost.description}} {{on "click" this.createSummary}}>Create
         new resume summary</button>
       <button
         type="button"
         class="btn"
+        disabled={{not @jobPost.description}}
         {{on "click" this.createCoverLetter}}
       >Create cover letter</button>
       <LinkTo
-        @route="job-applications.new"
-        @query={{hash jobId=@jobPost.id}}
+        @route="job-posts.show.job-applications.new"
+        @model={{@jobPost}}
         class="btn"
       >
         Apply

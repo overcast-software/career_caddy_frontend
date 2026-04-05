@@ -1,10 +1,9 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <button type="button" class="btn primary" {{on "click" this.saveCoverLetter}}>Save</button>
+    <button type="button" class="btn" {{on "click" this.saveCoverLetter}}>Save</button>
   </:subnav>
   <:main>
-    <Panel::Card>
-      <label>Select a resume</label>
+    <Panel::Card @collapsible={{true}} @title="Resume (optional)">
       <PowerSelect
         @options={{this.resumeOptions}}
         @onChange={{this.updateResume}}
@@ -24,7 +23,7 @@
     {{#if this.model.jobPost}}
       <Panel::Card>
         <button type="button" class="btn primary" {{on "click" this.saveCoverLetter}}>
-          Create Cover Letter
+          AI Craft Cover Letter
         </button>
       </Panel::Card>
     {{/if}}

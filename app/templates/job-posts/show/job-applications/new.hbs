@@ -1,7 +1,13 @@
 {{page-title "New Application"}}
-<div class="container">
-  <JobApplications::Edit
-    @jobApplication={{this.jobApplication}}
-    @resumes={{this.resumes}}
-  />
-</div>
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <button type="button" class="btn" {{on "click" this.save}}>Save</button>
+    <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
+  </:subnav>
+  <:main>
+    <JobApplications::Edit
+      @jobApplication={{this.jobApplication}}
+      @resumes={{this.resumes}}
+    />
+  </:main>
+</RouteLayout>

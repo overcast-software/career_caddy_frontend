@@ -9,7 +9,7 @@
         value={{this.search}}
         {{on "input" this.onSearchInput}}
       />
-      <LinkTo @route="job-applications.new" class="btn">+ New Application</LinkTo>
+      <LinkTo @route="job-applications.new" class="btn">+New Application</LinkTo>
     </div>
   </:subnav>
   <:main>
@@ -21,16 +21,29 @@
           <table class="min-w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">Title</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">Company</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600">Applied</th>
-                <th class="px-4 py-3 text-right font-semibold text-gray-600">Actions</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600"
+                >Title</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600"
+                >Company</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600"
+                >Status</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600"
+                >Applied At</th>
+                <th
+                  class="px-4 py-3 text-right font-semibold text-gray-600"
+                >Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
               {{#each this.model as |application|}}
-                <JobApplications::Compact @jobApplication={{application}} />
+                <JobApplications::Compact
+                  @jobApplication={{application}}
+                  @onDelete={{this.removeApplication}}
+                />
               {{/each}}
             </tbody>
           </table>

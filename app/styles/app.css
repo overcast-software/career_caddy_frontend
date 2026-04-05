@@ -47,11 +47,8 @@ body {
 .course {
   height: 100vh;
   display: grid;
-  grid-template-areas:
-    "header"
-    "main";
-  grid-template-rows: auto 1fr;
-  grid-template-columns: 1fr;
+  grid-template:
+    "header" auto "main" 1fr / 1fr;
   overflow: hidden;
 }
 
@@ -83,10 +80,11 @@ body {
 .course-main {
   grid-area: main;
   overflow-y: auto;
+  min-width: 0;
 }
 
 /* On mobile, the desktop sidebar is hidden; sidebar opens as an overlay drawer */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .course--sidebar-open {
     grid-template-areas:
       "header"
@@ -100,7 +98,7 @@ body {
 }
 
 /* On desktop, the mobile overlay drawer is never shown; hide back-arrow in persistent sidebar */
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .mobile-overlay,
   .mobile-drawer {
     display: none;
@@ -115,7 +113,7 @@ body {
 .mobile-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgb(0 0 0 / 40%);
   z-index: 40;
 }
 
@@ -188,13 +186,14 @@ a {
 .builder-form {
   display: grid;
   grid-template-columns: max-content 1fr;
-  column-gap: var(--space-4);
-  row-gap: var(--space-3);
+  gap: var(--space-3) var(--space-4);
   align-items: center;
   padding: var(--space-6);
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* Non-field direct children (buttons, field-rows, etc.) span both columns */
@@ -218,6 +217,7 @@ a {
 /* .builder-form .field input[type="text"], */
 .builder-form .field input {
   width: 100%;
+  min-width: 0;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -291,8 +291,23 @@ a {
   align-items: flex-end;
 }
 
-/* Stack field-rows when the editor panel is too narrow (e.g. sidebar open) */
+/* Collapse builder-form to single column when editor panel is narrow (e.g. sidebar open) */
 @container editor (width < 420px) {
+  .builder-form {
+    grid-template-columns: 1fr;
+  }
+
+  .builder-form > .field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .builder-form .field {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .builder-form .field-row {
     flex-direction: column;
   }
@@ -301,6 +316,20 @@ a {
   .builder-form .field-row label.field {
     width: 100%;
     min-width: 0;
+  }
+
+  .builder-form .field label,
+  .builder-form .field .field-label {
+    display: block;
+    width: 100%;
+    margin-bottom: var(--space-2);
+  }
+
+  .builder-form .field input,
+  .builder-form .field select,
+  .builder-form .field textarea {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -657,6 +686,9 @@ p.tee {
 .exp-header-company {
   font-size: 0.8rem;
   color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .exp-header-actions {
@@ -813,12 +845,22 @@ footer {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.collapsible.collapsed .collapsible-head {
+  margin-bottom: 0;
+}
+
+.collapsible .collapsible-head .panel-title {
+  margin-bottom: 0;
 }
 
 .collapsible .collapsible-body {
   overflow: hidden;
   display: grid;
   grid-template-rows: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   transition: grid-template-rows 180ms ease;
 }
 
@@ -832,6 +874,7 @@ footer {
 
 .collapsible .collapsible-body > * {
   min-height: 0; /* allow grid row to collapse */
+  min-width: 0;  /* prevent max-content children from overflowing */
 }
 
 /* Resume landing page styles */
@@ -1146,6 +1189,8 @@ footer {
 }
 
 .editor-panel {
+  display: flex;
+  flex-direction: column;
   top: 16px;
   gap: var(--space-4);
   align-self: start;
@@ -1156,6 +1201,7 @@ footer {
 .preview-panel {
   display: grid;
   gap: var(--space-4);
+  padding-bottom: 4em;
 }
 
 .builder-page .builder-layout > .editor-panel,
@@ -1164,6 +1210,7 @@ footer {
 }
 
 .panel-card {
+  min-width: 0;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1184,6 +1231,38 @@ footer {
 .panel-actions {
   display: flex;
   justify-content: flex-end;
+}
+
+.panel-caret-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.panel-caret {
+  display: inline-block;
+  transition: transform 180ms ease;
+}
+
+.panel-caret.rotated {
+  transform: rotate(-90deg);
+}
+
+.education-item {
+  margin-bottom: var(--space-3);
+}
+
+.edu-header {
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.edu-details {
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 .preview-actions {
@@ -1383,7 +1462,7 @@ pre {
 }
 
 /* Top bar styles */
-header {
+.site-header {
   position: sticky;
   top: 0;
   display: flex;
@@ -1494,7 +1573,7 @@ header {
   text-decoration: underline;
 }
 
-@media (max-width: 639px) {
+@media (width <= 639px) {
   .breadcrumbs {
     display: none;
   }
@@ -1763,6 +1842,7 @@ header {
 
 .input-group .desc-editor {
   flex: 1;
+  min-width: 0;
   border-radius: 0;
   min-height: 40px;
 }

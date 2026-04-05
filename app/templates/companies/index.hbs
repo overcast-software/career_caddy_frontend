@@ -5,7 +5,7 @@
         type="search"
         aria-label="search"
         placeholder="Search companies..."
-        value={{this.search}}
+        value={{this.searchInput}}
         {{on "input" this.onSearchInput}}
       />
       <LinkTo @route="companies.new" class="btn">+ New Company</LinkTo>

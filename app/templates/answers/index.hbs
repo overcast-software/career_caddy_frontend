@@ -1,24 +1,49 @@
 {{page-title "Answers"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    Answers
+    <div class="controls">
+      <input
+        type="search"
+        aria-label="search"
+        placeholder="Search answers..."
+        value={{this.search}}
+        {{on "input" this.onSearchInput}}
+      />
+      <button type="button" class="btn" {{on "click" this.newAnswer}}>+ New Answer</button>
+    </div>
   </:subnav>
   <:main>
-    <div class="panel-card">
-      <ul>
-        {{#each this.model as |answer|}}
-          <li>
+    {{#if this.isSearching}}
+      <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+    {{else}}
+      {{#each this.model as |answer|}}
+        <Panel::Card>
+          <div class="flex items-start gap-2">
             <button
               type="button"
               class="btn favorite {{if answer.favorite 'favorited'}}"
               data-tooltip="Favorited answers appear in Career Data"
               {{on "click" (fn this.toggleFavorite answer)}}
             >★</button>
-            {{answer.content}}
-            <LinkTo @route="answers.edit" @model={{answer}}>edit</LinkTo>
-          </li>
-        {{/each}}
-      </ul>
-    </div>
+            <div class="flex-1">
+              <p>{{answer.content}}</p>
+              <div class="flex gap-2 mt-2">
+                <LinkTo @route="answers.edit" @model={{answer}} class="btn small">edit</LinkTo>
+                <LinkTo
+                  @route="questions.show.answers.show"
+                  @models={{array answer.question.id answer.id}}
+                  class="btn small"
+                >show</LinkTo>
+              </div>
+            </div>
+          </div>
+        </Panel::Card>
+      {{else}}
+        <p class="text-gray-500 text-sm py-6 text-center">No answers found.</p>
+      {{/each}}
+      <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
+        <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
+      </InfinityLoader>
+    {{/if}}
   </:main>
 </RouteLayout>

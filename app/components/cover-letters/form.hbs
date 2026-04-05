@@ -10,19 +10,15 @@
         {{@coverLetter.content}}
       </textarea>
     </div>
-    <button
-      type="button"
-      class="favorite-btn {{if @coverLetter.favorite 'favorited'}}"
-      {{on "click" (fn this.toggleFavorite @coverLetter)}}
-      title="{{if
-        @coverLetter.favorite
-        'Remove from favorites'
-        'Add to favorites'
-      }}"
-    >
-      {{#if @coverLetter.favorite}}★{{else}}☆{{/if}}
-    </button>
-    <button type="submit" class="btn primary">Save</button>
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn {{if @coverLetter.favorite 'active'}}"
+        {{on "click" (fn this.toggleFavorite @coverLetter)}}
+        title="{{if @coverLetter.favorite 'Remove from favorites' 'Add to favorites'}}"
+      >{{if @coverLetter.favorite "★ Favorited" "☆ Favorite"}}</button>
+      <button type="submit" class="btn primary">Save</button>
+    </div>
   </form>
   {{yield}}
 </div>
