@@ -3,6 +3,7 @@
     <button
       type="button"
       class="btn"
+      disabled={{this.model.isSaving}}
       {{on "click" this.saveCoverLetter}}
     >Save</button>
   </:subnav>
@@ -29,6 +30,7 @@
         <button
           type="button"
           class="btn primary"
+          disabled={{this.model.isSaving}}
           {{on "click" this.saveCoverLetter}}
         >
           AI Craft Cover Letter

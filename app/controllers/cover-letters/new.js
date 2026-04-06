@@ -33,6 +33,7 @@ export default class CoverLettersNewController extends Controller {
   }
 
   @action saveCoverLetter() {
+    if (this.model.isSaving) return;
     const resumeId = this.selectedResume?.id;
     this.model.resume = this.store.peekRecord('resume', resumeId);
     this.spinner.wrap(
