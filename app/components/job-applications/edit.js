@@ -37,7 +37,8 @@ export default class JobApplicationsEdit extends Component {
     this.jobApplication.coverLetter = coverLetter;
   }
 
-  @action async saveApplication() {
+  @action async saveApplication(event) {
+    event?.preventDefault();
     await this.jobApplication.save();
     this.flashMessages.success('saved');
   }

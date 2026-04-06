@@ -61,9 +61,10 @@
         id={{this.statusSelectId}}
         {{on "change" (fn this.updateField "status")}}
       >
-        <option value="">{{@jobApplication.status}}</option>
-        {{#each this.statusOptions as |status|}}
-          <option value={{status}}>{{status}}</option>
+        {{#each this.statuses as |status|}}
+          <option value={{status}} selected={{eq status @jobApplication.status}}>
+            {{status}}
+          </option>
         {{/each}}
       </select>
     </div>
