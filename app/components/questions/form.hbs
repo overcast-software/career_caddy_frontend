@@ -39,21 +39,30 @@
 
     <div class="field">
       <label class="field-label w-36 flex-none">Job Post</label>
-      <PowerSelect
-        @options={{this.loadedJobPosts}}
-        @onChange={{this.updateJobPost}}
-        @selected={{this.selectedJobPost}}
-        @placeholder={{if
-          this.selectedCompany
-          "Select a job post (optional)"
-          "Select a company first"
-        }}
-        @allowClear={{true}}
-        @disabled={{not this.selectedCompany}}
-        as |jobPost|
-      >
-        {{jobPost.title}}
-      </PowerSelect>
+      {{#if @jobPost}}
+        <input
+          type="text"
+          value={{@jobPost.title}}
+          disabled="true"
+          aria-label="Job Post"
+        />
+      {{else}}
+        <PowerSelect
+          @options={{this.loadedJobPosts}}
+          @onChange={{this.updateJobPost}}
+          @selected={{this.selectedJobPost}}
+          @placeholder={{if
+            this.selectedCompany
+            "Select a job post (optional)"
+            "Select a company first"
+          }}
+          @allowClear={{true}}
+          @disabled={{not this.selectedCompany}}
+          as |jobPost|
+        >
+          {{jobPost.title}}
+        </PowerSelect>
+      {{/if}}
     </div>
 
     <div class="field">

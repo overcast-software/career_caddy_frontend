@@ -23,6 +23,15 @@ export default class QuestionsFormComponent extends Component {
       this.selectedCompany = args.company;
       this._preloadCompanyRelated(args.company, q);
     }
+    // Pre-select job post (and its company) when coming from a job post context
+    if (args.jobPost) {
+      this.selectedJobPost = args.jobPost;
+      const company = args.jobPost.belongsTo('company').value();
+      if (company) {
+        this.selectedCompany = company;
+        this._preloadCompanyRelated(company, q);
+      }
+    }
     if (q && !q.isNew) {
       const company = q.belongsTo('company').value();
       if (company) {
