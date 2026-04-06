@@ -1,3 +1,13 @@
 {{page-title "New Question"}}
-<Questions::Form @question={{this.model}} @jobPost={{this.model.jobPost}} />
+
+<div class="mb-4">
+  <LinkTo
+    @route="job-posts.show.questions.index"
+    @model={{this.model.jobPost}}
+    class="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
+  >← Back to Questions</LinkTo>
+</div>
+
+<Questions::Form @question={{this.model.question}} @jobPost={{this.model.jobPost}} />
+
 {{outlet}}

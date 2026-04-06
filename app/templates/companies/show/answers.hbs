@@ -1,4 +1,5 @@
-<div class="flex justify-end mb-4">
+<div class="flex items-center justify-between mb-4">
+  <h2 class="text-lg font-semibold text-gray-800">Questions</h2>
   <LinkTo @route="questions.new" class="btn btn-sm">+ New Question</LinkTo>
 </div>
 
@@ -7,26 +8,50 @@
     <table class="min-w-full text-sm">
       <thead class="bg-gray-50 border-b border-gray-200">
         <tr>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Question</th>
-          <th
-            class="px-4 py-3 text-right font-semibold text-gray-600"
-          >Actions</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Question</th>
+          <th class="px-4 py-3 text-center font-semibold text-gray-600 w-24">Answers</th>
+          <th class="px-4 py-3 text-center font-semibold text-gray-600 w-16">Fav</th>
+          <th class="px-4 py-3 text-right font-semibold text-gray-600 w-40">Actions</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
         {{#each this.model as |question|}}
           <tr class="hover:bg-gray-50">
-            <td
-              class="px-4 py-3 text-gray-900 max-w-md truncate"
-            >{{question.content}}</td>
+            <td class="px-4 py-3 text-gray-900 whitespace-pre-wrap break-words max-w-lg">
+              {{question.content}}
+            </td>
+            <td class="px-4 py-3 text-center">
+              {{#if question.answers.length}}
+                <LinkTo
+                  @route="questions.show.answers"
+                  @model={{question}}
+                  class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold hover:bg-indigo-200"
+                >{{question.answers.length}}</LinkTo>
+              {{else}}
+                <span class="text-gray-300 text-xs">—</span>
+              {{/if}}
+            </td>
+            <td class="px-4 py-3 text-center text-base">
+              {{if question.favorite "★" "☆"}}
+            </td>
             <td class="px-4 py-3 text-right">
-              <LinkTo
-                @route="questions.show.answers"
-                @model={{question}}
-                class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-              >Answers</LinkTo>
+              <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                <LinkTo
+                  @route="questions.show"
+                  @model={{question}}
+                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                >Show</LinkTo>
+                <LinkTo
+                  @route="questions.edit"
+                  @model={{question}}
+                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                >Edit</LinkTo>
+                <LinkTo
+                  @route="questions.show.answers.new"
+                  @model={{question}}
+                  class="px-2 py-1 text-xs rounded border border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                >Answer</LinkTo>
+              </div>
             </td>
           </tr>
         {{/each}}
@@ -34,6 +59,5 @@
     </table>
   </div>
 {{else}}
-  <p class="text-gray-500 text-sm py-6 text-center">No questions for this
-    company.</p>
+  <p class="text-gray-500 text-sm py-6 text-center">No questions for this company.</p>
 {{/if}}
