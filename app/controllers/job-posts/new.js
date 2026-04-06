@@ -8,9 +8,14 @@ export default class JobPostsNewController extends Controller {
   @service router;
 
   @tracked selectedCompany = null;
-  get companies() {
-    return this.store.findAll('company');
+
+  @action
+  async searchCompanies(term) {
+    const params = term ? { 'filter[query]': term } : {};
+    const results = await this.store.query('company', params);
+    return results.slice();
   }
+
   @action
   updateField(field, event) {
     this.model[field] = event.target.value;

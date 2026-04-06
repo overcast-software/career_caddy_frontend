@@ -19,8 +19,11 @@ export default class JobPostsFormComponent extends Component {
     this.args.jobPost.company = company;
   }
 
-  get companies() {
-    return this.args.companies || this.store.peekAll('company');
+  @action
+  async searchCompanies(term) {
+    const params = term ? { 'filter[query]': term } : {};
+    const results = await this.store.query('company', params);
+    return results.slice();
   }
 
   @action

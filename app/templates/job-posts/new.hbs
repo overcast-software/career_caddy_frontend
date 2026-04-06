@@ -6,8 +6,7 @@
     <form class="builder-form" {{on "submit" this.submitJobPost}}>
       <label>Company</label>
       <PowerSelectWithCreate
-        @options={{this.companies}}
-        @searchField="name"
+        @search={{this.searchCompanies}}
         @onCreate={{this.addCompanyToJobPost}}
         @onChange={{this.updateCompany}}
         @selected={{this.selectedCompany}}

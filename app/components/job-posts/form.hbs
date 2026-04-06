@@ -62,8 +62,7 @@
             class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
           >Company</label>
           <PowerSelectWithCreate
-            @options={{this.companies}}
-            @searchField="name"
+            @search={{this.searchCompanies}}
             @onCreate={{this.addCompanyToJobPost}}
             @onChange={{this.updateCompany}}
             @selected={{this.selectedCompany}}
