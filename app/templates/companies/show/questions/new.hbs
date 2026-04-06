@@ -1,0 +1,13 @@
+{{page-title "New Question"}}
+
+<div class="mb-4">
+  <LinkTo
+    @route="companies.show.answers"
+    @model={{this.model.company}}
+    class="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
+  >← Back to Questions</LinkTo>
+</div>
+
+<Questions::Form @question={{this.model.question}} @company={{this.model.company}} />
+
+{{outlet}}

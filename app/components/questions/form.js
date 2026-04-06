@@ -18,6 +18,11 @@ export default class QuestionsFormComponent extends Component {
   constructor(owner, args) {
     super(owner, args);
     const q = args.question;
+    // Pre-select company when passed directly (e.g. from company context)
+    if (args.company) {
+      this.selectedCompany = args.company;
+      this._preloadCompanyRelated(args.company, q);
+    }
     if (q && !q.isNew) {
       const company = q.belongsTo('company').value();
       if (company) {

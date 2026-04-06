@@ -39,6 +39,9 @@ Router.map(function () {
         this.route('job-applications');
         this.route('scrapes');
         this.route('answers');
+        this.route('questions', function () {
+          this.route('new');
+        });
         this.route('scores');
       },
     );
