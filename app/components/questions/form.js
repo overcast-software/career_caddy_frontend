@@ -188,9 +188,17 @@ export default class QuestionsFormComponent extends Component {
 
   @action cancel(event) {
     event?.preventDefault();
+    const wasEditing = this.isEditing;
+    const questionId = this.args.question?.id;
     this.args.question.rollbackAttributes?.();
-    if (this.isEditing) {
-      this.router.transitionTo('questions.show', this.args.question.id);
+    if (wasEditing && questionId) {
+      this.router.transitionTo('questions.show', questionId);
+    } else if (this.args.company) {
+      this.router.transitionTo('companies.show.answers', this.args.company);
+    } else if (this.args.jobPost) {
+      this.router.transitionTo('job-posts.show.questions.index', this.args.jobPost);
+    } else {
+      this.router.transitionTo('questions.index');
     }
   }
 }
