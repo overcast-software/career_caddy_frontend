@@ -1,0 +1,52 @@
+<form class="builder-form">
+  <div class="field">
+    <label class="field-label" for="proj-title-{{@project.id}}">Title</label>
+    <input
+      id="proj-title-{{@project.id}}"
+      type="text"
+      value={{@project.title}}
+      {{on "input" (fn this.updateField "title")}}
+    />
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="proj-description-{{@project.id}}">Description</label>
+    <textarea
+      id="proj-description-{{@project.id}}"
+      value={{@project.description}}
+      {{on "input" (fn this.updateField "description")}}
+      rows="3"
+    ></textarea>
+  </div>
+
+  <div class="field-row">
+    <div class="field">
+      <label class="field-label" for="proj-start-{{@project.id}}">Start Date</label>
+      <input
+        id="proj-start-{{@project.id}}"
+        type="date"
+        value={{this.formattedStartDate}}
+        {{on "input" (fn this.updateField "startDate")}}
+      />
+    </div>
+    <div class="field">
+      <label class="field-label" for="proj-end-{{@project.id}}">End Date</label>
+      <input
+        id="proj-end-{{@project.id}}"
+        type="date"
+        value={{this.formattedEndDate}}
+        {{on "input" (fn this.updateField "endDate")}}
+      />
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="proj-active-{{@project.id}}">Active</label>
+    <input
+      id="proj-active-{{@project.id}}"
+      type="checkbox"
+      checked={{@project.isActive}}
+      {{on "change" (fn this.updateField "isActive")}}
+    />
+  </div>
+</form>

@@ -7,7 +7,7 @@ export default class CoverLettersNewRoute extends Route {
   model() {
     this.store.findAll('job-post');
     this.store.findAll('company');
-    this.store.findAll('resume');
+    this.store.query('resume', { slim: 1 });
     return this.store.createRecord('cover-letter');
   }
 }

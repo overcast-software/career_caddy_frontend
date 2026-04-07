@@ -16,7 +16,7 @@ export default class JobApplicationsEditRoute extends Route {
       { include: ['job-post', 'company'] },
     );
 
-    const resumes = await this.store.findAll('resume');
+    const resumes = await this.store.query('resume', { slim: 1 });
     const coverLetters = await this.store.findAll('cover-letter');
     return { jobApplication, resumes, coverLetters };
   }

@@ -4,25 +4,39 @@
   </:subnav>
   <:main>
     <form class="builder-form" {{on "submit" this.submitJobPost}}>
-      <label>Company</label>
-      <PowerSelectWithCreate
-        @search={{this.searchCompanies}}
-        @onCreate={{this.addCompanyToJobPost}}
-        @onChange={{this.updateCompany}}
-        @selected={{this.selectedCompany}}
-        as |company|
-      >{{company.name}}</PowerSelectWithCreate>
-      <div class="field">
-        <label class="field-label" for="title">Title</label>
-        <input
-          id="title"
-          type="text"
-          value={{this.model.title}}
-          {{on "input" (fn this.updateField "title")}}
-          required
-        />
+      <div class="field-full">
+        <label class="field-label">Company</label>
+        <PowerSelectWithCreate
+          @search={{this.searchCompanies}}
+          @onCreate={{this.addCompanyToJobPost}}
+          @onChange={{this.updateCompany}}
+          @selected={{this.selectedCompany}}
+          as |company|
+        >{{company.name}}</PowerSelectWithCreate>
       </div>
-      <div class="field">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="title">Title</label>
+          <input
+            id="title"
+            type="text"
+            value={{this.model.title}}
+            {{on "input" (fn this.updateField "title")}}
+            required
+          />
+        </div>
+        <div class="field">
+          <label class="field-label" for="url">url</label>
+          <input
+            id="url"
+            type="text"
+            value={{this.model.link}}
+            {{on "input" (fn this.updateField "link")}}
+            required
+          />
+        </div>
+      </div>
+      <div class="field-full">
         <label class="field-label" for="description">Description</label>
         <textarea
           id="description"
@@ -31,16 +45,6 @@
           rows="8"
         ></textarea>
       </div>
-      <div class="field">
-        <label class="field-label" for="url">url</label>
-        <input
-          id="url"
-          type="text"
-          value={{this.model.link}}
-          {{on "input" (fn this.updateField "link")}}
-          required
-        />
-      </div>
       <div class="form-actions">
         <button type="submit" class="btn primary">Save</button>
         <button
@@ -48,6 +52,11 @@
           type="button"
           class="btn primary"
         >Save and apply</button>
+        <button
+          {{on "click" this.createAndScore}}
+          type="button"
+          class="btn primary"
+        >Save and score</button>
         <button
           class="btn danger"
           type="button"

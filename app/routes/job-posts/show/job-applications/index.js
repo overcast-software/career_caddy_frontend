@@ -8,7 +8,7 @@ export default class JobPostsShowJobApplicationsIndexRoute extends Route {
     const { job_post_id } = this.paramsFor('job-posts.show');
     const jobPost = this.store.peekRecord('job-post', job_post_id);
     const jobApplications = jobPost.jobApplications;
-    await this.store.findAll('resume');
+    await this.store.query('resume', { slim: 1 });
     return { jobPost, jobApplications };
   }
 }

@@ -9,7 +9,7 @@ export default class JobPostsShowCoverLettersRoute extends Route {
     const jobPost = this.store.peekRecord('job-post', job_post_id);
     const [coverLetters] = await Promise.all([
       jobPost.coverLetters,
-      this.store.findAll('resume'),
+      this.store.query('resume', { slim: 1 }),
     ]);
     return coverLetters;
   }

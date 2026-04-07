@@ -104,8 +104,14 @@ export default class ResumesEditController extends Controller {
     if (!rel.includes(exp)) rel.unshiftObject(exp);
   };
 
+  addProject = async () => {
+    const proj = this.store.createRecord('project', { resume: this.model });
+    const rel = await this.model.projects;
+    if (!rel.includes(proj)) rel.unshiftObject(proj);
+  };
+
   get resumeSummaries() {
-    return this.store.peekAll('summary');
+    return this.model.summaries;
   }
 
   get isDirty() {

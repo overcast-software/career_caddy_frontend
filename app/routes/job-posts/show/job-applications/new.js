@@ -13,7 +13,7 @@ export default class JobPostsShowJobApplicationsNewRoute extends Route {
           status: 'Applied',
         }),
       ),
-      this.store.findAll('resume'),
+      this.store.query('resume', { slim: 1 }),
     ]);
     jobApplication.jobPost = this.store.peekRecord('job-post', job_post_id);
     return { jobApplication, resumes };

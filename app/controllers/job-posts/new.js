@@ -43,10 +43,10 @@ export default class JobPostsNewController extends Controller {
 
   @action submitJobPost(event) {
     event.preventDefault();
-    this.model
-      .save()
-      .then(this.flashMessages.success('Job post saved'))
-      .then(this.router.transitionTo('job-posts.show', this.model));
+    this.model.save().then((record) => {
+      this.flashMessages.success('Job post saved');
+      this.router.transitionTo('job-posts.show', record);
+    });
   }
   @action createAndApply(event) {
     event.preventDefault();
@@ -54,6 +54,14 @@ export default class JobPostsNewController extends Controller {
       .save()
       .then((record) =>
         this.router.transitionTo('job-posts.show.job-applications.new', record),
+      );
+  }
+  @action createAndScore(event) {
+    event.preventDefault();
+    this.model
+      .save()
+      .then((record) =>
+        this.router.transitionTo('job-posts.show.scores', record),
       );
   }
 }

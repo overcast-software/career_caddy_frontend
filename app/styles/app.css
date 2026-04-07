@@ -277,13 +277,28 @@ a {
   grid-column: 1 / -1;
 }
 
+.builder-form .field-full {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  grid-column: 1 / -1;
+}
+
+.builder-form .field-full textarea {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+  line-height: 1.4;
+  resize: vertical;
+}
+
 .builder-form .field-row .field {
   flex: 1;
   min-width: 0;
-}
-
-.builder-form .field-row .field:last-child {
-  align-items: flex-end;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 /* Collapse builder-form to single column when editor panel is narrow (e.g. sidebar open) */
@@ -719,6 +734,15 @@ p.tee {
   transform: rotate(180deg);
 }
 
+/* Strip card chrome when builder-form is nested inside a panel-card */
+.panel-card .builder-form,
+.panel-card > .builder-form {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: var(--space-2) var(--space-3);
+}
+
 /* Two-column builder form variant */
 /* Two-column tile layout: equal-width fields tiling across 2 columns */
 .builder-form.two-col {
@@ -730,7 +754,14 @@ p.tee {
 .builder-form.two-col > .field {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: var(--space-2);
+}
+
+/* Power-select triggers fill their column in two-col mode */
+.builder-form.two-col .ember-power-select-trigger {
+  width: 100%;
+  flex: unset;
 }
 
 @media (width <= 640px) {
@@ -1685,13 +1716,25 @@ pre {
   padding: 0;
 }
 
+/* Global: all PowerSelect triggers match native input/select height and style */
 .ember-power-select-trigger {
   position: static;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  font: inherit;
+  background-color: var(--card);
+  color: var(--text);
+  line-height: 1.5;
 }
 
-.builder-form .field .ember-power-select-trigger {
+/* Layout helpers inside builder-form row fields */
+.builder-form .field .ember-power-select-trigger,
+.builder-form .field-full .ember-power-select-trigger {
   flex: 1;
   min-width: 0;
+  width: 100%;
 }
 
 .brand {

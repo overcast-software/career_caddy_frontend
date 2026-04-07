@@ -1,4 +1,4 @@
-<article class="panel-card builder-form">
+<article class="panel-card">
   <h3 class="form-title">{{if
       this.isEditing
       "Edit Question"
@@ -6,10 +6,10 @@
     }}</h3>
   <p class="form-hint">Capture questions from an application so AI can help
     draft answers.</p>
-  <form class="questions-form" {{on "submit" this.save}}>
+  <form class="questions-form builder-form two-col" {{on "submit" this.save}}>
 
     <div class="field">
-      <label class="field-label w-36 flex-none">Company
+      <label class="field-label">Company
         <span class="required">*</span></label>
       {{#if @jobPost}}
         <input
@@ -38,7 +38,7 @@
     {{/if}}
 
     <div class="field">
-      <label class="field-label w-36 flex-none">Job Post</label>
+      <label class="field-label">Job Post</label>
       {{#if @jobPost}}
         <input
           type="text"
@@ -66,7 +66,7 @@
     </div>
 
     <div class="field">
-      <label class="field-label w-36 flex-none">Job Application</label>
+      <label class="field-label">Job Application</label>
       <PowerSelect
         @options={{this.filteredJobAppOptions}}
         @onChange={{this.updateJobApplication}}
@@ -84,8 +84,8 @@
       </PowerSelect>
     </div>
 
-    <div class="field">
-      <label class="field-label w-36 flex-none" for="question-content">Question
+    <div class="field-full">
+      <label class="field-label" for="question-content">Question
         <span class="required">*</span></label>
       <textarea
         id="question-content"

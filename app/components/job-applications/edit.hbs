@@ -1,7 +1,7 @@
 <Panel::Card>
   <JobApplications::StatusFlow @current={{@jobApplication.status}} />
 
-  <form class="builder-form max-w-2xl" {{on "submit" this.saveApplication}}>
+  <form class="builder-form two-col" {{on "submit" this.saveApplication}}>
     <div class="field">
       <label class="field-label" for="ja-edit-job-post">Job Post</label>
       <input
@@ -79,7 +79,7 @@
       />
     </div>
 
-    <div class="field">
+    <div class="field-full">
       <label class="field-label" for={{this.notesTextareaId}}>Notes</label>
       <textarea
         id={{this.notesTextareaId}}

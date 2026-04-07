@@ -42,6 +42,26 @@
         <Panel::Card @title="Skills" @collapsible={{true}}>
           <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
         </Panel::Card>
+        <Panel::Card @title="Projects" @collapsible={{true}} @startCollapsed={{true}}>
+          <:top as |panel|>
+            <Panel::Navigation
+              @collapsible={{true}}
+              @collapsed={{panel.collapsed}}
+              @toggleCollapsed={{panel.toggleCollapsed}}
+            >
+              <button
+                type="button"
+                class="btn small"
+                {{on "click" this.addProject}}
+              >+ Add Project</button>
+            </Panel::Navigation>
+          </:top>
+          <:default>
+            {{#each this.model.projects as |proj|}}
+              <Projects::Form @project={{proj}} />
+            {{/each}}
+          </:default>
+        </Panel::Card>
         <Panel::Card
           @title="Education"
           @collapsible={{true}}

@@ -9,7 +9,7 @@ export default class JobPostsShowScoresRoute extends Route {
     const jobPost = this.store.peekRecord('job-post', job_post_id);
     const [scores] = await Promise.all([
       jobPost.scores,
-      this.store.findAll('resume'),
+      this.store.query('resume', { slim: 1 }),
     ]);
     return { jobPost, scores };
   }

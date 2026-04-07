@@ -9,21 +9,26 @@
   </:subnav>
   <:main>
     <Panel::Card @collapsible={{true}} @title="Resume (optional)">
-      <PowerSelect
-        @options={{this.resumeOptions}}
-        @onChange={{this.updateResume}}
-        @selected={{this.selectedResume}}
-        as |resume|
-      >
-        {{or resume.name resume.title}}
-      </PowerSelect>
+      <div class="field-full">
+        <label class="field-label">Resume</label>
+        <PowerSelect
+          @options={{this.resumeOptions}}
+          @onChange={{this.updateResume}}
+          @selected={{this.selectedResume}}
+          as |resume|
+        >
+          {{or resume.name resume.title}}
+        </PowerSelect>
+      </div>
     </Panel::Card>
     <Panel::Card>
-      <label>Select a job post</label>
-      <JobPosts::Selector
-        @jobPosts={{this.jobPosts}}
-        @jobPostCallback={{this.addJobPostToCoverLetter}}
-      />
+      <div class="field-full">
+        <label class="field-label">Job Post</label>
+        <JobPosts::Selector
+          @jobPosts={{this.jobPosts}}
+          @jobPostCallback={{this.addJobPostToCoverLetter}}
+        />
+      </div>
     </Panel::Card>
     {{#if this.model.jobPost}}
       <Panel::Card>
