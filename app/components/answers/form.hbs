@@ -38,14 +38,16 @@
         >{{@answer.content}}</textarea>
       </div>
     </label>
-    <button
-      type="button"
-      class="favorite-btn {{if @answer.favorite 'favorited'}}"
-      {{on "click" (fn this.toggleFavorite @answer)}}
-      title="{{if @answer.favorite 'Remove from favorites' 'Add to favorites'}}"
-    >
-      {{#if @answer.favorite}}★{{else}}☆{{/if}}
-    </button>
+    <div class="field">
+      <button
+        type="button"
+        class="btn favorite {{if @answer.favorite 'favorited'}}"
+        {{on "click" (fn this.toggleFavorite @answer)}}
+        title="{{if @answer.favorite 'Remove from favorites' 'Add to favorites'}}"
+      >
+        {{#if @answer.favorite}}★ Favorited{{else}}☆ Favorite{{/if}}
+      </button>
+    </div>
   {{/if}}
 
   <button type="submit" class="btn" disabled={{this.isPolling}}>save</button>

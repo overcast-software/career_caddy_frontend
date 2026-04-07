@@ -53,8 +53,11 @@ export default class AnswersForm extends Component {
     const afterSave = () => {
       if (this.args.onSave) {
         this.args.onSave(this.args.answer);
-      } else if (wasNew && question) {
-        this.router.transitionTo('questions.show.answers.index', question);
+      } else if (question) {
+        this.router.transitionTo(
+          'questions.show.answers.show',
+          this.args.answer,
+        );
       }
     };
 
@@ -74,7 +77,7 @@ export default class AnswersForm extends Component {
             } else {
               this.flashMessages.success('AI answer generated successfully.');
               this.useAI = false;
-              if (wasNew) afterSave();
+              afterSave();
             }
           },
           onError: () => {

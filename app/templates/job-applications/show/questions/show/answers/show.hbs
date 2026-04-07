@@ -3,11 +3,11 @@
     <h3 class="text-sm font-semibold text-gray-700">Answer</h3>
     <LinkTo
       @route="job-applications.show.questions.show.answers.edit"
-      @model={{this.model.answer}}
+      @model={{this.model}}
       class="btn btn-sm"
     >Edit</LinkTo>
   </div>
   <div class="panel-card">
-    <MarkdownToHtml @markdown={{this.model.answer.content}} />
+    <MarkdownToHtml @markdown={{this.model.content}} />
   </div>
 </div>
