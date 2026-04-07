@@ -11,15 +11,14 @@
     />
   </div>
   <br />
-  <div class="field">
-    <label class="field-label">
-      Notes
-      <textarea {{on "change" this.updateCompanyNote}}>
-        {{@company.note}}
-
-      </textarea>
-    </label>
+  <div class="field-full">
+    <label class="field-label" for="companyNotes">Notes</label>
+    <textarea id="companyNotes" {{on "change" this.updateCompanyNote}}>
+      {{@company.note}}
+    </textarea>
   </div>
-  <button type="submit" class="btn">save</button>
+  <div class="form-actions">
+    <button type="submit" class="btn">save</button>
+  </div>
 </form>
 {{yield}}
