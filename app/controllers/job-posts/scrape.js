@@ -69,7 +69,6 @@ export default class JobPostsScrapeController extends Controller {
       return;
     }
 
-    // After save completes, go to scores/:id of the returned record
-    this.router.transitionTo('job-posts.show', result.jobPost.id);
+    this.router.transitionTo('scrapes.show', result);
   }
 }
