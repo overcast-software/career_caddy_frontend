@@ -33,9 +33,6 @@
   {{else}}
     <label>
       <div class="field">
-        Answer to question:
-        {{!content.content because content is reserved word}}
-        {{@answer.question.content}}
         <textarea
           {{on "change" this.updateContent}}
         >{{@answer.content}}</textarea>
