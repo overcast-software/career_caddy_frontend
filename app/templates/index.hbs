@@ -34,8 +34,10 @@
 
     <div class="landing-hero-cta">
       {{#unless this.session.isAuthenticated}}
-        <LinkTo @route="setup" class="btn landing-btn-primary">Get Started</LinkTo>
-        <LinkTo @route="login" class="btn landing-btn-secondary">Login</LinkTo>
+        {{#if this.bootstrapOpen}}
+          <LinkTo @route="setup" class="btn landing-btn-primary">Get Started</LinkTo>
+        {{/if}}
+        <LinkTo @route="login" class="btn landing-btn-primary">Sign In</LinkTo>
       {{else}}
         <LinkTo @route="job-posts.index" class="btn landing-btn-primary">Go to Dashboard</LinkTo>
       {{/unless}}

@@ -41,10 +41,12 @@
           <button type="submit" class="login-submit">Sign in</button>
         </form>
 
-        <p class="login-card-setup">
-          First time here?
-          <LinkTo @route="setup">Set up Career Caddy</LinkTo>
-        </p>
+        {{#if this.bootstrapOpen}}
+          <p class="login-card-setup">
+            First time here?
+            <LinkTo @route="setup">Set up Career Caddy</LinkTo>
+          </p>
+        {{/if}}
       </div>
     </div>
   </:main>

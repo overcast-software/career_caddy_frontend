@@ -3,8 +3,9 @@ import { service } from '@ember/service';
 
 export default class LoginRoute extends Route {
   @service session;
+  @service health;
 
-  beforeModel() {
-    // this.session.prohibitAuthentication('job-posts.index');
+  async beforeModel() {
+    await this.health.ensureHealthy();
   }
 }

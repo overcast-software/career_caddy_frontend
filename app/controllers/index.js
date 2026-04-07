@@ -5,4 +5,9 @@ export default class IndexController extends Controller {
   @service session;
   @service currentUser;
   @service flashMessages;
+  @service health;
+
+  get bootstrapOpen() {
+    return this.health.bootstrapOpen;
+  }
 }

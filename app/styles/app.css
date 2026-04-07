@@ -912,7 +912,14 @@ p.tee {
   transition: background 0.15s, color 0.15s;
 }
 
-.landing-btn-primary:hover {
+a.landing-btn-primary,
+a.landing-btn-primary:link,
+a.landing-btn-primary:visited {
+  color: #111;
+}
+
+.landing-btn-primary:hover,
+a.landing-btn-primary:hover {
   background: var(--accent);
   color: #fff;
 }
@@ -930,8 +937,16 @@ p.tee {
   transition: background 0.15s;
 }
 
-.landing-btn-secondary:hover {
+a.landing-btn-secondary,
+a.landing-btn-secondary:link,
+a.landing-btn-secondary:visited {
+  color: #fff;
+}
+
+.landing-btn-secondary:hover,
+a.landing-btn-secondary:hover {
   background: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 
 .landing-hero-attribution {
@@ -1095,6 +1110,12 @@ p.tee {
 /* Prevent login/hero pages from scrolling */
 .course-main:has(.login-main) {
   overflow: hidden;
+}
+
+/* On noSubnav pages (login, landing), flash sits just below the header, not the subnav */
+.course-main:has(.login-main) .alert,
+.course-main:has(.login-main) .alert-box {
+  top: 4lh;
 }
 
 /* Builder page full-width */

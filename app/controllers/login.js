@@ -7,6 +7,11 @@ export default class LoginController extends Controller {
   @service session;
   @service flashMessages;
   @service router;
+  @service health;
+
+  get bootstrapOpen() {
+    return this.health.bootstrapOpen;
+  }
   @tracked username;
   @tracked password;
   @tracked errorMessage;
