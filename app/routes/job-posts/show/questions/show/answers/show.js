@@ -4,6 +4,10 @@ import { service } from '@ember/service';
 export default class JobPostsShowQuestionsShowAnswersShowRoute extends Route {
   @service store;
 
+  activate() {
+    window.scrollTo(0, 0);
+  }
+
   async model({ answer_id }) {
     const { job_post_id } = this.paramsFor('job-posts.show');
     const { question_id } = this.paramsFor('job-posts.show.questions.show');
