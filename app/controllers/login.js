@@ -31,6 +31,20 @@ export default class LoginController extends Controller {
     this.router.transitionTo('index');
   }
 
+  @action async tryDemo() {
+    try {
+      const response = await fetch('/api/v1/guest-session/', { method: 'POST' });
+      if (!response.ok) {
+        this.flashMessages.warning('Demo mode is not available on this server.');
+        return;
+      }
+      const tokens = await response.json();
+      await this.session.authenticate('authenticator:jwt', null, null, tokens);
+    } catch {
+      this.flashMessages.danger('Could not start demo session.');
+    }
+  }
+
   @action updatePassword(e) {
     this.password = e.target.value;
   }

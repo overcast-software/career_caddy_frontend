@@ -82,6 +82,7 @@
                 All Posts
               </LinkTo>
             </li>
+            {{#unless this.currentUser.isGuest}}
             <li>
               <LinkTo
                 @route="job-posts.new"
@@ -100,6 +101,7 @@
                 Scrape
               </LinkTo>
             </li>
+            {{/unless}}
           </ul>
         </details>
       </li>

@@ -52,7 +52,16 @@ export default class ApplicationRoute extends Route {
       }
     }
 
-    return this._loadCurrentUser();
+    await this._loadCurrentUser();
+
+    if (this.currentUser.isGuest) {
+      const writeRoutes = ['.new', '.edit', '.scrape', '.import'];
+      const isWriteRoute = writeRoutes.some((suffix) => routeName?.endsWith(suffix));
+      if (isWriteRoute) {
+        transition.abort();
+        this.router.transitionTo('index');
+      }
+    }
   }
 
   async _loadCurrentUser() {

@@ -7,6 +7,10 @@ export default class CurrentUserService extends Service {
   @service store;
   @tracked user = null;
 
+  get isGuest() {
+    return this.user?.isGuest ?? false;
+  }
+
   async load() {
     if (this.session.isAuthenticated) {
       let user = await this.store.queryRecord('user', { me: true });

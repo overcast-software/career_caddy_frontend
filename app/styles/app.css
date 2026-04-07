@@ -1057,6 +1057,24 @@ a.landing-btn-secondary:hover {
   opacity: 0.88;
 }
 
+.login-demo {
+  margin-top: -0.25rem;
+  padding: 0.65rem;
+  background: transparent;
+  border: 1.5px solid var(--accent);
+  border-radius: 0.4rem;
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.login-demo:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
 .login-card-setup {
   font-size: 0.8rem;
   color: var(--muted);
@@ -2089,6 +2107,30 @@ pre {
 }
 
 .bar-cart {}
+
+/* Guest / demo mode banner */
+.guest-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #fffbeb;
+  border-bottom: 1px solid #f59e0b;
+  color: #92400e;
+  font-size: 0.875rem;
+}
+
+.guest-banner-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.guest-banner-link {
+  font-weight: 600;
+  text-decoration: underline;
+  color: inherit;
+}
 
 .nav-link:hover {
   color: var(--text);

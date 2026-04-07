@@ -26,7 +26,18 @@ export default class JwtAuthenticator extends Base {
     );
   }
 
-  async authenticate(username, password) {
+  async authenticate(username, password, preAuthenticated = null) {
+    if (preAuthenticated) {
+      const exp = decodeExp(preAuthenticated.access);
+      const authenticatedData = {
+        access: preAuthenticated.access,
+        refresh: preAuthenticated.refresh,
+        exp,
+      };
+      this.scheduleRefresh(authenticatedData);
+      return authenticatedData;
+    }
+
     const url = `${this.baseUrl}${this.authConfig.TOKEN_PATH}`;
     const response = await fetch(url, {
       method: 'POST',
