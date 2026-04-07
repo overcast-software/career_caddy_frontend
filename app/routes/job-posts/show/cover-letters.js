@@ -7,6 +7,10 @@ export default class JobPostsShowCoverLettersRoute extends Route {
   async model() {
     const { job_post_id } = this.paramsFor('job-posts.show');
     const jobPost = this.store.peekRecord('job-post', job_post_id);
-    return await jobPost.coverLetters;
+    const [coverLetters] = await Promise.all([
+      jobPost.coverLetters,
+      this.store.findAll('resume'),
+    ]);
+    return coverLetters;
   }
 }

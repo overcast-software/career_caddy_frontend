@@ -10,5 +10,5 @@ export default class CompanyModel extends Model {
   @hasMany('job-application', { async: true, inverse: 'company' })
   jobApplications;
   @hasMany('score', { async: true, inverse: 'company' }) scores;
-  @hasMany('project', { async: true, inverse: 'company' }) projects;
+  @hasMany('project', { async: true, inverse: null }) projects;
 }

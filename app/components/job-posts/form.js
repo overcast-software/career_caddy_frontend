@@ -70,8 +70,10 @@ export default class JobPostsFormComponent extends Component {
     event.preventDefault();
     this.args.jobPost
       .destroyRecord()
-      .then(() => this.router.transitionTo('job-posts.index'))
-      .then(() => this.flashMessages.success('Saved the job post'))
-      .catch(() => this.flashMessages.danger('Problem in saving job post.'));
+      .then(() => {
+        this.flashMessages.success('Job post deleted.');
+        this.router.transitionTo('job-posts.index');
+      })
+      .catch(() => this.flashMessages.danger('Failed to delete job post.'));
   }
 }
