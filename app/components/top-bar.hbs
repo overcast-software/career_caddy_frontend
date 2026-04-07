@@ -27,6 +27,9 @@
 
 <div class="flex items-center justify-end">
   {{#if this.session.isAuthenticated}}
+    {{#if this.currentUser.user.username}}
+      <span class="text-sm text-muted">{{this.currentUser.user.username}}</span>
+    {{/if}}
     <button
       class="p-2 rounded hover:bg-gray-100"
       type="button"

@@ -5,6 +5,7 @@ import { tracked } from '@glimmer/tracking';
 export default class TopBarComponent extends Component {
   @tracked open = false;
   @service session;
+  @service currentUser;
   @service flashMessages;
   @service router;
 
