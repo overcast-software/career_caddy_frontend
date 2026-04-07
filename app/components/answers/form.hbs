@@ -26,7 +26,7 @@
     </label>
 
     <div class="field">
-      <p><strong>Question:</strong> {{@answer.question.content.content}}</p>
+      <p><strong>Question:</strong> {{@answer.question.content}}</p>
       <p><em>AI will generate an answer based on the question and your
           additional prompt.</em></p>
     </div>
@@ -35,7 +35,7 @@
       <div class="field">
         Answer to question:
         {{!content.content because content is reserved word}}
-        {{@answer.question.content.content}}
+        {{@answer.question.content}}
         <textarea
           {{on "change" this.updateContent}}
         >{{@answer.content}}</textarea>

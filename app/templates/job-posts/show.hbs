@@ -16,9 +16,9 @@
             {{/if}}
           </h1>
           <div class="flex gap-3 text-xs text-gray-400 mt-0.5">
-            {{#if this.model.postedDate}}
+            {{#if (if this.model.postedDate true this.model.createdAt)}}
               <span>Posted:
-                {{moment-format this.model.postedDate "MMM D, YYYY"}}</span>
+                {{moment-format (if this.model.postedDate this.model.postedDate this.model.createdAt) "MMM D, YYYY"}}</span>
             {{/if}}
             {{#if this.model.createdAt}}
               <span>Added:

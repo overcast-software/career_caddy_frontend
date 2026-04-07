@@ -49,6 +49,15 @@ export default class AnswersForm extends Component {
     event.preventDefault();
     const wasNew = this.args.answer.isNew;
     const question = this.args.answer.question;
+
+    const afterSave = () => {
+      if (this.args.onSave) {
+        this.args.onSave(this.args.answer);
+      } else if (wasNew && question) {
+        this.router.transitionTo('questions.show.answers.index', question);
+      }
+    };
+
     try {
       await this.args.answer.save();
       if (this.useAI) {
@@ -65,12 +74,7 @@ export default class AnswersForm extends Component {
             } else {
               this.flashMessages.success('AI answer generated successfully.');
               this.useAI = false;
-              if (wasNew && question) {
-                this.router.transitionTo(
-                  'questions.show.answers.index',
-                  question,
-                );
-              }
+              if (wasNew) afterSave();
             }
           },
           onError: () => {
@@ -83,9 +87,7 @@ export default class AnswersForm extends Component {
         });
       } else {
         this.flashMessages.success('Successfully saved answer');
-        if (wasNew && question) {
-          this.router.transitionTo('questions.show.answers.index', question);
-        }
+        afterSave();
       }
     } catch {
       this.flashMessages.danger('Failed to save answer.');

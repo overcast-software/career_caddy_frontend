@@ -1,6 +1,28 @@
-{{page-title "Questions"}}
 <Panel::Card>
-  <h1>Questions</h1>
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="panel-title">Questions</h3>
+    <LinkTo
+      @route="job-applications.show.questions.new"
+      @model={{this.model.jobApplication}}
+      class="btn btn-sm"
+    >New Question</LinkTo>
+  </div>
+  {{#if this.model.questions.length}}
+    <ul class="space-y-2">
+      {{#each this.model.questions as |question|}}
+        <li class="flex items-center justify-between text-sm">
+          <LinkTo
+            @route="job-applications.show.questions.show"
+            @models={{array this.model.jobApplication question}}
+            class="text-gray-700 hover:text-indigo-600"
+          >{{question.content}}</LinkTo>
+          <span class="text-xs text-gray-400 ml-2 shrink-0">
+            {{question.answers.length}} {{if (eq question.answers.length 1) "answer" "answers"}}
+          </span>
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p class="text-sm text-gray-500">No questions for this application.</p>
+  {{/if}}
 </Panel::Card>
-
-{{outlet}}

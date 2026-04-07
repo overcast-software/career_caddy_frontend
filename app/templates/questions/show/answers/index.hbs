@@ -1,28 +1,29 @@
-{{page-title "Answers"}}
-<RouteLayout @flashMessages={{this.flashMessages}}>
-  <:subnav>
+<div class="mt-4 border-t border-gray-200 pt-4 space-y-3">
+  <div class="flex items-center justify-between">
+    <h3 class="text-sm font-semibold text-gray-700">Answers</h3>
     <LinkTo
-      class="btn"
+      class="btn btn-sm"
       @route="questions.show.answers.new"
       @model={{this.model.question}}
-    >new answer</LinkTo>
-    <LinkTo
-      class="btn"
-      @route="questions.edit"
-      @model={{this.model.question}}
-    >edit question</LinkTo>
-  </:subnav>
-  <:main>
-    {{#each this.model.answers as |answer|}}
-      <Panel::Card>
-        <MarkdownToHtml @markdown={{answer.content}} />
+    >New Answer</LinkTo>
+  </div>
+  {{#each this.model.answers as |answer|}}
+    <div class="panel-card">
+      <MarkdownToHtml @markdown={{answer.content}} />
+      <div class="flex gap-2 mt-2">
         <LinkTo
           @route="questions.show.answers.show"
-          @models={{array this.model.question answer}}
-        >view</LinkTo>
-      </Panel::Card>
-    {{else}}
-      <p class="text-gray-500 text-sm">No answers yet.</p>
-    {{/each}}
-  </:main>
-</RouteLayout>
+          @model={{answer}}
+          class="btn btn-sm"
+        >View</LinkTo>
+        <LinkTo
+          @route="questions.show.answers.edit"
+          @model={{answer}}
+          class="btn btn-sm"
+        >Edit</LinkTo>
+      </div>
+    </div>
+  {{else}}
+    <p class="text-sm text-gray-400">No answers yet.</p>
+  {{/each}}
+</div>

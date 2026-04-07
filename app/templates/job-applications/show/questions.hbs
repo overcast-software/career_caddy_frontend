@@ -1,16 +1,1 @@
-<Panel::Card>
-  <h3 class="panel-title">Questions</h3>
-  {{#if this.model.length}}
-    <ul class="space-y-2">
-      {{#each this.model as |question|}}
-        <li class="text-sm text-gray-700">
-          <LinkTo @route="questions.show" @model={{question}}>
-            {{question.content}}
-          </LinkTo>
-        </li>
-      {{/each}}
-    </ul>
-  {{else}}
-    <p class="text-sm text-gray-500">No questions for this application.</p>
-  {{/if}}
-</Panel::Card>
+{{outlet}}

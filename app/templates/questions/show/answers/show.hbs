@@ -1,20 +1,20 @@
-{{page-title "Answer"}}
-<RouteLayout @flashMessages={{this.flashMessages}}>
-  <:subnav>
-    <LinkTo
-      class="btn"
-      @route="questions.show.answers"
-      @model={{this.model.question}}
-    >all answers</LinkTo>
-    <LinkTo
-      class="btn"
-      @route="questions.show.answers.edit"
-      @models={{array this.model.question this.model.answer}}
-    >edit</LinkTo>
-  </:subnav>
-  <:main>
-    <Panel::Card>
-      <MarkdownToHtml @markdown={{this.model.answer.content}} />
-    </Panel::Card>
-  </:main>
-</RouteLayout>
+<div class="mt-4 border-t border-gray-200 pt-4">
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-sm font-semibold text-gray-700">Answer</h3>
+    <div class="flex gap-2">
+      <LinkTo
+        @route="questions.show.answers.edit"
+        @model={{this.model.answer}}
+        class="btn btn-sm"
+      >Edit</LinkTo>
+      <LinkTo
+        @route="questions.show.answers"
+        @model={{this.model.question}}
+        class="btn btn-sm"
+      >All Answers</LinkTo>
+    </div>
+  </div>
+  <div class="panel-card">
+    <MarkdownToHtml @markdown={{this.model.answer.content}} />
+  </div>
+</div>

@@ -32,8 +32,8 @@
             <td class="px-4 py-3 text-center">
               {{#if question.answers.length}}
                 <LinkTo
-                  @route="questions.show.answers"
-                  @model={{question}}
+                  @route="job-posts.show.questions.show"
+                  @models={{array this.model.jobPost question}}
                   class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold hover:bg-indigo-200"
                 >{{question.answers.length}}</LinkTo>
               {{else}}
@@ -46,8 +46,8 @@
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-1.5 flex-wrap">
                 <LinkTo
-                  @route="questions.show"
-                  @model={{question}}
+                  @route="job-posts.show.questions.show"
+                  @models={{array this.model.jobPost question}}
                   class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
                 >Show</LinkTo>
                 <button
