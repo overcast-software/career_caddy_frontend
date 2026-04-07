@@ -1,0 +1,61 @@
+{{page-title "Documentation — Answers"}}
+<div class="container mx-auto max-w-3xl py-6 px-4 space-y-6">
+
+  <Panel::Card>
+    <h1 class="text-2xl font-bold text-gray-800 mb-3">Answers</h1>
+    <p class="text-gray-600">
+      Answers are your responses to application Questions. They can be AI-drafted, hand-written,
+      or a combination. You can store multiple versions of an answer to the same question —
+      useful when you want to tailor the response for different roles or just want to keep
+      drafts while you refine.
+    </p>
+    {{!-- <img src="" alt="screenshot of the answers list for a question" /> --}}
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Multiple Versions</h2>
+    <p class="text-gray-600">
+      Storing multiple answers per question lets you A/B test your phrasing, keep an AI draft
+      alongside your edited version, or maintain a general answer and a company-specific one.
+      Mark the best one as a <strong>favorite</strong> — it will be included in the AI's context
+      for future generations.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">The Favorite Feedback Loop</h2>
+    <p class="text-gray-600">
+      Favorited answers feed back into Career Data — they're treated as writing samples that
+      demonstrate your voice and communication style. Over time, the AI produces drafts that
+      sound more like you and less like something generated. This is how Career Caddy learns
+      your persona.
+    </p>
+    {{!-- <img src="" alt="screenshot showing the favorite button on an answer" /> --}}
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Example Answer</h2>
+    <div class="bg-gray-50 border border-gray-200 rounded p-4 text-sm text-gray-700 space-y-2">
+      <p class="text-gray-500 italic text-xs mb-2">For the question: "Tell us about a time you improved system performance."</p>
+      <p>
+        We had a patient intake API at Meridian that was timing out under moderate load — anything
+        above 200 concurrent requests and p99 latency would blow past 3 seconds. I spent a week
+        profiling and found the bottleneck: every request was making 6–8 synchronous DB calls in
+        a tight loop, some of which were identical lookups with no caching.
+      </p>
+      <p>
+        The fix had two parts. First, I introduced a Redis cache for the lookup-heavy calls —
+        hit rate ended up around 85% in production. Second, I converted the outer loop to use
+        Celery tasks so the expensive work ran asynchronously and the API returned immediately.
+        End result: p99 latency dropped from 1.2 seconds to 180ms, and we stopped seeing
+        timeouts entirely at normal load.
+      </p>
+      <p>
+        The lesson I took from it: profiling first, assumptions second. I went in thinking it
+        was a query optimization problem; it turned out to be an architecture problem.
+      </p>
+    </div>
+    {{!-- <img src="" alt="screenshot of an answer in the show view" /> --}}
+  </Panel::Card>
+
+</div>

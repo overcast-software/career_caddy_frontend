@@ -1,91 +1,51 @@
-<div class="mx-auto max-w-5xl px-4">
-  <form class="" {{on "submit" this.submitEdit}}>
-    <div class="space-y-4 py-2">
-      {{! Title (left) and URL (right) }}
-      <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-          <label
-            for="Title"
-            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          >
-            Title
-          </label>
-          <input
-            id="title"
-            type="text"
-            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            value={{@jobPost.title}}
-            {{on "input" (fn this.updateField "title")}}
-            required
-          />
-        </div>
-        <div class="w-full md:w-1/2 px-3">
-          <label
-            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-            for="url"
-          >URL</label>
-          <input
-            id="url"
-            type="text"
-            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            value={{@jobPost.link}}
-            {{on "input" (fn this.updateField "link")}}
-            required
-          />
-        </div>
-      </div>
+<form class="builder-form two-col" {{on "submit" this.submitEdit}}>
+  <div class="field">
+    <label class="field-label" for="title">Title</label>
+    <input
+      id="title"
+      type="text"
+      value={{@jobPost.title}}
+      {{on "input" (fn this.updateField "title")}}
+      required
+    />
+  </div>
 
-      {{! Description (full width) }}
-      <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full px-3">
-          <label
-            for="Description"
-            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          >
-            Description
-          </label>
-          <textarea
-            id="description"
-            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            value={{@jobPost.description}}
-            {{on "input" (fn this.updateField "description")}}
-            rows="8"
-            required
-          ></textarea>
-        </div>
-      </div>
+  <div class="field">
+    <label class="field-label" for="url">URL</label>
+    <input
+      id="url"
+      type="text"
+      value={{@jobPost.link}}
+      {{on "input" (fn this.updateField "link")}}
+    />
+  </div>
 
-      {{! Company (left) and Buttons (right) }}
-      <div class="flex flex-wrap -mx-3 mb-2">
-        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-          <label
-            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          >Company</label>
-          <PowerSelectWithCreate
-            @search={{this.searchCompanies}}
-            @onCreate={{this.addCompanyToJobPost}}
-            @onChange={{this.updateCompany}}
-            @selected={{this.selectedCompany}}
-            @triggerClass="py-3 px-4 bg-gray-200 border border-gray-200 rounded leading-tight"
-            as |company|
-          >
-            {{company.name}}
-          </PowerSelectWithCreate>
-        </div>
-        <div class="w-full md:w-1/2 px-3 flex items-end justify-end gap-2">
-          <button class="btn primary" type="submit">Save</button>
-          <button
-            class="btn"
-            type="button"
-            {{on "click" this.cancel}}
-          >Cancel</button>
-          <button
-            class="btn danger"
-            type="button"
-            {{on "click" this.submitDelete}}
-          >Delete</button>
-        </div>
-      </div>
-    </div>
-  </form>
-</div>
+  <div class="field">
+    <label class="field-label">Company</label>
+    <PowerSelectWithCreate
+      @search={{this.searchCompanies}}
+      @onCreate={{this.addCompanyToJobPost}}
+      @onChange={{this.updateCompany}}
+      @selected={{this.selectedCompany}}
+      @placeholder="Search or create a company…"
+      as |company|
+    >
+      {{company.name}}
+    </PowerSelectWithCreate>
+  </div>
+
+  <div class="field-full">
+    <label class="field-label" for="description">Description</label>
+    <textarea
+      id="description"
+      rows="12"
+      {{on "input" (fn this.updateField "description")}}
+    >{{@jobPost.description}}</textarea>
+  </div>
+
+  <div class="form-actions" style="justify-content: flex-end">
+    <button type="submit" class="btn primary">Save</button>
+    <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
+    <button type="button" class="btn danger" {{on "click" this.submitDelete}}>Delete</button>
+  </div>
+</form>

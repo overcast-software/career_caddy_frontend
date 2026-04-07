@@ -1,32 +1,51 @@
-{{page-title "Login"}}
+{{page-title "Login — Career Caddy"}}
+<RouteLayout @flashMessages={{this.flashMessages}} @noSubnav={{true}} @mainClass="login-main">
+  <:subnav></:subnav>
+  <:main>
+    <div class="landing-hero landing-hero--centered">
+      <div class="landing-hero-overlay"></div>
+      <div class="login-card">
+        <div class="login-card-brand">
+          <svg xmlns="http://www.w3.org/2000/svg" class="login-card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+          <span>Career Caddy</span>
+        </div>
 
-<div class="fairway">
-  <Panel::Card>
-    <div class="login-page">
-      <h1>Login to Career Caddy</h1>
-      <form {{on "submit" this.authenticate}}>
-        <label for="username">Username</label>
-        <input
-          id="username"
-          placeholder="Enter Username"
-          value={{this.username}}
-          {{on "change" this.updateUsername}}
-        />
-        <label for="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          placeholder="Enter Password"
-          value={{this.password}}
-          {{on "change" this.updatePassword}}
-        />
-        <button type="submit">Login</button>
-      </form>
+        <h1 class="login-card-title">Welcome back.</h1>
+        <p class="login-card-sub">Sign in to your account to continue.</p>
 
-      <p>
-        Need to set up the app?
-        <LinkTo @route="setup">Initial Setup</LinkTo>
-      </p>
+        <form {{on "submit" this.authenticate}} class="login-form">
+          <div class="login-field">
+            <label for="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              placeholder="Enter username"
+              value={{this.username}}
+              {{on "change" this.updateUsername}}
+              autocomplete="username"
+            />
+          </div>
+          <div class="login-field">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter password"
+              value={{this.password}}
+              {{on "change" this.updatePassword}}
+              autocomplete="current-password"
+            />
+          </div>
+          <button type="submit" class="login-submit">Sign in</button>
+        </form>
+
+        <p class="login-card-setup">
+          First time here?
+          <LinkTo @route="setup">Set up Career Caddy</LinkTo>
+        </p>
+      </div>
     </div>
-  </Panel::Card>
-</div>
+  </:main>
+</RouteLayout>

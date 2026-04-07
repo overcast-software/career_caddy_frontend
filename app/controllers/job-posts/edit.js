@@ -1,2 +1,6 @@
 import Controller from '@ember/controller';
-export default class JobPostsEditController extends Controller {}
+import { service } from '@ember/service';
+
+export default class JobPostsEditController extends Controller {
+  @service flashMessages;
+}

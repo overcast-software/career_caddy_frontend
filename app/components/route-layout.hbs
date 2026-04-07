@@ -1,25 +1,35 @@
-{{#in-element this.subnavPortal insertBefore=null}}
-  <Menus::SubnavBar>
-    <:left>
-      <Breadcrumbs />
-    </:left>
-    <:center>
-      {{yield to="subnav"}}
-    </:center>
-    <:right>
-      {{#if this.spinner.isShowing}}
-        <div class="spinner-status">
-          <span class="spinner-dot"></span>
-          {{#if this.spinner.label}}
-            <span class="spinner-label">{{this.spinner.label}}</span>
-          {{/if}}
-        </div>
-      {{/if}}
-    </:right>
-  </Menus::SubnavBar>
-{{/in-element}}
+{{#unless @noSubnav}}
+  {{#in-element this.subnavPortal insertBefore=null}}
+    <Menus::SubnavBar>
+      <:left>
+        <Breadcrumbs />
+      </:left>
+      <:center>
+        {{yield to="subnav"}}
+      </:center>
+      <:right>
+        {{#if this.spinner.isShowing}}
+          <div class="spinner-status">
+            <span class="spinner-dot"></span>
+            {{#if this.spinner.label}}
+              <span class="spinner-label">{{this.spinner.label}}</span>
+            {{/if}}
+          </div>
+        {{/if}}
+      </:right>
+    </Menus::SubnavBar>
+  {{/in-element}}
+{{/unless}}
 <BarCart @flashMessages={{@flashMessages}} />
 <div class="fairway {{@mainClass}}">
   {{yield to="main"}}
 </div>
 {{yield to="outlet"}}
+{{#unless @noSubnav}}
+  <footer class="route-footer">
+    <span>Career Caddy &mdash; copyleft 2025</span>
+    <nav>
+      <LinkTo @route="docs.index">Documentation</LinkTo>
+    </nav>
+  </footer>
+{{/unless}}

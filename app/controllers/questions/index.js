@@ -10,15 +10,6 @@ export default class QuestionsIndexController extends Controller {
   @tracked search = '';
   @tracked isSearching = false;
 
-  #debounceTimer = null;
-
-  @action
-  onSearchInput(event) {
-    const value = event.target.value;
-    this.isSearching = true;
-    clearTimeout(this.#debounceTimer);
-    this.#debounceTimer = setTimeout(() => {
-      this.search = value;
-    }, 300);
-  }
+  @action updateSearch(value) { this.search = value; this.isSearching = false; }
+  @action startSearching() { this.isSearching = true; }
 }

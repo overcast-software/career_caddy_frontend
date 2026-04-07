@@ -180,6 +180,19 @@ Router.map(function () {
     });
   });
   this.route('about');
+  this.route('docs', function () {
+    this.route('career-data');
+    this.route('job-posts');
+    this.route('job-applications');
+    this.route('resumes');
+    this.route('cover-letters');
+    this.route('companies');
+    this.route('questions');
+    this.route('answers');
+    this.route('scores');
+    this.route('summaries');
+    this.route('scrapes');
+  });
   this.route('questions', function () {
     this.route('new');
     this.route(

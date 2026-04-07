@@ -15,7 +15,12 @@ export default class ApplicationRoute extends Route {
   async beforeModel(transition) {
     // Skip health check for setup and login routes
     const routeName = transition.to?.name;
-    if (routeName === 'setup' || routeName === 'login') {
+    const isPublic =
+      routeName === 'setup' ||
+      routeName === 'login' ||
+      routeName === 'about' ||
+      (routeName && routeName.startsWith('docs'));
+    if (isPublic) {
       return;
     }
 

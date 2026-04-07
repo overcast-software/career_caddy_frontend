@@ -1,0 +1,150 @@
+{{page-title "Documentation — Overview"}}
+<div class="container mx-auto max-w-3xl py-6 px-4 space-y-6">
+
+  <Panel::Card>
+    <h1 class="text-2xl font-bold text-gray-800 mb-3">Welcome to Career Caddy</h1>
+    <p class="text-gray-600 mb-4">
+      Job hunting is fragmented. Listings are spread across dozens of sites, applications
+      live in browser tabs and mental notes, and by the time an interviewer asks "which
+      role was this again?" you've forgotten the details. Career Caddy is a single place
+      to track everything — and an AI partner that writes for you, in your voice.
+    </p>
+    {{!-- <img src="" alt="screenshot of Career Caddy dashboard" /> --}}
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">The AI-First Philosophy</h2>
+    <p class="text-gray-600 mb-3">
+      Every AI feature in Career Caddy — scoring, cover letters, executive summaries,
+      application answers — is powered by a single resource called
+      <LinkTo @route="docs.career-data" class="text-blue-600 underline">Career Data</LinkTo>.
+      Career Data is a markdown document you write once and refine over time. It describes
+      your professional background, skills, writing style, and goals.
+    </p>
+    <p class="text-gray-600 mb-3">
+      Think of it as your permanent context window for the AI. The better your Career Data,
+      the better every AI output. <strong>Start there before doing anything else.</strong>
+    </p>
+    <p class="text-gray-600">
+      Over time, answers and cover letters you mark as "favorites" are woven back into
+      Career Data — the AI learns your voice from your own best work.
+    </p>
+    {{!-- <img src="" alt="diagram showing Career Data at center connecting to Scores, Cover Letters, Summaries, Answers" /> --}}
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Recommended Workflow</h2>
+    <ol class="space-y-3 text-gray-600 list-decimal list-inside">
+      <li>
+        <strong>Build your Career Data</strong> — write your background, skills, and voice
+        in markdown. This is your AI foundation. Spend real time here.
+        <LinkTo @route="docs.career-data" class="text-blue-600 text-sm ml-1">→ learn more</LinkTo>
+      </li>
+      <li>
+        <strong>Add a Job Post</strong> — paste in a listing manually or scrape it from a URL.
+        <LinkTo @route="docs.job-posts" class="text-blue-600 text-sm ml-1">→ learn more</LinkTo>
+      </li>
+      <li>
+        <strong>Generate a Score</strong> — the AI reads the job description and your Career
+        Data and tells you how strong a fit you are (0–100) with a gap analysis.
+        <LinkTo @route="docs.scores" class="text-blue-600 text-sm ml-1">→ learn more</LinkTo>
+      </li>
+      <li>
+        <strong>Generate a Cover Letter</strong> — written in your voice, tailored to the role.
+        <LinkTo @route="docs.cover-letters" class="text-blue-600 text-sm ml-1">→ learn more</LinkTo>
+      </li>
+      <li>
+        <strong>Create a Job Application</strong> — link the job post to your resume and start
+        tracking status as it progresses.
+        <LinkTo @route="docs.job-applications" class="text-blue-600 text-sm ml-1">→ learn more</LinkTo>
+      </li>
+      <li>
+        <strong>Capture and answer application questions</strong> — log questions you're asked.
+        The AI drafts answers using your Career Data and the job context.
+        <LinkTo @route="docs.questions" class="text-blue-600 text-sm ml-1">→ learn more</LinkTo>
+      </li>
+    </ol>
+    {{!-- <img src="" alt="screenshot showing the workflow steps in action" /> --}}
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Resources at a Glance</h2>
+    <table class="w-full text-sm text-left text-gray-600">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="pb-2 font-semibold text-gray-700 w-36">Resource</th>
+          <th class="pb-2 font-semibold text-gray-700">What it does</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr class="py-2">
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.career-data" class="text-blue-600">Career Data</LinkTo>
+          </td>
+          <td class="py-2">Your professional background in markdown — the AI reads this for everything</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.job-posts" class="text-blue-600">Job Posts</LinkTo>
+          </td>
+          <td class="py-2">Stored job listings — the root resource everything else attaches to</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.job-applications" class="text-blue-600">Applications</LinkTo>
+          </td>
+          <td class="py-2">Your record of applying — tracks status, dates, notes, and linked Q&A</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.resumes" class="text-blue-600">Resumes</LinkTo>
+          </td>
+          <td class="py-2">Structured resume data — importable, editable, used to supplement AI context</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.cover-letters" class="text-blue-600">Cover Letters</LinkTo>
+          </td>
+          <td class="py-2">AI-generated letters in your voice, tied to a specific job post</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.companies" class="text-blue-600">Companies</LinkTo>
+          </td>
+          <td class="py-2">Employer profiles that group related posts, applications, and Q&A</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.questions" class="text-blue-600">Questions</LinkTo>
+          </td>
+          <td class="py-2">Application questions captured from postings — AI can draft answers</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.answers" class="text-blue-600">Answers</LinkTo>
+          </td>
+          <td class="py-2">Your responses — multiple drafts per question, favorites feed back to AI</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.scores" class="text-blue-600">Scores</LinkTo>
+          </td>
+          <td class="py-2">AI fit score (0–100) of your profile vs. a job description with gap analysis</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.summaries" class="text-blue-600">Summaries</LinkTo>
+          </td>
+          <td class="py-2">AI-generated executive summaries tailored to a specific role</td>
+        </tr>
+        <tr>
+          <td class="py-2 font-medium">
+            <LinkTo @route="docs.scrapes" class="text-blue-600">Scrapes</LinkTo>
+          </td>
+          <td class="py-2">Raw webpage captures of job listings — the input that becomes a Job Post</td>
+        </tr>
+      </tbody>
+    </table>
+  </Panel::Card>
+
+</div>

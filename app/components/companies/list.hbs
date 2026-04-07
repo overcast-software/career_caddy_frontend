@@ -18,7 +18,7 @@
         {{#each @companies as |company|}}
           <tr class="hover:bg-gray-50">
             <td class="px-4 py-3 font-medium text-gray-900">
-              <LinkTo @route="companies.show" @model={{company}}>
+              <LinkTo @route="companies.show.job-posts" @model={{company}}>
                 {{company.name}}
               </LinkTo>
             </td>

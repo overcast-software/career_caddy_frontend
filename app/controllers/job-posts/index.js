@@ -10,15 +10,6 @@ export default class JobPostsIndexController extends Controller {
   @tracked isSearching = false;
   @service flashMessages;
 
-  #debounceTimer = null;
-
-  @action
-  onSearchInput(event) {
-    const value = event.target.value;
-    this.isSearching = true;
-    clearTimeout(this.#debounceTimer);
-    this.#debounceTimer = setTimeout(() => {
-      this.search = value;
-    }, 300);
-  }
+  @action updateSearch(value) { this.search = value; this.isSearching = false; }
+  @action startSearching() { this.isSearching = true; }
 }

@@ -9,21 +9,10 @@ export default class CompaniesIndexController extends Controller {
   @service flashMessages;
   @service store;
   @tracked search = '';
-  @tracked searchInput = '';
   @tracked isSearching = false;
 
-  #debounceTimer = null;
-
-  @action
-  onSearchInput(event) {
-    const value = event.target.value;
-    this.searchInput = value;
-    this.isSearching = true;
-    clearTimeout(this.#debounceTimer);
-    this.#debounceTimer = setTimeout(() => {
-      this.search = value;
-    }, 300);
-  }
+  @action updateSearch(value) { this.search = value; this.isSearching = false; }
+  @action startSearching() { this.isSearching = true; }
 
   @action async deleteCompany(company) {
     const name = company.name;

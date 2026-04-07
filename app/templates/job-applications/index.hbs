@@ -2,12 +2,11 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
     <div class="controls">
-      <input
-        type="search"
-        aria-label="search"
-        placeholder="Search applications..."
-        value={{this.search}}
-        {{on "input" this.onSearchInput}}
+      <Menus::SubnavSearch
+        @value={{this.search}}
+        @onSearch={{this.updateSearch}}
+        @onSearchStart={{this.startSearching}}
+        @placeholder="Search applications..."
       />
       <LinkTo @route="job-applications.new" class="btn">+New Application</LinkTo>
     </div>

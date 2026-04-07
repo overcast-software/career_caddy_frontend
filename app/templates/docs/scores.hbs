@@ -1,0 +1,88 @@
+{{page-title "Documentation — Scores"}}
+<div class="container mx-auto max-w-3xl py-6 px-4 space-y-6">
+
+  <Panel::Card>
+    <h1 class="text-2xl font-bold text-gray-800 mb-3">Scores</h1>
+    <p class="text-gray-600">
+      A Score is an AI-generated assessment of how well your professional profile matches a
+      specific job posting. It gives you a numeric rating (0–100) and a written explanation
+      of your strengths and gaps. Run it before you invest time in a cover letter or application.
+    </p>
+    {{!-- <img src="" alt="screenshot of a score detail page showing the numeric score and explanation" /> --}}
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">How Scoring Works</h2>
+    <p class="text-gray-600 mb-3">
+      From a Job Post detail page, click "Generate Score." The AI receives the job description
+      and your Career Data and evaluates:
+    </p>
+    <ul class="text-gray-600 text-sm list-disc list-inside space-y-1">
+      <li>Technical skill overlap between the job requirements and your background</li>
+      <li>Experience level and seniority alignment</li>
+      <li>Industry and domain familiarity</li>
+      <li>Specific requirements mentioned in the job description</li>
+    </ul>
+    <p class="text-gray-600 mt-3">
+      The result includes a numeric score and a paragraph explaining what matched and what
+      didn't. The gaps section is often the most useful part.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Interpreting a Score</h2>
+    <div class="space-y-3 text-sm">
+      <div class="flex items-start gap-3">
+        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded font-semibold shrink-0">80–100</span>
+        <p class="text-gray-600">Strong match. Apply with confidence. The cover letter will need minimal customization.</p>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-semibold shrink-0">60–79</span>
+        <p class="text-gray-600">Reasonable fit with some gaps. Worth applying if the role interests you — address the gaps in your cover letter.</p>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-semibold shrink-0">Below 60</span>
+        <p class="text-gray-600">Significant mismatch. Either the role is a stretch, or your Career Data doesn't yet reflect relevant experience you have.</p>
+      </div>
+    </div>
+    <p class="text-gray-500 text-sm mt-4">
+      Note: a low score isn't necessarily a veto — it might mean your Career Data needs updating.
+      If you have the experience but scored poorly, review your Career Data and regenerate.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Using Scores Strategically</h2>
+    <ul class="space-y-2 text-gray-600 text-sm list-disc list-inside">
+      <li>Run a score before writing a cover letter — it tells you what to emphasize</li>
+      <li>Use the gap analysis to improve your Career Data for better future scores</li>
+      <li>Prioritize applications where you score highly — your time is finite</li>
+      <li>Compare scores across similar roles to understand where you're most competitive</li>
+    </ul>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Example Score</h2>
+    <div class="bg-gray-50 border border-gray-200 rounded p-4 text-sm text-gray-700 space-y-3">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl font-bold text-green-600">87</span>
+        <span class="text-gray-400 text-lg">/ 100</span>
+        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">Strong match</span>
+      </div>
+      <p>
+        Strong alignment with the backend requirements. Your Python and Django experience
+        maps directly to the tech stack, and your work on high-traffic APIs at Meridian Health
+        is relevant to the scalability concerns mentioned in the description.
+      </p>
+      <p>
+        The job emphasizes Kubernetes orchestration, which is not reflected in your Career Data.
+        Your Docker and Docker Swarm experience is related but not equivalent — consider adding
+        this to Career Data if you have any Kubernetes exposure, even in side projects or
+        training. The Ember.js frontend requirement is a secondary concern; your experience
+        is on the backend, and the role's primary focus appears to be there as well.
+      </p>
+    </div>
+    {{!-- <img src="" alt="screenshot of this score in the show view" /> --}}
+  </Panel::Card>
+
+</div>
