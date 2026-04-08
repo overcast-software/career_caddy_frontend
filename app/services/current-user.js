@@ -12,6 +12,8 @@ export default class CurrentUserService extends Service {
   }
 
   async load() {
+    this.user = null;
+    this.store.unloadAll('user');
     if (this.session.isAuthenticated) {
       let user = await this.store.queryRecord('user', { me: true });
       this.user = user;
