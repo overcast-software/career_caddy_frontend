@@ -2,6 +2,7 @@ import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
+import config from 'career-caddy-frontend/config/environment';
 
 export default class LoginController extends Controller {
   @service session;
@@ -33,7 +34,8 @@ export default class LoginController extends Controller {
 
   @action async tryDemo() {
     try {
-      const response = await fetch('/api/v1/guest-session/');
+      const host = config.APP.API_HOST || '';
+      const response = await fetch(`${host}/api/v1/guest-session/`);
       if (!response.ok) {
         this.flashMessages.warning('Demo mode is not available on this server.');
         return;
