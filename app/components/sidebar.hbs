@@ -1,6 +1,5 @@
 <aside
   class="w-full min-h-full bg-white shadow-xl flex flex-col justify-between border-e border-gray-100"
-  {{on "click" @onClose}}
 >
   <div class="px-4 py-4">
     <div
@@ -84,24 +83,24 @@
               </LinkTo>
             </li>
             {{#unless this.currentUser.isGuest}}
-            <li>
-              <LinkTo
-                @route="job-posts.new"
-                {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
-              >
-                Add Manually
-              </LinkTo>
-            </li>
-            <li>
-              <LinkTo
-                @route="job-posts.scrape"
-                {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
-              >
-                Scrape
-              </LinkTo>
-            </li>
+              <li>
+                <LinkTo
+                  @route="job-posts.new"
+                  {{on "click" @onClose}}
+                  class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+                >
+                  Add Manually
+                </LinkTo>
+              </li>
+              <li>
+                <LinkTo
+                  @route="job-posts.scrape"
+                  {{on "click" @onClose}}
+                  class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+                >
+                  Scrape
+                </LinkTo>
+              </li>
             {{/unless}}
           </ul>
         </details>
@@ -369,7 +368,9 @@
               </svg>
               <span class="text-sm font-medium">Documentation</span>
             </div>
-            <span class="shrink-0 transition duration-300 group-open:-rotate-180">
+            <span
+              class="shrink-0 transition duration-300 group-open:-rotate-180"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="size-4"
@@ -386,74 +387,110 @@
           </summary>
           <ul class="mt-1 space-y-1 pl-11">
             <li>
-              <LinkTo @route="docs.index" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.index"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Overview
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.career-data" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.career-data"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Career Data
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.job-posts" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.job-posts"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Job Posts
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.job-applications" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.job-applications"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Applications
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.resumes" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.resumes"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Resumes
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.cover-letters" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.cover-letters"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Cover Letters
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.companies" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.companies"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Companies
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.questions" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.questions"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Questions
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.answers" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.answers"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Answers
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.scores" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.scores"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Scores
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.summaries" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.summaries"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Summaries
               </LinkTo>
             </li>
             <li>
-              <LinkTo @route="docs.scrapes" {{on "click" @onClose}}
-                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100">
+              <LinkTo
+                @route="docs.scrapes"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
                 Scrapes
               </LinkTo>
             </li>

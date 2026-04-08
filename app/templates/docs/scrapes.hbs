@@ -4,34 +4,38 @@
   <Panel::Card>
     <h1 class="text-2xl font-bold text-gray-800 mb-3">Scrapes</h1>
     <p class="text-gray-600">
-      A Scrape is a raw captured snapshot of a job posting webpage. It's the input that becomes
-      a Job Post. Career Caddy fetches the page, stores the HTML, and then parses it into
-      structured fields (title, company, description, requirements). If you've ever lost a job
-      listing because the company removed it before your interview, Scrapes are why that won't
+      A Scrape is a raw captured snapshot of a job posting webpage. It's the
+      input that becomes a Job Post. Career Caddy fetches the page, stores the
+      HTML, and then parses it into structured fields (title, company,
+      description, requirements). If you've ever lost a job listing because the
+      company removed it before your interview, Scrapes are why that won't
       happen again.
     </p>
-    {{!-- <img src="" alt="screenshot of the scrapes list" /> --}}
+    {{! <img src="" alt="screenshot of the scrapes list" /> }}
   </Panel::Card>
 
   <Panel::Card>
-    <h2 class="text-xl font-semibold text-gray-800 mb-3">Manual vs. Automated Scraping</h2>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Manual vs. Automated
+      Scraping</h2>
     <div class="space-y-4">
       <div>
         <h3 class="font-semibold text-gray-700 mb-1">Manual (in-app)</h3>
         <p class="text-gray-600 text-sm">
-          Paste a job listing URL into the Scrape form. Career Caddy fetches the page and stores
-          the raw content. Then click "Parse" to extract structured fields and create a Job Post.
-          This works for any publicly accessible URL.
+          Paste a job listing URL into the Scrape form. Career Caddy fetches the
+          page and stores the raw content. Then click "Parse" to extract
+          structured fields and create a Job Post. This works for any publicly
+          accessible URL.
         </p>
-        {{!-- <img src="" alt="screenshot of the manual scrape form" /> --}}
+        {{! <img src="" alt="screenshot of the manual scrape form" /> }}
       </div>
       <div>
         <h3 class="font-semibold text-gray-700 mb-1">Automated (AI pipeline)</h3>
         <p class="text-gray-600 text-sm">
-          The AI pipeline watches your job alert emails (via notmuch), extracts URLs, and
-          automatically scrapes and adds them to Career Caddy. This is configured in the
-          <code class="bg-gray-100 px-1 rounded">ai/</code> layer and requires local setup.
-          See the root README for details.
+          The AI pipeline watches your job alert emails (via notmuch), extracts
+          URLs, and automatically scrapes and adds them to Career Caddy. This is
+          configured in the
+          <code class="bg-gray-100 px-1 rounded">ai/</code>
+          layer and requires local setup. See the root README for details.
         </p>
       </div>
     </div>
@@ -40,8 +44,8 @@
   <Panel::Card>
     <h2 class="text-xl font-semibold text-gray-800 mb-3">The Parse Step</h2>
     <p class="text-gray-600 mb-3">
-      After fetching a page, the raw HTML needs to be parsed into structured data. Click
-      "Parse" on a Scrape record to extract:
+      After fetching a page, the raw HTML needs to be parsed into structured
+      data. Click "Parse" on a Scrape record to extract:
     </p>
     <ul class="text-gray-600 text-sm list-disc list-inside space-y-1">
       <li>Job title</li>
@@ -50,31 +54,40 @@
       <li>Requirements / qualifications</li>
     </ul>
     <p class="text-gray-600 text-sm mt-3">
-      Parsing creates a linked Job Post from the extracted data. Review and edit the Job Post
-      fields before saving — automated parsing isn't perfect.
+      Parsing creates a linked Job Post from the extracted data. Review and edit
+      the Job Post fields before saving — automated parsing isn't perfect.
     </p>
-    {{!-- <img src="" alt="screenshot of a scrape with the parse button and status showing Parsed" /> --}}
+    {{! <img src="" alt="screenshot of a scrape with the parse button and status showing Parsed" /> }}
   </Panel::Card>
 
   <Panel::Card>
     <h2 class="text-xl font-semibold text-gray-800 mb-3">Retry</h2>
     <p class="text-gray-600">
-      If a scrape fails (network error, blocked by the site, or returns garbled content), use
-      the "Retry" button to re-fetch the URL. Some job boards use JavaScript rendering that
-      makes static scraping difficult — the browser-based scraping mode handles these cases
-      better.
+      If a scrape fails (network error, blocked by the site, or returns garbled
+      content), use the "Retry" button to re-fetch the URL. Some job boards use
+      JavaScript rendering that makes static scraping difficult — the
+      browser-based scraping mode handles these cases better.
     </p>
   </Panel::Card>
 
   <Panel::Card>
     <h2 class="text-xl font-semibold text-gray-800 mb-3">Example Scrape</h2>
-    <div class="bg-gray-50 border border-gray-200 rounded p-4 text-sm text-gray-700 space-y-2">
-      <div><span class="font-semibold">URL:</span> <span class="text-blue-600">https://jobs.acme.example/sfullstack-123</span></div>
-      <div><span class="font-semibold">Status:</span> <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">Parsed</span></div>
+    <div
+      class="bg-gray-50 border border-gray-200 rounded p-4 text-sm text-gray-700 space-y-2"
+    >
+      <div><span class="font-semibold">URL:</span>
+        <span
+          class="text-blue-600"
+        >https://jobs.acme.example/sfullstack-123</span></div>
+      <div><span class="font-semibold">Status:</span>
+        <span
+          class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs"
+        >Parsed</span></div>
       <div><span class="font-semibold">Scraped:</span> April 1, 2026</div>
-      <div><span class="font-semibold">Linked Job Post:</span> Senior Full-Stack Engineer at Acme Corp</div>
+      <div><span class="font-semibold">Linked Job Post:</span>
+        Senior Full-Stack Engineer at Acme Corp</div>
     </div>
-    {{!-- <img src="" alt="screenshot of this example scrape record in the show view" /> --}}
+    {{! <img src="" alt="screenshot of this example scrape record in the show view" /> }}
   </Panel::Card>
 
 </div>

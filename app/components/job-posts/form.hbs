@@ -43,9 +43,13 @@
     >{{@jobPost.description}}</textarea>
   </div>
 
-  <div class="form-actions" style="justify-content: flex-end">
+  <div class="form-actions justify-end">
     <button type="submit" class="btn primary">Save</button>
     <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
-    <button type="button" class="btn danger" {{on "click" this.submitDelete}}>Delete</button>
+    <button
+      type="button"
+      class="btn danger"
+      {{on "click" this.submitDelete}}
+    >Delete</button>
   </div>
 </form>

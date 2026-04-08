@@ -9,6 +9,10 @@ export default class JobPostsShowQuestionsShowAnswersNewRoute extends Route {
     const { question_id } = this.paramsFor('job-posts.show.questions.show');
     const jobPost = this.store.peekRecord('job-post', job_post_id);
     const question = this.store.peekRecord('question', question_id);
-    return { answer: this.store.createRecord('answer', { question }), jobPost, question };
+    return {
+      answer: this.store.createRecord('answer', { question }),
+      jobPost,
+      question,
+    };
   }
 }

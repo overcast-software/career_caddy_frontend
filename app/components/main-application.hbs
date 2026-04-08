@@ -12,7 +12,11 @@
 
 <div class="course {{if this.sidebarOpen 'course--sidebar-open'}}">
   <header class="site-header">
-    <TopBar @showLoading={{this.showLoading}} @onToggle={{this.toggle}} @onClose={{this.close}} />
+    <TopBar
+      @showLoading={{this.showLoading}}
+      @onToggle={{this.toggle}}
+      @onClose={{this.close}}
+    />
   </header>
   <GuestBanner />
   <div class="course-body">

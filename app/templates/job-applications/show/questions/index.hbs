@@ -17,7 +17,8 @@
             class="text-gray-700 hover:text-indigo-600"
           >{{question.content}}</LinkTo>
           <span class="text-xs text-gray-400 ml-2 shrink-0">
-            {{question.answers.length}} {{if (eq question.answers.length 1) "answer" "answers"}}
+            {{question.answers.length}}
+            {{if (eq question.answers.length 1) "answer" "answers"}}
           </span>
         </li>
       {{/each}}

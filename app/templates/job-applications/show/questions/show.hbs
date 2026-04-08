@@ -12,12 +12,16 @@
       >New Answer</LinkTo>
     </div>
 
-    <p class="text-sm font-medium text-gray-900">{{this.model.question.content}}</p>
+    <p
+      class="text-sm font-medium text-gray-900"
+    >{{this.model.question.content}}</p>
 
     {{outlet}}
 
     {{#each this.model.answers as |answer|}}
-      <div class="flex items-start justify-between gap-4 py-3 border-t border-gray-100">
+      <div
+        class="flex items-start justify-between gap-4 py-3 border-t border-gray-100"
+      >
         <div class="flex-1 min-w-0">
           <MarkdownToHtml @markdown={{answer.content}} />
         </div>

@@ -17,10 +17,10 @@ Every route template wraps content in `<RouteLayout>`:
 {{page-title "Page Title"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    {{!-- page-level nav links, use class="nav-link" --}}
+    {{! page-level nav links, use class="nav-link" }}
   </:subnav>
   <:main>
-    {{!-- page body, renders inside .fairway div --}}
+    {{! page body, renders inside .fairway div }}
   </:main>
 </RouteLayout>
 ```
@@ -47,11 +47,11 @@ To add a new public route, expand the `isPublic` check at line 18:
 
 ```js
 const isPublic =
-  routeName === 'setup' ||
-  routeName === 'login' ||
-  routeName === 'about' ||
-  (routeName && routeName.startsWith('docs'));
-  // add new public routes here
+  routeName === "setup" ||
+  routeName === "login" ||
+  routeName === "about" ||
+  (routeName && routeName.startsWith("docs"));
+// add new public routes here
 ```
 
 ## Tracked Inputs

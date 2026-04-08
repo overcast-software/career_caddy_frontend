@@ -18,9 +18,17 @@
         class="btn danger"
         {{on "click" this.deleteResume}}
       >Delete</button>
-      <button type="button" class="btn" {{on "click" this.cloneResume}}>Clone</button>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" this.cloneResume}}
+      >Clone</button>
       <LinkTo @route="resumes.import" class="btn">Import new</LinkTo>
-      <button type="button" class="btn" {{on "click" this.exportToWord}}>Export</button>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" this.exportToWord}}
+      >Export</button>
       <span class="submenu-field">
         <span class="submenu-label">Name:</span>
         <span class="submenu-value">{{this.model.name}}</span>

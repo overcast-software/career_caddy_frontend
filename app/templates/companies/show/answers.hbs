@@ -1,6 +1,7 @@
 <div class="flex items-center justify-between mb-4">
   <h2 class="text-lg font-semibold text-gray-800">Questions</h2>
-  <LinkTo @route="companies.show.questions.new" class="btn btn-sm">+ New Question</LinkTo>
+  <LinkTo @route="companies.show.questions.new" class="btn btn-sm">+ New
+    Question</LinkTo>
 </div>
 
 {{#if this.model.length}}
@@ -8,16 +9,26 @@
     <table class="min-w-full text-sm">
       <thead class="bg-gray-50 border-b border-gray-200">
         <tr>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Question</th>
-          <th class="px-4 py-3 text-center font-semibold text-gray-600 w-24">Answers</th>
-          <th class="px-4 py-3 text-center font-semibold text-gray-600 w-16">Fav</th>
-          <th class="px-4 py-3 text-right font-semibold text-gray-600 w-40">Actions</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Question</th>
+          <th
+            class="px-4 py-3 text-center font-semibold text-gray-600 w-24"
+          >Answers</th>
+          <th
+            class="px-4 py-3 text-center font-semibold text-gray-600 w-16"
+          >Fav</th>
+          <th
+            class="px-4 py-3 text-right font-semibold text-gray-600 w-40"
+          >Actions</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
         {{#each this.model as |question|}}
           <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-gray-900 whitespace-pre-wrap break-words max-w-lg">
+            <td
+              class="px-4 py-3 text-gray-900 whitespace-pre-wrap break-words max-w-lg"
+            >
               {{question.content}}
             </td>
             <td class="px-4 py-3 text-center">
@@ -59,5 +70,6 @@
     </table>
   </div>
 {{else}}
-  <p class="text-gray-500 text-sm py-6 text-center">No questions for this company.</p>
+  <p class="text-gray-500 text-sm py-6 text-center">No questions for this
+    company.</p>
 {{/if}}

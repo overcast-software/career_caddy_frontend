@@ -62,7 +62,10 @@
         {{on "change" (fn this.updateField "status")}}
       >
         {{#each this.statuses as |status|}}
-          <option value={{status}} selected={{eq status @jobApplication.status}}>
+          <option
+            value={{status}}
+            selected={{eq status @jobApplication.status}}
+          >
             {{status}}
           </option>
         {{/each}}

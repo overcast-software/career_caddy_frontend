@@ -7,10 +7,7 @@
         @model={{this.model}}
         class="btn btn-sm"
       >Edit</LinkTo>
-      <LinkTo
-        @route="questions.show.answers"
-        class="btn btn-sm"
-      >All Answers</LinkTo>
+      <LinkTo @route="questions.show.answers" class="btn btn-sm">All Answers</LinkTo>
     </div>
   </div>
   <MarkdownToHtml @markdown={{this.model.content}} />

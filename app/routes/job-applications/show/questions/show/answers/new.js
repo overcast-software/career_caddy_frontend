@@ -6,9 +6,18 @@ export default class JobApplicationsShowQuestionsShowAnswersNewRoute extends Rou
 
   model() {
     const { application_id } = this.paramsFor('job-applications.show');
-    const { question_id } = this.paramsFor('job-applications.show.questions.show');
-    const jobApplication = this.store.peekRecord('job-application', application_id);
+    const { question_id } = this.paramsFor(
+      'job-applications.show.questions.show',
+    );
+    const jobApplication = this.store.peekRecord(
+      'job-application',
+      application_id,
+    );
     const question = this.store.peekRecord('question', question_id);
-    return { answer: this.store.createRecord('answer', { question }), jobApplication, question };
+    return {
+      answer: this.store.createRecord('answer', { question }),
+      jobApplication,
+      question,
+    };
   }
 }

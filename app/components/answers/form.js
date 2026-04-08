@@ -47,7 +47,6 @@ export default class AnswersForm extends Component {
 
   @action async save(event) {
     event.preventDefault();
-    const wasNew = this.args.answer.isNew;
     const question = this.args.answer.question;
 
     const afterSave = () => {

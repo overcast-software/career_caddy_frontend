@@ -10,6 +10,11 @@ export default class QuestionsIndexController extends Controller {
   @tracked search = '';
   @tracked isSearching = false;
 
-  @action updateSearch(value) { this.search = value; this.isSearching = false; }
-  @action startSearching() { this.isSearching = true; }
+  @action updateSearch(value) {
+    this.search = value;
+    this.isSearching = false;
+  }
+  @action startSearching() {
+    this.isSearching = true;
+  }
 }

@@ -56,7 +56,9 @@ export default class ApplicationRoute extends Route {
 
     if (this.currentUser.isGuest) {
       const writeRoutes = ['.new', '.edit', '.scrape', '.import'];
-      const isWriteRoute = writeRoutes.some((suffix) => routeName?.endsWith(suffix));
+      const isWriteRoute = writeRoutes.some((suffix) =>
+        routeName?.endsWith(suffix),
+      );
       if (isWriteRoute) {
         transition.abort();
         this.router.transitionTo('index');

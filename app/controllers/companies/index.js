@@ -11,8 +11,13 @@ export default class CompaniesIndexController extends Controller {
   @tracked search = '';
   @tracked isSearching = false;
 
-  @action updateSearch(value) { this.search = value; this.isSearching = false; }
-  @action startSearching() { this.isSearching = true; }
+  @action updateSearch(value) {
+    this.search = value;
+    this.isSearching = false;
+  }
+  @action startSearching() {
+    this.isSearching = true;
+  }
 
   @action async deleteCompany(company) {
     const name = company.name;

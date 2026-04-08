@@ -10,6 +10,11 @@ export default class JobPostsIndexController extends Controller {
   @tracked isSearching = false;
   @service flashMessages;
 
-  @action updateSearch(value) { this.search = value; this.isSearching = false; }
-  @action startSearching() { this.isSearching = true; }
+  @action updateSearch(value) {
+    this.search = value;
+    this.isSearching = false;
+  }
+  @action startSearching() {
+    this.isSearching = true;
+  }
 }

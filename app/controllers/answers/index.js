@@ -11,8 +11,13 @@ export default class AnswersIndexController extends Controller {
   @tracked search = '';
   @tracked isSearching = false;
 
-  @action updateSearch(value) { this.search = value; this.isSearching = false; }
-  @action startSearching() { this.isSearching = true; }
+  @action updateSearch(value) {
+    this.search = value;
+    this.isSearching = false;
+  }
+  @action startSearching() {
+    this.isSearching = true;
+  }
 
   @action newAnswer() {
     this.flashMessages.info('Select a question to answer.');

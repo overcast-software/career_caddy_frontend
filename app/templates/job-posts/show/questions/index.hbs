@@ -14,10 +14,18 @@
     <table class="min-w-full text-sm">
       <thead class="bg-gray-50 border-b border-gray-200">
         <tr>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Question</th>
-          <th class="px-4 py-3 text-center font-semibold text-gray-600 w-24">Answers</th>
-          <th class="px-4 py-3 text-center font-semibold text-gray-600 w-16">Fav</th>
-          <th class="px-4 py-3 text-right font-semibold text-gray-600 w-48">Actions</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Question</th>
+          <th
+            class="px-4 py-3 text-center font-semibold text-gray-600 w-24"
+          >Answers</th>
+          <th
+            class="px-4 py-3 text-center font-semibold text-gray-600 w-16"
+          >Fav</th>
+          <th
+            class="px-4 py-3 text-right font-semibold text-gray-600 w-48"
+          >Actions</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
@@ -26,7 +34,9 @@
             class="hover:bg-gray-50
               {{if (eq this.answeringQuestionId question.id) 'bg-blue-50'}}"
           >
-            <td class="px-4 py-3 text-gray-900 whitespace-pre-wrap break-words max-w-lg">
+            <td
+              class="px-4 py-3 text-gray-900 whitespace-pre-wrap break-words max-w-lg"
+            >
               {{question.content}}
             </td>
             <td class="px-4 py-3 text-center">
@@ -81,10 +91,14 @@
                   <div class="flex flex-col gap-3">
 
                     <div class="flex items-center gap-2">
-                      <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      <span
+                        class="text-xs font-medium text-gray-500 uppercase tracking-wide"
+                      >
                         Answering:
                       </span>
-                      <span class="text-sm text-gray-700 italic">{{question.content}}</span>
+                      <span
+                        class="text-sm text-gray-700 italic"
+                      >{{question.content}}</span>
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -102,10 +116,28 @@
                         {{if this.useAI "✓ Ask AI" "Ask AI"}}
                       </button>
                       {{#if (eq this.isPollingAnswerId question.id)}}
-                        <span class="text-xs text-indigo-500 italic flex items-center gap-1">
-                          <svg class="animate-spin size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        <span
+                          class="text-xs text-indigo-500 italic flex items-center gap-1"
+                        >
+                          <svg
+                            class="animate-spin size-3"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              class="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              stroke-width="4"
+                            ></circle>
+                            <path
+                              class="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
                           </svg>
                           AI is generating…
                         </span>
@@ -114,8 +146,12 @@
 
                     {{#if this.useAI}}
                       <div class="flex flex-col gap-1">
-                        <label class="text-xs font-medium text-gray-500">Additional context for AI (optional)</label>
+                        <label
+                          for="additional-prompt"
+                          class="text-xs font-medium text-gray-500"
+                        >Additional context for AI (optional)</label>
                         <textarea
+                          id="additional-prompt"
                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 resize-y"
                           rows="2"
                           placeholder="e.g. Emphasize my background in distributed systems…"
@@ -124,8 +160,12 @@
                       </div>
                     {{else}}
                       <div class="flex flex-col gap-1">
-                        <label class="text-xs font-medium text-gray-500">Your answer</label>
+                        <label
+                          for="answer-content"
+                          class="text-xs font-medium text-gray-500"
+                        >Your answer</label>
                         <textarea
+                          id="answer-content"
                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 resize-y"
                           rows="4"
                           placeholder="Write your answer here…"

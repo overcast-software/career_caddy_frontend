@@ -37,7 +37,9 @@ export default class LoginController extends Controller {
       const host = config.APP.API_HOST || '';
       const response = await fetch(`${host}/api/v1/guest-session/`);
       if (!response.ok) {
-        this.flashMessages.warning('Demo mode is not available on this server.');
+        this.flashMessages.warning(
+          'Demo mode is not available on this server.',
+        );
         return;
       }
       const tokens = await response.json();

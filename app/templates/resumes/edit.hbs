@@ -42,7 +42,11 @@
         <Panel::Card @title="Skills" @collapsible={{true}}>
           <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
         </Panel::Card>
-        <Panel::Card @title="Projects" @collapsible={{true}} @startCollapsed={{true}}>
+        <Panel::Card
+          @title="Projects"
+          @collapsible={{true}}
+          @startCollapsed={{true}}
+        >
           <:top as |panel|>
             <Panel::Navigation
               @collapsible={{true}}

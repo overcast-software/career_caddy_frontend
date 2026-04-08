@@ -830,9 +830,9 @@ p.tee {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.05) 0%,
-    rgba(0, 0, 0, 0.3) 50%,
-    rgba(0, 0, 0, 0.78) 100%
+    rgb(0 0 0 / 5%) 0%,
+    rgb(0 0 0 / 30%) 50%,
+    rgb(0 0 0 / 78%) 100%
   );
   pointer-events: none;
 }
@@ -850,7 +850,7 @@ p.tee {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
   margin: 0 0 0.75rem;
 }
 
@@ -866,7 +866,7 @@ p.tee {
 .landing-hero-sub {
   font-size: 1.05rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.88);
+  color: rgb(255 255 255 / 88%);
   margin: 0 0 1.75rem;
   max-width: 560px;
 }
@@ -877,7 +877,7 @@ p.tee {
   gap: 1.25rem 2rem;
   font-size: 0.85rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgb(255 255 255 / 80%);
   margin-bottom: 2rem;
 }
 
@@ -910,7 +910,9 @@ p.tee {
   border-radius: 6px;
   border: none;
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 a.landing-btn-primary,
@@ -926,13 +928,13 @@ a.landing-btn-primary:hover {
 }
 
 .landing-btn-secondary {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgb(255 255 255 / 15%);
   color: #fff;
   font-weight: 600;
   font-size: 0.95rem;
   padding: 0.65rem 1.5rem;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgb(255 255 255 / 40%);
   text-decoration: none;
   backdrop-filter: blur(4px);
   transition: background 0.15s;
@@ -946,13 +948,13 @@ a.landing-btn-secondary:visited {
 
 .landing-btn-secondary:hover,
 a.landing-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgb(255 255 255 / 25%);
   color: #fff;
 }
 
 .landing-hero-attribution {
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgb(255 255 255 / 40%);
   margin: 0;
   font-style: italic;
 }
@@ -966,12 +968,12 @@ a.landing-btn-secondary:hover {
 .login-card {
   position: relative;
   z-index: 1;
-  background: rgba(255, 255, 255, 0.97);
+  background: rgb(255 255 255 / 97%);
   border-radius: 14px;
   padding: 2.5rem 2.25rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 8px 48px rgb(0 0 0 / 22%);
   margin: 2rem 1rem;
 }
 
@@ -1032,13 +1034,15 @@ a.landing-btn-secondary:hover {
   font-size: 0.95rem;
   color: var(--text);
   background: #fff;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
   outline: none;
 }
 
 .login-field input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(119, 182, 225, 0.2);
+  box-shadow: 0 0 0 3px rgb(119 182 225 / 20%);
 }
 
 .login-submit {
@@ -1068,7 +1072,9 @@ a.landing-btn-secondary:hover {
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .login-demo:hover {
@@ -2106,8 +2112,6 @@ pre {
   background: var(--border);
   pointer-events: none;
 }
-
-.bar-cart {}
 
 /* Guest / demo mode banner */
 .guest-banner {

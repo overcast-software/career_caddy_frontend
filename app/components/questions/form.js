@@ -196,7 +196,10 @@ export default class QuestionsFormComponent extends Component {
     } else if (this.args.company) {
       this.router.transitionTo('companies.show.answers', this.args.company);
     } else if (this.args.jobPost) {
-      this.router.transitionTo('job-posts.show.questions.index', this.args.jobPost);
+      this.router.transitionTo(
+        'job-posts.show.questions.index',
+        this.args.jobPost,
+      );
     } else {
       this.router.transitionTo('questions.index');
     }

@@ -6,7 +6,8 @@ export default class ResumesEditRoute extends Route {
 
   async model({ resume_id }) {
     const resume = await this.store.findRecord('resume', resume_id, {
-      include: 'user,skills,experiences,educations,certifications,summaries,projects',
+      include:
+        'user,skills,experiences,educations,certifications,summaries,projects',
     });
     await Promise.all([resume.skills, resume.summaries, resume.projects]);
     return resume;
