@@ -15,6 +15,4 @@ export default class MainApplicationComponent extends Component {
     this.sidebarOpen = false;
   }
 
-  @action
-  noop() {}
 }
