@@ -5,8 +5,7 @@
       @options={{this.resumeOptions}}
       @onChange={{this.updateResume}}
       @selected={{this.selectedResume}}
-      @placeholder="Select a resume"
-      as |resume|
+as |resume|
     >
       {{or resume.name resume.title}}
     </PowerSelect>
