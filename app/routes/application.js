@@ -2,18 +2,18 @@ import Route from '@ember/routing/route';
 import { service } from '@ember/service';
 
 export default class ApplicationRoute extends Route {
-  @service store;
   @service currentUser;
   @service router;
   @service health;
   @service session;
-  healthy = false;
-  get unhealthy() {
-    return !this.healthy;
-  }
 
   async beforeModel(transition) {
-    // Skip health check for setup and login routes
+    // Set up ESA's event handlers exactly once — calling setup() multiple times
+    // registers duplicate listeners on the internal event emitter.
+    if (!this.session._setupIsCalled) {
+      await this.session.setup();
+    }
+
     const routeName = transition.to?.name;
     const isPublic =
       routeName === 'setup' ||
@@ -30,19 +30,12 @@ export default class ApplicationRoute extends Route {
       return;
     }
 
-    // Restore session before checking authentication
-    await this.session.setup();
-
-    // Enforce authentication for protected routes
     if (routeName !== 'index' && !this.session.isAuthenticated) {
       transition.abort();
       this.router.transitionTo('login');
       return;
     }
 
-    this.healthy = true;
-
-    // Start activity watching and ensure fresh token
     if (this.session.isAuthenticated) {
       this.session.startActivityWatch();
       try {
@@ -52,26 +45,18 @@ export default class ApplicationRoute extends Route {
       }
     }
 
-    await this._loadCurrentUser();
+    try {
+      await this.currentUser.load();
+    } catch {
+      await this.session.invalidate();
+    }
 
     if (this.currentUser.isGuest) {
       const writeRoutes = ['.new', '.edit', '.scrape', '.import'];
-      const isWriteRoute = writeRoutes.some((suffix) =>
-        routeName?.endsWith(suffix),
-      );
-      if (isWriteRoute) {
+      if (writeRoutes.some((suffix) => routeName?.endsWith(suffix))) {
         transition.abort();
         this.router.transitionTo('index');
       }
-    }
-  }
-
-  async _loadCurrentUser() {
-    try {
-      await this.currentUser.load();
-    } catch (err) {
-      console.log(err);
-      await this.session.invalidate();
     }
   }
 }

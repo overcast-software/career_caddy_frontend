@@ -1,6 +1,7 @@
 import Service from '@ember/service';
 import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import { decodeUserId } from 'career-caddy-frontend/utils/jwt';
 
 export default class CurrentUserService extends Service {
   @service session;
@@ -13,10 +14,12 @@ export default class CurrentUserService extends Service {
 
   async load() {
     this.user = null;
-    this.store.unloadAll('user');
-    if (this.session.isAuthenticated) {
-      let user = await this.store.queryRecord('user', { me: true });
-      this.user = user;
-    }
+    if (!this.session.isAuthenticated) return;
+
+    const token = this.session.accessToken;
+    const userId = token ? decodeUserId(token) : null;
+    if (!userId) return;
+
+    this.user = await this.store.findRecord('user', userId);
   }
 }

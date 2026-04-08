@@ -24,12 +24,14 @@ export default class LoginController extends Controller {
       await this.session.authenticate('authenticator:jwt', username, password);
     } catch (error) {
       this.flashMessages.danger(
-        error?.error || error?.errors?.[0]?.detail || 'Login failed',
+        error?.error ||
+          error?.errors?.[0]?.detail ||
+          error?.message ||
+          'Login failed',
       );
       return;
     }
     this.flashMessages.success('Successfully logged in');
-    this.router.transitionTo('index');
   }
 
   @action async tryDemo() {

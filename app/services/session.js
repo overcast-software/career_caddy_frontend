@@ -1,6 +1,6 @@
 import Service from 'ember-simple-auth/services/session';
 import { service } from '@ember/service';
-import { getOwner } from '@ember/application';
+import { getOwner } from '@ember/owner';
 import { decodeExp, now } from 'career-caddy-frontend/utils/jwt';
 import { buildBaseUrl } from 'career-caddy-frontend/utils/base-url';
 import config from 'career-caddy-frontend/config/environment';
@@ -34,15 +34,18 @@ export default class SessionService extends Service {
     return newData;
   }
 
-  handleAuthentication(transition) {
-    if (transition) {
-      transition.retry();
-    } else {
-      this.router.transitionTo('index');
-    }
+  handleAuthentication() {
+    // application.beforeModel() only runs on first route entry and won't
+    // re-fire after the post-login redirect, so we load the user here.
+    getOwner(this)
+      .lookup('service:current-user')
+      .load()
+      .catch((err) => console.warn('Failed to load user after login:', err));
+    this.router.transitionTo('index');
   }
 
   handleInvalidation() {
+    getOwner(this).lookup('service:current-user').user = null;
     this.router.transitionTo('login');
   }
 
