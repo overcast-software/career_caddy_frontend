@@ -14,5 +14,4 @@ export default class MainApplicationComponent extends Component {
   close() {
     this.sidebarOpen = false;
   }
-
 }
