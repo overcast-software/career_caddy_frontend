@@ -33,7 +33,7 @@ export default class LoginController extends Controller {
 
   @action async tryDemo() {
     try {
-      const response = await fetch('/api/v1/guest-session/', { method: 'POST' });
+      const response = await fetch('/api/v1/guest-session/');
       if (!response.ok) {
         this.flashMessages.warning('Demo mode is not available on this server.');
         return;
