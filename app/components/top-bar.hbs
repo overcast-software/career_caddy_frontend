@@ -35,6 +35,7 @@
       type="button"
       title="Logout"
       {{on "click" this.invalidateSession}}
+      {{on "click" @onClose}}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -54,6 +55,7 @@
   {{else}}
     <LinkTo
       @route="login"
+      {{on "click" @onClose}}
       class="p-2 rounded hover:bg-gray-100 text-sm font-medium"
     >Login</LinkTo>
   {{/if}}
