@@ -39,4 +39,8 @@ export default class TopBarComponent extends Component {
     this.flashMessages.success('Successfully logged out.');
     this.router.transitionTo('index');
   }
+
+  get onClose() {
+    return this.args.onClose ?? (() => {});
+  }
 }
