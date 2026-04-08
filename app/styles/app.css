@@ -123,6 +123,7 @@ body {
   height: 100%;
   width: min(320px, 75vw);
   z-index: 50;
+  overflow-y: auto;
 }
 
 .sidebar-link.active,
