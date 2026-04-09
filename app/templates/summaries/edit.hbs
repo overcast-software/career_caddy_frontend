@@ -24,11 +24,14 @@
           {{or resume.name resume.title}}
         </PowerSelect>
       </div>
-      <textarea
-        aria-label="Summary content"
-        {{on "input" this.updateContent}}
-        rows="12"
-      >{{this.model.content}}</textarea>
+      <div class="field-full">
+        <label class="field-label" for="summary-content">Content</label>
+        <textarea
+          id="summary-content"
+          {{on "input" this.updateContent}}
+          rows="12"
+        >{{this.model.content}}</textarea>
+      </div>
       <div class="form-actions">
         <button
           type="button"
