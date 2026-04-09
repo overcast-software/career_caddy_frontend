@@ -1,98 +1,61 @@
-<div class="mx-auto max-w-5xl px-4">
-  <form {{on "submit" this.submitEdit}}>
-    <fieldset
-      class="fieldset bg-base-200 border-base-300 rounded-box border p-4"
-    >
+<form class="builder-form" {{on "submit" this.submitEdit}}>
+  <div class="field-row">
+    <div class="field">
+      <label class="field-label" for="scrape-url">URL</label>
+      <input
+        id="scrape-url"
+        type="url"
+        value={{@scrape.url}}
+        {{on "input" (fn this.updateField "url")}}
+      />
+    </div>
+    <div class="field">
+      <label class="field-label" for="scrape-external-link">External Link</label>
+      <input
+        id="scrape-external-link"
+        type="url"
+        value={{@scrape.externalLink}}
+        {{on "input" (fn this.updateField "externalLink")}}
+      />
+    </div>
+  </div>
 
-      {{! URL (left) and External Link (right) }}
-      <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-          <label
-            for="scrape-url"
-            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          >URL</label>
-          <input
-            id="scrape-url"
-            type="url"
-            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            value={{@scrape.url}}
-            {{on "input" (fn this.updateField "url")}}
-          />
-        </div>
-        <div class="w-full md:w-1/2 px-3">
-          <label
-            for="scrape-external-link"
-            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          >External Link</label>
-          <input
-            id="scrape-external-link"
-            type="url"
-            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            value={{@scrape.externalLink}}
-            {{on "input" (fn this.updateField "externalLink")}}
-          />
-        </div>
-      </div>
+  <div class="field-row">
+    <div class="field">
+      <label class="field-label" for="scrape-css-selectors">CSS Selectors</label>
+      <input
+        id="scrape-css-selectors"
+        type="text"
+        value={{@scrape.cssSelectors}}
+        {{on "input" (fn this.updateField "cssSelectors")}}
+      />
+    </div>
+    <div class="field">
+      <label class="field-label" for="scrape-parse-method">Parse Method</label>
+      <input
+        id="scrape-parse-method"
+        type="text"
+        value={{@scrape.parseMethod}}
+        {{on "input" (fn this.updateField "parseMethod")}}
+      />
+    </div>
+  </div>
 
-      {{! CSS Selectors (left) and Parse Method (right) }}
-      <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-          <label
-            for="scrape-css-selectors"
-            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          >CSS Selectors</label>
-          <input
-            id="scrape-css-selectors"
-            type="text"
-            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            value={{@scrape.cssSelectors}}
-            {{on "input" (fn this.updateField "cssSelectors")}}
-          />
-        </div>
-        <div class="w-full md:w-1/2 px-3">
-          <label
-            for="scrape-parse-method"
-            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          >Parse Method</label>
-          <input
-            id="scrape-parse-method"
-            type="text"
-            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            value={{@scrape.parseMethod}}
-            {{on "input" (fn this.updateField "parseMethod")}}
-          />
-        </div>
-      </div>
+  <div class="field-full">
+    <label class="field-label" for="scrape-job-content">Job Content</label>
+    <textarea
+      id="scrape-job-content"
+      rows="10"
+      {{on "input" (fn this.updateField "jobContent")}}
+    >{{@scrape.jobContent}}</textarea>
+  </div>
 
-      {{! Job Content }}
-      <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full px-3">
-          <label
-            for="scrape-job-content"
-            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          >Job Content</label>
-          <textarea
-            id="scrape-job-content"
-            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            {{on "input" (fn this.updateField "jobContent")}}
-            rows="10"
-          >{{@scrape.jobContent}}</textarea>
-        </div>
-      </div>
-
-      {{! Buttons }}
-      <div class="flex justify-end gap-2">
-        <button
-          type="submit"
-          class="border border-gray-200 px-3 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >Save</button>
-        <button
-          type="button"
-          class="border border-red-200 px-3 py-2 font-medium text-red-600 transition-colors hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
-          {{on "click" this.submitDelete}}
-        >Delete</button>
-      </div>
-
-    </fieldset>
-  </form>
-</div>
+  <div class="form-actions">
+    <button type="submit" class="btn">Save</button>
+    <button
+      type="button"
+      class="btn danger"
+      {{on "click" this.submitDelete}}
+    >Delete</button>
+  </div>
+</form>
