@@ -12,6 +12,7 @@ export default class CoverLettersNewController extends Controller {
   @service spinner;
 
   @tracked selectedResume = CAREER_DATA_OPTION;
+  @tracked instructions = '';
 
   get resumeOptions() {
     const resumes = this.store.peekAll('resume');
@@ -32,10 +33,15 @@ export default class CoverLettersNewController extends Controller {
     this.model.jobPost = jobPost;
   }
 
+  @action updateInstructions(event) {
+    this.instructions = event.target.value;
+  }
+
   @action saveCoverLetter() {
     if (this.model.isSaving) return;
     const resumeId = this.selectedResume?.id;
     this.model.resume = this.store.peekRecord('resume', resumeId);
+    this.model.instructions = this.instructions;
     this.spinner.wrap(
       this.model
         .save()

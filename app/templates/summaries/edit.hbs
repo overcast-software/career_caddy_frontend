@@ -12,6 +12,18 @@
       {{#if this.model.jobPost.title}}
         <p class="muted">{{this.model.jobPost.title}}</p>
       {{/if}}
+      <div class="field-full">
+        <label class="field-label">Resume (optional)</label>
+        <PowerSelect
+          @options={{this.resumeOptions}}
+          @selected={{this.model.resume}}
+          @onChange={{this.updateResume}}
+          @placeholder="Select a resume..."
+          as |resume|
+        >
+          {{or resume.name resume.title}}
+        </PowerSelect>
+      </div>
       <textarea
         aria-label="Summary content"
         {{on "input" this.updateContent}}

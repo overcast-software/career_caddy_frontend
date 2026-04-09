@@ -3,6 +3,7 @@ import Model, { attr, belongsTo } from '@ember-data/model';
 export default class CoverLetterModel extends Model {
   @attr('string') content;
   @attr('string') status;
+  @attr('string') instructions;
   @attr('date') createdAt;
   @attr('boolean') favorite;
   @belongsTo('user', { async: true, inverse: 'coverLetters' }) user;
