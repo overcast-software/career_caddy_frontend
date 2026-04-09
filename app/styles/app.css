@@ -60,10 +60,10 @@
   --card: #1e293b;
   --border: #334155;
   --accent: #6366f1;
-  --surface: #1e293b;
-  --surface-alt: #0f172a;
-  --surface-hover: #334155;
-  --tee-bg: #1e293b;
+  --surface: #334155;     /* elevated: buttons, inputs — one step above card */
+  --surface-alt: #1e293b; /* alt surface at card bg level */
+  --surface-hover: #475569; /* hover state for elevated surfaces */
+  --tee-bg: #334155;
   --page-bg: #0f172a;
 }
 
@@ -298,7 +298,7 @@ a {
 }
 
 .builder-form .field select:disabled {
-  background: #f8f8f8;
+  background: var(--surface-alt);
   color: var(--muted);
 }
 
@@ -318,7 +318,7 @@ a {
 
 .builder-form .field input[disabled] {
   color: var(--muted);
-  background: #f8f8f8;
+  background: var(--surface-alt);
 }
 
 .builder-form .field-label {
@@ -501,7 +501,7 @@ a {
   gap: 8px;
   padding: 8px 12px;
   border: 1px solid var(--border);
-  background: #f7f7f7;
+  background: var(--surface);
   color: var(--text);
   border-radius: 6px;
   font: inherit;
@@ -598,7 +598,7 @@ p.tee {
 }
 
 .btn:hover {
-  background: #f1f1f1;
+  background: var(--surface-hover);
 }
 
 .btn.primary {
@@ -1382,7 +1382,7 @@ a.landing-btn-primary:hover {
 }
 
 .resume-preview {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: var(--space-5);
@@ -1419,7 +1419,7 @@ pre {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
+  background: var(--card);
   padding: 6px;
   border-radius: 10px;
   border: 1px solid rgb(3 10 27 / 6%);
@@ -1582,7 +1582,7 @@ pre {
   align-items: center;
   justify-content: space-between;
   padding: 10px 20px;
-  background: #fff;
+  background: var(--card);
   border-bottom: 1px solid var(--border);
   z-index: 50;
   min-height: 4lh;
@@ -1642,7 +1642,7 @@ pre {
   border-radius: 4px;
   font: inherit;
   font-size: 0.875rem;
-  background: white;
+  background: var(--card);
   color: var(--text);
   min-width: 180px;
 }
@@ -1872,7 +1872,7 @@ pre {
 
 .nav-link:hover {
   color: var(--text);
-  background: #f7f7f7;
+  background: var(--surface);
 }
 
 /* ===== SUBMENU ===== */

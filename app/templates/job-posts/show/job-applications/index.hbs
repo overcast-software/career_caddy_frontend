@@ -18,26 +18,26 @@
 </div>
 
 {{#if this.model.jobApplications.length}}
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
     <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b border-gray-200">
+      <thead class="bg-gray-50 border-b border-gray-200 dark:bg-gray-700 dark:border-gray-600">
         <tr>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Job Post</th>
           <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
+            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
           >Company</th>
           <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
+            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
           >Status</th>
           <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
+            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
           >Applied</th>
           <th
-            class="px-4 py-3 text-right font-semibold text-gray-600"
+            class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
           >Actions</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100">
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
         {{#each this.model.jobApplications as |jobApplication|}}
           <JobApplications::Compact @jobApplication={{jobApplication}} />
         {{/each}}

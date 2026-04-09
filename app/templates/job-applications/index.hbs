@@ -13,31 +13,31 @@
   </:subnav>
   <:main>
     {{#if this.isSearching}}
-      <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+      <div class="py-8 text-center text-sm text-gray-400 dark:text-gray-500">Searching…</div>
     {{else}}
       {{#if this.model.length}}
-        <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+        <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
           <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200">
+            <thead class="bg-gray-50 border-b border-gray-200 dark:bg-gray-700 dark:border-gray-600">
               <tr>
                 <th
-                  class="px-4 py-3 text-left font-semibold text-gray-600"
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
                 >Title</th>
                 <th
-                  class="px-4 py-3 text-left font-semibold text-gray-600"
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
                 >Company</th>
                 <th
-                  class="px-4 py-3 text-left font-semibold text-gray-600"
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
                 >Status</th>
                 <th
-                  class="px-4 py-3 text-left font-semibold text-gray-600"
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
                 >Applied At</th>
                 <th
-                  class="px-4 py-3 text-right font-semibold text-gray-600"
+                  class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
                 >Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
               {{#each this.model as |application|}}
                 <JobApplications::Compact
                   @jobApplication={{application}}
@@ -48,7 +48,7 @@
           </table>
         </div>
         <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
-          <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
+          <div class="py-4 text-center text-sm text-gray-400 dark:text-gray-500">Loading more…</div>
         </InfinityLoader>
       {{else}}
         <EmptyState @message="No applications found." />

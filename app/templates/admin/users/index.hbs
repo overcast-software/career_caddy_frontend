@@ -19,7 +19,7 @@
       {{#if this.model.length}}
         <table class="w-full text-sm">
           <thead>
-            <tr class="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
+            <tr class="border-b border-gray-200 dark:border-gray-700 text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
               <th class="pb-2 pr-4 font-medium">Name</th>
               <th class="pb-2 pr-4 font-medium">Email</th>
               <th class="pb-2 pr-4 font-medium">Username</th>
@@ -30,24 +30,24 @@
           </thead>
           <tbody>
             {{#each this.model as |user|}}
-              <tr class="border-b border-gray-100 last:border-0">
-                <td class="py-3 pr-4 font-medium text-gray-900">{{user.name}}</td>
-                <td class="py-3 pr-4 text-gray-600">{{user.email}}</td>
-                <td class="py-3 pr-4 text-gray-500">{{user.username}}</td>
+              <tr class="border-b border-gray-100 dark:border-gray-700 last:border-0">
+                <td class="py-3 pr-4 font-medium text-gray-900 dark:text-gray-100">{{user.name}}</td>
+                <td class="py-3 pr-4 text-gray-600 dark:text-gray-300">{{user.email}}</td>
+                <td class="py-3 pr-4 text-gray-500 dark:text-gray-400">{{user.username}}</td>
                 <td class="py-3 pr-4">
                   {{#if user.isStaff}}
-                    <span class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Staff</span>
+                    <span class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">Staff</span>
                   {{else if user.isGuest}}
-                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">Guest</span>
+                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Guest</span>
                   {{else}}
-                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">User</span>
+                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">User</span>
                   {{/if}}
                 </td>
                 <td class="py-3 pr-4">
                   {{#if user.isActive}}
-                    <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Active</span>
+                    <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</span>
                   {{else}}
-                    <span class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">Inactive</span>
+                    <span class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">Inactive</span>
                   {{/if}}
                 </td>
                 <td class="py-3">
@@ -55,18 +55,18 @@
                     <LinkTo
                       @route="admin.users.show"
                       @model={{user.id}}
-                      class="text-sm text-blue-600 hover:underline"
+                      class="text-sm text-blue-600 hover:underline dark:text-blue-400"
                     >Edit</LinkTo>
                     <button
                       type="button"
-                      class="text-sm {{if user.isActive 'text-yellow-600 hover:text-yellow-800' 'text-green-600 hover:text-green-800'}}"
+                      class="text-sm {{if user.isActive 'text-yellow-600 hover:text-yellow-800 dark:text-yellow-500' 'text-green-600 hover:text-green-800 dark:text-green-500'}}"
                       {{on "click" (fn this.toggleActive user)}}
                     >
                       {{if user.isActive "Deactivate" "Activate"}}
                     </button>
                     <button
                       type="button"
-                      class="text-sm text-red-600 hover:text-red-800"
+                      class="text-sm text-red-600 hover:text-red-800 dark:text-red-400"
                       {{on "click" (fn this.destroy user)}}
                     >Delete</button>
                   </div>
