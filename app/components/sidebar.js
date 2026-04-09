@@ -3,4 +3,5 @@ import { service } from '@ember/service';
 
 export default class SidebarComponent extends Component {
   @service currentUser;
+  @service theme;
 }
