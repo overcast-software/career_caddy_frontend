@@ -1,0 +1,85 @@
+{{page-title "New User — Admin"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
+    <LinkTo @route="admin.users.index" class="nav-link">Users</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card max-w-lg">
+      <h1 class="text-xl font-semibold mb-6">New User</h1>
+
+      <form class="builder-form" {{on "submit" this.save}}>
+        <div class="field">
+          <label class="field-label" for="firstName">First Name</label>
+          <input
+            id="firstName"
+            type="text"
+            class="field-input"
+            value={{this.firstName}}
+            {{on "input" (fn (mut this.firstName) value="target.value")}}
+          />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="lastName">Last Name</label>
+          <input
+            id="lastName"
+            type="text"
+            class="field-input"
+            value={{this.lastName}}
+            {{on "input" (fn (mut this.lastName) value="target.value")}}
+          />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            class="field-input"
+            value={{this.email}}
+            {{on "input" (fn (mut this.email) value="target.value")}}
+          />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="username">Username</label>
+          <input
+            id="username"
+            type="text"
+            class="field-input"
+            value={{this.username}}
+            {{on "input" (fn (mut this.username) value="target.value")}}
+          />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            class="field-input"
+            value={{this.password}}
+            {{on "input" (fn (mut this.password) value="target.value")}}
+          />
+        </div>
+
+        <div class="field">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={{this.isStaff}}
+              {{on "change" (fn (mut this.isStaff) value="target.checked")}}
+            />
+            <span class="field-label mb-0">Staff (superuser)</span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Create User</button>
+          <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
+        </div>
+      </form>
+    </div>
+  </:main>
+</RouteLayout>

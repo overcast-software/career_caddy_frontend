@@ -222,6 +222,10 @@ Router.map(function () {
   this.route('admin', function () {
     this.route('new');
     this.route('show', { path: '/:api_key_id' });
+    this.route('users', function () {
+      this.route('new');
+      this.route('show', { path: '/:user_id' });
+    });
   });
   this.route('career-data', function () {});
   this.route('favorites');

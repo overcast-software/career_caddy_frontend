@@ -7,6 +7,8 @@ export default class UserModel extends Model {
   @attr('string') email;
   @attr('string') phone;
   @attr('boolean') isGuest;
+  @attr('boolean', { defaultValue: false }) isStaff;
+  @attr('boolean', { defaultValue: true }) isActive;
   @hasMany('resume', { async: true, inverse: 'user' }) resumes;
   @hasMany('score', { async: true, inverse: 'user' }) scores;
   @hasMany('cover-letter', { async: true, inverse: 'user' }) coverLetters;

@@ -1,4 +1,9 @@
 <div class="max-w-6xl mx-auto p-6">
+  <div class="submenu submenu-buttons mb-6">
+    <LinkTo @route="admin.users.index" class="btn">Users</LinkTo>
+    <LinkTo @route="admin.index" class="btn is-active">API Keys</LinkTo>
+  </div>
+
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-bold text-gray-900">API Keys</h1>
     <button
