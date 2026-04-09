@@ -33,8 +33,9 @@
     {{#if this.model.jobPost}}
       <Panel::Card @title="Additional Instructions (optional)">
         <div class="field-full">
-          <label class="field-label">Instructions for AI</label>
+          <label class="field-label" for="cl-instructions">Instructions for AI</label>
           <textarea
+            id="cl-instructions"
             placeholder="Add any additional context or instructions for the AI..."
             {{on "input" this.updateInstructions}}
           >{{this.instructions}}</textarea>

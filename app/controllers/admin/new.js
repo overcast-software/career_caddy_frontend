@@ -69,11 +69,4 @@ export default class ApiKeysNewController extends Controller {
   updateField(field, event) {
     this.model[field] = event.target.value;
   }
-
-  @action
-  derp(event) {
-    event.preventDefault();
-
-    this.spinner.wrap(this.model.save());
-  }
 }

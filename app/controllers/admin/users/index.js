@@ -24,7 +24,9 @@ export default class AdminUsersIndexController extends Controller {
     user.isStaff = !user.isStaff;
     try {
       await user.save();
-      const role = user.isStaff ? 'granted staff access' : 'revoked staff access';
+      const role = user.isStaff
+        ? 'granted staff access'
+        : 'revoked staff access';
       this.flashMessages.success(`${user.name} ${role}.`);
     } catch {
       this.flashMessages.danger('Failed to update user.');
@@ -33,7 +35,7 @@ export default class AdminUsersIndexController extends Controller {
   }
 
   @action
-  async destroy(user) {
+  async deleteUser(user) {
     if (!confirm(`Delete ${user.name}? This cannot be undone.`)) return;
     try {
       await user.destroyRecord();
