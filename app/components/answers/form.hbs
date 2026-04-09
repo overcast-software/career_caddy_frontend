@@ -37,12 +37,10 @@
         {{on "change" this.updateContent}}
       >{{@answer.content}}</textarea>
     </div>
-    <div class="field">
-      <Buttons::Favorite @model={{@answer}} @onToggle={{fn this.toggleFavorite @answer}} />
-    </div>
   {{/if}}
 
   <div class="form-actions">
+    <Buttons::Favorite @model={{@answer}} @onToggle={{fn this.toggleFavorite @answer}} />
     <button type="submit" class="btn" disabled={{this.isPolling}}>Save</button>
   </div>
 </form>

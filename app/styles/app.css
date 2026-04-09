@@ -39,6 +39,8 @@
   --border: #e6e6e6;
   --accent: #77b6e1;
   --danger: #c62828;
+  --danger-surface: #fff5f5;
+  --danger-border: #f2b8b5;
   --surface: #fafafa;
   --surface-alt: #f5f6f8;
   --surface-hover: #f0f4f8;
@@ -63,6 +65,9 @@
   --surface: #334155;     /* elevated: buttons, inputs — one step above card */
   --surface-alt: #1e293b; /* alt surface at card bg level */
   --surface-hover: #475569; /* hover state for elevated surfaces */
+  --danger: #ef4444;
+  --danger-surface: #3b1a1a;
+  --danger-border: #7f1d1d;
   --tee-bg: #334155;
   --page-bg: #0f172a;
 }
@@ -658,13 +663,13 @@ p.tee {
 }
 
 .btn.danger {
-  background: #fff5f5;
-  border-color: #f2b8b5;
+  background: var(--danger-surface);
+  border-color: var(--danger-border);
   color: var(--danger);
 }
 
 .btn.danger:hover {
-  background: #ffecec;
+  filter: brightness(1.1);
 }
 
 .btn.favorite {
@@ -1157,7 +1162,7 @@ a.landing-btn-primary:hover {
   gap: var(--space-3);
   font-size: 0.78rem;
   color: var(--muted);
-  background: var(--bg);
+  background: var(--card);
 }
 
 .route-footer a {
@@ -1850,7 +1855,9 @@ pre {
 }
 
 /* ===== POWER SELECT ===== */
-/* Global: all PowerSelect triggers match native input/select height and style */
+/* Global: all PowerSelect triggers match native input/select height and style.
+   background-color/color use !important — vendor CSS (#fff) has equal specificity and
+   may load after app.css depending on build order, so we must win explicitly. */
 .ember-power-select-trigger {
   position: static;
   width: 100%;
@@ -1858,10 +1865,15 @@ pre {
   border: 1px solid var(--border) !important;
   border-radius: 6px !important;
   font: inherit;
-  background-color: var(--card);
-  color: var(--text);
+  background-color: var(--card) !important;
+  color: var(--text) !important;
   line-height: 1.5 !important;
   min-height: calc(2 * var(--space-3) + 1lh + 2px);
+}
+
+/* Inline search input inside trigger (PowerSelectWithCreate) — must stay transparent so selected item shows through */
+.ember-power-select-search-input-field {
+  color: var(--text);
 }
 
 /* Layout helpers inside builder-form row fields */
@@ -1874,12 +1886,12 @@ pre {
 
 /* Dropdown popup — HyperUI dark: bg-gray-900, text-white, border-gray-600 */
 .ember-power-select-dropdown {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 6px;
   box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
   font: inherit;
-  color: var(--text);
+  color: var(--text) !important;
 }
 
 .ember-power-select-search {
@@ -1910,6 +1922,8 @@ pre {
   padding: var(--space-1) 0;
   max-height: 240px;
   overflow-y: auto;
+  background: var(--card) !important;
+  color: var(--text) !important;
 }
 
 .ember-power-select-option {
@@ -1940,6 +1954,33 @@ pre {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+/* Placeholder text — vendor hardcodes #999999 */
+.ember-power-select-placeholder {
+  color: var(--muted);
+}
+
+/* Chevron arrow — vendor hardcodes #aaaaaa */
+.ember-power-select-status-icon {
+  border-color: var(--muted) transparent transparent transparent;
+}
+
+/* Disabled trigger — vendor hardcodes #eeeeee; attribute selector beats our general rule */
+.ember-power-select-trigger[aria-disabled="true"] {
+  background-color: var(--surface-alt) !important;
+  color: var(--muted) !important;
+  border-color: var(--border) !important;
+}
+
+/* ember-basic-dropdown-content wrapper — vendor hardcodes #ffffff background.
+   Hide until JS has positioned it (sets inline style) to prevent a visible
+   flash at the bottom of the page where the wormhole element naturally sits. */
+.ember-basic-dropdown-content {
+  background-color: var(--card) !important;
+}
+.ember-basic-dropdown-content:not([style]) {
+  visibility: hidden;
 }
 
 .nav-link {
