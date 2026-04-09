@@ -1,6 +1,36 @@
 /* Ember supports plain CSS out of the box. More info: https://cli.emberjs.com/release/advanced-use/stylesheets/ */
 
-/* Resume Builder Look & Feel */
+/*
+ * app.css — Career Caddy frontend styles
+ *
+ * Sections (search for the marker to jump):
+ *   TOKENS       — :root design tokens (colors, spacing, radius)
+ *   BASE         — html/body reset
+ *   APP SHELL    — .course grid layout, sidebar, mobile drawer
+ *   TAGS         — .skill-tag, .tag-remove
+ *   BUILDER FORM — .builder-form grid, .field variants, container query
+ *   EXPERIENCE   — .experience, .desc-list, .rich-text
+ *   BUTTONS      — .btn variants, tooltips, .actions, .form-actions
+ *   FLASH        — ember-cli-flash alert/alert-box
+ *   RESUME       — preview panel, profile, experience preview
+ *   LOGIN        — login card, setup pages
+ *   LANDING      — .landing-hero, landing page utilities
+ *   LAYOUTS      — builder page, two-column form, collapsible
+ *   PANEL        — .panel-card, toolbar, loader
+ *   TOPBAR       — .tee-box header, subnav, breadcrumbs, spinner
+ *   POWER SELECT — ember-power-select overrides
+ *   SUBMENU      — subnav meta, submenu navigation
+ *   SUMMARIES    — summaries page
+ *   SKILLS       — skills editor, .skills-row, .add-skills
+ *   UPLOAD       — .upload-zone, .visually-hidden
+ *   COMPANIES    — companies select-or-create
+ *
+ * Prefer Tailwind utilities for new work. Only add to this file when
+ * custom behavior can't be expressed with utilities (container queries,
+ * grid animation, third-party overrides, or complex multi-state rules).
+ */
+
+/* ===== TOKENS ===== */
 :root {
   --text: #111;
   --muted: #5b5b5b;
@@ -18,6 +48,7 @@
   --space-6: 24px;
 }
 
+/* ===== BASE ===== */
 html,
 body {
   height: 100%;
@@ -44,6 +75,7 @@ body {
   z-index: -1;
 }
 
+/* ===== APP SHELL ===== */
 .course {
   height: 100vh;
   display: grid;
@@ -145,6 +177,7 @@ a {
   box-sizing: border-box;
 }
 
+/* ===== TAGS ===== */
 .skill-tag {
   pointer-events: auto;
   background-color: #eff4ff;
@@ -179,6 +212,7 @@ a {
   pointer-events: auto;
 }
 
+/* ===== BUILDER FORM ===== */
 .builder-form {
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -345,6 +379,7 @@ a {
   }
 }
 
+/* ===== EXPERIENCE ===== */
 .section-title {
   margin: 0 0 var(--space-3);
   font-size: 0.85rem;
@@ -429,6 +464,7 @@ a {
   margin: 0 0 var(--space-2);
 }
 
+/* ===== BUTTONS ===== */
 .actions {
   display: flex;
   gap: var(--space-3);
@@ -458,6 +494,7 @@ a.btn:active {
   color: var(--muted);
 }
 
+/* ===== FLASH (ember-cli-flash) ===== */
 .alert,
 .alert-box {
   opacity: 0;
@@ -770,6 +807,7 @@ p.tee {
   width: auto;
 }
 
+/* ===== LANDING ===== */
 /* Full-bleed hero for root route */
 .landing-hero {
   position: relative;
@@ -893,6 +931,7 @@ a.landing-btn-primary:hover {
   font-style: italic;
 }
 
+/* ===== LOGIN ===== */
 /* Login page — centered card variant */
 .landing-hero--centered {
   align-items: center;
@@ -1071,6 +1110,7 @@ a.landing-btn-primary:hover {
   top: 4lh;
 }
 
+/* ===== LAYOUTS ===== */
 /* Builder page full-width */
 .builder-page {
   display: flex;
@@ -1087,6 +1127,7 @@ a.landing-btn-primary:hover {
   box-sizing: border-box;
 }
 
+/* ===== RESUME ===== */
 /* Center the profile block in preview */
 .resume-preview .profile,
 .resume-preview .profile .name,
@@ -1348,6 +1389,7 @@ pre {
   word-break: break-word;
 }
 
+/* ===== PANEL ===== */
 /* Panel card toolbar styles */
 .panel-card .toolbar {
   display: flex;
@@ -1506,6 +1548,7 @@ pre {
   }
 }
 
+/* ===== TOPBAR ===== */
 /* Top bar styles */
 .site-header {
   position: sticky;
@@ -1729,6 +1772,7 @@ pre {
   padding: 0;
 }
 
+/* ===== POWER SELECT ===== */
 /* Global: all PowerSelect triggers match native input/select height and style */
 .ember-power-select-trigger {
   position: static;
@@ -1777,6 +1821,7 @@ pre {
   pointer-events: none;
 }
 
+/* ===== GUEST BANNER ===== */
 /* Guest / demo mode banner */
 .guest-banner {
   display: flex;
@@ -1806,6 +1851,7 @@ pre {
   background: #f7f7f7;
 }
 
+/* ===== SUBMENU ===== */
 /* Submenu styles */
 .submenu {
   background: #f5f6f8;
@@ -1903,7 +1949,7 @@ pre {
   min-height: 40px;
 }
 
-/* Summaries page */
+/* ===== SUMMARIES ===== */
 .summary-content {
   line-height: 1.5;
 }
@@ -1925,6 +1971,7 @@ pre {
   font: inherit;
 }
 
+/* ===== SKILLS ===== */
 /* Skills list styles */
 .skills-row {
   display: inline-flex;
@@ -1953,6 +2000,7 @@ pre {
   display: inline;
 }
 
+/* ===== UPLOAD ===== */
 /* Upload form styles */
 .visually-hidden {
   position: absolute !important;
@@ -2008,6 +2056,7 @@ pre {
   padding: 2em;
 }
 
+/* ===== COMPANIES ===== */
 /* Companies selector/create layout */
 .companies-select-row {
   display: flex;
