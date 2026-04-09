@@ -15,15 +15,14 @@
       <p><em>AI is generating your answer, please wait…</em></p>
     </div>
   {{else if this.useAI}}
-    <label>
-      <div class="field">
-        Additional prompt for AI:
-        <textarea
-          placeholder="Add any additional context or instructions for the AI..."
-          {{on "change" this.updateAdditionalPrompt}}
-        >{{this.additionalPrompt}}</textarea>
-      </div>
-    </label>
+    <div class="field-full">
+      <label class="field-label" for="answer-additional-prompt">Additional prompt for AI</label>
+      <textarea
+        id="answer-additional-prompt"
+        placeholder="Add any additional context or instructions for the AI..."
+        {{on "change" this.updateAdditionalPrompt}}
+      >{{this.additionalPrompt}}</textarea>
+    </div>
 
     <div class="field">
       <p><strong>Question:</strong> {{@answer.question.content}}</p>
@@ -31,13 +30,13 @@
           additional prompt.</em></p>
     </div>
   {{else}}
-    <label>
-      <div class="field">
-        <textarea
-          {{on "change" this.updateContent}}
-        >{{@answer.content}}</textarea>
-      </div>
-    </label>
+    <div class="field-full">
+      <label class="field-label" for="answer-content">Answer</label>
+      <textarea
+        id="answer-content"
+        {{on "change" this.updateContent}}
+      >{{@answer.content}}</textarea>
+    </div>
     <div class="field">
       <button
         type="button"
@@ -54,6 +53,8 @@
     </div>
   {{/if}}
 
-  <button type="submit" class="btn" disabled={{this.isPolling}}>save</button>
+  <div class="form-actions">
+    <button type="submit" class="btn" disabled={{this.isPolling}}>Save</button>
+  </div>
 </form>
 {{yield}}
