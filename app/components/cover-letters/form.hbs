@@ -1,28 +1,24 @@
-<div class="builder-form">
-  <form {{on "submit" this.saveCoverLetter}}>
-    <div class="field">
-      Body:
-      <textarea
-        rows="30"
-        aria-label="update-content"
-        {{on "change" this.updateContent}}
-      >
-        {{@coverLetter.content}}
-      </textarea>
-    </div>
-    <div class="form-actions">
-      <button
-        type="button"
-        class="btn {{if @coverLetter.favorite 'active'}}"
-        {{on "click" (fn this.toggleFavorite @coverLetter)}}
-        title="{{if
-          @coverLetter.favorite
-          'Remove from favorites'
-          'Add to favorites'
-        }}"
-      >{{if @coverLetter.favorite "★ Favorited" "☆ Favorite"}}</button>
-      <button type="submit" class="btn primary">Save</button>
-    </div>
-  </form>
-  {{yield}}
-</div>
+<form class="builder-form" {{on "submit" this.saveCoverLetter}}>
+  <div class="field-full">
+    <label class="field-label">Body</label>
+    <textarea
+      rows="30"
+      aria-label="update-content"
+      {{on "change" this.updateContent}}
+    >{{@coverLetter.content}}</textarea>
+  </div>
+  <div class="form-actions">
+    <button
+      type="button"
+      class="btn {{if @coverLetter.favorite 'active'}}"
+      {{on "click" (fn this.toggleFavorite @coverLetter)}}
+      title="{{if
+        @coverLetter.favorite
+        'Remove from favorites'
+        'Add to favorites'
+      }}"
+    >{{if @coverLetter.favorite "★ Favorited" "☆ Favorite"}}</button>
+    <button type="submit" class="btn primary">Save</button>
+  </div>
+</form>
+{{yield}}
