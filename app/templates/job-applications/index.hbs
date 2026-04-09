@@ -51,7 +51,7 @@
           <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
         </InfinityLoader>
       {{else}}
-        <p class="text-gray-500 text-sm py-6 text-center">No applications found.</p>
+        <EmptyState @message="No applications found." />
       {{/if}}
     {{/if}}
   </:main>

@@ -88,7 +88,7 @@
             </tbody>
           </table>
         {{else}}
-          <p>No resumes found.</p>
+          <EmptyState @message="No resumes found." />
         {{/if}}
       </div>
     {{/if}}
@@ -150,7 +150,7 @@
             </tbody>
           </table>
         {{else}}
-          <p>No cover letters found.</p>
+          <EmptyState @message="No cover letters found." />
         {{/if}}
       </div>
     {{/if}}
@@ -218,7 +218,7 @@
             </tbody>
           </table>
         {{else}}
-          <p>No answers found.</p>
+          <EmptyState @message="No answers found." />
         {{/if}}
       </div>
     {{/if}}

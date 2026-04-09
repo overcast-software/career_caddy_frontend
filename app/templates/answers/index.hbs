@@ -43,7 +43,7 @@
           </div>
         </Panel::Card>
       {{else}}
-        <p class="text-gray-500 text-sm py-6 text-center">No answers found.</p>
+        <EmptyState @message="No answers found." />
       {{/each}}
       <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
         <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
