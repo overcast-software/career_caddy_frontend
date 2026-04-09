@@ -4,22 +4,21 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 export default class ApiKeysNewController extends Controller {
-  @service spinner;
   @service flashMessages;
   @service router;
   @tracked isSubmitting = false;
-  @tracked createdKey = null;
 
   get canRead() {
-    return this.model.scopes.includes('read');
+    return this.model?.scopes?.includes('read') ?? false;
   }
 
   get canWrite() {
-    return this.model.scopes.includes('write');
+    return this.model?.scopes?.includes('write') ?? false;
   }
 
   @action
-  async save() {
+  async save(event) {
+    event?.preventDefault();
     if (this.isSubmitting) return;
 
     const apiKey = this.model;
@@ -33,8 +32,8 @@ export default class ApiKeysNewController extends Controller {
 
     try {
       const savedKey = await apiKey.save();
-      this.createdKey = savedKey;
       this.flashMessages.success('API key created successfully');
+      this.router.transitionTo('admin.show', savedKey.id);
     } catch (error) {
       this.flashMessages.danger('Failed to create API key');
       console.error('Error creating API key:', error);
@@ -46,11 +45,6 @@ export default class ApiKeysNewController extends Controller {
   @action
   cancel() {
     this.model.rollbackAttributes();
-    this.router.transitionTo('admin.index');
-  }
-
-  @action
-  goToIndex() {
     this.router.transitionTo('admin.index');
   }
 

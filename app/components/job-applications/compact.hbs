@@ -4,8 +4,12 @@
       {{this.jobPost.title}}
     </LinkTo>
   </td>
-  <td class="px-4 py-3 text-gray-600 dark:text-gray-300">{{this.jobPost.company.name}}</td>
-  <td class="px-4 py-3 text-gray-600 dark:text-gray-300">{{@jobApplication.status}}</td>
+  <td
+    class="px-4 py-3 text-gray-600 dark:text-gray-300"
+  >{{this.jobPost.company.name}}</td>
+  <td
+    class="px-4 py-3 text-gray-600 dark:text-gray-300"
+  >{{@jobApplication.status}}</td>
   <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
     {{#if @jobApplication.appliedAt}}
       {{moment-format @jobApplication.appliedAt "MMM D, YYYY"}}

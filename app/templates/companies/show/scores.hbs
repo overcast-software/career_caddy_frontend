@@ -1,10 +1,18 @@
 {{#if this.model.length}}
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+  <div
+    class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+  >
     <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b border-gray-200 dark:bg-gray-700 dark:border-gray-600">
+      <thead
+        class="bg-gray-50 border-b border-gray-200 dark:bg-gray-700 dark:border-gray-600"
+      >
         <tr>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Job Post</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Score</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+          >Job Post</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+          >Score</th>
           <th
             class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
           >Actions</th>
@@ -18,7 +26,9 @@
                 {{score.jobPost.title}}
               </LinkTo>
             </td>
-            <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">{{score.score}}</td>
+            <td
+              class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400"
+            >{{score.score}}</td>
             <td class="px-4 py-3 text-right">
               <LinkTo
                 @route="scores.show"

@@ -1,6 +1,9 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <Buttons::Favorite @model={{this.model}} @onToggle={{this.toggleFavorite}} />
+    <Buttons::Favorite
+      @model={{this.model}}
+      @onToggle={{this.toggleFavorite}}
+    />
     <button type="button" {{on "click" this.exportToDocx}} class="btn">export to
       docx</button>
     <LinkTo

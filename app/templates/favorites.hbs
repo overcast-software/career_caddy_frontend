@@ -54,7 +54,10 @@
               {{#each this.filteredResumes as |resume|}}
                 <tr>
                   <td>
-                    <Buttons::Favorite @model={{resume}} @onToggle={{fn this.toggleFavorite resume}} />
+                    <Buttons::Favorite
+                      @model={{resume}}
+                      @onToggle={{fn this.toggleFavorite resume}}
+                    />
                   </td>
                   <td>
                     <LinkTo @route="resumes.show" @model={{resume}}>
@@ -99,7 +102,10 @@
               {{#each this.filteredCoverLetters as |coverLetter|}}
                 <tr>
                   <td>
-                    <Buttons::Favorite @model={{coverLetter}} @onToggle={{fn this.toggleFavorite coverLetter}} />
+                    <Buttons::Favorite
+                      @model={{coverLetter}}
+                      @onToggle={{fn this.toggleFavorite coverLetter}}
+                    />
                   </td>
                   <td>
                     <LinkTo @route="cover-letters.show" @model={{coverLetter}}>
@@ -149,7 +155,10 @@
               {{#each this.filteredAnswers as |answer|}}
                 <tr>
                   <td>
-                    <Buttons::Favorite @model={{answer}} @onToggle={{fn this.toggleFavorite answer}} />
+                    <Buttons::Favorite
+                      @model={{answer}}
+                      @onToggle={{fn this.toggleFavorite answer}}
+                    />
                   </td>
                   <td>
                     {{#if answer.question}}

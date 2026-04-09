@@ -14,9 +14,8 @@
           <input
             id="firstName"
             type="text"
-            class="field-input"
             value={{this.firstName}}
-            {{on "input" (fn (mut this.firstName) value="target.value")}}
+            {{on "input" (fn this.updateField "firstName")}}
           />
         </div>
 
@@ -25,9 +24,8 @@
           <input
             id="lastName"
             type="text"
-            class="field-input"
             value={{this.lastName}}
-            {{on "input" (fn (mut this.lastName) value="target.value")}}
+            {{on "input" (fn this.updateField "lastName")}}
           />
         </div>
 
@@ -36,9 +34,8 @@
           <input
             id="email"
             type="email"
-            class="field-input"
             value={{this.email}}
-            {{on "input" (fn (mut this.email) value="target.value")}}
+            {{on "input" (fn this.updateField "email")}}
           />
         </div>
 
@@ -47,9 +44,8 @@
           <input
             id="username"
             type="text"
-            class="field-input"
             value={{this.username}}
-            {{on "input" (fn (mut this.username) value="target.value")}}
+            {{on "input" (fn this.updateField "username")}}
           />
         </div>
 
@@ -58,9 +54,8 @@
           <input
             id="password"
             type="password"
-            class="field-input"
             value={{this.password}}
-            {{on "input" (fn (mut this.password) value="target.value")}}
+            {{on "input" (fn this.updateField "password")}}
           />
         </div>
 
@@ -69,7 +64,7 @@
             <input
               type="checkbox"
               checked={{this.isStaff}}
-              {{on "change" (fn (mut this.isStaff) value="target.checked")}}
+              {{on "change" (fn this.toggleField "isStaff")}}
             />
             <span class="field-label mb-0">Staff (superuser)</span>
           </label>

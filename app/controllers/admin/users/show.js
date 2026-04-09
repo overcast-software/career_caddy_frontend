@@ -13,6 +13,14 @@ export default class AdminUsersShowController extends Controller {
   @tracked isStaff = false;
   @tracked isActive = true;
 
+  @action updateField(field, event) {
+    this[field] = event.target.value;
+  }
+
+  @action toggleField(field) {
+    this[field] = !this[field];
+  }
+
   @action
   async save(event) {
     event?.preventDefault();

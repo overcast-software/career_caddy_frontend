@@ -15,7 +15,10 @@
         >{{this.model.content}}</textarea>
       </div>
       <div class="form-actions">
-        <Buttons::Favorite @model={{this.model}} @onToggle={{this.toggleFavorite}} />
+        <Buttons::Favorite
+          @model={{this.model}}
+          @onToggle={{this.toggleFavorite}}
+        />
         <button type="submit" class="btn">Save</button>
         <button
           type="button"

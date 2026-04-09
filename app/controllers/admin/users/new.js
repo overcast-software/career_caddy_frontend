@@ -15,6 +15,14 @@ export default class AdminUsersNewController extends Controller {
   @tracked password = '';
   @tracked isStaff = false;
 
+  @action updateField(field, event) {
+    this[field] = event.target.value;
+  }
+
+  @action toggleField(field) {
+    this[field] = !this[field];
+  }
+
   @action
   async save(event) {
     event?.preventDefault();

@@ -550,16 +550,20 @@
         </svg>
         Dark mode
       </span>
-      <span class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-        {{if this.theme.isDark 'bg-indigo-500' 'bg-gray-200'}}">
+      <span
+        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+          {{if this.theme.isDark 'bg-indigo-500' 'bg-gray-200'}}"
+      >
         <input
           type="checkbox"
           class="peer sr-only"
           checked={{this.theme.isDark}}
           {{on "change" this.theme.toggle}}
         />
-        <span class="inline-block size-4 rounded-full bg-white shadow transition-transform
-          {{if this.theme.isDark 'translate-x-6' 'translate-x-1'}}"></span>
+        <span
+          class="inline-block size-4 rounded-full bg-white shadow transition-transform
+            {{if this.theme.isDark 'translate-x-6' 'translate-x-1'}}"
+        ></span>
       </span>
     </label>
   </div>

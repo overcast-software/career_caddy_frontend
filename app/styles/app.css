@@ -62,7 +62,7 @@
   --card: #1e293b;
   --border: #334155;
   --accent: #6366f1;
-  --surface: #334155;     /* elevated: buttons, inputs — one step above card */
+  --surface: #334155; /* elevated: buttons, inputs — one step above card */
   --surface-alt: #1e293b; /* alt surface at card bg level */
   --surface-hover: #475569; /* hover state for elevated surfaces */
   --danger: #ef4444;
@@ -84,33 +84,59 @@
  * HyperUI reference: ~/Sandbox/hyperui/public/examples/application/
  */
 [data-theme="dark"] .text-gray-900,
-[data-theme="dark"] .text-gray-800 { color: #f1f5f9; }
+[data-theme="dark"] .text-gray-800 {
+  color: #f1f5f9;
+}
 
 [data-theme="dark"] .text-gray-700,
-[data-theme="dark"] .text-gray-600 { color: #cbd5e1; }
+[data-theme="dark"] .text-gray-600 {
+  color: #cbd5e1;
+}
 
-[data-theme="dark"] .text-gray-500 { color: #94a3b8; }
+[data-theme="dark"] .text-gray-500 {
+  color: #94a3b8;
+}
 
-[data-theme="dark"] .text-gray-400 { color: #64748b; }
+[data-theme="dark"] .text-gray-400 {
+  color: #64748b;
+}
 
-[data-theme="dark"] .text-gray-300 { color: #475569; }
+[data-theme="dark"] .text-gray-300 {
+  color: #475569;
+}
 
-[data-theme="dark"] .bg-white { background-color: #1e293b; }
+[data-theme="dark"] .bg-white {
+  background-color: #1e293b;
+}
 
-[data-theme="dark"] .bg-gray-50 { background-color: #334155; }
+[data-theme="dark"] .bg-gray-50 {
+  background-color: #334155;
+}
 
-[data-theme="dark"] .bg-gray-100 { background-color: #334155; }
+[data-theme="dark"] .bg-gray-100 {
+  background-color: #334155;
+}
 
-[data-theme="dark"] .border-gray-100 { border-color: #1e293b; }
+[data-theme="dark"] .border-gray-100 {
+  border-color: #1e293b;
+}
 
 [data-theme="dark"] .border-gray-200,
-[data-theme="dark"] .border-gray-300 { border-color: #334155; }
+[data-theme="dark"] .border-gray-300 {
+  border-color: #334155;
+}
 
 [data-theme="dark"] .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
-[data-theme="dark"] .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #334155; }
+[data-theme="dark"] .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #334155;
+}
 
+/* stylelint-disable-next-line selector-class-pattern */
 [data-theme="dark"] .hover\:bg-gray-50:hover,
-[data-theme="dark"] .hover\:bg-gray-100:hover { background-color: #475569; }
+/* stylelint-disable-next-line selector-class-pattern */
+[data-theme="dark"] .hover\:bg-gray-100:hover {
+  background-color: #475569;
+}
 
 /* ===== BASE ===== */
 html,
@@ -294,7 +320,7 @@ a {
   flex-wrap: wrap;
 }
 
-.builder-form .field input:not([type="checkbox"]):not([type="radio"]) {
+.builder-form .field input:not([type="checkbox"], [type="radio"]) {
   width: 100%;
   min-width: 0;
   padding: var(--space-3) var(--space-4);
@@ -305,7 +331,7 @@ a {
   color: var(--text);
 }
 
-.builder-form .field input:not([type="checkbox"]):not([type="radio"]):focus {
+.builder-form .field input:not([type="checkbox"], [type="radio"]):focus {
   outline: 2px solid rgb(10 102 194 / 25%);
   outline-offset: 2px;
   border-color: #4a9eda;
@@ -386,7 +412,7 @@ a {
 
 /* field-full input/textarea styles apply globally, not just inside builder-form */
 .field-full textarea,
-.field-full input:not([type="checkbox"]):not([type="radio"]) {
+.field-full input:not([type="checkbox"], [type="radio"]) {
   width: 100%;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
@@ -399,7 +425,7 @@ a {
 }
 
 .field-full textarea:focus,
-.field-full input:not([type="checkbox"]):not([type="radio"]):focus {
+.field-full input:not([type="checkbox"], [type="radio"]):focus {
   outline: 2px solid rgb(10 102 194 / 25%);
   outline-offset: 2px;
   border-color: #4a9eda;
@@ -446,7 +472,7 @@ a {
     margin-bottom: var(--space-2);
   }
 
-  .builder-form .field input:not([type="checkbox"]):not([type="radio"]),
+  .builder-form .field input:not([type="checkbox"], [type="radio"]),
   .builder-form .field select,
   .builder-form .field textarea {
     width: 100%;
@@ -1332,14 +1358,14 @@ a.landing-btn-primary:hover {
     margin-bottom: var(--space-2);
   }
 
-  .builder-form .field input:not([type="checkbox"]):not([type="radio"]),
+  .builder-form .field input:not([type="checkbox"], [type="radio"]),
   .builder-form .field select,
   .builder-form .field textarea {
     width: 100%;
     max-width: 100%;
   }
 
-  .builder-form.two-col .field input:not([type="checkbox"]):not([type="radio"]),
+  .builder-form.two-col .field input:not([type="checkbox"], [type="radio"]),
   .builder-form.two-col .field select,
   .builder-form.two-col .field textarea {
     width: 100%;

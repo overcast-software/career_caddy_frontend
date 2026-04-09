@@ -16,7 +16,8 @@
     </div>
   {{else if this.useAI}}
     <div class="field-full">
-      <label class="field-label" for="answer-additional-prompt">Additional prompt for AI</label>
+      <label class="field-label" for="answer-additional-prompt">Additional
+        prompt for AI</label>
       <textarea
         id="answer-additional-prompt"
         placeholder="Add any additional context or instructions for the AI..."
@@ -40,7 +41,10 @@
   {{/if}}
 
   <div class="form-actions">
-    <Buttons::Favorite @model={{@answer}} @onToggle={{fn this.toggleFavorite @answer}} />
+    <Buttons::Favorite
+      @model={{@answer}}
+      @onToggle={{fn this.toggleFavorite @answer}}
+    />
     <button type="submit" class="btn" disabled={{this.isPolling}}>Save</button>
   </div>
 </form>
