@@ -8,16 +8,7 @@
     >{{@coverLetter.content}}</textarea>
   </div>
   <div class="form-actions">
-    <button
-      type="button"
-      class="btn {{if @coverLetter.favorite 'active'}}"
-      {{on "click" (fn this.toggleFavorite @coverLetter)}}
-      title="{{if
-        @coverLetter.favorite
-        'Remove from favorites'
-        'Add to favorites'
-      }}"
-    >{{if @coverLetter.favorite "★ Favorited" "☆ Favorite"}}</button>
+    <Buttons::Favorite @model={{@coverLetter}} @onToggle={{fn this.toggleFavorite @coverLetter}} />
     <button type="submit" class="btn primary">Save</button>
   </div>
 </form>

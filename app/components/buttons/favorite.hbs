@@ -1,0 +1,6 @@
+<button
+  type="button"
+  class="btn favorite {{if @model.favorite 'favorited'}}"
+  title="{{if @model.favorite 'Remove from favorites' 'Add to favorites'}}"
+  {{on "click" @onToggle}}
+>★</button>

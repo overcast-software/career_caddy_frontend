@@ -54,18 +54,7 @@
               {{#each this.filteredResumes as |resume|}}
                 <tr>
                   <td>
-                    <button
-                      type="button"
-                      class="favorite-btn {{if resume.favorite 'favorited'}}"
-                      {{on "click" (fn this.toggleFavorite resume)}}
-                      title="{{if
-                        resume.favorite
-                        'Remove from favorites'
-                        'Add to favorites'
-                      }}"
-                    >
-                      {{#if resume.favorite}}★{{else}}☆{{/if}}
-                    </button>
+                    <Buttons::Favorite @model={{resume}} @onToggle={{fn this.toggleFavorite resume}} />
                   </td>
                   <td>
                     <LinkTo @route="resumes.show" @model={{resume}}>
@@ -110,19 +99,7 @@
               {{#each this.filteredCoverLetters as |coverLetter|}}
                 <tr>
                   <td>
-                    <button
-                      type="button"
-                      class="favorite-btn
-                        {{if coverLetter.favorite 'favorited'}}"
-                      {{on "click" (fn this.toggleFavorite coverLetter)}}
-                      title="{{if
-                        coverLetter.favorite
-                        'Remove from favorites'
-                        'Add to favorites'
-                      }}"
-                    >
-                      {{#if coverLetter.favorite}}★{{else}}☆{{/if}}
-                    </button>
+                    <Buttons::Favorite @model={{coverLetter}} @onToggle={{fn this.toggleFavorite coverLetter}} />
                   </td>
                   <td>
                     <LinkTo @route="cover-letters.show" @model={{coverLetter}}>
@@ -172,18 +149,7 @@
               {{#each this.filteredAnswers as |answer|}}
                 <tr>
                   <td>
-                    <button
-                      type="button"
-                      class="favorite-btn {{if answer.favorite 'favorited'}}"
-                      {{on "click" (fn this.toggleFavorite answer)}}
-                      title="{{if
-                        answer.favorite
-                        'Remove from favorites'
-                        'Add to favorites'
-                      }}"
-                    >
-                      {{#if answer.favorite}}★{{else}}☆{{/if}}
-                    </button>
+                    <Buttons::Favorite @model={{answer}} @onToggle={{fn this.toggleFavorite answer}} />
                   </td>
                   <td>
                     {{#if answer.question}}

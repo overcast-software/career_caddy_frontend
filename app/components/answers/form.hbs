@@ -38,18 +38,7 @@
       >{{@answer.content}}</textarea>
     </div>
     <div class="field">
-      <button
-        type="button"
-        class="btn favorite {{if @answer.favorite 'favorited'}}"
-        {{on "click" (fn this.toggleFavorite @answer)}}
-        title="{{if
-          @answer.favorite
-          'Remove from favorites'
-          'Add to favorites'
-        }}"
-      >
-        {{#if @answer.favorite}}★ Favorited{{else}}☆ Favorite{{/if}}
-      </button>
+      <Buttons::Favorite @model={{@answer}} @onToggle={{fn this.toggleFavorite @answer}} />
     </div>
   {{/if}}
 

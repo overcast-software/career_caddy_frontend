@@ -1,11 +1,6 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <button
-      type="button"
-      class="btn favorite {{if this.model.favorite 'favorited'}}"
-      data-tooltip="Favorited items appear in Career Data"
-      {{on "click" this.toggleFavorite}}
-    >★</button>
+    <Buttons::Favorite @model={{this.model}} @onToggle={{this.toggleFavorite}} />
     <button type="button" {{on "click" this.exportToDocx}} class="btn">export to
       docx</button>
     <LinkTo

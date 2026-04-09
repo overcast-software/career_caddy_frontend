@@ -15,12 +15,7 @@
         >{{this.model.content}}</textarea>
       </div>
       <div class="form-actions">
-        <button
-          type="button"
-          class="btn favorite {{if this.model.favorite 'favorited'}}"
-          data-tooltip="Favorited answers appear in Career Data"
-          {{on "click" this.toggleFavorite}}
-        >★</button>
+        <Buttons::Favorite @model={{this.model}} @onToggle={{this.toggleFavorite}} />
         <button type="submit" class="btn">Save</button>
         <button
           type="button"
