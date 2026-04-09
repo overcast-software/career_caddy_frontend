@@ -258,15 +258,6 @@ a {
   resize: none;
 }
 
-.builder-form .field-full input:not([type="checkbox"]):not([type="radio"]) {
-  width: 100%;
-  min-width: 0;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font: inherit;
-}
-
 .builder-form .field input[disabled] {
   color: var(--muted);
   background: #f8f8f8;
@@ -293,7 +284,9 @@ a {
   grid-column: 1 / -1;
 }
 
-.builder-form .field-full textarea {
+/* field-full input/textarea styles apply globally, not just inside builder-form */
+.field-full textarea,
+.field-full input:not([type="checkbox"]):not([type="radio"]) {
   width: 100%;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
