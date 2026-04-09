@@ -1169,6 +1169,13 @@ a.landing-btn-primary:hover {
   color: var(--text);
 }
 
+/* On desktop with sidebar open, footer must not cover the sidebar */
+@media (width >= 768px) {
+  .course--sidebar-open .route-footer {
+    left: 280px;
+  }
+}
+
 /* Prevent login/hero pages from scrolling */
 .course-main:has(.login-main) {
   overflow: hidden;
@@ -1863,6 +1870,76 @@ pre {
   flex: 1;
   min-width: 0;
   width: 100%;
+}
+
+/* Dropdown popup — HyperUI dark: bg-gray-900, text-white, border-gray-600 */
+.ember-power-select-dropdown {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+  font: inherit;
+  color: var(--text);
+}
+
+.ember-power-select-search {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.ember-power-select-search-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+  font-size: 0.875rem;
+  background: var(--card);
+  color: var(--text);
+}
+
+.ember-power-select-search-input:focus {
+  outline: 2px solid rgb(10 102 194 / 25%);
+  outline-offset: 2px;
+  border-color: #4a9eda;
+}
+
+.ember-power-select-options {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.ember-power-select-option {
+  padding: var(--space-2) var(--space-4);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.ember-power-select-option--highlighted {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.ember-power-select-option[aria-selected="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+.ember-power-select-option--disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.ember-power-select-group-name {
+  padding: var(--space-1) var(--space-4);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .nav-link {
