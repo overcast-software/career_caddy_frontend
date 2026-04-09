@@ -2,7 +2,7 @@
   <div class="flex items-center justify-between">
     <h3 class="text-sm font-semibold text-gray-700">Answers</h3>
     <LinkTo
-      class="btn btn-sm"
+      class="btn small"
       @route="questions.show.answers.new"
       @model={{this.model.question}}
     >New Answer</LinkTo>
@@ -14,12 +14,12 @@
         <LinkTo
           @route="questions.show.answers.show"
           @model={{answer}}
-          class="btn btn-sm"
+          class="btn small"
         >View</LinkTo>
         <LinkTo
           @route="questions.show.answers.edit"
           @model={{answer}}
-          class="btn btn-sm"
+          class="btn small"
         >Edit</LinkTo>
       </div>
     </div>

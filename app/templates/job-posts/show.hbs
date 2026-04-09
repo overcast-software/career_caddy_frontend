@@ -36,13 +36,13 @@
         <div class="flex items-center gap-2 shrink-0">
           <button
             type="button"
-            class="btn btn-sm"
+            class="btn small"
             {{on "click" this.copyDescription}}
           >
             {{this.copyButtonText}}
           </button>
           <LinkTo
-            class="btn btn-sm"
+            class="btn small"
             @route="job-posts.edit"
             @model={{this.model}}
           >Edit</LinkTo>

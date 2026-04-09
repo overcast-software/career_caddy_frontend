@@ -15,12 +15,12 @@
       <LinkTo
         @route="scrapes.show"
         @model={{get @jobPost.scrapes "0"}}
-        class="btn btn-sm"
+        class="btn small"
       >View Scrape</LinkTo>
     {{else}}
       <button
         type="button"
-        class="btn btn-sm"
+        class="btn small"
         {{on "click" this.createScrape}}
       >Create Scrape</button>
     {{/if}}
