@@ -210,8 +210,7 @@ a {
   flex-wrap: wrap;
 }
 
-/* .builder-form .field input[type="text"], */
-.builder-form .field input {
+.builder-form .field input:not([type="checkbox"]):not([type="radio"]) {
   width: 100%;
   min-width: 0;
   padding: var(--space-3) var(--space-4);
@@ -257,6 +256,15 @@ a {
 
 .builder-form .field .certification-content-textarea {
   resize: none;
+}
+
+.builder-form .field-full input:not([type="checkbox"]):not([type="radio"]) {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
 }
 
 .builder-form .field input[disabled] {
@@ -336,7 +344,7 @@ a {
     margin-bottom: var(--space-2);
   }
 
-  .builder-form .field input,
+  .builder-form .field input:not([type="checkbox"]):not([type="radio"]),
   .builder-form .field select,
   .builder-form .field textarea {
     width: 100%;
@@ -1509,14 +1517,14 @@ a.landing-btn-secondary:hover {
     margin-bottom: var(--space-2);
   }
 
-  .builder-form .field input,
+  .builder-form .field input:not([type="checkbox"]):not([type="radio"]),
   .builder-form .field select,
   .builder-form .field textarea {
     width: 100%;
     max-width: 100%;
   }
 
-  .builder-form.two-col .field input,
+  .builder-form.two-col .field input:not([type="checkbox"]):not([type="radio"]),
   .builder-form.two-col .field select,
   .builder-form.two-col .field textarea {
     width: 100%;
