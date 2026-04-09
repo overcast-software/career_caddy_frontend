@@ -10,6 +10,7 @@ Router.map(function () {
   this.route('login');
   this.route('logout');
   this.route('setup');
+  this.route('waitlist');
   this.route('job-applications', function () {
     this.route(
       'show',

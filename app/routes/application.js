@@ -18,6 +18,7 @@ export default class ApplicationRoute extends Route {
     const isPublic =
       routeName === 'setup' ||
       routeName === 'login' ||
+      routeName === 'waitlist' ||
       routeName === 'about' ||
       (routeName && routeName.startsWith('docs'));
     if (isPublic) {
