@@ -275,6 +275,14 @@ a {
   border: 1px solid var(--border);
   border-radius: 6px;
   font: inherit;
+  background: var(--card);
+  color: var(--text);
+}
+
+.builder-form .field input:not([type="checkbox"]):not([type="radio"]):focus {
+  outline: 2px solid rgb(10 102 194 / 25%);
+  outline-offset: 2px;
+  border-color: #4a9eda;
 }
 
 .builder-form .field select {
@@ -310,6 +318,14 @@ a {
   font: inherit;
   line-height: 1.4;
   resize: vertical;
+  background: var(--card);
+  color: var(--text);
+}
+
+.builder-form .field textarea:focus {
+  outline: 2px solid rgb(10 102 194 / 25%);
+  outline-offset: 2px;
+  border-color: #4a9eda;
 }
 
 .builder-form .field .certification-content-textarea {
@@ -352,6 +368,15 @@ a {
   font: inherit;
   line-height: 1.4;
   resize: vertical;
+  background: var(--card);
+  color: var(--text);
+}
+
+.field-full textarea:focus,
+.field-full input:not([type="checkbox"]):not([type="radio"]):focus {
+  outline: 2px solid rgb(10 102 194 / 25%);
+  outline-offset: 2px;
+  border-color: #4a9eda;
 }
 
 .builder-form .field-row .field {
