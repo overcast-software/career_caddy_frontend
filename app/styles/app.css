@@ -72,6 +72,41 @@
   --tee-bg: #9ecfb5;
 }
 
+/*
+ * Tailwind gray utility overrides for dark mode.
+ * [data-theme="dark"] + class = specificity 0,2,0 — beats Tailwind's 0,1,0.
+ * Covers templates that use Tailwind gray classes without dark: variants.
+ * HyperUI reference: ~/Sandbox/hyperui/public/examples/application/
+ */
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-gray-800 { color: #f1f5f9; }
+
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .text-gray-600 { color: #cbd5e1; }
+
+[data-theme="dark"] .text-gray-500 { color: #94a3b8; }
+
+[data-theme="dark"] .text-gray-400 { color: #64748b; }
+
+[data-theme="dark"] .text-gray-300 { color: #475569; }
+
+[data-theme="dark"] .bg-white { background-color: #1e293b; }
+
+[data-theme="dark"] .bg-gray-50 { background-color: #334155; }
+
+[data-theme="dark"] .bg-gray-100 { background-color: #334155; }
+
+[data-theme="dark"] .border-gray-100 { border-color: #1e293b; }
+
+[data-theme="dark"] .border-gray-200,
+[data-theme="dark"] .border-gray-300 { border-color: #334155; }
+
+[data-theme="dark"] .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+[data-theme="dark"] .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #334155; }
+
+[data-theme="dark"] .hover\:bg-gray-50:hover,
+[data-theme="dark"] .hover\:bg-gray-100:hover { background-color: #475569; }
+
 /* ===== BASE ===== */
 html,
 body {
@@ -80,22 +115,8 @@ body {
 }
 
 body {
-  /* background: linear-gradient( */
-
-  /*   180deg, */
-
-  /*   #c8effa 0%, */
-
-  /*   #77b6e1 5%, */
-
-  /*   #92a341 10%, */
-
-  /*   #6f7f28 90%, */
-
-  /*   #6e533f 100% */
-
-  /* ); */
   background-color: var(--page-bg);
+  color: var(--text);
   z-index: -1;
 }
 
@@ -185,7 +206,7 @@ body {
 .sidebar-link.active,
 .sidebar-link[aria-current="page"] {
   background-color: var(--tee-bg);
-  color: #111;
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -1689,12 +1710,12 @@ pre {
 }
 
 .breadcrumb-sep {
-  color: #555;
+  color: var(--muted);
   flex-shrink: 0;
 }
 
 .breadcrumb-link {
-  color: #1a3a5c;
+  color: var(--accent);
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1716,7 +1737,7 @@ pre {
   align-items: center;
   gap: var(--space-2);
   font-size: 0.8rem;
-  color: #1a3a5c;
+  color: var(--muted);
   white-space: nowrap;
 }
 
