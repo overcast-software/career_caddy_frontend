@@ -1,61 +1,67 @@
-<div class="pb-10">
-  <h2 class="sr-only">Status</h2>
-  <div
-    class="after:mt-4 after:block after:h-1 after:w-full after:rounded-lg after:bg-gray-200"
-  >
-    <ol class="grid text-sm font-medium text-gray-600" style={{this.gridStyle}}>
-      {{#each this.steps as |step|}}
-        <li
-          class="relative flex
-            {{step.align}}
-            {{if (eq step.state 'done') 'text-blue-500'}}
-            {{if (eq step.state 'active') 'text-blue-600 font-semibold'}}
-            {{if (eq step.state 'failed') 'text-red-500'}}
-            {{if (eq step.state 'future') 'text-gray-400'}}
-            "
-        >
-          <span class="hidden sm:block">{{step.label}}</span>
+<div class="w-full overflow-x-auto py-2">
+  <ol class="flex min-w-max items-start">
+    {{#each this.steps as |step|}}
+      <li class="flex flex-1 flex-col items-center">
+        {{! Top row: optional left line + circle + optional right line }}
+        <div class="flex w-full items-center">
+          {{! Left line segment }}
+          {{#if step.isFirst}}
+            <div class="flex-1"></div>
+          {{else}}
+            <div
+              class="h-0.5 flex-1 rounded-full
+                {{if step.lineBeforeDone "bg-blue-500 dark:bg-blue-400" "bg-gray-200 dark:bg-gray-600"}}"
+            ></div>
+          {{/if}}
 
-          <span
-            class="absolute
-              {{step.circleAlign}}
-              -bottom-7 rounded-full text-white
-              {{if (eq step.state 'done') 'bg-blue-500'}}
-              {{if (eq step.state 'active') 'bg-blue-600 ring-2 ring-blue-300'}}
-              {{if (eq step.state 'failed') 'bg-red-500'}}
-              {{if (eq step.state 'future') 'bg-gray-300'}}
-              "
-          >
-            {{#if (eq step.state "failed")}}
-              <svg
-                class="size-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clip-rule="evenodd"
-                />
+          {{! Circle }}
+          {{#if (eq step.state "done")}}
+            <span
+              class="flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white dark:bg-blue-400"
+            >
+              <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
-            {{else}}
-              <svg
-                class="size-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd"
-                />
+            </span>
+          {{else if (eq step.state "active")}}
+            <span
+              class="flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white ring-2 ring-blue-300 ring-offset-1 dark:bg-blue-500 dark:ring-blue-400"
+            >{{step.number}}</span>
+          {{else if (eq step.state "failed")}}
+            <span
+              class="flex size-7 shrink-0 items-center justify-center rounded-full bg-red-500 text-white ring-2 ring-red-300 ring-offset-1 dark:bg-red-400 dark:ring-red-300"
+            >
+              <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
-            {{/if}}
-          </span>
-        </li>
-      {{/each}}
-    </ol>
-  </div>
+            </span>
+          {{else}}
+            <span
+              class="flex size-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-[10px] font-bold text-gray-400 dark:bg-gray-700 dark:text-gray-500"
+            >{{step.number}}</span>
+          {{/if}}
+
+          {{! Right line segment }}
+          {{#if step.isLast}}
+            <div class="flex-1"></div>
+          {{else}}
+            <div
+              class="h-0.5 flex-1 rounded-full
+                {{if step.lineAfterDone "bg-blue-500 dark:bg-blue-400" "bg-gray-200 dark:bg-gray-600"}}"
+            ></div>
+          {{/if}}
+        </div>
+
+        {{! Label }}
+        <span
+          class="mt-1.5 max-w-16 text-center text-[11px] leading-tight
+            {{if (eq step.state "done") "text-blue-600 dark:text-blue-400"
+              (if (eq step.state "active") "font-semibold text-blue-700 dark:text-blue-300"
+                (if (eq step.state "failed") "font-semibold text-red-600 dark:text-red-400"
+                  "text-gray-400 dark:text-gray-500"))
+            }}"
+        >{{step.label}}</span>
+      </li>
+    {{/each}}
+  </ol>
 </div>

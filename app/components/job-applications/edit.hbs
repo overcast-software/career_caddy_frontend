@@ -1,5 +1,9 @@
 <Panel::Card>
-  <JobApplications::StatusFlow @current={{@jobApplication.status}} />
+  <StatusSteps
+    @steps={{this.statusSteps}}
+    @current={{@jobApplication.status}}
+    @failedStates={{this.failedStates}}
+  />
 
   <form class="builder-form two-col" {{on "submit" this.saveApplication}}>
     <div class="field">

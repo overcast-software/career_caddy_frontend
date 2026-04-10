@@ -3,6 +3,10 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { guidFor } from '@ember/object/internals';
 import { tracked } from '@glimmer/tracking';
+import {
+  stepsForStatus,
+  TERMINAL_STATES,
+} from 'career-caddy-frontend/utils/job-application-steps';
 export default class JobApplicationsEdit extends Component {
   @service store;
   @service currentUser;
@@ -28,6 +32,12 @@ export default class JobApplicationsEdit extends Component {
   get companies() {
     return this.store.findAll('company');
   }
+
+  get statusSteps() {
+    return stepsForStatus(this.args.jobApplication?.status);
+  }
+
+  failedStates = TERMINAL_STATES;
 
   get jobApplication() {
     return this.args.jobApplication;

@@ -1,5 +1,4 @@
 import Component from '@glimmer/component';
-import { htmlSafe } from '@ember/template';
 
 export default class StatusStepsComponent extends Component {
   get failedStates() {
@@ -17,45 +16,39 @@ export default class StatusStepsComponent extends Component {
     );
   }
 
-  get gridStyle() {
-    return htmlSafe(
-      `grid-template-columns: repeat(${(this.args.steps ?? []).length}, minmax(0, 1fr))`,
-    );
-  }
-
   get steps() {
     const steps = this.args.steps ?? [];
     const last = steps.length - 1;
 
+    // Build states first so we can reference neighbours for line colors
+    const states = steps.map((_, i) => {
+      if (this.isFailed && i === last) return 'failed';
+      if (!this.isFailed && i === this.currentIndex) return 'active';
+      if (!this.isFailed && i < this.currentIndex) return 'done';
+      return 'future';
+    });
+
     return steps.map((label, i) => {
+      const state = states[i];
+      const isFirst = i === 0;
       const isLast = i === last;
 
-      // Determine state
-      let state;
-      if (this.isFailed && isLast) {
-        state = 'failed';
-      } else if (!this.isFailed && i === this.currentIndex) {
-        state = 'active';
-      } else if (!this.isFailed && i < this.currentIndex) {
-        state = 'done';
-      } else {
-        state = 'future';
-      }
+      // Line segment AFTER this step is "done" if both this and next are reached
+      const reached = (s) => s === 'done' || s === 'active' || s === 'failed';
+      const lineAfterDone =
+        !isLast && reached(states[i]) && reached(states[i + 1]);
+      const lineBeforeDone =
+        !isFirst && reached(states[i - 1]) && reached(states[i]);
 
-      // Horizontal alignment of the label and circle
-      let align, circleAlign;
-      if (i === 0) {
-        align = 'justify-start';
-        circleAlign = 'start-0';
-      } else if (isLast) {
-        align = 'justify-end';
-        circleAlign = 'end-0';
-      } else {
-        align = 'justify-center';
-        circleAlign = 'left-1/2 -translate-x-1/2';
-      }
-
-      return { label, state, align, circleAlign };
+      return {
+        label,
+        state,
+        number: i + 1,
+        isFirst,
+        isLast,
+        lineAfterDone,
+        lineBeforeDone,
+      };
     });
   }
 }
