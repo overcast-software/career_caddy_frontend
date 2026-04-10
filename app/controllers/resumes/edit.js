@@ -2,11 +2,13 @@ import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import cloneResume from 'career-caddy-frontend/utils/clone-resume';
+import exportResumeToWord from 'career-caddy-frontend/utils/export-resume-to-word';
 
 export default class ResumesEditController extends Controller {
   @service store;
   @service router;
   @service flashMessages;
+  @service session;
 
   @action
   async cloneResume() {
@@ -31,42 +33,14 @@ export default class ResumesEditController extends Controller {
     });
   }
 
+  isExporting = false;
+
   @action
   async exportToWord() {
     if (this.isExporting) return;
     this.isExporting = true;
     try {
-      const id = this.model.id;
-      const adapter = this.store.adapterFor('resume');
-      const base = adapter.buildURL('resume', id);
-      const url = `${base}export`;
-
-      const resp = await fetch(url, { method: 'GET', credentials: 'include' });
-      if (!resp.ok) throw new Error(`Export failed (${resp.status})`);
-
-      const ct = resp.headers.get('content-type') || '';
-      if (
-        ct.includes(
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        ) ||
-        ct.includes('application/octet-stream')
-      ) {
-        const blob = await resp.blob();
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `resume-${id}.docx`;
-        document.body.appendChild(link);
-        link.click();
-        URL.revokeObjectURL(link.href);
-        link.remove();
-      } else {
-        try {
-          const data = await resp.json();
-          if (data?.url) window.location.assign(data.url);
-        } catch {
-          /* ignore */
-        }
-      }
+      await exportResumeToWord(this.store, this.session, this.model.id);
     } catch (e) {
       alert?.(e?.message ?? 'Export failed');
     } finally {
