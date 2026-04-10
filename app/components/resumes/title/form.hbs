@@ -4,8 +4,8 @@
       <span class="field-label">Job Title</span>
       <input
         type="text"
-        name="Title"
-        value={{@resume.title}}
+        name="title"
+        value={{this.title}}
         {{on "input" this.updateTitle}}
       />
     </label>
@@ -13,8 +13,8 @@
       <span class="field-label">Internal Resume Name</span>
       <input
         type="text"
-        name="Title"
-        value={{@resume.name}}
+        name="name"
+        value={{this.name}}
         {{on "input" this.updateName}}
       />
     </label>
@@ -22,9 +22,9 @@
   <label class="field">
     <span class="field-label">Resume Notes</span>
     <textarea
-      name="Title"
+      name="notes"
       rows="2"
-      value={{@resume.notes}}
+      value={{this.notes}}
       {{on "input" this.updateNotes}}
     ></textarea>
   </label>
