@@ -1,4 +1,3 @@
-{{yield}}
 <article class="panel-card">
   <h3>
     <LinkTo @route="resumes.show" @model={{@resume}}>
@@ -9,7 +8,7 @@
   <p>
     Used in
     {{@resume.jobApplications.length}}
-    job appliations
+    job applications
   </p>
   <p>
     Note:
@@ -20,12 +19,7 @@
     type="button"
     class="btn danger"
     {{on "click" this.deleteResume}}
-  >delete</button>
-  <button
-    type="button"
-    class="btn favorite {{if @resume.favorite 'favorited'}}"
-    data-tooltip="Favorited items appear in Career Data"
-    {{on "click" (fn this.toggleFavorite @resume)}}
-  >★</button>
+  >Delete</button>
+  <Buttons::Favorite @model={{@resume}} @onToggle={{fn this.toggleFavorite @resume}} />
 </article>
 {{yield}}
