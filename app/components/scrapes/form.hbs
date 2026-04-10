@@ -50,6 +50,22 @@
     >{{@scrape.jobContent}}</textarea>
   </div>
 
+  {{#if this.showHoldOption}}
+    <div class="field-row">
+      <div class="field">
+        <label class="inline-flex items-center gap-2 text-sm text-[var(--muted)] cursor-pointer">
+          <input
+            type="checkbox"
+            checked={{this.isHold}}
+            {{on "change" this.toggleHold}}
+            class="rounded border-[var(--border)] text-[var(--accent)]"
+          />
+          Hold for later processing
+        </label>
+      </div>
+    </div>
+  {{/if}}
+
   <div class="form-actions">
     <button type="submit" class="btn">Save</button>
     <button

@@ -5,10 +5,24 @@ import { service } from '@ember/service';
 export default class ScrapesFormComponent extends Component {
   @service router;
   @service flashMessages;
+  @service currentUser;
+
+  get showHoldOption() {
+    return this.currentUser.user?.isStaff && this.args.scrape.isNew;
+  }
+
+  get isHold() {
+    return this.args.scrape.status === 'hold';
+  }
 
   @action
   updateField(field, event) {
     this.args.scrape[field] = event.target.value;
+  }
+
+  @action
+  toggleHold(event) {
+    this.args.scrape.status = event.target.checked ? 'hold' : null;
   }
 
   @action
