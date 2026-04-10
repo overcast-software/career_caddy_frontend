@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
+import cloneResume from 'career-caddy-frontend/utils/clone-resume';
 
 export default class ResumesEditController extends Controller {
   @service store;
@@ -9,26 +10,7 @@ export default class ResumesEditController extends Controller {
 
   @action
   async cloneResume() {
-    try {
-      const adapter = this.store.adapterFor('resume');
-      const url = `${adapter.buildURL('resume', this.model.id)}clone/`;
-      const payload = await adapter.ajax(url, 'POST');
-      const clone = this.store.push(
-        this.store
-          .serializerFor('resume')
-          .normalizeResponse(
-            this.store,
-            this.store.modelFor('resume'),
-            payload,
-            null,
-            'createRecord',
-          ),
-      );
-      this.flashMessages.success('Resume successfully cloned');
-      this.router.transitionTo('resumes.show', clone.id);
-    } catch {
-      this.flashMessages.warning('Failed to clone resume');
-    }
+    await cloneResume(this.store, this.router, this.flashMessages, this.model.id);
   }
 
   @action

@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
+import cloneResume from 'career-caddy-frontend/utils/clone-resume';
 
 export default class ResumesShowController extends Controller {
   @service store;
@@ -14,28 +15,7 @@ export default class ResumesShowController extends Controller {
 
   @action
   async cloneResume() {
-    const source = this.model;
-    const user = await source.user;
-    this.store
-      .createRecord('resume', {
-        user,
-        filePath: source.filePath ?? null,
-        skills: source.skills.content,
-        title: source.title ? `${source.title} (Copy)` : source.title,
-        educations: source.educations.content,
-        experiences: source.experiences.content,
-        certifications: source.certifications.content,
-        summaries: source.summaries.content,
-        projects: source.projects?.content,
-      })
-      .save()
-      .then((clone) => {
-        this.router.transitionTo('resumes.show', clone.id);
-      })
-      .then(() => this.flashMessages.success('resume successfully cloned'))
-      .catch((error) => {
-        this.flashMessages.warning(error);
-      });
+    await cloneResume(this.store, this.router, this.flashMessages, this.model.id);
   }
 
   @action
