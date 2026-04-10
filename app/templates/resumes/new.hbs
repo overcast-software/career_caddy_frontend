@@ -1,5 +1,5 @@
-<div class="builder-page">
-  <div class="container">
+<RouteLayout @flashMessages={{this.flashMessages}} @mainClass="builder-page">
+  <:main>
     <div class="builder-layout">
       <aside class="editor-panel">
         <Panel::Card @title="Job Title" @collapsible={{true}}>
@@ -62,5 +62,5 @@
         </div>
       </main>
     </div>
-  </div>
-</div>
+  </:main>
+</RouteLayout>

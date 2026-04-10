@@ -5,6 +5,7 @@ import { action } from '@ember/object';
 export default class ResumesNewController extends Controller {
   @service store;
   @service router;
+  @service flashMessages;
 
   addExperience = async () => {
     const exp = this.store.createRecord('experience', { resume: this.model });
