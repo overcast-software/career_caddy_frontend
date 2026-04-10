@@ -4,9 +4,11 @@
   </:subnav>
   <:main>
     {{#if this.noResumes}}
-      <p>no resumes —
-        <LinkTo @route="resumes.import">import</LinkTo>
-        one to start.</p>
+      <EmptyState @message="No resumes yet." />
+      <p class="mt-2 text-center text-sm">
+        <LinkTo @route="resumes.import" class="text-blue-600 hover:underline dark:text-blue-400">Import</LinkTo>
+        one to start.
+      </p>
     {{else}}
       {{#if this.model}}
         {{#each this.model as |resume|}}
