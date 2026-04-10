@@ -10,7 +10,11 @@
           {{else}}
             <div
               class="h-0.5 flex-1 rounded-full
-                {{if step.lineBeforeDone "bg-blue-500 dark:bg-blue-400" "bg-gray-200 dark:bg-gray-600"}}"
+                {{if
+                  step.lineBeforeDone
+                  'bg-blue-500 dark:bg-blue-400'
+                  'bg-gray-200 dark:bg-gray-600'
+                }}"
             ></div>
           {{/if}}
 
@@ -19,8 +23,19 @@
             <span
               class="flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white dark:bg-blue-400"
             >
-              <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              <svg
+                class="size-3.5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="3"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4.5 12.75l6 6 9-13.5"
+                />
               </svg>
             </span>
           {{else if (eq step.state "active")}}
@@ -31,8 +46,19 @@
             <span
               class="flex size-7 shrink-0 items-center justify-center rounded-full bg-red-500 text-white ring-2 ring-red-300 ring-offset-1 dark:bg-red-400 dark:ring-red-300"
             >
-              <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              <svg
+                class="size-3.5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="3"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </span>
           {{else}}
@@ -47,7 +73,11 @@
           {{else}}
             <div
               class="h-0.5 flex-1 rounded-full
-                {{if step.lineAfterDone "bg-blue-500 dark:bg-blue-400" "bg-gray-200 dark:bg-gray-600"}}"
+                {{if
+                  step.lineAfterDone
+                  'bg-blue-500 dark:bg-blue-400'
+                  'bg-gray-200 dark:bg-gray-600'
+                }}"
             ></div>
           {{/if}}
         </div>
@@ -55,10 +85,18 @@
         {{! Label }}
         <span
           class="mt-1.5 max-w-16 text-center text-[11px] leading-tight
-            {{if (eq step.state "done") "text-blue-600 dark:text-blue-400"
-              (if (eq step.state "active") "font-semibold text-blue-700 dark:text-blue-300"
-                (if (eq step.state "failed") "font-semibold text-red-600 dark:text-red-400"
-                  "text-gray-400 dark:text-gray-500"))
+            {{if
+              (eq step.state 'done')
+              'text-blue-600 dark:text-blue-400'
+              (if
+                (eq step.state 'active')
+                'font-semibold text-blue-700 dark:text-blue-300'
+                (if
+                  (eq step.state 'failed')
+                  'font-semibold text-red-600 dark:text-red-400'
+                  'text-gray-400 dark:text-gray-500'
+                )
+              )
             }}"
         >{{step.label}}</span>
       </li>

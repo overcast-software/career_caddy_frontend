@@ -8,6 +8,7 @@ export default class AnswersIndexController extends Controller {
 
   @service flashMessages;
   @service router;
+  @service store;
   @tracked search = '';
   @tracked isSearching = false;
 
@@ -28,6 +29,7 @@ export default class AnswersIndexController extends Controller {
     answer.favorite = !answer.favorite;
     try {
       await answer.save();
+      this.store.peekRecord('career-data', '1')?.markDirty();
       const status = answer.favorite ? 'added to' : 'removed from';
       this.flashMessages.success(`Answer ${status} favorites`);
     } catch {

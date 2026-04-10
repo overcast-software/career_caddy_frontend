@@ -5,10 +5,12 @@ import { service } from '@ember/service';
 export default class ResumesCompact extends Component {
   @service spinner;
   @service flashMessages;
+  @service store;
   @action async toggleFavorite(resume) {
     resume.favorite = !resume.favorite;
     try {
       await resume.save();
+      this.store.peekRecord('career-data', '1')?.markDirty();
       const status = resume.favorite ? 'added to' : 'removed from';
       this.flashMessages.success(`Resume ${status} favorites`);
     } catch {

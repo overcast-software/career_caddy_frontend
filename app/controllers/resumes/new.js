@@ -28,6 +28,11 @@ export default class ResumesNewController extends Controller {
       this.flashMessages.warning('Save the resume before cloning');
       return;
     }
-    await cloneResume(this.store, this.router, this.flashMessages, this.model.id);
+    await cloneResume(
+      this.store,
+      this.router,
+      this.flashMessages,
+      this.model.id,
+    );
   }
 }

@@ -43,6 +43,7 @@ export default class CoverLettersShowController extends Controller {
     this.model.favorite = !this.model.favorite;
     try {
       await this.model.save();
+      this.store.peekRecord('career-data', '1')?.markDirty();
       const status = this.model.favorite ? 'added to' : 'removed from';
       this.flashMessages.success(`Cover letter ${status} favorites`);
     } catch {

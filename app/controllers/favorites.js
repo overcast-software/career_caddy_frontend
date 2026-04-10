@@ -5,6 +5,7 @@ import { service } from '@ember/service';
 
 export default class FavoritesController extends Controller {
   @service flashMessages;
+  @service store;
 
   @tracked showOnlyFavorites = true;
   @tracked activeTab = 'resumes';
@@ -41,6 +42,7 @@ export default class FavoritesController extends Controller {
     item.favorite = !item.favorite;
     try {
       await item.save();
+      this.store.peekRecord('career-data', '1')?.markDirty();
       const status = item.favorite ? 'added to' : 'removed from';
       this.flashMessages.success(`Item ${status} favorites`);
     } catch {

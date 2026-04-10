@@ -6,7 +6,10 @@
     {{#if this.noResumes}}
       <EmptyState @message="No resumes yet." />
       <p class="mt-2 text-center text-sm">
-        <LinkTo @route="resumes.import" class="text-blue-600 hover:underline dark:text-blue-400">Import</LinkTo>
+        <LinkTo
+          @route="resumes.import"
+          class="text-blue-600 hover:underline dark:text-blue-400"
+        >Import</LinkTo>
         one to start.
       </p>
     {{else}}

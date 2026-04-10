@@ -1,4 +1,9 @@
-export default async function cloneResume(store, router, flashMessages, resumeId) {
+export default async function cloneResume(
+  store,
+  router,
+  flashMessages,
+  resumeId,
+) {
   try {
     const adapter = store.adapterFor('resume');
     const url = `${adapter.buildURL('resume', resumeId)}clone/`;

@@ -11,6 +11,7 @@ export default class AnswersForm extends Component {
   @service poller;
   @service router;
   @service spinner;
+  @service store;
   @tracked additionalPrompt = '';
   @tracked useAI = false;
   @tracked isPolling = false;
@@ -62,6 +63,7 @@ export default class AnswersForm extends Component {
 
     try {
       await this.args.answer.save();
+      this.store.peekRecord('career-data', '1')?.markDirty();
       if (this.useAI) {
         this.isPolling = true;
         this.spinner.begin({ label: 'AI is generating your answer…' });

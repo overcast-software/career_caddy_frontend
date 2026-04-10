@@ -20,6 +20,9 @@
     class="btn danger"
     {{on "click" this.deleteResume}}
   >Delete</button>
-  <Buttons::Favorite @model={{@resume}} @onToggle={{fn this.toggleFavorite @resume}} />
+  <Buttons::Favorite
+    @model={{@resume}}
+    @onToggle={{fn this.toggleFavorite @resume}}
+  />
 </article>
 {{yield}}

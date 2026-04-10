@@ -21,6 +21,7 @@ export default class AnswersEditController extends Controller {
   @action saveAnswer(event) {
     event.preventDefault();
     this.model.save().then(() => {
+      this.store.peekRecord('career-data', '1')?.markDirty();
       this.flashMessages.success('answer saved');
       this.router.transitionTo('answers.show', this.model);
     });

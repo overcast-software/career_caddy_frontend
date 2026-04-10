@@ -16,7 +16,12 @@ export default class ResumesShowController extends Controller {
 
   @action
   async cloneResume() {
-    await cloneResume(this.store, this.router, this.flashMessages, this.model.id);
+    await cloneResume(
+      this.store,
+      this.router,
+      this.flashMessages,
+      this.model.id,
+    );
   }
 
   @action
