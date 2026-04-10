@@ -1236,27 +1236,6 @@ a.landing-btn-primary:hover {
 }
 
 /* ===== RESUME ===== */
-/* Center the profile block in preview */
-.resume-preview .profile,
-.resume-preview .profile .name,
-.resume-preview .profile .title,
-.resume-preview .profile .email {
-  text-align: center;
-}
-
-/* Preview-side experience layout */
-.resume-preview .experience .job-title {
-  font-weight: 600;
-}
-
-.resume-preview .experience .job-meta {
-  color: var(--muted);
-}
-
-.resume-preview .experience .desc-list {
-  list-style: disc;
-  margin-left: 1.25rem;
-}
 
 .collapsible .collapsible-head {
   display: flex;
@@ -1472,10 +1451,6 @@ a.landing-btn-primary:hover {
   padding: var(--space-5);
 }
 
-.resume-content {
-  width: 90%;
-  margin: 0 auto;
-}
 
 .muted {
   color: var(--muted);
