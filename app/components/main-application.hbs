@@ -1,14 +1,12 @@
-{{#if this.sidebarOpen}}
-  <button
-    type="button"
-    class="mobile-overlay"
-    aria-label="Close menu"
-    {{on "click" this.close}}
-  ></button>
-  <div class="mobile-drawer">
-    <Sidebar @onClose={{this.close}} />
-  </div>
-{{/if}}
+<button
+  type="button"
+  class="mobile-overlay {{if this.sidebarOpen 'mobile-overlay--visible'}}"
+  aria-label="Close menu"
+  {{on "click" this.close}}
+></button>
+<div class="mobile-drawer {{if this.sidebarOpen 'mobile-drawer--open'}}">
+  <Sidebar @onClose={{this.close}} />
+</div>
 
 <div class="course {{if this.sidebarOpen 'course--sidebar-open'}}">
   <header class="site-header">
