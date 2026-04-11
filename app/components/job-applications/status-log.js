@@ -90,7 +90,7 @@ export default class JobApplicationsStatusLogComponent extends Component {
         ? 'bg-red-400'
         : s.status === 'Accepted'
           ? 'bg-green-500'
-          : 'bg-blue-400',
+          : 'bg-accent-400',
     }));
   }
 

@@ -1,0 +1,93 @@
+{{page-title "Appearance — Settings"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="settings.index" class="nav-link">Profile</LinkTo>
+    <LinkTo @route="settings.data" class="nav-link">Data</LinkTo>
+    <LinkTo @route="settings.appearance" class="nav-link">Appearance</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card max-w-lg">
+      <h1 class="text-xl font-semibold mb-2">Appearance</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        Choose your accent color and toggle dark mode.
+      </p>
+
+      {{! ── Dark Mode Toggle ── }}
+      <div
+        class="flex items-center justify-between py-3 mb-6 border-b border-gray-100 dark:border-gray-700"
+      >
+        <div>
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Dark
+            mode</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500">Switch between
+            light and dark themes</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked="{{this.theme.isDark}}"
+          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200
+            {{if this.theme.isDark 'bg-accent-500' 'bg-gray-200'}}"
+          {{on "click" this.theme.toggle}}
+        >
+          <span
+            class="pointer-events-none inline-block size-5 rounded-full bg-white shadow ring-0 transition-transform duration-200
+              {{if this.theme.isDark 'translate-x-5' 'translate-x-0'}}"
+          ></span>
+        </button>
+      </div>
+
+      {{! ── Palette Selection ── }}
+      <p
+        class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3"
+      >Accent color</p>
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {{#each this.paletteOptions as |opt|}}
+          <button
+            type="button"
+            class="group relative flex flex-col items-center gap-2 rounded-lg border-2 p-3 transition-all duration-150
+              {{if
+                (eq this.theme.palette opt.id)
+                'border-accent-500 bg-accent-50/50 dark:bg-accent-900/20 ring-1 ring-accent-300 dark:ring-accent-600'
+                'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'
+              }}"
+            {{on "click" (fn this.selectPalette opt.id)}}
+          >
+            <div class="flex gap-0.5">
+              {{#each opt.swatches as |swatch|}}
+                <span
+                  class="block size-5 first:rounded-l-md last:rounded-r-md"
+                  style={{swatch}}
+                ></span>
+              {{/each}}
+            </div>
+            <span
+              class="text-xs font-medium capitalize text-gray-600 dark:text-gray-300"
+            >
+              {{opt.name}}
+            </span>
+            {{#if (eq this.theme.palette opt.id)}}
+              <span
+                class="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-accent-500 text-white"
+              >
+                <svg
+                  class="size-2.5"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    d="M2 6l3 3 5-5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+            {{/if}}
+          </button>
+        {{/each}}
+      </div>
+    </div>
+  </:main>
+</RouteLayout>

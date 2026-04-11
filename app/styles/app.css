@@ -37,15 +37,12 @@
   --bg: #fff;
   --card: #fff;
   --border: #e6e6e6;
-  --accent: #77b6e1;
   --danger: #c62828;
   --danger-surface: #fff5f5;
   --danger-border: #f2b8b5;
   --surface: #fafafa;
   --surface-alt: #f5f6f8;
   --surface-hover: #f0f4f8;
-  --tee-bg: #9bd8f8;
-  --page-bg: #f0f6fb;
   --radius: 8px;
   --space-1: 4px;
   --space-2: 8px;
@@ -53,6 +50,21 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+
+  /* Default palette: indigo (space-separated RGB for Tailwind alpha support) */
+  --accent-50: 238 242 255;
+  --accent-100: 224 231 255;
+  --accent-200: 199 210 254;
+  --accent-300: 165 180 252;
+  --accent-400: 129 140 248;
+  --accent-500: 99 102 241;
+  --accent-600: 79 70 229;
+  --accent-700: 67 56 202;
+  --accent-800: 55 48 163;
+  --accent-900: 49 46 129;
+  --accent: rgb(var(--accent-500));
+  --tee-bg: rgb(var(--accent-200));
+  --page-bg: #eef2ff;
 }
 
 [data-theme="dark"] {
@@ -61,7 +73,6 @@
   --bg: #1e293b;
   --card: #1e293b;
   --border: #334155;
-  --accent: #6366f1;
   --surface: #334155; /* elevated: buttons, inputs — one step above card */
   --surface-alt: #1e293b; /* alt surface at card bg level */
   --surface-hover: #475569; /* hover state for elevated surfaces */
@@ -72,9 +83,90 @@
   --page-bg: #0f172a;
 }
 
-[data-theme="jade"] {
-  --accent: #3a8c5c;
-  --tee-bg: #9ecfb5;
+/* ===== PALETTES ===== */
+/* Each palette defines accent shades 50–900 as space-separated RGB.
+ * To add a new palette: copy a block, change the selector and RGB values,
+ * then add the name to PALETTES in services/theme.js.
+ * Conversion: printf "%d %d %d\n" 0xRR 0xGG 0xBB */
+
+[data-palette="blue"] {
+  --accent-50: 239 246 255;
+  --accent-100: 219 234 254;
+  --accent-200: 191 219 254;
+  --accent-300: 147 197 253;
+  --accent-400: 96 165 250;
+  --accent-500: 59 130 246;
+  --accent-600: 37 99 235;
+  --accent-700: 29 78 216;
+  --accent-800: 30 64 175;
+  --accent-900: 30 58 138;
+  --accent: rgb(var(--accent-500));
+  --tee-bg: rgb(var(--accent-200));
+  --page-bg: #eff6ff;
+}
+
+[data-palette="jade"] {
+  --accent-50: 236 253 245;
+  --accent-100: 209 250 229;
+  --accent-200: 167 243 208;
+  --accent-300: 110 231 183;
+  --accent-400: 52 211 153;
+  --accent-500: 16 185 129;
+  --accent-600: 5 150 105;
+  --accent-700: 4 120 87;
+  --accent-800: 6 95 70;
+  --accent-900: 6 78 59;
+  --accent: rgb(var(--accent-500));
+  --tee-bg: rgb(var(--accent-200));
+  --page-bg: #ecfdf5;
+}
+
+[data-palette="rose"] {
+  --accent-50: 255 241 242;
+  --accent-100: 255 228 230;
+  --accent-200: 254 205 211;
+  --accent-300: 253 164 175;
+  --accent-400: 251 113 133;
+  --accent-500: 244 63 94;
+  --accent-600: 225 29 72;
+  --accent-700: 190 18 60;
+  --accent-800: 159 18 57;
+  --accent-900: 136 19 55;
+  --accent: rgb(var(--accent-500));
+  --tee-bg: rgb(var(--accent-200));
+  --page-bg: #fff1f2;
+}
+
+[data-palette="amber"] {
+  --accent-50: 255 251 235;
+  --accent-100: 254 243 199;
+  --accent-200: 253 230 138;
+  --accent-300: 252 211 77;
+  --accent-400: 251 191 36;
+  --accent-500: 245 158 11;
+  --accent-600: 217 119 6;
+  --accent-700: 180 83 9;
+  --accent-800: 146 64 14;
+  --accent-900: 120 53 15;
+  --accent: rgb(var(--accent-500));
+  --tee-bg: rgb(var(--accent-200));
+  --page-bg: #fffbeb;
+}
+
+[data-palette="violet"] {
+  --accent-50: 245 243 255;
+  --accent-100: 237 233 254;
+  --accent-200: 221 214 254;
+  --accent-300: 196 181 253;
+  --accent-400: 167 139 250;
+  --accent-500: 139 92 246;
+  --accent-600: 124 58 237;
+  --accent-700: 109 40 217;
+  --accent-800: 91 33 182;
+  --accent-900: 76 29 149;
+  --accent: rgb(var(--accent-500));
+  --tee-bg: rgb(var(--accent-200));
+  --page-bg: #f5f3ff;
 }
 
 /*
@@ -150,7 +242,7 @@
 }
 
 .brand-title span {
-  color: #6366f1;
+  color: var(--accent);
 }
 
 [data-theme="dark"] .brand-title {
@@ -646,7 +738,10 @@ a {
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .btn.pill {
@@ -1176,14 +1271,14 @@ a.landing-btn-primary:hover {
 }
 
 .login-field input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgb(99 102 241 / 20%);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgb(var(--accent-500) / 20%);
 }
 
 .login-submit {
   margin-top: 0.25rem;
   padding: 0.65rem;
-  background: #6366f1;
+  background: var(--accent);
   color: #fff;
   font-weight: 700;
   font-size: 0.95rem;
@@ -1201,9 +1296,9 @@ a.landing-btn-primary:hover {
   margin-top: -0.25rem;
   padding: 0.65rem;
   background: transparent;
-  border: 1.5px solid #6366f1;
+  border: 1.5px solid var(--accent);
   border-radius: 0.4rem;
-  color: #6366f1;
+  color: var(--accent);
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -1213,7 +1308,7 @@ a.landing-btn-primary:hover {
 }
 
 .login-demo:hover {
-  background: #6366f1;
+  background: var(--accent);
   color: #fff;
 }
 
@@ -1225,7 +1320,7 @@ a.landing-btn-primary:hover {
 }
 
 .login-card-setup a {
-  color: #6366f1;
+  color: var(--accent);
   text-decoration: none;
   font-weight: 600;
 }
@@ -1262,7 +1357,7 @@ a.landing-btn-primary:hover {
 }
 
 .route-footer-guest a {
-  color: #6366f1;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -1728,11 +1823,11 @@ pre {
 }
 
 .topbar-login {
-  background: #6366f1;
+  background: var(--accent);
 }
 
 .topbar-login:hover {
-  background: #4f46e5;
+  background: rgb(var(--accent-600));
 }
 
 .tee-left {
@@ -2106,7 +2201,7 @@ pre {
 .guest-banner-link {
   font-weight: 600;
   text-decoration: underline;
-  color: #6366f1;
+  color: var(--accent);
 }
 
 .nav-link:hover {

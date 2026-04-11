@@ -64,7 +64,10 @@
                     (eq scrape.state 'pending')
                     'bg-yellow-100 text-yellow-700'
                   }}
-                  {{if (eq scrape.state 'running') 'bg-blue-100 text-blue-700'}}
+                  {{if
+                    (eq scrape.state 'running')
+                    'bg-accent-100 text-accent-700'
+                  }}
                   "
               >
                 {{or scrape.status "unknown"}}

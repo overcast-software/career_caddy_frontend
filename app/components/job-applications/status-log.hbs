@@ -41,7 +41,7 @@
                   class="transition-colors
                     {{if
                       (eq this.expandedId entry.record.id)
-                      'text-blue-500'
+                      'text-accent-500'
                       'text-gray-300 hover:text-gray-500'
                     }}"
                   {{on "click" (fn this.toggleExpand entry.record)}}
@@ -84,7 +84,7 @@
                 <input
                   type="datetime-local"
                   aria-label="Status date"
-                  class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent-400"
                   value={{this.editingDate}}
                   {{on "change" this.updateEditingDate}}
                 />
@@ -92,7 +92,7 @@
                   rows="2"
                   aria-label="Status note"
                   placeholder="Add a note…"
-                  class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"
+                  class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent-400 resize-none"
                   {{on "input" this.updateEditingNote}}
                 >{{this.editingNote}}</textarea>
                 <div class="flex gap-2">

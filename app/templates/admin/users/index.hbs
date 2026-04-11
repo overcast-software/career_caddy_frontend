@@ -45,7 +45,7 @@
                   <td class="py-3 pr-4">
                     {{#if user.isStaff}}
                       <span
-                        class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300"
+                        class="inline-flex items-center rounded-full bg-accent-100 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-300"
                       >Staff</span>
                     {{else if user.isGuest}}
                       <span
@@ -73,7 +73,7 @@
                       <LinkTo
                         @route="admin.users.show"
                         @model={{user.id}}
-                        class="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                        class="text-sm text-accent-600 hover:underline dark:text-accent-400"
                       >Edit</LinkTo>
                       <button
                         type="button"

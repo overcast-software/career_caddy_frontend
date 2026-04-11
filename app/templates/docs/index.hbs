@@ -18,7 +18,7 @@
     <p class="text-gray-600 mb-3">
       Every AI feature in Career Caddy — scoring, cover letters, executive
       summaries, application answers — is powered by a single resource called
-      <LinkTo @route="docs.career-data" class="text-blue-600 underline">Career
+      <LinkTo @route="docs.career-data" class="text-accent-600 underline">Career
         Data</LinkTo>. Career Data is a markdown document you write once and
       refine over time. It describes your professional background, skills,
       writing style, and goals.
@@ -42,27 +42,29 @@
         <strong>Build your Career Data</strong>
         — write your background, skills, and voice in markdown. This is your AI
         foundation. Spend real time here.
-        <LinkTo @route="docs.career-data" class="text-blue-600 text-sm ml-1">→
+        <LinkTo @route="docs.career-data" class="text-accent-600 text-sm ml-1">→
           learn more</LinkTo>
       </li>
       <li>
         <strong>Add a Job Post</strong>
         — paste in a listing manually or scrape it from a URL.
-        <LinkTo @route="docs.job-posts" class="text-blue-600 text-sm ml-1">→
+        <LinkTo @route="docs.job-posts" class="text-accent-600 text-sm ml-1">→
           learn more</LinkTo>
       </li>
       <li>
         <strong>Generate a Score</strong>
         — the AI reads the job description and your Career Data and tells you
         how strong a fit you are (0–100) with a gap analysis.
-        <LinkTo @route="docs.scores" class="text-blue-600 text-sm ml-1">→ learn
-          more</LinkTo>
+        <LinkTo @route="docs.scores" class="text-accent-600 text-sm ml-1">→
+          learn more</LinkTo>
       </li>
       <li>
         <strong>Generate a Cover Letter</strong>
         — written in your voice, tailored to the role.
-        <LinkTo @route="docs.cover-letters" class="text-blue-600 text-sm ml-1">→
-          learn more</LinkTo>
+        <LinkTo
+          @route="docs.cover-letters"
+          class="text-accent-600 text-sm ml-1"
+        >→ learn more</LinkTo>
       </li>
       <li>
         <strong>Create a Job Application</strong>
@@ -70,14 +72,14 @@
         progresses.
         <LinkTo
           @route="docs.job-applications"
-          class="text-blue-600 text-sm ml-1"
+          class="text-accent-600 text-sm ml-1"
         >→ learn more</LinkTo>
       </li>
       <li>
         <strong>Capture and answer application questions</strong>
         — log questions you're asked. The AI drafts answers using your Career
         Data and the job context.
-        <LinkTo @route="docs.questions" class="text-blue-600 text-sm ml-1">→
+        <LinkTo @route="docs.questions" class="text-accent-600 text-sm ml-1">→
           learn more</LinkTo>
       </li>
     </ol>
@@ -96,14 +98,15 @@
       <tbody class="divide-y divide-gray-100">
         <tr class="py-2">
           <td class="py-2 font-medium">
-            <LinkTo @route="docs.career-data" class="text-blue-600">Career Data</LinkTo>
+            <LinkTo @route="docs.career-data" class="text-accent-600">Career
+              Data</LinkTo>
           </td>
           <td class="py-2">Your professional background in markdown — the AI
             reads this for everything</td>
         </tr>
         <tr>
           <td class="py-2 font-medium">
-            <LinkTo @route="docs.job-posts" class="text-blue-600">Job Posts</LinkTo>
+            <LinkTo @route="docs.job-posts" class="text-accent-600">Job Posts</LinkTo>
           </td>
           <td class="py-2">Stored job listings — the root resource everything
             else attaches to</td>
@@ -112,7 +115,7 @@
           <td class="py-2 font-medium">
             <LinkTo
               @route="docs.job-applications"
-              class="text-blue-600"
+              class="text-accent-600"
             >Applications</LinkTo>
           </td>
           <td class="py-2">Your record of applying — tracks status, dates,
@@ -120,14 +123,17 @@
         </tr>
         <tr>
           <td class="py-2 font-medium">
-            <LinkTo @route="docs.resumes" class="text-blue-600">Resumes</LinkTo>
+            <LinkTo
+              @route="docs.resumes"
+              class="text-accent-600"
+            >Resumes</LinkTo>
           </td>
           <td class="py-2">Structured resume data — importable, editable, used
             to supplement AI context</td>
         </tr>
         <tr>
           <td class="py-2 font-medium">
-            <LinkTo @route="docs.cover-letters" class="text-blue-600">Cover
+            <LinkTo @route="docs.cover-letters" class="text-accent-600">Cover
               Letters</LinkTo>
           </td>
           <td class="py-2">AI-generated letters in your voice, tied to a
@@ -137,7 +143,7 @@
           <td class="py-2 font-medium">
             <LinkTo
               @route="docs.companies"
-              class="text-blue-600"
+              class="text-accent-600"
             >Companies</LinkTo>
           </td>
           <td class="py-2">Employer profiles that group related posts,
@@ -147,7 +153,7 @@
           <td class="py-2 font-medium">
             <LinkTo
               @route="docs.questions"
-              class="text-blue-600"
+              class="text-accent-600"
             >Questions</LinkTo>
           </td>
           <td class="py-2">Application questions captured from postings — AI can
@@ -155,14 +161,17 @@
         </tr>
         <tr>
           <td class="py-2 font-medium">
-            <LinkTo @route="docs.answers" class="text-blue-600">Answers</LinkTo>
+            <LinkTo
+              @route="docs.answers"
+              class="text-accent-600"
+            >Answers</LinkTo>
           </td>
           <td class="py-2">Your responses — multiple drafts per question,
             favorites feed back to AI</td>
         </tr>
         <tr>
           <td class="py-2 font-medium">
-            <LinkTo @route="docs.scores" class="text-blue-600">Scores</LinkTo>
+            <LinkTo @route="docs.scores" class="text-accent-600">Scores</LinkTo>
           </td>
           <td class="py-2">AI fit score (0–100) of your profile vs. a job
             description with gap analysis</td>
@@ -171,7 +180,7 @@
           <td class="py-2 font-medium">
             <LinkTo
               @route="docs.summaries"
-              class="text-blue-600"
+              class="text-accent-600"
             >Summaries</LinkTo>
           </td>
           <td class="py-2">AI-generated executive summaries tailored to a
@@ -179,7 +188,10 @@
         </tr>
         <tr>
           <td class="py-2 font-medium">
-            <LinkTo @route="docs.scrapes" class="text-blue-600">Scrapes</LinkTo>
+            <LinkTo
+              @route="docs.scrapes"
+              class="text-accent-600"
+            >Scrapes</LinkTo>
           </td>
           <td class="py-2">Raw webpage captures of job listings — the input that
             becomes a Job Post</td>

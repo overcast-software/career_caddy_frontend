@@ -347,7 +347,10 @@
       </li>
 
       <li>
-        <details class="group [&_summary::-webkit-details-marker]:hidden" open={{this.isDocsRoute}}>
+        <details
+          class="group [&_summary::-webkit-details-marker]:hidden"
+          open={{this.isDocsRoute}}
+        >
           <summary
             class="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-800"
           >
@@ -581,7 +584,7 @@
       </span>
       <span
         class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-          {{if this.theme.isDark 'bg-indigo-500' 'bg-gray-200'}}"
+          {{if this.theme.isDark 'bg-accent-500' 'bg-gray-200'}}"
       >
         <input
           type="checkbox"

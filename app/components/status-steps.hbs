@@ -12,7 +12,7 @@
               class="h-0.5 flex-1 rounded-full
                 {{if
                   step.lineBeforeDone
-                  'bg-blue-500 dark:bg-blue-400'
+                  'bg-accent-500 dark:bg-accent-400'
                   'bg-gray-200 dark:bg-gray-600'
                 }}"
             ></div>
@@ -21,7 +21,7 @@
           {{! Circle }}
           {{#if (eq step.state "done")}}
             <span
-              class="flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white dark:bg-blue-400"
+              class="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-500 text-white dark:bg-accent-400"
             >
               <svg
                 class="size-3.5"
@@ -40,7 +40,7 @@
             </span>
           {{else if (eq step.state "active")}}
             <span
-              class="flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white ring-2 ring-blue-300 ring-offset-1 dark:bg-blue-500 dark:ring-blue-400"
+              class="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-600 text-[10px] font-bold text-white ring-2 ring-accent-300 ring-offset-1 dark:bg-accent-500 dark:ring-accent-400"
             >{{step.number}}</span>
           {{else if (eq step.state "failed")}}
             <span
@@ -75,7 +75,7 @@
               class="h-0.5 flex-1 rounded-full
                 {{if
                   step.lineAfterDone
-                  'bg-blue-500 dark:bg-blue-400'
+                  'bg-accent-500 dark:bg-accent-400'
                   'bg-gray-200 dark:bg-gray-600'
                 }}"
             ></div>
@@ -87,10 +87,10 @@
           class="mt-1.5 max-w-16 text-center text-[11px] leading-tight
             {{if
               (eq step.state 'done')
-              'text-blue-600 dark:text-blue-400'
+              'text-accent-600 dark:text-accent-400'
               (if
                 (eq step.state 'active')
-                'font-semibold text-blue-700 dark:text-blue-300'
+                'font-semibold text-accent-700 dark:text-accent-300'
                 (if
                   (eq step.state 'failed')
                   'font-semibold text-red-600 dark:text-red-400'

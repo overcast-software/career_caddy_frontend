@@ -231,6 +231,7 @@ Router.map(function () {
   this.route('career-data', function () {});
   this.route('settings', function () {
     this.route('data');
+    this.route('appearance');
   });
   this.route('favorites');
 });
