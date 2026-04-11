@@ -6,6 +6,10 @@ export default class UserModel extends Model {
   @attr('string') username;
   @attr('string') email;
   @attr('string') phone;
+  @attr('string') linkedin;
+  @attr('string') github;
+  @attr('string') address;
+  @attr() links;
   @attr('boolean') isGuest;
   @attr('boolean', { defaultValue: false }) isStaff;
   @attr('boolean', { defaultValue: true }) isActive;
