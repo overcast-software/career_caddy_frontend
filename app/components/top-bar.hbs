@@ -21,8 +21,8 @@
   </button>
 </div>
 
-<div class="text-center text-xl font-bold">
-  <LinkTo @route="index">CareerCaddy</LinkTo>
+<div class="text-center">
+  <LinkTo @route="index" class="brand-title no-underline">Career<span>Caddy</span></LinkTo>
 </div>
 
 <div class="flex items-center justify-end">
@@ -56,7 +56,7 @@
     <LinkTo
       @route="login"
       {{on "click" this.onClose}}
-      class="p-2 rounded hover:bg-gray-100 text-sm font-medium"
+      class="topbar-login rounded px-3 py-1.5 text-sm font-semibold text-white no-underline"
     >Login</LinkTo>
   {{/if}}
 </div>

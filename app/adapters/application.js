@@ -20,6 +20,35 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
   }
 
   async ajax(url, method, options = {}) {
+    // No auth → no API call. Extract resource from the URL and redirect.
+    if (!this.session.isAuthenticated) {
+      const docsMap = {
+        scores: 'docs.scores',
+        summaries: 'docs.summaries',
+        questions: 'docs.questions',
+        answers: 'docs.answers',
+        'career-data': 'docs.career-data',
+        'job-posts': 'docs.job-posts',
+        'job-applications': 'docs.job-applications',
+        companies: 'docs.companies',
+        resumes: 'docs.resumes',
+        'cover-letters': 'docs.cover-letters',
+        scrapes: 'docs.scrapes',
+      };
+      const match = url.match(/\/api\/v1\/([a-z-]+)/);
+      const resource = match?.[1];
+      const docsRoute = resource && docsMap[resource];
+      if (docsRoute) {
+        this.flashMessages.info(
+          'Looking for your data? Sign in using the button in the top right.',
+        );
+        this.router.transitionTo(docsRoute);
+      } else {
+        this.router.transitionTo('login');
+      }
+      return { data: [] };
+    }
+
     // Preflight token refresh for write operations
     if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
       try {

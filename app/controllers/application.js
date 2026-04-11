@@ -5,6 +5,7 @@ import { tracked } from '@glimmer/tracking';
 import { getOwner } from '@ember/application';
 export default class ApplicationController extends Controller {
   @service session;
+  @service store;
   @service flashMessages;
   @service currentUser;
   @service router;
@@ -18,6 +19,7 @@ export default class ApplicationController extends Controller {
   @action
   async invalidateSession() {
     await this.session.invalidate();
+    this.store.unloadAll();
   }
 
   @action setLoading(loading) {

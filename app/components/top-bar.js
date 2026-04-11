@@ -6,6 +6,7 @@ import { tracked } from '@glimmer/tracking';
 export default class TopBarComponent extends Component {
   @tracked open = false;
   @service session;
+  @service store;
   @service currentUser;
   @service flashMessages;
   @service router;
@@ -20,6 +21,7 @@ export default class TopBarComponent extends Component {
 
   @action async invalidateSession() {
     await this.session.invalidate();
+    this.store.unloadAll();
     this.flashMessages.success('Successfully logged out.');
   }
 

@@ -138,6 +138,46 @@
   background-color: #475569;
 }
 
+/* ===== BRAND ===== */
+/* Two-tone logo: "Career" in contextual color, "Caddy" always indigo.
+ * Light mode / light bg → dark text.  Dark mode / dark bg → white text.
+ * Login card has a hardcoded white bg in both themes → force dark text there. */
+.brand-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: #111;
+}
+
+.brand-title span {
+  color: #6366f1;
+}
+
+[data-theme="dark"] .brand-title {
+  color: #f8fafc;
+}
+
+a.brand-title,
+a.brand-title:link,
+a.brand-title:visited,
+a.brand-title:hover {
+  text-decoration: none;
+  color: #111;
+}
+
+[data-theme="dark"] a.brand-title,
+[data-theme="dark"] a.brand-title:link,
+[data-theme="dark"] a.brand-title:visited,
+[data-theme="dark"] a.brand-title:hover {
+  color: #f8fafc;
+}
+
+/* Login/waitlist card is always white — force dark text regardless of theme */
+.login-card .brand-title,
+.login-card a.brand-title {
+  color: #111;
+}
+
 /* ===== BASE ===== */
 html,
 body {
@@ -597,14 +637,21 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 8px 16px;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
   border-radius: 6px;
   font: inherit;
+  font-weight: 500;
   cursor: pointer;
   text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn.pill {
+  border-radius: 9999px;
+  padding: 8px 20px;
 }
 
 a.btn,
@@ -1072,34 +1119,27 @@ a.landing-btn-primary:hover {
   margin: 2rem 1rem;
 }
 
+/* Login card is always a white surface regardless of theme.
+ * All colors are hardcoded light-mode values — no var(--*) tokens here
+ * so dark mode cannot produce invisible text on the white card. */
 .login-card-brand {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.02em;
   margin-bottom: 1.5rem;
-}
-
-.login-card-icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
 }
 
 .login-card-title {
   font-size: 1.65rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--text);
+  color: #111;
   margin: 0 0 0.35rem;
 }
 
 .login-card-sub {
   font-size: 0.88rem;
-  color: var(--muted);
+  color: #5b5b5b;
   margin: 0 0 1.75rem;
 }
 
@@ -1119,15 +1159,15 @@ a.landing-btn-primary:hover {
 .login-field label {
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--text);
+  color: #111;
 }
 
 .login-field input {
   padding: 0.6rem 0.85rem;
-  border: 1px solid var(--border);
+  border: 1px solid #e6e6e6;
   border-radius: 7px;
   font-size: 0.95rem;
-  color: var(--text);
+  color: #111;
   background: #fff;
   transition:
     border-color 0.15s,
@@ -1136,14 +1176,14 @@ a.landing-btn-primary:hover {
 }
 
 .login-field input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgb(119 182 225 / 20%);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 20%);
 }
 
 .login-submit {
   margin-top: 0.25rem;
   padding: 0.65rem;
-  background: var(--accent);
+  background: #6366f1;
   color: #fff;
   font-weight: 700;
   font-size: 0.95rem;
@@ -1161,9 +1201,9 @@ a.landing-btn-primary:hover {
   margin-top: -0.25rem;
   padding: 0.65rem;
   background: transparent;
-  border: 1.5px solid var(--accent);
+  border: 1.5px solid #6366f1;
   border-radius: 0.4rem;
-  color: var(--accent);
+  color: #6366f1;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -1173,19 +1213,19 @@ a.landing-btn-primary:hover {
 }
 
 .login-demo:hover {
-  background: var(--accent);
+  background: #6366f1;
   color: #fff;
 }
 
 .login-card-setup {
   font-size: 0.8rem;
-  color: var(--muted);
+  color: #5b5b5b;
   text-align: center;
   margin: 0;
 }
 
 .login-card-setup a {
-  color: var(--accent);
+  color: #6366f1;
   text-decoration: none;
   font-weight: 600;
 }
@@ -1207,7 +1247,7 @@ a.landing-btn-primary:hover {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--space-3);
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   color: var(--muted);
   background: var(--card);
 }
@@ -1219,6 +1259,11 @@ a.landing-btn-primary:hover {
 
 .route-footer a:hover {
   color: var(--text);
+}
+
+.route-footer-guest a {
+  color: #6366f1;
+  font-weight: 600;
 }
 
 /* On desktop with sidebar open, footer must not cover the sidebar */
@@ -1682,6 +1727,14 @@ pre {
   gap: var(--space-3);
 }
 
+.topbar-login {
+  background: #6366f1;
+}
+
+.topbar-login:hover {
+  background: #4f46e5;
+}
+
 .tee-left {
   display: flex;
   align-items: center;
@@ -2035,24 +2088,25 @@ pre {
 .guest-banner {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #fffbeb;
-  border-bottom: 1px solid #f59e0b;
-  color: #92400e;
-  font-size: 0.875rem;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.35rem 1rem;
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .guest-banner-icon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 0.9rem;
+  height: 0.9rem;
   flex-shrink: 0;
 }
 
 .guest-banner-link {
   font-weight: 600;
   text-decoration: underline;
-  color: inherit;
+  color: #6366f1;
 }
 
 .nav-link:hover {

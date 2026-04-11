@@ -4,6 +4,7 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 
 export default class MainApplicationComponent extends Component {
+  @service currentUser;
   @service router;
   @tracked sidebarOpen = true;
 

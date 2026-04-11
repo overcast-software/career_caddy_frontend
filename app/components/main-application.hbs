@@ -16,7 +16,6 @@
       @onClose={{this.close}}
     />
   </header>
-  <GuestBanner />
   <div class="course-body">
     <aside class="course-sidebar">
       <Sidebar @onClose={{this.close}} />
@@ -26,4 +25,15 @@
       {{yield}}
     </div>
   </div>
+  <footer class="route-footer">
+    <span>copyleft 2026</span>
+    {{#if this.currentUser.isGuest}}
+      <span class="route-footer-guest">Demo mode</span>
+    {{else}}
+      <a href="https://github.com/overcast-software/career_caddy">Github</a>
+    {{/if}}
+    <nav>
+      <LinkTo @route="docs.index">Documentation</LinkTo>
+    </nav>
+  </footer>
 </div>

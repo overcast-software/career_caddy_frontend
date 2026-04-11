@@ -1,11 +1,27 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
 
+const DOCS_ROUTES = new Set([
+  'scores',
+  'summaries',
+  'questions',
+  'answers',
+  'career-data',
+  'job-posts',
+  'job-applications',
+  'companies',
+  'resumes',
+  'cover-letters',
+  'scrapes',
+]);
+
 export default class ApplicationRoute extends Route {
   @service currentUser;
+  @service flashMessages;
   @service router;
   @service health;
   @service session;
+  @service store;
 
   async beforeModel(transition) {
     // Set up ESA's event handlers exactly once — calling setup() multiple times
@@ -25,39 +41,53 @@ export default class ApplicationRoute extends Route {
       return;
     }
 
+    // ESA's requireAuthentication: checks session, stores attemptedTransition,
+    // and calls our redirect callback if not authenticated.
+    if (routeName !== 'index') {
+      const isAuthed = this.session.requireAuthentication(transition, () => {
+        this._redirectUnauthenticated(routeName);
+      });
+      if (!isAuthed) return;
+    }
+
     const ok = await this.health.ensureHealthy();
     if (!ok || this.health.bootstrapOpen) {
-      this.router.transitionTo('setup');
-      return;
+      return this.router.replaceWith('setup');
     }
 
-    if (routeName !== 'index' && !this.session.isAuthenticated) {
-      transition.abort();
-      this.router.transitionTo('login');
-      return;
-    }
-
-    if (this.session.isAuthenticated) {
-      this.session.startActivityWatch();
-      try {
-        await this.session.ensureFreshToken(90);
-      } catch (error) {
-        console.warn('Initial token refresh failed:', error);
-      }
+    this.session.startActivityWatch();
+    try {
+      await this.session.ensureFreshToken(90);
+    } catch (error) {
+      console.warn('Initial token refresh failed:', error);
     }
 
     try {
       await this.currentUser.load();
     } catch {
       await this.session.invalidate();
+      this.store.unloadAll();
+      this._redirectUnauthenticated(routeName);
+      return;
     }
 
     if (this.currentUser.isGuest) {
       const writeRoutes = ['.new', '.edit', '.scrape', '.import'];
       if (writeRoutes.some((suffix) => routeName?.endsWith(suffix))) {
-        transition.abort();
-        this.router.transitionTo('index');
+        return this.router.replaceWith('index');
       }
+    }
+  }
+
+  _redirectUnauthenticated(routeName) {
+    const baseRoute = routeName?.split('.')[0];
+    if (DOCS_ROUTES.has(baseRoute)) {
+      this.flashMessages.info(
+        'Looking for your data? Sign in using the button in the top right.',
+      );
+      this.router.transitionTo(`docs.${baseRoute}`);
+    } else {
+      this.router.transitionTo('login');
     }
   }
 }

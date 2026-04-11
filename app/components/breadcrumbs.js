@@ -13,6 +13,7 @@ const LABELS = {
   scrapes: 'Scrapes',
   summaries: 'Summaries',
   'career-data': 'Career Data',
+  docs: 'Documents',
   about: 'About',
   new: 'New',
   edit: 'Edit',
