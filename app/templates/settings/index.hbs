@@ -1,0 +1,168 @@
+{{page-title "Profile — Settings"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="settings.index" class="nav-link">Profile</LinkTo>
+    <LinkTo @route="settings.data" class="nav-link">Data</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card max-w-lg">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold">Profile</h1>
+        {{#unless this.isEditing}}
+          <button
+            type="button"
+            class="btn primary"
+            {{on "click" this.edit}}
+          >Edit</button>
+        {{/unless}}
+      </div>
+
+      {{#if this.isEditing}}
+        <fieldset disabled={{this.isSubmitting}}>
+          <form class="builder-form" {{on "submit" this.save}}>
+            <div class="field">
+              <label class="field-label" for="settings-first-name">First name</label>
+              <input
+                id="settings-first-name"
+                type="text"
+                value={{this.firstName}}
+                {{on "input" (fn this.updateField "firstName")}}
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="settings-last-name">Last name</label>
+              <input
+                id="settings-last-name"
+                type="text"
+                value={{this.lastName}}
+                {{on "input" (fn this.updateField "lastName")}}
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="settings-email">Email</label>
+              <input
+                id="settings-email"
+                type="email"
+                value={{this.email}}
+                {{on "input" (fn this.updateField "email")}}
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="settings-phone">Phone</label>
+              <input
+                id="settings-phone"
+                type="tel"
+                value={{this.phone}}
+                {{on "input" (fn this.updateField "phone")}}
+              />
+            </div>
+
+            <div class="field">
+              <label
+                class="field-label"
+                for="settings-linkedin"
+              >LinkedIn</label>
+              <input
+                id="settings-linkedin"
+                type="url"
+                value={{this.linkedin}}
+                placeholder="https://linkedin.com/in/..."
+                {{on "input" (fn this.updateField "linkedin")}}
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="settings-github">GitHub</label>
+              <input
+                id="settings-github"
+                type="url"
+                value={{this.github}}
+                placeholder="https://github.com/..."
+                {{on "input" (fn this.updateField "github")}}
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="settings-address">Address</label>
+              <textarea
+                id="settings-address"
+                rows="2"
+                value={{this.address}}
+                {{on "input" (fn this.updateField "address")}}
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary">
+                {{if this.isSubmitting "Saving\u2026" "Save"}}
+              </button>
+              <button
+                type="button"
+                class="btn"
+                {{on "click" this.cancel}}
+              >Cancel</button>
+            </div>
+          </form>
+        </fieldset>
+      {{else}}
+        <dl class="space-y-4 text-sm">
+          <div>
+            <dt class="font-medium text-gray-500 dark:text-gray-400">Name</dt>
+            <dd
+              class="mt-1 text-gray-900 dark:text-gray-100"
+            >{{this.model.name}}</dd>
+          </div>
+          <div>
+            <dt
+              class="font-medium text-gray-500 dark:text-gray-400"
+            >Username</dt>
+            <dd
+              class="mt-1 text-gray-900 dark:text-gray-100"
+            >{{this.model.username}}</dd>
+          </div>
+          <div>
+            <dt class="font-medium text-gray-500 dark:text-gray-400">Email</dt>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
+                this.model.email
+                "—"
+              }}</dd>
+          </div>
+          <div>
+            <dt class="font-medium text-gray-500 dark:text-gray-400">Phone</dt>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
+                this.model.phone
+                "—"
+              }}</dd>
+          </div>
+          <div>
+            <dt
+              class="font-medium text-gray-500 dark:text-gray-400"
+            >LinkedIn</dt>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
+                this.model.linkedin
+                "—"
+              }}</dd>
+          </div>
+          <div>
+            <dt class="font-medium text-gray-500 dark:text-gray-400">GitHub</dt>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
+                this.model.github
+                "—"
+              }}</dd>
+          </div>
+          <div>
+            <dt
+              class="font-medium text-gray-500 dark:text-gray-400"
+            >Address</dt>
+            <dd
+              class="mt-1 text-gray-900 dark:text-gray-100 whitespace-pre-line"
+            >{{or this.model.address "—"}}</dd>
+          </div>
+        </dl>
+      {{/if}}
+    </div>
+  </:main>
+</RouteLayout>
