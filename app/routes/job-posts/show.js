@@ -7,17 +7,7 @@ export default class JobPostsShowRoute extends Route {
   @service flashMessages;
 
   async model({ job_post_id }) {
-    return await this.store.findRecord('job-post', job_post_id, {
-      include: [
-        'company',
-        'job-applications',
-        'questions',
-        'scores',
-        'cover-letters',
-        'scrapes',
-        'summaries',
-      ],
-    });
+    return await this.store.findRecord('job-post', job_post_id);
   }
 
   error() {

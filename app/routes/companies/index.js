@@ -17,7 +17,6 @@ export default class CompaniesIndexRoute extends Route {
     return this.infinity.model('company', {
       perPage: 20,
       startingPage: 1,
-      include: 'job-post,job-application',
       sort: 'name',
       ...(search ? { 'filter[query]': search } : {}),
     });

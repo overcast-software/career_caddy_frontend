@@ -5,8 +5,6 @@ export default class JobPostsEditRoute extends Route {
   @service store;
 
   async model({ job_post_id }) {
-    return await this.store.findRecord('job-post', job_post_id, {
-      include: 'company',
-    });
+    return await this.store.findRecord('job-post', job_post_id);
   }
 }

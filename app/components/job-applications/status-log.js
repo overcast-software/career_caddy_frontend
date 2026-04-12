@@ -66,16 +66,13 @@ export default class JobApplicationsStatusLogComponent extends Component {
   // Cached so both sortedStatuses and impliedStatuses share one computation.
   @cached
   get _sortedRecords() {
-    const appId = this.args.jobApplication?.id;
-    if (!appId) return [];
-    return this.store
-      .peekAll('job-application-status')
-      .filter((s) => s.belongsTo('application').id() === appId)
-      .sort((a, b) => {
-        const da = new Date(a.loggedAt || a.createdAt || 0);
-        const db = new Date(b.loggedAt || b.createdAt || 0);
-        return da - db;
-      });
+    const statuses = this.args.jobApplication?.applicationStatuses;
+    if (!statuses) return [];
+    return [...statuses].sort((a, b) => {
+      const da = new Date(a.loggedAt || a.createdAt || 0);
+      const db = new Date(b.loggedAt || b.createdAt || 0);
+      return da - db;
+    });
   }
 
   get sortedStatuses() {

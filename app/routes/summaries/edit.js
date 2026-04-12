@@ -6,7 +6,6 @@ export default class SummariesEditRoute extends Route {
 
   async model({ summary_id }) {
     return this.store.findRecord('summary', summary_id, {
-      include: 'job-post,resume',
       reload: true,
     });
   }

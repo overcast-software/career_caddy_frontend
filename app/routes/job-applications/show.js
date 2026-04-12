@@ -9,8 +9,6 @@ export default class JobApplicationsShowRoute extends Route {
       this.flashMessages.warning('redirecting to new');
       this.router.transitionTo('job-application.new');
     }
-    return this.store.findRecord('job-application', application_id, {
-      include: 'application-statuses',
-    });
+    return this.store.findRecord('job-application', application_id);
   }
 }

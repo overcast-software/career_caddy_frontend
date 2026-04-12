@@ -5,7 +5,7 @@ export default class QuestionsShowRoute extends Route {
   @service flashMessages;
   async model({ question_id }) {
     return this.store.findRecord('question', question_id, {
-      include: 'company,job-application,answers',
+      include: 'answers',
     });
   }
 }

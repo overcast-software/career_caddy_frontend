@@ -5,8 +5,7 @@ export default class CoverLettersIndexRoute extends Route {
   @service store;
 
   model() {
-    return this.store.findAll('cover-letter', {
-      include: 'job-post,resume',
-    });
+    this.store.query('resume', { slim: 1 });
+    return this.store.findAll('cover-letter', { include: 'job-post' });
   }
 }

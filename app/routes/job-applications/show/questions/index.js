@@ -6,11 +6,14 @@ export default class JobApplicationsShowQuestionsIndexRoute extends Route {
 
   async model() {
     const { application_id } = this.paramsFor('job-applications.show');
-    const jobApplication = await this.store.findRecord(
+    const jobApplication = this.store.peekRecord(
       'job-application',
       application_id,
-      { include: 'questions,questions.answers' },
     );
-    return { jobApplication, questions: await jobApplication.questions };
+    const questions = await this.store.query('question', {
+      'filter[application_id]': application_id,
+      include: 'answers',
+    });
+    return { jobApplication, questions };
   }
 }

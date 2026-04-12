@@ -6,8 +6,6 @@ export default class QuestionsEditRoute extends Route {
 
   async model({ question_id }) {
     await this.store.findAll('company');
-    return this.store.findRecord('question', question_id, {
-      include: 'company,job-post,job-application.job-post',
-    });
+    return this.store.findRecord('question', question_id);
   }
 }

@@ -3,6 +3,7 @@ import { service } from '@ember/service';
 
 export default class SummariesIndexRoute extends Route {
   @service infinity;
+  @service store;
 
   queryParams = {
     search: { refreshModel: true },
@@ -14,10 +15,11 @@ export default class SummariesIndexRoute extends Route {
   }
 
   model({ search }) {
+    this.store.query('resume', { slim: 1 });
     return this.infinity.model('summary', {
       perPage: 20,
       startingPage: 1,
-      include: 'job-post,resume',
+      include: 'job-post',
       sort: '-id',
       ...(search ? { 'filter[query]': search } : {}),
     });

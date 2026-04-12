@@ -18,9 +18,7 @@ export default class JobApplicationsNewRoute extends Route {
     const { jobId, resumeId } = transition.to.queryParams;
     const jobApplication = this.store.createRecord('job-application');
     if (jobId) {
-      const jobPost = await this.store.findRecord('job-post', jobId, {
-        include: 'company',
-      });
+      const jobPost = await this.store.findRecord('job-post', jobId);
       jobApplication.jobPost = jobPost;
     }
     this.store.findAll('cover-letter');
