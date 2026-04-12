@@ -142,13 +142,18 @@ export default class QuestionsFormComponent extends Component {
     }
   }
 
-  @action addCompanyToQuestion(companyName) {
+  @action async addCompanyToQuestion(companyName) {
     const company = this.store.createRecord('company', { name: companyName });
-    company.save().then(() => {
+    try {
+      await company.save();
       this.selectedCompany = company;
       this.args.question.company = company;
-      this.flashMessages.success('Created company: ' + company.name);
-    });
+      this.flashMessages.success('Company created: ' + company.name + '.');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to create company.');
+      }
+    }
   }
 
   @action updateJobPost(jobPost) {
@@ -169,9 +174,15 @@ export default class QuestionsFormComponent extends Component {
     this.args.question.jobPost = this.selectedJobPost;
     this.args.question.jobApplication =
       this.selectedJobAppOption?.record ?? null;
-    const q = await this.args.question.save();
-    this.flashMessages.success('Question saved');
-    this.router.transitionTo('questions.show', q.id);
+    try {
+      const q = await this.args.question.save();
+      this.flashMessages.success('Question saved.');
+      this.router.transitionTo('questions.show', q.id);
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to save question.');
+      }
+    }
   }
 
   @action async saveAndNew() {
@@ -179,11 +190,17 @@ export default class QuestionsFormComponent extends Component {
     this.args.question.jobPost = this.selectedJobPost;
     this.args.question.jobApplication =
       this.selectedJobAppOption?.record ?? null;
-    await this.args.question.save();
-    this.flashMessages.success('Question saved');
-    this.router.transitionTo('questions.new', {
-      queryParams: { companyId: this.selectedCompany?.id },
-    });
+    try {
+      await this.args.question.save();
+      this.flashMessages.success('Question saved.');
+      this.router.transitionTo('questions.new', {
+        queryParams: { companyId: this.selectedCompany?.id },
+      });
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to save question.');
+      }
+    }
   }
 
   @action cancel(event) {

@@ -10,16 +10,20 @@ export default class CompaniesFastCreate extends Component {
     this.companyName = event.target.value;
   }
 
-  @action handleClick() {
+  @action async handleClick() {
     if (this.args.customSubmit) {
       this.args.customSubmit();
     } else {
-      this.store
-        .createRecord('company', { name: this.companyName })
-        .save()
-        .then((company) =>
-          this.flashMessages.success(`created company: ${company.name}`),
-        );
+      try {
+        const company = await this.store
+          .createRecord('company', { name: this.companyName })
+          .save();
+        this.flashMessages.success(`Company created: ${company.name}.`);
+      } catch (error) {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to create company.');
+        }
+      }
     }
   }
 }

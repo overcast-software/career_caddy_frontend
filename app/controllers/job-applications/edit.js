@@ -8,13 +8,13 @@ export default class JobApplicationsEditController extends Controller {
   @action async save() {
     try {
       await this.model.jobApplication.save();
-      this.flashMessages.success('Saved.');
+      this.flashMessages.success('Application saved.');
       this.router.transitionTo(
         'job-applications.show',
         this.model.jobApplication.id,
       );
     } catch (error) {
-      this.flashMessages.alert(error?.errors?.[0]?.detail ?? 'Save failed.');
+      this.flashMessages.danger(error?.errors?.[0]?.detail ?? 'Failed to save application.');
     }
   }
 

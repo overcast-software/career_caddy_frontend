@@ -10,7 +10,7 @@ export default class CompaniesEditController extends Controller {
   async deleteCompany() {
     if (!confirm(`Delete ${this.model.name}?`)) return;
     await this.model.destroyRecord();
-    this.flashMessages.success('Company deleted');
+    this.flashMessages.success('Company deleted.');
     this.router.transitionTo('companies.index');
   }
 }

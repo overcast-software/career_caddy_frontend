@@ -148,7 +148,7 @@ export default class JobApplicationsStatusLogComponent extends Component {
           : 'Status logged.',
       );
     } catch {
-      this.flashMessages.alert('Failed to save status.');
+      this.flashMessages.danger('Failed to save status.');
     } finally {
       this.isSaving = false;
     }
@@ -186,7 +186,7 @@ export default class JobApplicationsStatusLogComponent extends Component {
       this.editingNote = '';
       this.flashMessages.success('Entry updated.');
     } catch {
-      this.flashMessages.alert('Failed to update entry.');
+      this.flashMessages.danger('Failed to update entry.');
     }
   }
 
@@ -204,7 +204,7 @@ export default class JobApplicationsStatusLogComponent extends Component {
       await record.destroyRecord();
       await this.args.jobApplication.reload();
     } catch {
-      this.flashMessages.alert('Failed to delete status entry.');
+      this.flashMessages.danger('Failed to delete status entry.');
     }
   }
 }

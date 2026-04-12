@@ -34,7 +34,7 @@ export default class ResumesEditController extends Controller {
     if (!confirm('Delete this resume? This cannot be undone.')) return;
     await this.model.destroyRecord();
     this.router.transitionTo('resumes').then(() => {
-      this.flashMessages.success('successfully deleted resume.');
+      this.flashMessages.success('Resume deleted.');
     });
   }
 

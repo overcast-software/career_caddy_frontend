@@ -17,7 +17,7 @@ export default class JobPostsShowController extends Controller {
       this.copyButtonText = 'Copied!';
       setTimeout(() => (this.copyButtonText = 'Copy Description'), 2000);
     } catch {
-      this.flashMessages.alert('Failed to copy.');
+      this.flashMessages.danger('Failed to copy.');
     }
   }
 }

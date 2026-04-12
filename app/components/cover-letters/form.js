@@ -8,20 +8,21 @@ export default class CoverLettersForm extends Component {
   @action updateContent(event) {
     this.args.coverLetter.content = event.target.value;
   }
-  @action saveCoverLetter(event) {
+  @action async saveCoverLetter(event) {
     event.preventDefault();
-    this.args.coverLetter
-      .save()
-      .then(() => {
-        this.store.peekRecord('career-data', '1')?.markDirty();
-        this.flashMessages.success('Cover letter saved.');
-      })
-      .then(() =>
-        this.router.transitionTo(
-          'cover-letters.show',
-          this.args.coverLetter.id,
-        ),
+    try {
+      await this.args.coverLetter.save();
+      this.store.peekRecord('career-data', '1')?.markDirty();
+      this.flashMessages.success('Cover letter saved.');
+      this.router.transitionTo(
+        'cover-letters.show',
+        this.args.coverLetter.id,
       );
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to save cover letter.');
+      }
+    }
   }
   @action async toggleFavorite(coverLetter) {
     coverLetter.favorite = !coverLetter.favorite;

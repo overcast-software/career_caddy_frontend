@@ -40,17 +40,18 @@ export default class JobPostsActions extends Component {
     const resume = this.store.peekRecord('resume', resumeId);
     const summary = this.store.createRecord('summary', { resume, jobPost });
 
-    this.spinner.wrap(
-      summary
-        .save()
-        .then((summary) =>
-          this.router.transitionTo('summaries.show', summary.id),
-        )
-        .catch(this.flashMessages.danger('failed to create summary')),
-    );
+    try {
+      const saved = await this.spinner.wrap(summary.save());
+      this.router.transitionTo('summaries.show', saved.id);
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to create summary.');
+      }
+    }
   }
+
   @action
-  createCoverLetter() {
+  async createCoverLetter() {
     const jobPost = this.args.jobPost;
     const resumeId = this.selectedResume.id;
     let resume = this.store.peekRecord('resume', resumeId);
@@ -58,15 +59,17 @@ export default class JobPostsActions extends Component {
       resume,
       jobPost,
     });
-    this.flashMessages.info('creating new cover letter');
+    this.flashMessages.info('Creating cover letter...');
 
-    this.spinner.wrap(
-      newCoverLetter
-        .save()
-        .then((cl) => this.router.transitionTo('cover-letters.show', cl))
-        .then(() => this.flashMessages.success('Cover letter created'))
-        .catch((error) => console.log(error) & this.flashMessages.alert(error)),
-    );
+    try {
+      const cl = await this.spinner.wrap(newCoverLetter.save());
+      this.flashMessages.success('Cover letter created.');
+      this.router.transitionTo('cover-letters.show', cl);
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to create cover letter.');
+      }
+    }
   }
 
   @action

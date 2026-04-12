@@ -24,7 +24,7 @@ export default class CoverLettersItemComponent extends Component {
   @action
   async exportToDocx() {
     if (this.isExporting)
-      this.flashMessages.warn('already exporting. calm down.');
+      this.flashMessages.warning('Export already in progress.');
     this.isExporting = true;
     try {
       const id = this.args.coverLetter.id;

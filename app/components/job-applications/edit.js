@@ -49,8 +49,14 @@ export default class JobApplicationsEdit extends Component {
 
   @action async saveApplication(event) {
     event?.preventDefault();
-    await this.jobApplication.save();
-    this.flashMessages.success('saved');
+    try {
+      await this.jobApplication.save();
+      this.flashMessages.success('Application saved.');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to save application.');
+      }
+    }
   }
 
   @action updateResume(resume) {

@@ -60,7 +60,7 @@ export default class JobPostsShowScoresController extends Controller {
       }
     } catch (e) {
       newScore.unloadRecord();
-      this.flashMessages.alert(
+      this.flashMessages.danger(
         e?.errors?.[0]?.detail ?? 'Failed to create score.',
       );
     }
@@ -75,14 +75,14 @@ export default class JobPostsShowScoresController extends Controller {
           [...this.pendingIds].filter((id) => id !== score.id),
         );
         if (rec.status === 'failed' || rec.status === 'error') {
-          this.flashMessages.alert('Scoring failed.');
+          this.flashMessages.danger('Scoring failed.');
         }
       },
       onError: () => {
         this.pendingIds = new Set(
           [...this.pendingIds].filter((id) => id !== score.id),
         );
-        this.flashMessages.alert('Lost connection while waiting for score.');
+        this.flashMessages.danger('Lost connection while waiting for score.');
       },
     });
   }

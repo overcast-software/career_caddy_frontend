@@ -94,7 +94,7 @@ export default class ExperiencesEditorForm extends Component {
           this.flashMessages.success('saved experience');
         })
         .catch((error) => {
-          this.flashMessages.error(error);
+          this.flashMessages.danger(error);
         });
       // what is this doing?
     } catch (e) {

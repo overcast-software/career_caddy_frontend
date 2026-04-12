@@ -50,7 +50,7 @@ export default class JobPostsFormComponent extends Component {
       this.flashMessages.success('Job post saved.');
       this.router.transitionTo('job-posts.show', this.args.jobPost);
     } catch (error) {
-      this.flashMessages.alert(error?.errors?.[0]?.detail ?? 'Save failed.');
+      this.flashMessages.danger(error?.errors?.[0]?.detail ?? 'Failed to save job post.');
     }
   }
 

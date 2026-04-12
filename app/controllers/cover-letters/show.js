@@ -54,7 +54,7 @@ export default class CoverLettersShowController extends Controller {
 
   @action async exportToDocx() {
     if (this.isExporting) {
-      this.flashMessages.warn('already exporting. calm down.');
+      this.flashMessages.warning('Export already in progress.');
       return;
     }
     this.isExporting = true;

@@ -57,7 +57,7 @@ export default class JobPostsShowCoverLettersController extends Controller {
       }
     } catch {
       cl.unloadRecord();
-      this.flashMessages.alert('Failed to create cover letter.');
+      this.flashMessages.danger('Failed to create cover letter.');
     }
   }
 
@@ -70,7 +70,7 @@ export default class JobPostsShowCoverLettersController extends Controller {
           [...this.pendingIds].filter((id) => id !== cl.id),
         );
         if (rec.status === 'failed' || rec.status === 'error') {
-          this.flashMessages.alert('Cover letter generation failed.');
+          this.flashMessages.danger('Cover letter generation failed.');
         } else {
           this.flashMessages.success('Cover letter ready.');
         }
@@ -79,7 +79,7 @@ export default class JobPostsShowCoverLettersController extends Controller {
         this.pendingIds = new Set(
           [...this.pendingIds].filter((id) => id !== cl.id),
         );
-        this.flashMessages.alert(
+        this.flashMessages.danger(
           'Lost connection while waiting for cover letter.',
         );
       },

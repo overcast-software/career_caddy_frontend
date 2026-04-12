@@ -26,42 +26,65 @@ export default class JobPostsNewController extends Controller {
     this.selectedCompany = company;
   }
 
-  @action submitDelete() {
-    this.model
-      .destroyRecord()
-      .then(() => this.flashMessages.success('successfully deleted record'));
+  @action async submitDelete() {
+    try {
+      await this.model.destroyRecord();
+      this.flashMessages.success('Job post deleted.');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to delete job post.');
+      }
+    }
   }
 
-  @action addCompanyToJobPost(companyName) {
+  @action async addCompanyToJobPost(companyName) {
     const company = this.store.createRecord('company', { name: companyName });
-    company
-      .save()
-      .then((this.selectedCompany = company))
-      .then((this.model.company = company))
-      .then(this.flashMessages.success('created company ' + company.name));
+    try {
+      await company.save();
+      this.selectedCompany = company;
+      this.model.company = company;
+      this.flashMessages.success('Company created: ' + company.name + '.');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to create company.');
+      }
+    }
   }
 
-  @action submitJobPost(event) {
+  @action async submitJobPost(event) {
     event.preventDefault();
-    this.model.save().then((record) => {
-      this.flashMessages.success('Job post saved');
-      this.router.transitionTo('job-posts.show', record);
-    });
+    try {
+      const record = await this.model.save();
+      this.flashMessages.success('Job post saved.');
+      this.router.transitionTo('job-posts.show.job-applications', record);
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to save job post.');
+      }
+    }
   }
-  @action createAndApply(event) {
+
+  @action async createAndApply(event) {
     event.preventDefault();
-    this.model
-      .save()
-      .then((record) =>
-        this.router.transitionTo('job-posts.show.job-applications.new', record),
-      );
+    try {
+      const record = await this.model.save();
+      this.router.transitionTo('job-posts.show.job-applications.new', record);
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to save job post.');
+      }
+    }
   }
-  @action createAndScore(event) {
+
+  @action async createAndScore(event) {
     event.preventDefault();
-    this.model
-      .save()
-      .then((record) =>
-        this.router.transitionTo('job-posts.show.scores', record),
-      );
+    try {
+      const record = await this.model.save();
+      this.router.transitionTo('job-posts.show.scores', record);
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to save job post.');
+      }
+    }
   }
 }

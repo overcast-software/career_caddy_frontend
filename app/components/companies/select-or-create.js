@@ -37,15 +37,20 @@ export default class CompaniesSelectOrCreate extends Component {
     }
   }
 
-  @action companyKeydown(dropdown, e) {
+  @action async companyKeydown(dropdown, e) {
     if (dropdown.results.length === 0 && e.key === 'Enter') {
       const company = this.store.createRecord('company', {
         name: this.proposedCompanyName,
       });
-      company
-        .save()
-        .then(this.flashMessages.success(`created company ${company.name}`));
-      this.selectedCompany = company;
+      try {
+        await company.save();
+        this.flashMessages.success(`Company created: ${company.name}.`);
+        this.selectedCompany = company;
+      } catch (error) {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to create company.');
+        }
+      }
     }
   }
 }

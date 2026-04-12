@@ -46,7 +46,7 @@ export default class JobPostsShowScrapesController extends Controller {
       }
     } catch {
       scrape.unloadRecord();
-      this.flashMessages.alert('Failed to create scrape.');
+      this.flashMessages.danger('Failed to create scrape.');
     }
   }
 
@@ -59,7 +59,7 @@ export default class JobPostsShowScrapesController extends Controller {
           [...this.pendingIds].filter((id) => id !== scrape.id),
         );
         if (rec.status === 'failed' || rec.status === 'error') {
-          this.flashMessages.alert('Scrape failed.');
+          this.flashMessages.danger('Scrape failed.');
         } else {
           this.flashMessages.success('Scrape completed.');
         }
@@ -68,7 +68,7 @@ export default class JobPostsShowScrapesController extends Controller {
         this.pendingIds = new Set(
           [...this.pendingIds].filter((id) => id !== scrape.id),
         );
-        this.flashMessages.alert('Lost connection while waiting for scrape.');
+        this.flashMessages.danger('Lost connection while waiting for scrape.');
       },
     });
   }

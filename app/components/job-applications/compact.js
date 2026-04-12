@@ -25,7 +25,7 @@ export default class JobApplicationsCompact extends Component {
         this.args.onDelete?.(application);
       })
       .catch(() => {
-        this.flashMessages.alert('Problem deleting application.');
+        this.flashMessages.danger('Failed to delete application.');
       });
   }
 }

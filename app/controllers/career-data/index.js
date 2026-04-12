@@ -16,7 +16,7 @@ export default class CareerDataIndexController extends Controller {
         this.copyButtonText = 'Copy to Clipboard';
       }, 2000);
     } catch (err) {
-      this.flashMessages.error('Failed to copy to clipboard');
+      this.flashMessages.danger('Failed to copy to clipboard.');
       console.error('Failed to copy:', err);
     }
   }

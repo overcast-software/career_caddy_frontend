@@ -22,7 +22,7 @@ export default class TopBarComponent extends Component {
   @action async invalidateSession() {
     await this.session.invalidate();
     this.store.unloadAll();
-    this.flashMessages.success('Successfully logged out.');
+    this.flashMessages.success('Signed out.');
   }
 
   get onClose() {

@@ -75,7 +75,7 @@ export default class JobApplicationsNewController extends Controller {
   @action saveApplication(event) {
     event?.preventDefault();
     if (!this.selectedJobPost) {
-      this.flashMessages.warn('please select a job.');
+      this.flashMessages.warning('Please select a job post.');
       return;
     }
     this.model.jobPost = this.selectedJobPost
@@ -89,18 +89,18 @@ export default class JobApplicationsNewController extends Controller {
       : undefined;
 
     if (this.model.company === null) {
-      this.flashMessages.warn('No company provided');
+      this.flashMessages.warning('No company provided.');
       return;
     }
 
     this.model
       .save()
       .then((app) => {
-        this.flashMessages.success('job application saved');
+        this.flashMessages.success('Application saved.');
         return app;
       })
       .then((app) => this.router.transitionTo('job-applications.show', app))
-      .catch((error) => this.flashMessages.alert(error));
+      .catch((error) => this.flashMessages.danger(error));
   }
 
   @action updateStatus(status) {

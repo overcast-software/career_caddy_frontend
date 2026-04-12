@@ -22,13 +22,13 @@ export default class AnswersEditController extends Controller {
     event.preventDefault();
     this.model.save().then(() => {
       this.store.peekRecord('career-data', '1')?.markDirty();
-      this.flashMessages.success('answer saved');
+      this.flashMessages.success('Answer saved.');
       this.router.transitionTo('answers.show', this.model);
     });
   }
   @action deleteAnswer() {
     this.model.destroyRecord().then(() => {
-      this.flashMessages.success('Answer deleted');
+      this.flashMessages.success('Answer deleted.');
     });
     this.router.transitionTo(
       'questions.show.answers.index',

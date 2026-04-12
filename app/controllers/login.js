@@ -31,7 +31,7 @@ export default class LoginController extends Controller {
       );
       return;
     }
-    this.flashMessages.success('Successfully logged in');
+    this.flashMessages.success('Signed in.');
   }
 
   @action async tryDemo() {

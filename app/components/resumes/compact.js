@@ -20,7 +20,7 @@ export default class ResumesCompact extends Component {
   }
   @action async deleteResume() {
     await this.spinner.wrap(this.args.resume.destroyRecord()).then(() => {
-      this.flashMessages.success('deleted resume');
+      this.flashMessages.success('Resume deleted.');
     });
   }
 }
