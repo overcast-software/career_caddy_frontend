@@ -64,16 +64,18 @@ export default class ChatService extends Service {
         if (response.status === 401) {
           this._replaceLastMessage(
             "Hey there! I'd love to help, but I need you to log in first. " +
-            "Head over to the [login page](/login) and come back — I'll be right here waiting.",
+              "Head over to the [login page](/login) and come back — I'll be right here waiting.",
           );
         } else if (response.status === 403) {
           this._replaceLastMessage(
             "I can see you're browsing as a guest — welcome! " +
-            "Chat is available for registered users. " +
-            "[Sign up or log in](/login) with your own account and I'll be ready to help.",
+              'Chat is available for registered users. ' +
+              "[Sign up or log in](/login) with your own account and I'll be ready to help.",
           );
         } else {
-          this._replaceLastMessage(`Error: request failed (${response.status})`);
+          this._replaceLastMessage(
+            `Error: request failed (${response.status})`,
+          );
         }
         return;
       }

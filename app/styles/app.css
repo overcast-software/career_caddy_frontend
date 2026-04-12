@@ -2108,9 +2108,15 @@ pre {
   margin-bottom: 0.2em;
 }
 
-.chat-markdown h1 { font-size: 1.1rem; }
-.chat-markdown h2 { font-size: 1.05rem; }
-.chat-markdown h3 { font-size: 1rem; }
+.chat-markdown h1 {
+  font-size: 1.1rem;
+}
+.chat-markdown h2 {
+  font-size: 1.05rem;
+}
+.chat-markdown h3 {
+  font-size: 1rem;
+}
 
 .chat-markdown ul,
 .chat-markdown ol {
@@ -2118,15 +2124,23 @@ pre {
   margin-bottom: 0.4em;
 }
 
-.chat-markdown ul { list-style: disc; }
-.chat-markdown ol { list-style: decimal; }
+.chat-markdown ul {
+  list-style: disc;
+}
+.chat-markdown ol {
+  list-style: decimal;
+}
 
 .chat-markdown li {
   margin-bottom: 0.15em;
 }
 
-.chat-markdown strong { font-weight: 700; }
-.chat-markdown em { font-style: italic; }
+.chat-markdown strong {
+  font-weight: 700;
+}
+.chat-markdown em {
+  font-style: italic;
+}
 
 .chat-markdown code {
   font-family: monospace;

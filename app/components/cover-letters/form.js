@@ -14,10 +14,7 @@ export default class CoverLettersForm extends Component {
       await this.args.coverLetter.save();
       this.store.peekRecord('career-data', '1')?.markDirty();
       this.flashMessages.success('Cover letter saved.');
-      this.router.transitionTo(
-        'cover-letters.show',
-        this.args.coverLetter.id,
-      );
+      this.router.transitionTo('cover-letters.show', this.args.coverLetter.id);
     } catch (error) {
       if (error?.status !== 403) {
         this.flashMessages.danger('Failed to save cover letter.');

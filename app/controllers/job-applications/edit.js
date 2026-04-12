@@ -14,7 +14,9 @@ export default class JobApplicationsEditController extends Controller {
         this.model.jobApplication.id,
       );
     } catch (error) {
-      this.flashMessages.danger(error?.errors?.[0]?.detail ?? 'Failed to save application.');
+      this.flashMessages.danger(
+        error?.errors?.[0]?.detail ?? 'Failed to save application.',
+      );
     }
   }
 

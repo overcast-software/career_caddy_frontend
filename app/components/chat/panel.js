@@ -41,6 +41,7 @@ export default class ChatPanelComponent extends Component {
     if (!text) return;
     this.inputText = '';
     this._scrollToBottom();
+    document.getElementById('chat-input')?.focus();
     await this.chat.sendMessage(text);
     this._scrollToBottom();
     document.getElementById('chat-input')?.focus();
