@@ -1,5 +1,7 @@
+{{! template-lint-disable no-invalid-interactive }}
 <div
   class="flex {{if (eq @message.role 'user') 'justify-end' 'justify-start'}}"
+  {{on "click" this.handleClick}}
 >
   <div
     class="max-w-[85%] rounded-lg px-3 py-2 text-sm
@@ -9,6 +11,12 @@
         'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
       }}"
   >
-    <div class="whitespace-pre-wrap break-words">{{@message.content}}</div>
+    {{#if (eq @message.role "assistant")}}
+      <div class="chat-markdown break-words">
+        <MarkdownToHtml @markdown={{@message.content}} />
+      </div>
+    {{else}}
+      <div class="whitespace-pre-wrap break-words">{{@message.content}}</div>
+    {{/if}}
   </div>
 </div>
