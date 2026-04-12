@@ -11,6 +11,8 @@ Router.map(function () {
   this.route('logout');
   this.route('setup');
   this.route('waitlist');
+  this.route('forgot-password');
+  this.route('reset-password');
   this.route('job-applications', function () {
     this.route(
       'show',

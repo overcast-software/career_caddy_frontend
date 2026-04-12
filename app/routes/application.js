@@ -35,6 +35,8 @@ export default class ApplicationRoute extends Route {
       routeName === 'setup' ||
       routeName === 'login' ||
       routeName === 'waitlist' ||
+      routeName === 'forgot-password' ||
+      routeName === 'reset-password' ||
       routeName === 'about' ||
       (routeName && routeName.startsWith('docs'));
     if (isPublic) {
