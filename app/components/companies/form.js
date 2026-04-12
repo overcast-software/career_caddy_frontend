@@ -15,9 +15,15 @@ export default class CompaniesForm extends Component {
     this.company.note = event.target.value;
   }
 
-  @action saveCompany(event) {
+  @action async saveCompany(event) {
     event.preventDefault();
-    this.company.save();
-    this.flashMessages.success('success');
+    try {
+      await this.company.save();
+      this.flashMessages.success('Company saved');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to save company');
+      }
+    }
   }
 }

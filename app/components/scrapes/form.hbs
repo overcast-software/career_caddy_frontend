@@ -53,17 +53,33 @@
   {{#if this.showHoldOption}}
     <div class="field-row">
       <div class="field">
-        <label
-          class="inline-flex items-center gap-2 text-sm text-[var(--muted)] cursor-pointer"
-        >
-          <input
-            type="checkbox"
-            checked={{this.isHold}}
-            {{on "change" this.toggleHold}}
-            class="rounded border-[var(--border)] text-[var(--accent)]"
-          />
-          Hold for later processing
-        </label>
+        <span class="field-label">Processing</span>
+        <div class="mt-1 flex items-center gap-6">
+          <label
+            class="inline-flex items-center gap-2 text-sm text-[var(--muted)] cursor-pointer"
+          >
+            <input
+              type="radio"
+              name="scrape-status"
+              checked={{unless this.isHold true}}
+              {{on "change" (fn this.setStatus null)}}
+              class="border-[var(--border)] text-[var(--accent)]"
+            />
+            Dispatch
+          </label>
+          <label
+            class="inline-flex items-center gap-2 text-sm text-[var(--muted)] cursor-pointer"
+          >
+            <input
+              type="radio"
+              name="scrape-status"
+              checked={{this.isHold}}
+              {{on "change" (fn this.setStatus "hold")}}
+              class="border-[var(--border)] text-[var(--accent)]"
+            />
+            Hold
+          </label>
+        </div>
       </div>
     </div>
   {{/if}}

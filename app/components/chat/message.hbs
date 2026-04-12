@@ -1,0 +1,14 @@
+<div
+  class="flex {{if (eq @message.role 'user') 'justify-end' 'justify-start'}}"
+>
+  <div
+    class="max-w-[85%] rounded-lg px-3 py-2 text-sm
+      {{if
+        (eq @message.role 'user')
+        'bg-accent-600 text-white'
+        'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+      }}"
+  >
+    <div class="whitespace-pre-wrap break-words">{{@message.content}}</div>
+  </div>
+</div>

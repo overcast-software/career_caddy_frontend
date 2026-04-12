@@ -299,6 +299,20 @@ body {
   grid-template-columns: 280px 1fr;
 }
 
+.course--chat-open {
+  grid-template-areas:
+    "header header"
+    "main chat";
+  grid-template-columns: 1fr 24rem;
+}
+
+.course--sidebar-open.course--chat-open {
+  grid-template-areas:
+    "header header header"
+    "sidebar main chat";
+  grid-template-columns: 280px 1fr 24rem;
+}
+
 .course > header {
   grid-area: header;
 }
@@ -320,6 +334,13 @@ body {
   grid-template-columns: 0 1fr;
 }
 
+.course:not(.course--sidebar-open).course--chat-open {
+  grid-template-areas:
+    "header header header"
+    "sidebar main chat";
+  grid-template-columns: 0 1fr 24rem;
+}
+
 .course:not(.course--sidebar-open) .course-sidebar {
   overflow: hidden;
 }
@@ -330,7 +351,33 @@ body {
   min-width: 0;
 }
 
-/* On mobile, the desktop sidebar is hidden; sidebar opens as an overlay drawer */
+.course-chat {
+  grid-area: chat;
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+}
+
+/* Full-page chat (/caddy): fill entire course-main area */
+.course-main:has(.caddy-fullpage) {
+  display: flex;
+  flex-direction: column;
+}
+
+.course-main:has(.caddy-fullpage) .fairway {
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.caddy-fullpage {
+  flex: 1;
+  min-height: 0;
+}
+
+/* On mobile, the desktop sidebar is hidden; chat takes full width */
 @media (width <= 767px) {
   .course--sidebar-open {
     grid-template-areas:
@@ -340,6 +387,17 @@ body {
   }
 
   .course-sidebar {
+    display: none;
+  }
+
+  .course--chat-open {
+    grid-template-areas:
+      "header"
+      "chat";
+    grid-template-columns: 1fr;
+  }
+
+  .course--chat-open .course-main {
     display: none;
   }
 }
@@ -1361,10 +1419,14 @@ a.landing-btn-primary:hover {
   font-weight: 600;
 }
 
-/* On desktop with sidebar open, footer must not cover the sidebar */
+/* On desktop with sidebars open, footer must not cover them */
 @media (width >= 768px) {
   .course--sidebar-open .route-footer {
     left: 280px;
+  }
+
+  .course--chat-open .route-footer {
+    right: 24rem;
   }
 }
 

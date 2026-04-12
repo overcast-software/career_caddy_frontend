@@ -21,8 +21,8 @@ export default class ScrapesFormComponent extends Component {
   }
 
   @action
-  toggleHold(event) {
-    this.args.scrape.status = event.target.checked ? 'hold' : null;
+  setStatus(status) {
+    this.args.scrape.status = status;
   }
 
   @action

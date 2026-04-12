@@ -73,7 +73,14 @@ export default class ApplicationRoute extends Route {
 
     if (this.currentUser.isGuest) {
       const writeRoutes = ['.new', '.edit', '.scrape', '.import'];
-      if (writeRoutes.some((suffix) => routeName?.endsWith(suffix))) {
+      const guestBlocked =
+        routeName === 'caddy' ||
+        writeRoutes.some((suffix) => routeName?.endsWith(suffix));
+      if (guestBlocked) {
+        this.flashMessages.warning(
+          'This feature requires a full account. Sign in to access it.',
+          { sticky: true },
+        );
         return this.router.replaceWith('index');
       }
     }

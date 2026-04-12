@@ -234,4 +234,5 @@ Router.map(function () {
     this.route('appearance');
   });
   this.route('favorites');
+  this.route('caddy');
 });

@@ -5,6 +5,7 @@ import { service } from '@ember/service';
 
 export default class MainApplicationComponent extends Component {
   @service currentUser;
+  @service chat;
   @service router;
   @tracked sidebarOpen = true;
 
@@ -30,10 +31,26 @@ export default class MainApplicationComponent extends Component {
   @action
   toggle() {
     this.sidebarOpen = !this.sidebarOpen;
+    if (this.sidebarOpen) {
+      this.chat.sidebarOpen = false;
+    }
   }
 
   @action
   close() {
     this.sidebarOpen = false;
+  }
+
+  @action
+  closeSidebarForChat() {
+    this.sidebarOpen = false;
+  }
+
+  @action
+  toggleChat() {
+    this.chat.sidebarOpen = !this.chat.sidebarOpen;
+    if (this.chat.sidebarOpen) {
+      this.sidebarOpen = false;
+    }
   }
 }

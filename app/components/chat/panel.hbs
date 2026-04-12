@@ -1,0 +1,108 @@
+<div class="flex flex-col h-full">
+  {{! Header }}
+  <div
+    class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700"
+  >
+    <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Career
+      Caddy AI</h2>
+    <div class="flex items-center gap-3">
+      {{#if this.chat.hasMessages}}
+        <button
+          type="button"
+          class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          {{on "click" this.clearChat}}
+        >
+          Clear
+        </button>
+      {{/if}}
+      {{#if this.chat.sidebarOpen}}
+        <button
+          type="button"
+          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          title="Close chat"
+          {{on "click" this.closePanel}}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      {{/if}}
+    </div>
+  </div>
+
+  {{! Messages }}
+  <div class="flex-1 overflow-y-auto px-4 py-3 space-y-4" id="chat-messages">
+    {{#if this.messages.length}}
+      {{#each this.messages as |msg|}}
+        <Chat::Message @message={{msg}} />
+      {{/each}}
+      {{#if this.isStreaming}}
+        <div class="flex items-center gap-2 text-xs text-gray-400">
+          <span
+            class="inline-block size-2 rounded-full bg-accent-400 animate-pulse"
+          ></span>
+          Thinking...
+        </div>
+      {{/if}}
+    {{else}}
+      <div class="flex flex-col items-center justify-center h-full text-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="size-12 text-gray-300 dark:text-gray-600 mb-3"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+          />
+        </svg>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Ask me anything
+          about your job search</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">I can search
+          your job posts, track applications, and more</p>
+      </div>
+    {{/if}}
+  </div>
+
+  {{! Input }}
+  <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+    <div class="flex items-end gap-2">
+      <label for="chat-input" class="sr-only">Chat message</label>
+      <textarea
+        id="chat-input"
+        class="flex-1 resize-none rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
+        rows="1"
+        placeholder="Type a message..."
+        value={{this.inputText}}
+        disabled={{this.isStreaming}}
+        {{on "input" this.updateInput}}
+        {{on "keydown" this.handleKeydown}}
+      ></textarea>
+      <button
+        type="button"
+        class="shrink-0 rounded-lg bg-accent-600 px-3 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        disabled={{this.isStreaming}}
+        {{on "click" this.send}}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="size-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
