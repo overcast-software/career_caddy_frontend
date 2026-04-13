@@ -1,0 +1,103 @@
+{{page-title "Accept Invitation — Career Caddy"}}
+<RouteLayout @noSubnav={{true}} @mainClass="login-main">
+  <:subnav></:subnav>
+  <:main>
+    <div class="landing-hero landing-hero--centered">
+      <div class="landing-hero-overlay"></div>
+      <div class="login-card">
+        <div class="login-card-brand">
+          <span class="brand-title">Career<span>Caddy</span></span>
+        </div>
+
+        {{#if this.success}}
+          <h1 class="login-card-title">Account created.</h1>
+          <p class="login-card-sub">
+            Your account is ready. You can now sign in.
+          </p>
+          <div class="mt-6">
+            <LinkTo @route="login" class="login-submit">Sign in</LinkTo>
+          </div>
+        {{else}}
+          <h1 class="login-card-title">Create your account.</h1>
+          <p class="login-card-sub">
+            You've been invited to Career Caddy. Choose a username and password
+            to get started.
+          </p>
+
+          {{#if this.errorMessage}}
+            <div class="error">{{this.errorMessage}}</div>
+          {{/if}}
+
+          <form {{on "submit" this.submit}} class="login-form">
+            <div class="login-field">
+              <label for="first-name">First name</label>
+              <input
+                id="first-name"
+                type="text"
+                placeholder="First name"
+                value={{this.firstName}}
+                {{on "input" this.updateFirstName}}
+                autocomplete="given-name"
+              />
+            </div>
+            <div class="login-field">
+              <label for="last-name">Last name</label>
+              <input
+                id="last-name"
+                type="text"
+                placeholder="Last name"
+                value={{this.lastName}}
+                {{on "input" this.updateLastName}}
+                autocomplete="family-name"
+              />
+            </div>
+            <div class="login-field">
+              <label for="username">Username</label>
+              <input
+                id="username"
+                type="text"
+                placeholder="Choose a username"
+                value={{this.username}}
+                {{on "input" this.updateUsername}}
+                autocomplete="username"
+                required
+              />
+            </div>
+            <div class="login-field">
+              <label for="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Choose a password"
+                value={{this.password}}
+                {{on "input" this.updatePassword}}
+                autocomplete="new-password"
+                required
+              />
+            </div>
+            <div class="login-field">
+              <label for="confirm-password">Confirm password</label>
+              <input
+                id="confirm-password"
+                type="password"
+                placeholder="Confirm password"
+                value={{this.confirmPassword}}
+                {{on "input" this.updateConfirmPassword}}
+                autocomplete="new-password"
+                required
+              />
+            </div>
+            <button type="submit" class="login-submit" disabled={{this.saving}}>
+              {{if this.saving "Creating account..." "Create Account"}}
+            </button>
+          </form>
+
+          <p class="login-card-setup">
+            Already have an account?
+            <LinkTo @route="login">Sign in</LinkTo>
+          </p>
+        {{/if}}
+      </div>
+    </div>
+  </:main>
+</RouteLayout>

@@ -4,6 +4,7 @@
     <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
     <LinkTo @route="admin.users.index" class="nav-link">Users</LinkTo>
     <LinkTo @route="admin.waitlist" class="nav-link">Waitlist</LinkTo>
+    <LinkTo @route="admin.invitations" class="nav-link">Invitations</LinkTo>
   </:subnav>
   <:main>
     <div class="panel-card">
@@ -48,7 +49,12 @@
                       —
                     {{/if}}
                   </td>
-                  <td class="px-4 py-3 text-right">
+                  <td class="px-4 py-3 text-right space-x-2">
+                    <button
+                      type="button"
+                      class="px-2 py-1 text-xs rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-800 dark:text-accent-400 dark:hover:bg-accent-900/30"
+                      {{on "click" (fn this.inviteEntry entry)}}
+                    >Invite</button>
                     <button
                       type="button"
                       class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"

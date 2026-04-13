@@ -4,6 +4,7 @@ import config from 'career-caddy-frontend/config/environment';
 
 export default class HealthService extends Service {
   @tracked bootstrapOpen = false;
+  @tracked registrationOpen = false;
   lastError = null;
 
   async ensureHealthy() {
@@ -12,6 +13,11 @@ export default class HealthService extends Service {
 
     if (cachedBootstrap !== null) {
       this.bootstrapOpen = cachedBootstrap === 'true';
+    }
+
+    const cachedRegistration = sessionStorage.getItem('cc:registration-open');
+    if (cachedRegistration !== null) {
+      this.registrationOpen = cachedRegistration === 'true';
     }
 
     if (cached === 'true') {
@@ -49,11 +55,17 @@ export default class HealthService extends Service {
       const data = await response.json();
       const isHealthy = data.healthy === true;
       const bootstrapOpen = data.bootstrap_open === true;
+      const registrationOpen = data.registration_open === true;
 
       this.bootstrapOpen = bootstrapOpen;
+      this.registrationOpen = registrationOpen;
       sessionStorage.setItem(
         'cc:bootstrap-open',
         bootstrapOpen ? 'true' : 'false',
+      );
+      sessionStorage.setItem(
+        'cc:registration-open',
+        registrationOpen ? 'true' : 'false',
       );
 
       if (isHealthy) {

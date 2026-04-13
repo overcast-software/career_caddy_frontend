@@ -13,6 +13,8 @@ Router.map(function () {
   this.route('waitlist');
   this.route('forgot-password');
   this.route('reset-password');
+  this.route('accept-invite');
+  this.route('signup');
   this.route('job-applications', function () {
     this.route(
       'show',
@@ -230,6 +232,7 @@ Router.map(function () {
       this.route('show', { path: '/:user_id' });
     });
     this.route('waitlist');
+    this.route('invitations');
   });
   this.route('career-data', function () {});
   this.route('settings', function () {
