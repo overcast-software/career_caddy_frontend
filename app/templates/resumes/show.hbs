@@ -1,51 +1,19 @@
+{{page-title this.model.name}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <div class="submenu-buttons">
+    <div class="controls">
       {{#if this.isDirty}}
-        <button
-          type="button"
-          class="btn"
-          {{on "click" this.saveResume}}
-        >Save</button>
+        <button type="button" class="btn" {{on "click" this.saveResume}}>Save</button>
       {{/if}}
-      <LinkTo
-        @route="resumes.edit"
-        @model={{this.model}}
-        class="btn"
-      >Edit</LinkTo>
-      <button
-        type="button"
-        class="btn danger"
-        {{on "click" this.deleteResume}}
-      >Delete</button>
-      <button
-        type="button"
-        class="btn"
-        {{on "click" this.cloneResume}}
-      >Clone</button>
-      <LinkTo @route="resumes.import" class="btn">Import new</LinkTo>
-      <button
-        type="button"
-        class="btn"
-        {{on "click" this.exportToWord}}
-      >Export</button>
-      <span class="submenu-field">
-        <span class="submenu-label">Name:</span>
-        <span class="submenu-value">{{this.model.name}}</span>
-      </span>
-      <span class="submenu-field">
-      </span>
+      <LinkTo @route="resumes.edit" @model={{this.model}} class="btn">Edit</LinkTo>
+      <button type="button" class="btn" {{on "click" this.cloneResume}}>Clone</button>
+      <button type="button" class="btn" {{on "click" this.exportToWord}}>Export</button>
+      <button type="button" class="btn danger" {{on "click" this.deleteResume}}>Delete</button>
     </div>
   </:subnav>
   <:main>
-    <div class="container">
-      <div class="builder-layout">
-        <main class="preview-panel">
-          <div class="resume-preview">
-            <Resumes::Item @resume={{this.model}} />
-          </div>
-        </main>
-      </div>
+    <div class="resume-preview">
+      <Resumes::Item @resume={{this.model}} />
     </div>
   </:main>
 </RouteLayout>

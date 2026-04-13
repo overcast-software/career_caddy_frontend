@@ -5,9 +5,6 @@ export default class ResumesIndexRoute extends Route {
   @service store;
 
   async model() {
-    const resume = this.store.findAll('resume', {
-      include: 'user,skill,experience,education,certification,summary',
-    });
-    return resume;
+    return this.store.findAll('resume');
   }
 }

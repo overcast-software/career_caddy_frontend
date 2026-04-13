@@ -1,27 +1,36 @@
+{{page-title "Resumes"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <LinkTo @route="resumes.import" class="btn">Import resume</LinkTo>
+    <div class="controls">
+      <LinkTo @route="resumes.new" class="btn">+ New Resume</LinkTo>
+      <LinkTo @route="resumes.import" class="btn">Import Resume</LinkTo>
+    </div>
   </:subnav>
   <:main>
     {{#if this.noResumes}}
       <EmptyState @message="No resumes yet." />
-      <p class="mt-2 text-center text-sm">
-        <LinkTo
-          @route="resumes.import"
-          class="text-accent-600 hover:underline dark:text-accent-400"
-        >Import</LinkTo>
-        one to start.
-      </p>
     {{else}}
-      {{#if this.model}}
-        {{#each this.model as |resume|}}
-          <div class="resume-item">
-            <Resumes::Compact @resume={{resume}} />
-          </div>
-        {{/each}}
-      {{else}}
-        loading...
-      {{/if}}
+      <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+        <table class="min-w-full text-sm">
+          <thead class="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Name</th>
+              <th class="px-4 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">Applications</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Notes</th>
+              <th class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {{#each this.model as |resume|}}
+              <Resumes::Compact
+                @resume={{resume}}
+                @onDelete={{this.deleteResume}}
+                @onToggleFavorite={{this.toggleFavorite}}
+              />
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
     {{/if}}
   </:main>
 </RouteLayout>

@@ -26,10 +26,12 @@ export default class ResumesShowController extends Controller {
 
   @action
   async saveResume() {
-    this.model
-      .save()
-      .then(() => this.flashMessages.success('saved'))
-      .then(() => this.router.transitionTo('resumes.show', this.model.id));
+    try {
+      await this.model.save();
+      this.flashMessages.success('Resume saved.');
+    } catch {
+      this.flashMessages.danger('Failed to save resume.');
+    }
   }
 
   @action
@@ -37,15 +39,9 @@ export default class ResumesShowController extends Controller {
     if (!confirm('Delete this resume? This cannot be undone.')) return;
     await this.model.destroyRecord();
     this.router.transitionTo('resumes').then(() => {
-      this.flashMessages.success('Resume deleted');
+      this.flashMessages.success('Resume deleted.');
     });
   }
-
-  addExperience = async () => {
-    const exp = this.store.createRecord('experience', { resume: this.model });
-    const rel = await this.model.experiences;
-    if (!rel.includes(exp)) rel.unshiftObject(exp);
-  };
 
   isExporting = false;
 

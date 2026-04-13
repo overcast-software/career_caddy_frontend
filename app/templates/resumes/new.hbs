@@ -1,62 +1,63 @@
+{{page-title "New Resume"}}
 <RouteLayout @flashMessages={{this.flashMessages}} @mainClass="builder-page">
   <:main>
     <div class="builder-layout">
       <aside class="editor-panel">
-        <Panel::Card @title="Job Title" @collapsible={{true}}>
+        <Panel::Card @title="Job Title" @collapsible={{false}}>
           <Resumes::Title::Form @resume={{this.model}} />
         </Panel::Card>
-
         <Panel::Card @title="Personal Information" @collapsible={{true}}>
           <PersonalInformation::Form @user={{this.model.user}} />
         </Panel::Card>
-
-        <Panel::Card @title="Summary" @collapsible={{true}}>
+        <Panel::Card @title="Summary" @collapsible={{true}} @startCollapsed={{true}}>
           <Summary::Form @summary={{this.model.summary}} />
         </Panel::Card>
-
-        <Panel::Card @title="Skills" @collapsible={{true}}>
-          <Skills::Form />
+        <Panel::Card @title="Skills" @collapsible={{true}} @startCollapsed={{true}}>
+          <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
         </Panel::Card>
-
         <Panel::Card @title="Experience" @collapsible={{true}}>
-          <div class="panel-body">
-            <div class="panel-actions">
+          <:top as |panel|>
+            <Panel::Navigation
+              @collapsible={{true}}
+              @collapsed={{panel.collapsed}}
+              @toggleCollapsed={{panel.toggleCollapsed}}
+            >
               <button
                 type="button"
                 class="btn small"
                 {{on "click" this.addExperience}}
               >+ Add Experience</button>
-            </div>
+            </Panel::Navigation>
+          </:top>
+          <:default>
             <Experiences::List @experiences={{this.model.experiences}} />
-          </div>
+          </:default>
         </Panel::Card>
-
-        <Panel::Card @title="Certifications" @collapsible={{true}}>
-          <div class="panel-body">
-            <div class="panel-actions">
+        <Panel::Card @title="Certifications" @collapsible={{true}} @startCollapsed={{true}}>
+          <:top as |panel|>
+            <Panel::Navigation
+              @collapsible={{true}}
+              @collapsed={{panel.collapsed}}
+              @toggleCollapsed={{panel.toggleCollapsed}}
+            >
               <button
                 type="button"
                 class="btn small"
                 {{on "click" this.addCertification}}
               >+ Add Certification</button>
-            </div>
-            <Certifications::Form @certification={{this.model.certification}} />
-          </div>
+            </Panel::Navigation>
+          </:top>
+          <:default>
+            {{#each this.model.certifications as |cert|}}
+              <Certifications::Form @certification={{cert}} />
+            {{/each}}
+          </:default>
         </Panel::Card>
-
-        <Panel::Card @title="Education" @collapsible={{true}}>
+        <Panel::Card @title="Education" @collapsible={{true}} @startCollapsed={{true}}>
           <Educations::Form @education={{this.model.education}} />
-        </Panel::Card>
-
-        <Panel::Card @title="Projects" @collapsible={{true}}>
-          {{! empty -- not in models}}
         </Panel::Card>
       </aside>
       <main class="preview-panel">
-        <div class="preview-actions">
-          <div class="score muted">Resume Score: 0%</div>
-          <button type="button" class="btn">Export PDF</button>
-        </div>
         <div class="resume-preview">
           <Resumes::Item @resume={{this.model}} />
         </div>

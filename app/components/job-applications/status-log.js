@@ -68,7 +68,7 @@ export default class JobApplicationsStatusLogComponent extends Component {
   get _sortedRecords() {
     const rel = this.args.jobApplication?.applicationStatuses;
     if (!rel) return [];
-    const statuses = rel.slice();
+    const statuses = rel?.toArray?.() ?? Array.from(rel);
     if (!statuses.length) return [];
     return statuses.sort((a, b) => {
       const da = new Date(a.loggedAt || a.createdAt || 0);

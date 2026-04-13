@@ -1,15 +1,7 @@
 import Component from '@glimmer/component';
-import { service } from '@ember/service';
 import { cached } from '@glimmer/tracking';
 
 export default class ResumesItemComponent extends Component {
-  @service router;
-  @service store;
-
-  get canClone() {
-    return this.router.currentRouteName === 'resumes.show';
-  }
-
   get groups() {
     return Object.keys(this.groupedSkillsMap);
   }

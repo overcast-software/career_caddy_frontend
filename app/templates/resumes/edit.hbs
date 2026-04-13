@@ -1,27 +1,14 @@
+{{page-title "Edit Resume"}}
 <RouteLayout @flashMessages={{this.flashMessages}} @mainClass="builder-page">
   <:subnav>
-    <div class="submenu-buttons">
+    <div class="controls">
       {{#if this.isDirty}}
-        <button
-          type="button"
-          class="btn"
-          {{on "click" this.saveResume}}
-        >Save</button>
+        <button type="button" class="btn" {{on "click" this.saveResume}}>Save</button>
       {{/if}}
-      <button
-        type="button"
-        class="btn danger"
-        {{on "click" this.deleteResume}}
-      >Delete</button>
-      <button type="button" class="btn" {{on "click" this.cloneResume}}>Clone
-        Resume</button>
-      <LinkTo
-        @route="resumes.show"
-        @model={{this.model}}
-        class="btn"
-      >Preview</LinkTo>
-      <button type="button" class="btn" {{on "click" this.exportToWord}}>Export
-        to Word</button>
+      <LinkTo @route="resumes.show" @model={{this.model}} class="btn">Preview</LinkTo>
+      <button type="button" class="btn" {{on "click" this.cloneResume}}>Clone</button>
+      <button type="button" class="btn" {{on "click" this.exportToWord}}>Export</button>
+      <button type="button" class="btn danger" {{on "click" this.deleteResume}}>Delete</button>
     </div>
   </:subnav>
   <:main>
@@ -41,6 +28,24 @@
         </Panel::Card>
         <Panel::Card @title="Skills" @collapsible={{true}}>
           <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
+        </Panel::Card>
+        <Panel::Card @title="Experience" @collapsible={{true}}>
+          <:top as |panel|>
+            <Panel::Navigation
+              @collapsible={{true}}
+              @collapsed={{panel.collapsed}}
+              @toggleCollapsed={{panel.toggleCollapsed}}
+            >
+              <button
+                type="button"
+                class="btn small"
+                {{on "click" this.addExperience}}
+              >+ Add Experience</button>
+            </Panel::Navigation>
+          </:top>
+          <:default>
+            <Experiences::List @experiences={{this.model.experiences}} />
+          </:default>
         </Panel::Card>
         <Panel::Card
           @title="Projects"
@@ -67,6 +72,30 @@
           </:default>
         </Panel::Card>
         <Panel::Card
+          @title="Certifications"
+          @collapsible={{true}}
+          @startCollapsed={{true}}
+        >
+          <:top as |panel|>
+            <Panel::Navigation
+              @collapsible={{true}}
+              @collapsed={{panel.collapsed}}
+              @toggleCollapsed={{panel.toggleCollapsed}}
+            >
+              <button
+                type="button"
+                class="btn small"
+                {{on "click" this.addCertification}}
+              >+ Add Certification</button>
+            </Panel::Navigation>
+          </:top>
+          <:default>
+            {{#each this.model.certifications as |cert|}}
+              <Certifications::Form @certification={{cert}} />
+            {{/each}}
+          </:default>
+        </Panel::Card>
+        <Panel::Card
           @title="Education"
           @collapsible={{true}}
           @startCollapsed={{true}}
@@ -88,24 +117,6 @@
             {{#each this.model.educations as |edu|}}
               <Educations::Form @education={{edu}} />
             {{/each}}
-          </:default>
-        </Panel::Card>
-        <Panel::Card @title="Experience" @collapsible={{true}}>
-          <:top as |panel|>
-            <Panel::Navigation
-              @collapsible={{true}}
-              @collapsed={{panel.collapsed}}
-              @toggleCollapsed={{panel.toggleCollapsed}}
-            >
-              <button
-                type="button"
-                class="btn small"
-                {{on "click" this.addExperience}}
-              >+ Add Experience</button>
-            </Panel::Navigation>
-          </:top>
-          <:default>
-            <Experiences::List @experiences={{this.model.experiences}} />
           </:default>
         </Panel::Card>
       </aside>

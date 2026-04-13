@@ -1,7 +1,9 @@
-{{page-title "Import"}}
+{{page-title "Import Resume"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    ingestion
+    <div class="controls">
+      <LinkTo @route="resumes" class="btn">Back to Resumes</LinkTo>
+    </div>
   </:subnav>
   <:main>
     <UploadForm

@@ -71,6 +71,14 @@ export default class ResumesEditController extends Controller {
     if (!rel.includes(proj)) rel.unshiftObject(proj);
   };
 
+  addCertification = async () => {
+    const cert = this.store.createRecord('certification', {
+      resume: this.model,
+    });
+    const rel = await this.model.certifications;
+    if (!rel.includes(cert)) rel.unshiftObject(cert);
+  };
+
   get resumeSummaries() {
     return this.model.summaries;
   }
