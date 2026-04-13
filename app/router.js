@@ -223,8 +223,8 @@ Router.map(function () {
     this.route('show', { path: '/:answer_id' });
   });
   this.route('admin', function () {
-    this.route('new');
-    this.route('show', { path: '/:api_key_id' });
+    this.route('new', { path: '/api-keys/new' });
+    this.route('show', { path: '/api-keys/:api_key_id' });
     this.route('users', function () {
       this.route('new');
       this.route('show', { path: '/:user_id' });

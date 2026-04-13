@@ -169,6 +169,18 @@
   --page-bg: #f5f3ff;
 }
 
+/* Dark mode overrides for non-indigo palettes.
+ * In dark mode every palette shares the same dark background and tee colors;
+ * only the accent shades differ (those are inherited from the palette block). */
+[data-theme="dark"][data-palette="blue"],
+[data-theme="dark"][data-palette="jade"],
+[data-theme="dark"][data-palette="rose"],
+[data-theme="dark"][data-palette="amber"],
+[data-theme="dark"][data-palette="violet"] {
+  --tee-bg: #334155;
+  --page-bg: #0f172a;
+}
+
 /*
  * Tailwind gray utility overrides for dark mode.
  * [data-theme="dark"] + class = specificity 0,2,0 — beats Tailwind's 0,1,0.
@@ -922,6 +934,9 @@ p.tee {
 
 .btn.favorite {
   position: relative;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  line-height: 1rem;
   color: #ccc;
 }
 

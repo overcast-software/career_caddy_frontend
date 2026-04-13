@@ -7,78 +7,102 @@
   </:subnav>
   <:main>
     <div class="panel-card max-w-lg">
-      <h1 class="text-xl font-semibold mb-2">Create API Key</h1>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Create a new API key to access your account programmatically.
-      </p>
+      {{#if this.createdKey}}
+        <h1 class="text-xl font-semibold mb-2">API Key Created</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Copy this key now. You won't be able to see it again.
+        </p>
+        <div
+          class="flex items-center gap-2 p-3 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 font-mono text-sm break-all"
+        >
+          <span class="flex-1">{{this.createdKey}}</span>
+          <button
+            type="button"
+            class="btn small shrink-0"
+            {{on "click" this.copyKey}}
+          >{{this.copyButtonText}}</button>
+        </div>
+        <div class="form-actions mt-6">
+          <button
+            type="button"
+            class="btn primary"
+            {{on "click" this.done}}
+          >Done</button>
+        </div>
+      {{else}}
+        <h1 class="text-xl font-semibold mb-2">Create API Key</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Create a new API key to access your account programmatically.
+        </p>
 
-      <fieldset disabled={{this.isSubmitting}}>
-        <form class="builder-form" {{on "submit" this.save}}>
-          <div class="field">
-            <label class="field-label" for="api-key-name">Name</label>
-            <input
-              id="api-key-name"
-              type="text"
-              value={{this.model.name}}
-              placeholder="e.g., Production API Key"
-              required
-              {{on "change" (fn this.updateField "name")}}
-            />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              A descriptive name to help you identify this API key.
-            </p>
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="api-key-expires">Expires in (days)</label>
-            <input
-              id="api-key-expires"
-              type="number"
-              value={{this.model.expiresDays}}
-              placeholder="30"
-              min="1"
-              max="365"
-              {{on "change" (fn this.updateField "expiresDays")}}
-            />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Leave empty for no expiration. Maximum 365 days.
-            </p>
-          </div>
-
-          <div class="field">
-            <label class="field-label">Scopes</label>
-            <div class="flex flex-col gap-2 mt-1">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={{this.canRead}}
-                  {{on "change" (fn this.toggleScope "read")}}
-                />
-                <span class="text-sm">Read access</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={{this.canWrite}}
-                  {{on "change" (fn this.toggleScope "write")}}
-                />
-                <span class="text-sm">Write access</span>
-              </label>
+        <fieldset disabled={{this.isSubmitting}}>
+          <form class="builder-form" {{on "submit" this.save}}>
+            <div class="field">
+              <label class="field-label" for="api-key-name">Name</label>
+              <input
+                id="api-key-name"
+                type="text"
+                value={{this.model.name}}
+                placeholder="e.g., Production API Key"
+                required
+                {{on "change" (fn this.updateField "name")}}
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                A descriptive name to help you identify this API key.
+              </p>
             </div>
-          </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn primary">
-              {{if this.isSubmitting "Creating…" "Create API Key"}}
-            </button>
-            <button
-              type="button"
-              class="btn"
-              {{on "click" this.cancel}}
-            >Cancel</button>
-          </div>
-        </form>
-      </fieldset>
+            <div class="field">
+              <label class="field-label" for="api-key-expires">Expires in (days)</label>
+              <input
+                id="api-key-expires"
+                type="number"
+                value={{this.model.expiresDays}}
+                placeholder="30"
+                min="1"
+                max="365"
+                {{on "change" (fn this.updateField "expiresDays")}}
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Leave empty for no expiration. Maximum 365 days.
+              </p>
+            </div>
+
+            <div class="field">
+              <label class="field-label">Scopes</label>
+              <div class="flex flex-col gap-2 mt-1">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={{this.canRead}}
+                    {{on "change" (fn this.toggleScope "read")}}
+                  />
+                  <span class="text-sm">Read access</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={{this.canWrite}}
+                    {{on "change" (fn this.toggleScope "write")}}
+                  />
+                  <span class="text-sm">Write access</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary">
+                {{if this.isSubmitting "Creating…" "Create API Key"}}
+              </button>
+              <button
+                type="button"
+                class="btn"
+                {{on "click" this.cancel}}
+              >Cancel</button>
+            </div>
+          </form>
+        </fieldset>
+      {{/if}}
     </div>
   </:main>
 </RouteLayout>

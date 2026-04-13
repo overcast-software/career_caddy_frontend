@@ -7,6 +7,7 @@ export default class JobPostsItemComponent extends Component {
   @service router;
   @service store;
   @service currentUser;
+  @service flashMessages;
 
   @tracked selectedResumeId = null;
   @tracked showFullDescription = false;
@@ -55,7 +56,12 @@ export default class JobPostsItemComponent extends Component {
       return this.args.onDelete(jobPost);
     }
     if (window.confirm('Are you sure you want to delete this job post?')) {
-      await jobPost.destroyRecord();
+      try {
+        await jobPost.destroyRecord();
+        this.flashMessages.success('Job post deleted.');
+      } catch {
+        this.flashMessages.danger('Failed to delete job post.');
+      }
     }
   }
 

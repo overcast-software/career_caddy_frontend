@@ -7,6 +7,8 @@ export default class ApiKeysNewController extends Controller {
   @service flashMessages;
   @service router;
   @tracked isSubmitting = false;
+  @tracked createdKey = null;
+  @tracked copyButtonText = 'Copy';
 
   get canRead() {
     return this.model?.scopes?.includes('read') ?? false;
@@ -32,10 +34,10 @@ export default class ApiKeysNewController extends Controller {
 
     try {
       const savedKey = await apiKey.save();
-      this.flashMessages.success('API key created successfully');
-      this.router.transitionTo('admin.show', savedKey.id);
+      this.createdKey = savedKey.key;
+      this.flashMessages.success('API key created.');
     } catch (error) {
-      this.flashMessages.danger('Failed to create API key');
+      this.flashMessages.danger('Failed to create API key.');
       console.error('Error creating API key:', error);
     } finally {
       this.isSubmitting = false;
@@ -43,8 +45,28 @@ export default class ApiKeysNewController extends Controller {
   }
 
   @action
+  async copyKey() {
+    try {
+      await navigator.clipboard.writeText(this.createdKey);
+      this.copyButtonText = 'Copied!';
+      setTimeout(() => (this.copyButtonText = 'Copy'), 2000);
+    } catch {
+      this.flashMessages.danger('Failed to copy.');
+    }
+  }
+
+  @action
+  done() {
+    this.createdKey = null;
+    this.copyButtonText = 'Copy';
+    this.router.transitionTo('admin.index');
+  }
+
+  @action
   cancel() {
     this.model.rollbackAttributes();
+    this.createdKey = null;
+    this.copyButtonText = 'Copy';
     this.router.transitionTo('admin.index');
   }
 
