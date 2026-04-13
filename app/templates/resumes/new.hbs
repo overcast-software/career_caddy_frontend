@@ -9,10 +9,18 @@
         <Panel::Card @title="Personal Information" @collapsible={{true}}>
           <PersonalInformation::Form @user={{this.model.user}} />
         </Panel::Card>
-        <Panel::Card @title="Summary" @collapsible={{true}} @startCollapsed={{true}}>
+        <Panel::Card
+          @title="Summary"
+          @collapsible={{true}}
+          @startCollapsed={{true}}
+        >
           <Summary::Form @summary={{this.model.summary}} />
         </Panel::Card>
-        <Panel::Card @title="Skills" @collapsible={{true}} @startCollapsed={{true}}>
+        <Panel::Card
+          @title="Skills"
+          @collapsible={{true}}
+          @startCollapsed={{true}}
+        >
           <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
         </Panel::Card>
         <Panel::Card @title="Experience" @collapsible={{true}}>
@@ -33,7 +41,11 @@
             <Experiences::List @experiences={{this.model.experiences}} />
           </:default>
         </Panel::Card>
-        <Panel::Card @title="Certifications" @collapsible={{true}} @startCollapsed={{true}}>
+        <Panel::Card
+          @title="Certifications"
+          @collapsible={{true}}
+          @startCollapsed={{true}}
+        >
           <:top as |panel|>
             <Panel::Navigation
               @collapsible={{true}}
@@ -53,7 +65,11 @@
             {{/each}}
           </:default>
         </Panel::Card>
-        <Panel::Card @title="Education" @collapsible={{true}} @startCollapsed={{true}}>
+        <Panel::Card
+          @title="Education"
+          @collapsible={{true}}
+          @startCollapsed={{true}}
+        >
           <Educations::Form @education={{this.model.education}} />
         </Panel::Card>
       </aside>

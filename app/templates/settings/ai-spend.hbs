@@ -21,8 +21,19 @@
           disabled={{this.isLoading}}
           {{on "click" this.loadData}}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="size-5 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182"
+            />
           </svg>
           {{if this.isLoading "Loading\u2026" "Load"}}
         </button>
@@ -31,30 +42,46 @@
       {{#if this.spendData}}
         {{! Summary cards }}
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
-          <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+          <div
+            class="rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
             <p class="text-sm text-gray-500 dark:text-gray-400">Total Cost</p>
-            <p class="text-2xl font-semibold mt-1">{{this.formattedTotalCost}}</p>
+            <p
+              class="text-2xl font-semibold mt-1"
+            >{{this.formattedTotalCost}}</p>
           </div>
-          <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+          <div
+            class="rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
             <p class="text-sm text-gray-500 dark:text-gray-400">Total Tokens</p>
-            <p class="text-2xl font-semibold mt-1">{{this.formattedTotalTokens}}</p>
+            <p
+              class="text-2xl font-semibold mt-1"
+            >{{this.formattedTotalTokens}}</p>
           </div>
-          <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Avg Cost / Request</p>
-            <p class="text-2xl font-semibold mt-1">{{this.avgCostPerRequest}}</p>
+          <div
+            class="rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <p class="text-sm text-gray-500 dark:text-gray-400">Avg Cost /
+              Request</p>
+            <p
+              class="text-2xl font-semibold mt-1"
+            >{{this.avgCostPerRequest}}</p>
           </div>
         </div>
 
         {{! Controls }}
         <div class="flex flex-wrap gap-4 mb-6">
           <div>
-            <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Period</label>
+            <label
+              class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block"
+            >Period</label>
             <div class="flex gap-1">
               {{#each (array "daily" "weekly" "monthly") as |p|}}
                 <button
                   type="button"
                   class="px-3 py-1 text-sm rounded-md border
-                    {{if (eq this.period p)
+                    {{if
+                      (eq this.period p)
                       'bg-accent-600 text-white border-accent-600'
                       'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }}"
@@ -64,13 +91,16 @@
             </div>
           </div>
           <div>
-            <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Group by</label>
+            <label
+              class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block"
+            >Group by</label>
             <div class="flex gap-1">
               {{#each (array "agent_name" "model_name" "trigger") as |g|}}
                 <button
                   type="button"
                   class="px-3 py-1 text-sm rounded-md border
-                    {{if (eq this.groupBy g)
+                    {{if
+                      (eq this.groupBy g)
                       'bg-accent-600 text-white border-accent-600'
                       'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }}"
@@ -80,13 +110,16 @@
             </div>
           </div>
           <div>
-            <label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Days</label>
+            <label
+              class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block"
+            >Days</label>
             <div class="flex gap-1">
               {{#each (array 7 30 90) as |d|}}
                 <button
                   type="button"
                   class="px-3 py-1 text-sm rounded-md border
-                    {{if (eq this.days d)
+                    {{if
+                      (eq this.days d)
                       'bg-accent-600 text-white border-accent-600'
                       'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }}"
@@ -101,7 +134,9 @@
         {{#if this.hasBuckets}}
           <div class="overflow-x-auto">
             <table class="w-full text-sm text-left">
-              <thead class="text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+              <thead
+                class="text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
+              >
                 <tr>
                   <th class="px-3 py-2">Period</th>
                   <th class="px-3 py-2">{{this.groupBy}}</th>
@@ -114,19 +149,30 @@
               <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 {{#each this.buckets as |bucket|}}
                   <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td class="px-3 py-2 whitespace-nowrap">{{bucket.period}}</td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap"
+                    >{{bucket.period}}</td>
                     <td class="px-3 py-2">{{get bucket this.groupBy}}</td>
-                    <td class="px-3 py-2 text-right tabular-nums">{{bucket.request_tokens}}</td>
-                    <td class="px-3 py-2 text-right tabular-nums">{{bucket.response_tokens}}</td>
-                    <td class="px-3 py-2 text-right tabular-nums">{{bucket.request_count}}</td>
-                    <td class="px-3 py-2 text-right tabular-nums">${{bucket.estimated_cost_usd}}</td>
+                    <td
+                      class="px-3 py-2 text-right tabular-nums"
+                    >{{bucket.request_tokens}}</td>
+                    <td
+                      class="px-3 py-2 text-right tabular-nums"
+                    >{{bucket.response_tokens}}</td>
+                    <td
+                      class="px-3 py-2 text-right tabular-nums"
+                    >{{bucket.request_count}}</td>
+                    <td
+                      class="px-3 py-2 text-right tabular-nums"
+                    >${{bucket.estimated_cost_usd}}</td>
                   </tr>
                 {{/each}}
               </tbody>
             </table>
           </div>
         {{else}}
-          <p class="text-sm text-gray-500 dark:text-gray-400">No usage data for this period.</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">No usage data for
+            this period.</p>
         {{/if}}
       {{else if (not this.isLoading)}}
         <p class="text-sm text-gray-500 dark:text-gray-400">

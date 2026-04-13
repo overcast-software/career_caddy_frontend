@@ -3,12 +3,32 @@
   <:subnav>
     <div class="controls">
       {{#if this.isDirty}}
-        <button type="button" class="btn" {{on "click" this.saveResume}}>Save</button>
+        <button
+          type="button"
+          class="btn"
+          {{on "click" this.saveResume}}
+        >Save</button>
       {{/if}}
-      <LinkTo @route="resumes.edit" @model={{this.model}} class="btn">Edit</LinkTo>
-      <button type="button" class="btn" {{on "click" this.cloneResume}}>Clone</button>
-      <button type="button" class="btn" {{on "click" this.exportToWord}}>Export</button>
-      <button type="button" class="btn danger" {{on "click" this.deleteResume}}>Delete</button>
+      <LinkTo
+        @route="resumes.edit"
+        @model={{this.model}}
+        class="btn"
+      >Edit</LinkTo>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" this.cloneResume}}
+      >Clone</button>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" this.exportToWord}}
+      >Export</button>
+      <button
+        type="button"
+        class="btn danger"
+        {{on "click" this.deleteResume}}
+      >Delete</button>
     </div>
   </:subnav>
   <:main>

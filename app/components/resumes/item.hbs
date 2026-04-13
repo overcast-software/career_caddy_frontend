@@ -73,36 +73,36 @@
     <section>
       <h2>Projects</h2>
       <hr />
-        {{#each @resume.projects as |proj|}}
-          <article class="experience">
-            <div class="job-header">
-              <div class="job-title font-semibold">
-                {{proj.title}}
-                <span class="job-dates">
-                  {{#if proj.startDate}}
-                    {{#if proj.endDate}}
-                      {{format-date proj.startDate "MM.YYYY"}}
-                      -
-                      {{format-date proj.endDate "MM.YYYY"}}
-                    {{else}}
-                      {{format-date proj.startDate "MM.YYYY"}}
-                    {{/if}}
+      {{#each @resume.projects as |proj|}}
+        <article class="experience">
+          <div class="job-header">
+            <div class="job-title font-semibold">
+              {{proj.title}}
+              <span class="job-dates">
+                {{#if proj.startDate}}
+                  {{#if proj.endDate}}
+                    {{format-date proj.startDate "MM.YYYY"}}
+                    -
+                    {{format-date proj.endDate "MM.YYYY"}}
                   {{else}}
-                    {{#if proj.endDate}}
-                      {{format-date proj.endDate "MM.YYYY"}}
-                    {{/if}}
+                    {{format-date proj.startDate "MM.YYYY"}}
                   {{/if}}
-                </span>
-              </div>
+                {{else}}
+                  {{#if proj.endDate}}
+                    {{format-date proj.endDate "MM.YYYY"}}
+                  {{/if}}
+                {{/if}}
+              </span>
             </div>
+          </div>
 
-            <ul class="desc-list list-disc ml-5">
-              {{#each proj.descriptions as |desc|}}
-                <li class="desc-item">{{desc.content}}</li>
-              {{/each}}
-            </ul>
-          </article>
-        {{/each}}
+          <ul class="desc-list list-disc ml-5">
+            {{#each proj.descriptions as |desc|}}
+              <li class="desc-item">{{desc.content}}</li>
+            {{/each}}
+          </ul>
+        </article>
+      {{/each}}
     </section>
   {{/if}}
 
