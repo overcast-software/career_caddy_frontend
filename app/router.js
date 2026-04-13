@@ -234,6 +234,7 @@ Router.map(function () {
   this.route('settings', function () {
     this.route('data');
     this.route('appearance');
+    this.route('ai-spend');
   });
   this.route('favorites');
   this.route('caddy');
