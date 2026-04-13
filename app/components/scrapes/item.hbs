@@ -75,9 +75,75 @@
 
       {{#if @scrape.jobContent}}
         <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900">Job Content</dt>
-          <dd class="text-gray-700 sm:col-span-2 line-clamp-4 overflow-hidden">
+          <dt class="font-medium text-gray-900 flex items-center gap-2">
+            Job Content
+            <button
+              type="button"
+              class="text-xs text-accent-600 hover:text-accent-800 dark:text-accent-400 dark:hover:text-accent-300"
+              {{on "click" this.toggleJobContent}}
+            >{{if this.jobContentExpanded "Collapse" "Expand"}}</button>
+          </dt>
+          <dd
+            class="text-gray-700 dark:text-gray-300 sm:col-span-2 whitespace-pre-wrap
+              {{unless this.jobContentExpanded 'line-clamp-4 overflow-hidden'}}"
+          >
             {{@scrape.jobContent}}
+          </dd>
+        </div>
+      {{/if}}
+
+      {{#if @scrape.sourceScrape.id}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Source Scrape</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            <LinkTo @route="scrapes.show" @model={{@scrape.sourceScrape}}>
+              {{or
+                @scrape.sourceScrape.url
+                (concat "Scrape #" @scrape.sourceScrape.id)
+              }}
+            </LinkTo>
+          </dd>
+        </div>
+      {{/if}}
+
+      {{#if @scrape.scrapes.length}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Child Scrapes</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            <ul class="space-y-1">
+              {{#each @scrape.scrapes as |child|}}
+                <li>
+                  <LinkTo @route="scrapes.show" @model={{child}}>
+                    {{or child.url (concat "Scrape #" child.id)}}
+                  </LinkTo>
+                  <span
+                    class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium
+                      {{if
+                        (eq child.status 'completed')
+                        'bg-green-100 text-green-700'
+                      }}
+                      {{if
+                        (eq child.status 'done')
+                        'bg-green-100 text-green-700'
+                      }}
+                      {{if
+                        (eq child.status 'failed')
+                        'bg-red-100 text-red-700'
+                      }}
+                      {{if (eq child.status 'error') 'bg-red-100 text-red-700'}}
+                      {{if
+                        (eq child.status 'pending')
+                        'bg-yellow-100 text-yellow-700'
+                      }}
+                      {{if
+                        (eq child.status 'running')
+                        'bg-accent-100 text-accent-700'
+                      }}
+                      "
+                  >{{or child.status "unknown"}}</span>
+                </li>
+              {{/each}}
+            </ul>
           </dd>
         </div>
       {{/if}}

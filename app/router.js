@@ -229,6 +229,7 @@ Router.map(function () {
       this.route('new');
       this.route('show', { path: '/:user_id' });
     });
+    this.route('waitlist');
   });
   this.route('career-data', function () {});
   this.route('settings', function () {

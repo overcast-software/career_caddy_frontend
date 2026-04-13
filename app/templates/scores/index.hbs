@@ -1,8 +1,12 @@
+{{page-title "Scores"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
     Scores
   </:subnav>
   <:main>
-    <Scores::List @scores={{this.model}} />
+    <Scores::List @scores={{this.model}} @onDelete={{this.deleteScore}} />
+    <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
+      <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
+    </InfinityLoader>
   </:main>
 </RouteLayout>

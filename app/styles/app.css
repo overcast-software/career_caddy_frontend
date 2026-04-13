@@ -375,6 +375,7 @@ body {
 .caddy-fullpage {
   flex: 1;
   min-height: 0;
+  padding-bottom: 3rem;
 }
 
 /* On mobile, the desktop sidebar is hidden; chat takes full width */

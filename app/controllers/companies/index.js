@@ -23,9 +23,12 @@ export default class CompaniesIndexController extends Controller {
     const name = company.name;
     try {
       await company.destroyRecord();
-      this.flashMessages.success(`deleted ${name}`);
-    } catch {
-      this.flashMessages.danger('Failed to delete company');
+      this.model.content.removeObject(company);
+      this.flashMessages.success(`${name} deleted.`);
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to delete company.');
+      }
     }
   }
 }
