@@ -13,8 +13,23 @@
   >
     {{#if (eq @message.role "assistant")}}
       <div class="chat-markdown break-words">
-        <MarkdownToHtml @markdown={{@message.content}} />
+        <MarkdownToHtml @markdown={{this.displayContent}} />
       </div>
+      {{#if this.elicitation}}
+        <div
+          class="flex flex-wrap gap-2 mt-3 pt-2 border-t border-gray-200 dark:border-gray-600"
+        >
+          {{#each this.elicitation.actions as |act|}}
+            <button
+              type="button"
+              class="px-3 py-1.5 text-xs font-medium rounded-md bg-accent-100 dark:bg-accent-900 text-accent-700 dark:text-accent-200 hover:bg-accent-200 dark:hover:bg-accent-800 transition-colors"
+              {{on "click" (fn this.sendAction act.message)}}
+            >
+              {{act.label}}
+            </button>
+          {{/each}}
+        </div>
+      {{/if}}
     {{else}}
       <div class="whitespace-pre-wrap break-words">{{@message.content}}</div>
     {{/if}}

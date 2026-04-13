@@ -1,75 +1,58 @@
-# +title: Todo
+# +title: Todo (Frontend)
 #+startup: show2levels
+#+NOTE: [2026-04-13] This file predates the Tailwind/HyperUI migration. Many items may be resolved. Verify before working on anything here.
+
 * Inbox
 * fixes
 ** resume [0/4]
-*** TODO thinking for resume import.
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
-**** TODO should also disable button for upload so you can't upload twice
-*** TODO when displaying resume if no summary wasn't presented then don't show the header tag
+*** TODO thinking for resume import — should also disable button so you can't upload twice
+*** TODO when displaying resume, if no summary was generated, don't show the header tag
 *** TODO [#A] the upload button should be disabled after upload started
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/serializers/application.js::const val = attrs\[serializedKey\];]]
-*** TODO Notes at the subnav level is bad. but I don't know where to put it
+*** TODO Notes at the subnav level is bad — but unclear where to put it
 ** questions and answers
-*** TODO [#B] `/questions/:id/answer` has a "new" button but it doesn't mean new answer, it means new question.
-*** TODO when ai returns answer.  add it to the list in questions/:id/answers
-maybe I meant redirect but just make sure it works
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/models/question.js]]
-This should happen anyway.
-*** TODO saving a new manual answer stays in /new should reroute to show :bug:ui:
-this UI is bad
+*** TODO [#B] /questions/:id/answer has a "new" button but it means new question, not new answer
+*** TODO when AI returns answer, add it to the list in questions/:id/answers (or redirect)
+*** TODO saving a new manual answer stays in /new — should reroute to show       :bug:ui:
 ** summary
-*** IDEA "create-new-summary" action in UI is missing
-mostly AI generated but would be nice to create one manually
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js]]
+*** IDEA "create-new-summary" action in UI is missing — mostly AI generated but nice to create manually
 ** jobPosts
-
-*** [?] [#B] should route job_post
-maybe I mean that after save go to job-post/<id>
+*** [?] [#B] should route job_post — maybe after save go to job-post/<id>
 **** TODO find what it does now
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/controllers/job-posts/new.js::}]]
 *** index [0/4]
-**** TODO All posts always is highlighted
-**** TODO score went to jobPosts index and didn't actually start grabbing a score
-kick off polling after creating score
-redirect to jobPosts/id/scores
-**** TODO Search at the top is ugly :UI:
+**** TODO "All posts" is always highlighted
+**** TODO score went to jobPosts index and didn't actually start grabbing a score — kick off polling, redirect to jobPosts/id/scores
+**** TODO Search at the top is ugly                                              :UI:
 **** TODO cancel should go back to job-posts.show.job-applications
-
 *** Edit [0/2]
-**** TODO can't create company :bug:
-**** TODO you can save without description. :bug:
-**** TODO UI has old look :UI:
+**** TODO can't create company                                                   :bug:
+**** TODO you can save without description                                       :bug:
+**** TODO UI has old look                                                        :UI:
 *** show [0/6]
 **** TODO salary and location are being presented
-**** TODO COPY button should say Copy description
-**** TODO Edit should be next to copy description
-remove from subnav
+**** TODO COPY button should say "Copy description"
+**** TODO Edit should be next to Copy description — remove from subnav
 **** summaries
 ***** TODO need ability to create summary from page
-**** scapes
-***** TODO scapes aren't being called.
+**** scrapes
+***** TODO scrapes aren't being called
 *** New [0/3]
-**** TODO check save and apply does it go to job-posts/id/job-applications/new
-**** TODO default 'applied' should be "Applied"
-**** TODO too many boarders. remove the outer one
+**** TODO check "save and apply" — does it go to job-posts/id/job-applications/new?
+**** TODO default "applied" should be "Applied"
+**** TODO too many borders — remove the outer one
 *** scrape [0/2]
-**** TODO The font looks weird in the input :ui:
-**** TODO the button doesn't match :ui:
+**** TODO The font looks weird in the input                                      :ui:
+**** TODO the button doesn't match                                               :ui:
 *** questions [0/2]
-problem with question.  company is known and locked but drop downs for job-application and question dropdown is redundant
-**** TODO test save and add another.  should be for going through old questions and answers and being able to rapidly enter them.  probably can remove.  actually hide.
+**** TODO test "save and add another" — probably can remove or hide
 **** TODO list row needs show in addition to answer; show still goes to questions/id/answers
 *** applications
 **** TODO resume dropdown needs to be close to apply
 ** jobApplications
-*** TODO invalid dates should not be at the top.  find out why they are invalid and fix
-Fixed display (null appliedAt now shows "—" instead of "Invalid date"). Root cause is backend NULL sort order — nulls sort first with -applied_at. Requires backend NULLS LAST fix.
-[[file:~/Network/syncthing/Projects/career_caddy_frontend/app/templates/job-applications/index.hbs::<:subnav>]]
-**** TODO the button "+New Application" button breaks with warning: WARNING: This link is in an inactive loading state because at least one of its models currently has a null/undefined value, or the provided route name is invalid. 3 ember.js:443:1*
+*** TODO invalid dates should not be at the top — nulls sort first with -applied_at, needs backend NULLS LAST fix
+**** TODO "+New Application" button breaks with warning about null/undefined model values
 *** index [0/2]
-**** [?] what does the column applied mean?
-**** TODO deleting a record doesn't remove the row, just the data on that row. action buttons persist but are broken
+**** [?] what does the column "applied" mean?
+**** TODO deleting a record doesn't remove the row — just the data. Action buttons persist but are broken.
 *** view [0/4]
 **** TODO remove svg with the statuses or make it smaller
 **** TODO job-application/id/questions is broken
@@ -79,175 +62,63 @@ Fixed display (null appliedAt now shows "—" instead of "Invalid date"). Root c
 **** TODO edit doesn't let you mess with statuses, only show does
 **** TODO cancel button doesn't bring you back to job-application/show
 **** TODO save should take you to job-application show
-**** TODO dropdowns with search look strange on full sized page.
-on smaller dimentions they go full size and stack, but in fullsized they become half sized and share the row with another input.
-however the label sits on the left instead of above.
+**** TODO dropdowns with search look strange on full-sized page — labels sit left instead of above
 ** cover-letters
 *** edit [/]
-**** TODO no option to delete
-delete needs to go back to cover-letters/index
+**** TODO no option to delete — delete needs to go back to cover-letters/index
 **** TODO favorite button not standard
 *** new [0/3]
-**** TODO don't need to select a resume if you make a manual entry.
-place resume selection on the same panel card as create a cover letterk
-**** TODO rename create cover letter to "AI craft cover letter"
-**** TODO save button is not standard.
+**** TODO don't need to select a resume for manual entry — place resume selection on same panel as "create cover letter"
+**** TODO rename "create cover letter" to "AI craft cover letter"
+**** TODO save button is not standard
 ** Companies
-*** TODO answers tab can have a new question action.
+*** TODO answers tab can have a "new question" action
 ** Questions
 *** TODO infinite scroll
 *** TODO search
 ** Answers
-*** TODO answers new button should go to questions and flash, "select question to answer"
+*** TODO answers new button should go to questions and flash "select question to answer"
 *** TODO search
 ** Summaries
 *** TODO if there is no job for the summary, remove the job label
 *** TODO search
-*** TODO inifnite scroll
+*** TODO infinite scroll
 
 * features
-*** WAIT descriptions should have descriptions :resume:
-make a join table so that a description can describe a description
-this is a feature for STAR on bullet points
-this is what the q&a portion does
+*** WAIT descriptions should have descriptions                                   :resume:
+Make a join table so a description can describe a description. This is a feature for STAR on bullet points — same concept as Q&A.
+
 * bugs
-*** STRT [#B] edit resume is broken  edit.js
-lowered priority b/c we don't actually need it
-serializeAttribute application.js:22
+*** STRT [#B] edit resume is broken (edit.js)
+Lowered priority — we don't actually need it. serializeAttribute application.js:22
+
 * production readiness
-** Synopsis (as of 2026-03-20)
-- 36/165 QUnit tests failing; CI blocks on push to main
-- npm run lint fails: 197 CSS errors, 23 HBS errors, 3 JS errors
-- Deploy pipeline (CI → Docker → SSH) is wired but GitHub deploy secrets unverified
-- Several broken user flows documented in bugs section below
-- ember-data deprecation warnings will become hard errors in ember-data 6.0
+#+NOTE: [2026-04-13] Counts below are from 2026-03-20 and may be stale. Re-run linters and tests to get current numbers before starting work.
 
-** TODO [#A] Fix failing lint — JS (3 errors, all unused vars)
-- ~app/authenticators/jwt.js~ line 27: unused ~error~ variable
-- ~app/authenticators/jwt.js~ line 41: unused ~refreshError~ variable
-- one route file: unused ~query~ parameter
-Run ~npm run lint:js~ to confirm locations
+** TODO [#A] Fix failing lint — JS
+Run =npm run lint:js= to check current state.
 
-** TODO [#A] Fix failing lint — HBS (23 errors, 4 auto-fixable)
-Run ~npm run lint:hbs --fix~ for the 4 auto-fixable ones first.
-Manual fixes needed:
-- ~no-yield-only~: component with only ~{{yield}}~ — add markup or delete file
-- ~no-forbidden-elements~: two ~<script>~ tags in templates — move to app.js or remove
-- ~no-action-on-submit-button~: 3 submit buttons with click actions — remove {{on "click"}} and use form's submit event instead
-- ~no-builtin-form-components~: 2 uses of ~<Input>~ — replace with ~<input>~ + separate action
-- ~require-input-label~: 3 unlabeled inputs — add ~<label for=...>~ or ~aria-label~
-- ~no-inline-styles~: 2 elements — move to Tailwind classes
-- ~no-log~: ~{{log}}~ in template — remove debug statement
-- ~no-invalid-interactive~: click on non-interactive element — wrap in ~<button>~
-- ~no-nested-interactive~: interactive inside ~<label>~ — restructure
+** TODO [#A] Fix failing lint — HBS
+Run =npm run lint:hbs= to check current state. Some may be auto-fixable with =--fix=.
 
-** TODO [#A] Fix failing lint — CSS (197 errors, 144 auto-fixable)
-Run ~npm run lint:fix~ first to auto-fix 144.
-Manually address remaining 53 errors after that.
+** TODO [#A] Fix failing lint — CSS
+Run =npm run lint:css= to check current state. Many may be auto-fixable.
 
-** TODO [#A] Fix 36 failing unit/integration tests
-*** Stale route test files (routes were renamed/removed)
-These test files reference modules that no longer exist — delete or update them:
-- ~tests/unit/routes/applications/~ (edit, index, new, show) — route is now ~job-applications/~
-- ~tests/unit/routes/questions-test.js~ — route is ~questions/index~, not ~questions~
-- ~tests/unit/controllers/job-posts/show/job-application/new-test.js~ — controller doesn't exist
-*** Broken model test
-- ~tests/unit/models/questions-test.js~ — model name is ~question~ (singular), test file uses ~questions~; fix the ~moduleForModel~ call
-
-*** Integration component tests (28 failing)
-All component render tests fail — likely because ~store~ or auth services aren't being injected in test setup.
-- Audit one failing test (e.g. ~answers/form~) to confirm the root cause
-- Add any missing ~this.owner.register(...)~ stubs for ~store~, ~session~, ~currentUser~, ~flashMessages~, ~router~ services
-- Once root cause is confirmed, apply fix pattern across all 28 component test files
+** TODO [#A] Fix failing unit/integration tests
+Run =npm --prefix frontend test= to get current count. Known issues:
+- Stale route test files (routes renamed/removed)
+- Component tests may need service stubs (store, session, currentUser, flashMessages, router)
 
 ** TODO [#B] Resolve ember-data deprecation warnings (breaks in ember-data 6.0)
-Create explicit transform shims so ember-data stops auto-registering them:
-- ~app/transforms/string.js~ → ~export { StringTransform as default } from '@ember-data/serializer/transform';~
-- ~app/transforms/date.js~ → ~export { DateTransform as default } from '@ember-data/serializer/transform';~
-- ~app/transforms/boolean.js~ → ~export { BooleanTransform as default } from '@ember-data/serializer/transform';~
-- ~app/transforms/number.js~ → same pattern for NumberTransform
-Update ~app/deprecation-workflow.js~ to un-silence these once the shims are in place.
+Create explicit transform shims: =app/transforms/string.js=, =date.js=, =boolean.js=, =number.js=.
 
 ** TODO [#B] Verify GitHub Actions deploy secrets are set
-The deploy workflow requires these secrets set in the repo's GitHub environment named ~production~:
-- ~DEPLOY_SSH_HOST~
-- ~DEPLOY_SSH_USER~
-- ~DEPLOY_SSH_KEY~
-- ~DEPLOY_APP_DIR~
-- Optional: ~DEPLOY_SSH_PORT~, ~GHCR_PULL_USER~, ~GHCR_PULL_TOKEN~
-The ~build-and-push~ job uses ~GITHUB_TOKEN~ automatically — no action needed there.
-Verify a manual ~workflow_dispatch~ run completes without the "secret is not set" early exit.
+Deploy workflow requires: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY, DEPLOY_APP_DIR.
 
 ** TODO [#C] Confirm production environment config
-- ~config/environment.js~: verify ~API_HOST~ for production points to ~https://api.careercaddy.online~
-- CSP headers in environment.js — confirm they cover all external assets loaded in prod (fonts, CDN, etc.)
-- ~nginx.conf~: confirm gzip, cache headers, and SPA fallback (~try_files $uri /index.html~) are all present
-- Dockerfile: confirm static assets are built with ~npm run build~ (not ~start~) and served via nginx
+- =config/environment.js=: verify API_HOST for production
+- CSP headers, nginx.conf, Dockerfile
 
 * projects
 ** PROJ /plan bootstrap
 ** PROJ chat
-that would be kinda cool to have a chat in the webpage
-* PROJ UI revamp
-** Phase 1: Analysis & Design System
-*** TODO Document target site structure and components
-- [ ] Screenshot all key pages from jobops.dakheera47.com
-- [ ] Document color palette, typography, spacing system
-- [ ] List all UI components needed (buttons, cards, forms, etc.)
-- [ ] Map out navigation structure and routing
-- [ ] Identify reusable component patterns
-
-*** DONE Create design tokens/variables
-- [X] Define CSS custom properties for colors
-- [X] Define spacing scale
-- [X] Define typography scale
-- [X] Define breakpoints for responsive design
-
-** Phase 2: Component Library Foundation
-*** TODO Build base UI components
-- [X] Button component with variants (using Materialize)
-- [X] Added Materialize CSS framework
-- [X] Added Material Icons
-- [ ] Card component
-- [ ] Form input components
-- [ ] Navigation components
-- [ ] Layout components (containers, grids)
-
-*** DONE Update application styles
-- [X] Create new base stylesheet
-- [X] Add CSS reset/normalize
-- [X] Implement design tokens
-- [X] Integrated Materialize CSS
-- [X] Created dark theme overrides for Materialize
-
-** Phase 3: Page-by-Page Migration
-*** TODO Identify page migration order
-- [ ] List all current routes
-- [ ] Prioritize by user flow importance
-- [ ] Plan data/state management changes if needed
-
-*** TODO Migrate core pages (in order)
-- [ ] Index/dashboard page
-- [ ] Job applications list/index
-- [ ] Job application detail/show
-- [ ] Questions list/index
-- [ ] Question detail with answers
-- [ ] Resume management pages
-- [ ] Cover letter pages
-
-*** TODO Migrate secondary pages
-- [ ] Settings/admin pages
-- [ ] Setup/onboarding flow
-- [ ] About page
-
-** Phase 4: Testing & Polish
-*** TODO Cross-browser testing
-*** TODO Responsive design testing
-*** TODO Accessibility audit
-*** TODO Performance optimization
-*** TODO User acceptance testing
-
-** Phase 5: Deployment
-*** TODO Staging deployment
-*** TODO Production deployment
-*** TODO Monitor for issues

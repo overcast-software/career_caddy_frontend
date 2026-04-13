@@ -5,13 +5,17 @@ import { tracked } from '@glimmer/tracking';
 
 export default class SettingsAiSpendController extends Controller {
   @service api;
+  @service currentUser;
   @service flashMessages;
+  @service store;
 
   @tracked isLoading = false;
   @tracked spendData = null;
   @tracked period = 'daily';
   @tracked groupBy = 'agent_name';
   @tracked days = 30;
+  @tracked selectedUserId = '';
+  @tracked users = [];
 
   get buckets() {
     return this.spendData?.data?.buckets ?? [];
@@ -44,8 +48,32 @@ export default class SettingsAiSpendController extends Controller {
     return `$${(cost / count).toFixed(4)}`;
   }
 
+  get isStaff() {
+    return this.currentUser.user?.isStaff;
+  }
+
+  @action
+  async loadUsers() {
+    if (!this.isStaff || this.users.length > 0) return;
+    try {
+      const results = await this.store.findAll('user');
+      this.users = results.slice();
+    } catch {
+      // Non-critical — dropdown just stays empty
+    }
+  }
+
+  @action
+  setUser(event) {
+    this.selectedUserId = event.target.value;
+    if (this.spendData) this.loadData();
+  }
+
   @action
   async loadData() {
+    if (this.isStaff && this.users.length === 0) {
+      await this.loadUsers();
+    }
     this.isLoading = true;
     try {
       const params = new URLSearchParams({
@@ -53,6 +81,9 @@ export default class SettingsAiSpendController extends Controller {
         group_by: this.groupBy,
         days: this.days.toString(),
       });
+      if (this.isStaff && this.selectedUserId) {
+        params.set('user_id', this.selectedUserId);
+      }
       const response = await fetch(
         `${this.api.baseUrl}ai-usages/summary/?${params}`,
         { headers: this.api.headers() },

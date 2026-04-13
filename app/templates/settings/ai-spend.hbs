@@ -71,6 +71,33 @@
 
         {{! Controls }}
         <div class="flex flex-wrap gap-4 mb-6">
+          {{#if this.isStaff}}
+            <div>
+              <label
+                for="ai-spend-user"
+                class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block"
+              >User</label>
+              <select
+                id="ai-spend-user"
+                class="field-input text-sm py-1 px-2 min-w-[10rem]"
+                {{on "change" this.setUser}}
+              >
+                <option value="" selected={{not this.selectedUserId}}>All users</option>
+                {{#each this.users as |u|}}
+                  <option
+                    value={{u.id}}
+                    selected={{eq this.selectedUserId u.id}}
+                  >
+                    {{if
+                      u.firstName
+                      (concat u.firstName " " u.lastName)
+                      u.username
+                    }}
+                  </option>
+                {{/each}}
+              </select>
+            </div>
+          {{/if}}
           <div>
             <label
               class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block"

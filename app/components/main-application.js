@@ -26,6 +26,14 @@ export default class MainApplicationComponent extends Component {
     if (transition.from) {
       this.sidebarOpen = false;
     }
+
+    if (transition.to) {
+      this.chat.currentPage = {
+        route: transition.to.name,
+        url: this.router.currentURL,
+        params: transition.to.params,
+      };
+    }
   }
 
   @action

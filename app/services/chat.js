@@ -3,13 +3,17 @@ import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import { buildBaseUrl } from 'career-caddy-frontend/utils/base-url';
 
+const NAVIGATE_RE = /<!--\s*navigate:(\/[^\s]*)\s*-->/g;
+
 export default class ChatService extends Service {
+  @service router;
   @service session;
 
   @tracked messages = [];
   @tracked isStreaming = false;
   @tracked conversationId = null;
   @tracked sidebarOpen = false;
+  @tracked currentPage = null;
 
   get hasMessages() {
     return this.messages.length > 0;
@@ -57,6 +61,7 @@ export default class ChatService extends Service {
           message: text,
           history: this._buildHistory(),
           conversation_id: this.conversationId,
+          page_context: this.currentPage,
         }),
       });
 
@@ -107,12 +112,25 @@ export default class ChatService extends Service {
               this.conversationId =
                 event.conversation_id || this.conversationId;
               this._replaceLastMessage(accumulated);
+            } else if (event.type === 'navigate') {
+              this.router.transitionTo(event.url);
             } else if (event.type === 'error') {
               this._replaceLastMessage(`Error: ${event.content}`);
             }
           } catch {
             // skip malformed events
           }
+        }
+      }
+
+      // Strip navigate markers from final text and trigger navigation
+      if (accumulated) {
+        const navMatches = [...accumulated.matchAll(NAVIGATE_RE)];
+        if (navMatches.length > 0) {
+          accumulated = accumulated.replace(NAVIGATE_RE, '').trim();
+          this._replaceLastMessage(accumulated);
+          const lastNav = navMatches[navMatches.length - 1][1];
+          this.router.transitionTo(lastNav);
         }
       }
 
