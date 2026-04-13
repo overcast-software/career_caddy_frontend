@@ -299,29 +299,23 @@ body {
 .course {
   height: 100vh;
   display: grid;
-  grid-template: "header" auto "main" 1fr / 1fr;
+  grid-template:
+    "header header header" auto
+    "sidebar main chat" 1fr
+    / 0 1fr 0;
   overflow: hidden;
   transition: grid-template-columns 0.25s ease;
 }
 
 .course--sidebar-open {
-  grid-template-areas:
-    "header header"
-    "sidebar main";
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 280px 1fr 0;
 }
 
 .course--chat-open {
-  grid-template-areas:
-    "header header"
-    "main chat";
-  grid-template-columns: 1fr 24rem;
+  grid-template-columns: 0 1fr 24rem;
 }
 
 .course--sidebar-open.course--chat-open {
-  grid-template-areas:
-    "header header header"
-    "sidebar main chat";
   grid-template-columns: 280px 1fr 24rem;
 }
 
@@ -339,21 +333,11 @@ body {
   border-right: 1px solid var(--border);
 }
 
-.course:not(.course--sidebar-open) {
-  grid-template-areas:
-    "header header"
-    "sidebar main";
-  grid-template-columns: 0 1fr;
-}
-
-.course:not(.course--sidebar-open).course--chat-open {
-  grid-template-areas:
-    "header header header"
-    "sidebar main chat";
-  grid-template-columns: 0 1fr 24rem;
-}
-
 .course:not(.course--sidebar-open) .course-sidebar {
+  overflow: hidden;
+}
+
+.course:not(.course--chat-open) .course-chat {
   overflow: hidden;
 }
 
@@ -833,27 +817,30 @@ a.btn:active {
 .alert,
 .alert-box {
   opacity: 0;
-  height: 2lh; /* Assuming `lh` is a legitimate unit in your context — could be a typo; consider using valid units like `em` or `rem` */
+  height: 2lh;
   width: 100%;
   position: fixed;
   top: 7lh;
   background-color: #f3fbfb;
   bottom: 100px;
   transition: all 1500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  text-align: center; /* Add this line to center text horizontally */
-  display: flex; /* Add this to enable flexbox for centering */
-  align-items: center; /* Centers text vertically within the component */
-  justify-content: center; /* Centers content horizontally within flex container */
-  &.active {
-    opacity: 1;
-    bottom: 0;
-    z-index: 10;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    &.exiting {
-      opacity: 0;
-      bottom: 100px;
-    }
-  }
+.alert.active,
+.alert-box.active {
+  opacity: 1;
+  bottom: 0;
+  z-index: 50;
+}
+
+.alert.active.exiting,
+.alert-box.active.exiting {
+  opacity: 0;
+  bottom: 100px;
 }
 
 p.tee {

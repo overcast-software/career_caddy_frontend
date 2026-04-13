@@ -1,6 +1,6 @@
-{{! Chat panel — rendered inside course-body to participate in grid }}
-{{#if this.isOpen}}
-  <aside class="course-chat bg-white dark:bg-gray-800">
+{{! Chat panel — always rendered so grid transition animates open/close }}
+<aside class="course-chat bg-white dark:bg-gray-800">
+  {{#if this.isOpen}}
     <Chat::Panel />
-  </aside>
-{{/if}}
+  {{/if}}
+</aside>
