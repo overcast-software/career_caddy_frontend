@@ -106,6 +106,76 @@
         </div>
       {{/if}}
 
+      {{#if @scrape.scrapeStatuses.length}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900 dark:text-gray-100">Status
+            History</dt>
+          <dd class="text-gray-700 dark:text-gray-300 sm:col-span-2">
+            <div class="space-y-1">
+              {{#each @scrape.scrapeStatuses as |ss|}}
+                <div class="flex items-center gap-3 text-sm">
+                  <span
+                    class="px-2 py-0.5 rounded-full text-xs font-medium inline-block whitespace-nowrap
+                      {{if
+                        (eq ss.status.status 'completed')
+                        'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                      }}
+                      {{if
+                        (eq ss.status.status 'failed')
+                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      }}
+                      {{if
+                        (eq ss.status.status 'login_failed')
+                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      }}
+                      {{if
+                        (eq ss.status.status 'running')
+                        'bg-accent-100 text-accent-700 dark:bg-accent-900/30 dark:text-accent-400'
+                      }}
+                      {{if
+                        (eq ss.status.status 'hold')
+                        'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      }}
+                      {{if
+                        (eq ss.status.status 'pending')
+                        'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      }}
+                      "
+                  >{{ss.status.status}}</span>
+                  <span class="text-gray-500 dark:text-gray-500">{{moment-format
+                      ss.loggedAt
+                      "MMM D h:mm:ss a"
+                    }}</span>
+                  {{#if ss.note}}
+                    <span
+                      class="text-gray-600 dark:text-gray-400 truncate max-w-xs"
+                      title={{ss.note}}
+                    >{{ss.note}}</span>
+                  {{/if}}
+                </div>
+              {{/each}}
+            </div>
+          </dd>
+        </div>
+      {{/if}}
+
+      {{#if this.screenshots.length}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt
+            class="font-medium text-gray-900 dark:text-gray-100"
+          >Screenshots</dt>
+          <dd class="text-gray-700 dark:text-gray-300 sm:col-span-2 space-y-3">
+            {{#each this.screenshots as |shot|}}
+              <img
+                src={{shot.url}}
+                alt={{shot.filename}}
+                class="rounded border border-gray-200 dark:border-gray-700 max-w-full"
+              />
+            {{/each}}
+          </dd>
+        </div>
+      {{/if}}
+
       {{#if @scrape.scrapes.length}}
         <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
           <dt class="font-medium text-gray-900">Child Scrapes</dt>

@@ -13,4 +13,5 @@ export default class ScrapeModel extends Model {
   @belongsTo('company', { async: true, inverse: 'scrapes' }) company;
   @hasMany('scrape', { async: true, inverse: 'sourceScrape' }) scrapes;
   @belongsTo('scrape', { async: true, inverse: 'scrapes' }) sourceScrape;
+  @hasMany('scrape-status', { async: true, inverse: 'scrape' }) scrapeStatuses;
 }

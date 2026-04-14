@@ -1,5 +1,6 @@
 import Controller from '@ember/controller';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 
 const TERMINAL_STATES = ['completed', 'done', 'failed', 'error'];
@@ -10,6 +11,9 @@ export default class JobPostsScrapeController extends Controller {
   @service flashMessages;
   @service router;
   @service spinner;
+  @service currentUser;
+
+  @tracked scrapeStatus = null;
 
   _pollTimeout = null;
 
@@ -48,6 +52,19 @@ export default class JobPostsScrapeController extends Controller {
     );
   }
 
+  get showHoldOption() {
+    return this.currentUser.user?.isStaff;
+  }
+
+  get isHold() {
+    return this.scrapeStatus === 'hold';
+  }
+
+  @action
+  setStatus(status) {
+    this.scrapeStatus = status;
+  }
+
   @action
   updateUrl(event) {
     this.url = event.target.value;
@@ -58,7 +75,11 @@ export default class JobPostsScrapeController extends Controller {
     event.preventDefault();
     this._stopPolling();
 
-    let scrape = this.store.createRecord('scrape', { url: this.url });
+    let attrs = { url: this.url };
+    if (this.scrapeStatus) {
+      attrs.status = this.scrapeStatus;
+    }
+    let scrape = this.store.createRecord('scrape', attrs);
     let result;
     try {
       result = await this.spinner.wrap(scrape.save());
