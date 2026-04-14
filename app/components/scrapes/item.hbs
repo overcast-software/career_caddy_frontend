@@ -75,17 +75,28 @@
 
       {{#if @scrape.jobContent}}
         <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900 flex items-center gap-2">
+          <dt
+            class="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2 self-start"
+          >
             Job Content
             <button
               type="button"
               class="text-xs text-accent-600 hover:text-accent-800 dark:text-accent-400 dark:hover:text-accent-300"
               {{on "click" this.toggleJobContent}}
             >{{if this.jobContentExpanded "Collapse" "Expand"}}</button>
+            <button
+              type="button"
+              class="text-xs text-accent-600 hover:text-accent-800 dark:text-accent-400 dark:hover:text-accent-300"
+              {{on "click" this.copyJobContent}}
+            >{{if this.copied "Copied!" "Copy"}}</button>
           </dt>
           <dd
             class="text-gray-700 dark:text-gray-300 sm:col-span-2 whitespace-pre-wrap
-              {{unless this.jobContentExpanded 'line-clamp-4 overflow-hidden'}}"
+              {{if
+                this.jobContentExpanded
+                'max-h-96 overflow-y-auto'
+                'line-clamp-4 overflow-hidden'
+              }}"
           >
             {{@scrape.jobContent}}
           </dd>

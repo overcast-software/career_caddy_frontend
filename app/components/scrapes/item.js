@@ -4,8 +4,11 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 
 const STATE_MAP = {
+  hold: 'Hold',
   pending: 'Pending',
   running: 'Running',
+  scraping: 'Scraping',
+  extracting: 'Extracting',
   completed: 'Completed',
   done: 'Completed',
 };
@@ -14,9 +17,17 @@ export default class ScrapesItemComponent extends Component {
   @service currentUser;
   @service session;
 
-  scrapeSteps = ['Pending', 'Running', 'Completed'];
+  scrapeSteps = [
+    'Hold',
+    'Pending',
+    'Running',
+    'Scraping',
+    'Extracting',
+    'Completed',
+  ];
   failedStates = ['failed', 'error', 'login_failed'];
   @tracked jobContentExpanded = false;
+  @tracked copied = false;
   @tracked screenshots = [];
 
   get normalizedState() {
@@ -57,5 +68,15 @@ export default class ScrapesItemComponent extends Component {
 
   @action toggleJobContent() {
     this.jobContentExpanded = !this.jobContentExpanded;
+  }
+
+  @action async copyJobContent() {
+    try {
+      await navigator.clipboard.writeText(this.args.scrape.jobContent);
+      this.copied = true;
+      setTimeout(() => (this.copied = false), 2000);
+    } catch {
+      // fallback silently
+    }
   }
 }
