@@ -52,8 +52,8 @@ export default class ScrapesShowController extends Controller {
     this.spinner.begin({ label: 'Parsing scrape...' });
     try {
       const adapter = this.store.adapterFor('scrape');
-      const url = `${adapter.buildURL('scrape', scrape.id)}/parse/`;
-      await adapter.ajax(url, 'POST');
+      const base = adapter.buildURL('scrape', scrape.id).replace(/\/+$/, '');
+      await adapter.ajax(`${base}/parse/`, 'POST');
       this.flashMessages.success('Parse initiated');
       await scrape.reload();
       this.startPollingIfNeeded(scrape);
@@ -69,9 +69,8 @@ export default class ScrapesShowController extends Controller {
     this.spinner.begin({ label: 'Retrying scrape...' });
     try {
       const adapter = this.store.adapterFor('scrape');
-      const url = `${adapter.buildURL('scrape', scrape.id)}/redo/`;
-
-      await adapter.ajax(url, 'POST');
+      const base = adapter.buildURL('scrape', scrape.id).replace(/\/+$/, '');
+      await adapter.ajax(`${base}/redo/`, 'POST');
 
       this.flashMessages.success('Scrape retry initiated successfully');
 
