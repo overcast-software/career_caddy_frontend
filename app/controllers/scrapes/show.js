@@ -26,6 +26,7 @@ export default class ScrapesShowController extends Controller {
     this.poller.watchRecord(scrape, {
       intervalMs: POLL_INTERVAL_MS,
       isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
+      onUpdate: (rec) => this._refreshStatuses(rec),
       onStop: async (rec) => {
         this.spinner.end();
         if (rec.status === 'failed' || rec.status === 'error') {
@@ -43,6 +44,15 @@ export default class ScrapesShowController extends Controller {
         this.flashMessages.danger('Lost connection while waiting for scrape.');
       },
     });
+  }
+
+  async _refreshStatuses(scrape) {
+    try {
+      const statuses = await scrape.scrapeStatuses;
+      await statuses.reload();
+    } catch {
+      // Non-critical — timeline just won't update this tick
+    }
   }
 
   @action
