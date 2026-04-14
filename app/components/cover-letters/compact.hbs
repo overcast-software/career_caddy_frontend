@@ -1,9 +1,10 @@
 <article class="panel-card">
   <h3>
     <LinkTo @route="cover-letters.show" @model={{@coverLetter}}>
-      Cover Letter for
       {{@coverLetter.jobPost.title}}
-      at
+    </LinkTo>
+    at
+    <LinkTo @route="companies.show" @model={{@coverLetter.jobPost.company}}>
       {{@coverLetter.jobPost.company.name}}
     </LinkTo>
   </h3>
