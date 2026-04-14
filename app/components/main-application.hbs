@@ -20,6 +20,9 @@
       @onClose={{this.close}}
     />
   </header>
+  {{#if this.spinner.isShowing}}
+    <div class="loading-bar" aria-hidden="true"></div>
+  {{/if}}
   <div class="course-body">
     <aside class="course-sidebar">
       <Sidebar @onClose={{this.close}} />

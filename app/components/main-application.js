@@ -7,6 +7,7 @@ export default class MainApplicationComponent extends Component {
   @service currentUser;
   @service chat;
   @service router;
+  @service spinner;
   @tracked sidebarOpen = true;
 
   constructor(owner, args) {

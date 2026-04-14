@@ -1872,6 +1872,32 @@ pre {
   min-height: 4lh;
 }
 
+.loading-bar {
+  position: sticky;
+  top: 0;
+  z-index: 49;
+  height: 2px;
+  background: var(--accent-500, #6366f1);
+  animation: loading-slide 1.4s ease-in-out infinite;
+}
+
+@keyframes loading-slide {
+  0% {
+    width: 0;
+    margin-left: 0;
+  }
+
+  50% {
+    width: 40%;
+    margin-left: 30%;
+  }
+
+  100% {
+    width: 0;
+    margin-left: 100%;
+  }
+}
+
 .tee-box {
   /* background-color: #c8effa; */
   background-color: var(--tee-bg);
