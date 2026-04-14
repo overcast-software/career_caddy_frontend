@@ -6,13 +6,17 @@ import { buildBaseUrl } from 'career-caddy-frontend/utils/base-url';
 export default class ResetPasswordController extends Controller {
   queryParams = ['token', 'uid'];
 
-  @tracked token = '';
-  @tracked uid = '';
+  @tracked token = null;
+  @tracked uid = null;
   @tracked newPassword = '';
   @tracked confirmPassword = '';
   @tracked saving = false;
   @tracked success = false;
   @tracked errorMessage = null;
+
+  get linkValid() {
+    return this.token && this.uid;
+  }
 
   @action
   updateNewPassword(event) {
@@ -42,7 +46,7 @@ export default class ResetPasswordController extends Controller {
       return;
     }
 
-    if (!this.token || !this.uid) {
+    if (!this.linkValid) {
       this.errorMessage = 'Invalid reset link. Please request a new one.';
       this.saving = false;
       return;

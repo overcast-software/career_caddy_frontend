@@ -11,6 +11,11 @@ export default class MainApplicationComponent extends Component {
 
   constructor(owner, args) {
     super(owner, args);
+    this.chat.currentPage = {
+      route: this.router.currentRouteName,
+      url: this.router.currentURL,
+      params: {},
+    };
     this.router.on('routeDidChange', this, this._onRouteChange);
   }
 
@@ -33,6 +38,7 @@ export default class MainApplicationComponent extends Component {
         url: this.router.currentURL,
         params: transition.to.params,
       };
+      console.log('[page-context]', transition.to.name, this.router.currentURL);
     }
   }
 
