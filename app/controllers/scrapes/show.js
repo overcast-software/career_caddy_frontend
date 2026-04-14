@@ -26,18 +26,16 @@ export default class ScrapesShowController extends Controller {
     this.poller.watchRecord(scrape, {
       intervalMs: POLL_INTERVAL_MS,
       isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
-      onStop: (rec) => {
+      onStop: async (rec) => {
         this.spinner.end();
         if (rec.status === 'failed' || rec.status === 'error') {
           this.flashMessages.danger('Scrape failed.');
-        } else if (rec.jobPost?.id) {
-          this.flashMessages.success('Scrape completed.');
-          setTimeout(
-            () => this.router.transitionTo('job-posts.show', rec.jobPost.id),
-            500,
-          );
         } else {
           this.flashMessages.success('Scrape completed.');
+          await this.store.findRecord('scrape', rec.id, {
+            reload: true,
+            include: 'company,job-post',
+          });
         }
       },
       onError: () => {
