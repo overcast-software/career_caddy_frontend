@@ -11,18 +11,9 @@ export default class ScrapesFormComponent extends Component {
     return this.currentUser.user?.isStaff && this.args.scrape.isNew;
   }
 
-  get isHold() {
-    return this.args.scrape.status === 'hold';
-  }
-
   @action
   updateField(field, event) {
     this.args.scrape[field] = event.target.value;
-  }
-
-  @action
-  setStatus(status) {
-    this.args.scrape.status = status;
   }
 
   @action
@@ -31,6 +22,18 @@ export default class ScrapesFormComponent extends Component {
     try {
       await this.args.scrape.save();
       this.flashMessages.success('Scrape saved');
+      this.router.transitionTo('scrapes.show', this.args.scrape.id);
+    } catch {
+      this.flashMessages.danger('Failed to save scrape');
+    }
+  }
+
+  @action
+  async submitHold() {
+    this.args.scrape.status = 'hold';
+    try {
+      await this.args.scrape.save();
+      this.flashMessages.success('Scrape held for external service');
       this.router.transitionTo('scrapes.show', this.args.scrape.id);
     } catch {
       this.flashMessages.danger('Failed to save scrape');
