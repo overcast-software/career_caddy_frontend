@@ -1,0 +1,146 @@
+{{page-title (concat this.model.hostname " — Scrape Profile")}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
+    <LinkTo @route="admin.users.index" class="nav-link">Users</LinkTo>
+    <LinkTo @route="admin.waitlist" class="nav-link">Waitlist</LinkTo>
+    <LinkTo @route="admin.invitations" class="nav-link">Invitations</LinkTo>
+    <LinkTo @route="admin.scrape-profiles" class="nav-link">Scrape Profiles</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card max-w-2xl">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold">{{this.model.hostname}}</h1>
+        <LinkTo
+          @route="admin.scrape-profiles.index"
+          class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
+        >Back to profiles</LinkTo>
+      </div>
+
+      <div
+        class="mb-6 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4"
+      >
+        <h2
+          class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3"
+        >Stats</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Auth Required</span>
+            <div class="font-medium text-gray-900 dark:text-gray-100">
+              {{if this.model.requiresAuth "Yes" "No"}}
+            </div>
+          </div>
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Success Rate</span>
+            <div class="font-medium {{this.model.successRateClass}}">
+              {{this.model.successRatePercent}}%
+            </div>
+          </div>
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Scrape Count</span>
+            <div class="font-medium text-gray-900 dark:text-gray-100">
+              {{this.model.scrapeCount}}
+            </div>
+          </div>
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Avg Content Length</span>
+            <div class="font-medium text-gray-900 dark:text-gray-100">
+              {{if this.model.avgContentLength this.model.avgContentLength "—"}}
+            </div>
+          </div>
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Last Success</span>
+            <div class="font-medium text-gray-900 dark:text-gray-100">
+              {{#if this.model.lastSuccessAt}}
+                {{moment-format this.model.lastSuccessAt "MMM D, YYYY h:mm a"}}
+              {{else}}
+                —
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form class="builder-form" {{on "submit" this.save}}>
+        <h2
+          class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3"
+        >Configuration</h2>
+
+        <div class="field">
+          <label class="field-label" for="preferredTier">Preferred Tier</label>
+          <select
+            id="preferredTier"
+            class="field-input"
+            {{on "change" (fn this.updateField "preferredTier")}}
+          >
+            <option
+              value="auto"
+              selected={{eq this.preferredTier "auto"}}
+            >Auto</option>
+            <option value="0" selected={{eq this.preferredTier "0"}}>Tier 0 —
+              Deterministic</option>
+            <option value="1" selected={{eq this.preferredTier "1"}}>Tier 1 —
+              Mini + Hints</option>
+            <option value="2" selected={{eq this.preferredTier "2"}}>Tier 2 —
+              Haiku</option>
+            <option value="3" selected={{eq this.preferredTier "3"}}>Tier 3 —
+              Sonnet</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="extractionHints">Extraction Hints</label>
+          <textarea
+            id="extractionHints"
+            class="field-input h-24"
+            value={{this.extractionHints}}
+            placeholder="LLM-generated hints about this domain's job posting format..."
+            {{on "input" (fn this.updateField "extractionHints")}}
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="pageStructure">Page Structure</label>
+          <textarea
+            id="pageStructure"
+            class="field-input h-24"
+            value={{this.pageStructure}}
+            placeholder="LLM-generated description of the page layout..."
+            {{on "input" (fn this.updateField "pageStructure")}}
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="cssSelectors">CSS Selectors (JSON)</label>
+          <textarea
+            id="cssSelectors"
+            class="field-input h-24 font-mono text-xs"
+            value={{this.cssSelectors}}
+            placeholder='{"title": "h1.job-title", "company": ".company-name"}'
+            {{on "input" (fn this.updateField "cssSelectors")}}
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={{this.enabled}}
+              {{on "change" this.toggleEnabled}}
+            />
+            <span class="field-label mb-0">Enabled</span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Save</button>
+          <button
+            type="button"
+            class="btn"
+            {{on "click" this.cancel}}
+          >Cancel</button>
+        </div>
+      </form>
+    </div>
+  </:main>
+</RouteLayout>

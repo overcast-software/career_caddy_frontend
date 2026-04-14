@@ -233,6 +233,9 @@ Router.map(function () {
     });
     this.route('waitlist');
     this.route('invitations');
+    this.route('scrape-profiles', function () {
+      this.route('show', { path: '/:scrape_profile_id' });
+    });
   });
   this.route('career-data', function () {});
   this.route('settings', function () {
