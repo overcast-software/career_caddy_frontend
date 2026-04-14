@@ -1,95 +1,101 @@
 <form class="builder-form" {{on "submit" this.submitEdit}}>
-  <div class="field-row">
-    <div class="field">
-      <label class="field-label" for="scrape-url">URL</label>
-      <input
-        id="scrape-url"
-        type="url"
-        value={{@scrape.url}}
-        {{on "input" (fn this.updateField "url")}}
-      />
-    </div>
-    <div class="field">
-      <label class="field-label" for="scrape-external-link">External Link</label>
-      <input
-        id="scrape-external-link"
-        type="url"
-        value={{@scrape.externalLink}}
-        {{on "input" (fn this.updateField "externalLink")}}
-      />
-    </div>
-  </div>
-
-  <div class="field-row">
-    <div class="field">
-      <label class="field-label" for="scrape-css-selectors">CSS Selectors</label>
-      <input
-        id="scrape-css-selectors"
-        type="text"
-        value={{@scrape.cssSelectors}}
-        {{on "input" (fn this.updateField "cssSelectors")}}
-      />
-    </div>
-    <div class="field">
-      <label class="field-label" for="scrape-parse-method">Parse Method</label>
-      <input
-        id="scrape-parse-method"
-        type="text"
-        value={{@scrape.parseMethod}}
-        {{on "input" (fn this.updateField "parseMethod")}}
-      />
-    </div>
-  </div>
-
-  <div class="field-full">
-    <label class="field-label" for="scrape-job-content">Job Content</label>
-    <textarea
-      id="scrape-job-content"
-      rows="10"
-      {{on "input" (fn this.updateField "jobContent")}}
-    >{{@scrape.jobContent}}</textarea>
+  <div class="field">
+    <label class="field-label" for="scrape-url">URL</label>
+    <input
+      id="scrape-url"
+      type="url"
+      value={{@scrape.url}}
+      placeholder="https://..."
+      {{on "input" (fn this.updateField "url")}}
+    />
   </div>
 
   {{#if this.showHoldOption}}
-    <div class="field-row">
-      <div class="field">
-        <span class="field-label">Processing</span>
-        <div class="mt-1 flex items-center gap-6">
-          <label
-            class="inline-flex items-center gap-2 text-sm text-[var(--muted)] cursor-pointer"
-          >
-            <input
-              type="radio"
-              name="scrape-status"
-              checked={{unless this.isHold true}}
-              {{on "change" (fn this.setStatus null)}}
-              class="border-[var(--border)] text-[var(--accent)]"
-            />
-            Dispatch
-          </label>
-          <label
-            class="inline-flex items-center gap-2 text-sm text-[var(--muted)] cursor-pointer"
-          >
-            <input
-              type="radio"
-              name="scrape-status"
-              checked={{this.isHold}}
-              {{on "change" (fn this.setStatus "hold")}}
-              class="border-[var(--border)] text-[var(--accent)]"
-            />
-            Hold
-          </label>
-        </div>
+    <div class="field">
+      <span class="field-label">Processing</span>
+      <div class="mt-1 flex items-center gap-6">
+        <label
+          class="inline-flex items-center gap-2 text-sm text-[var(--muted)] cursor-pointer"
+        >
+          <input
+            type="radio"
+            name="scrape-status"
+            checked={{unless this.isHold true}}
+            {{on "change" (fn this.setStatus null)}}
+            class="border-[var(--border)] text-[var(--accent)]"
+          />
+          Dispatch
+        </label>
+        <label
+          class="inline-flex items-center gap-2 text-sm text-[var(--muted)] cursor-pointer"
+        >
+          <input
+            type="radio"
+            name="scrape-status"
+            checked={{this.isHold}}
+            {{on "change" (fn this.setStatus "hold")}}
+            class="border-[var(--border)] text-[var(--accent)]"
+          />
+          Hold
+        </label>
       </div>
     </div>
   {{/if}}
 
+  {{#unless @scrape.isNew}}
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label" for="scrape-external-link">External Link</label>
+        <input
+          id="scrape-external-link"
+          type="url"
+          value={{@scrape.externalLink}}
+          {{on "input" (fn this.updateField "externalLink")}}
+        />
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label" for="scrape-css-selectors">CSS Selectors</label>
+        <input
+          id="scrape-css-selectors"
+          type="text"
+          value={{@scrape.cssSelectors}}
+          {{on "input" (fn this.updateField "cssSelectors")}}
+        />
+      </div>
+      <div class="field">
+        <label class="field-label" for="scrape-parse-method">Parse Method</label>
+        <input
+          id="scrape-parse-method"
+          type="text"
+          value={{@scrape.parseMethod}}
+          {{on "input" (fn this.updateField "parseMethod")}}
+        />
+      </div>
+    </div>
+
+    <div class="field-full">
+      <label class="field-label" for="scrape-job-content">Job Content</label>
+      <textarea
+        id="scrape-job-content"
+        rows="10"
+        {{on "input" (fn this.updateField "jobContent")}}
+      >{{@scrape.jobContent}}</textarea>
+    </div>
+  {{/unless}}
+
   <div class="form-actions">
-    <button type="submit" class="btn">Save</button>
-    <button
-      type="button"
-      class="btn danger"
-      {{on "click" this.submitDelete}}
-    >Delete</button>
+    <button type="submit" class="btn primary">
+      {{if @scrape.isNew "Scrape" "Save"}}
+    </button>
+    {{#unless @scrape.isNew}}
+      <button
+        type="button"
+        class="btn danger"
+        {{on "click" this.submitDelete}}
+      >Delete</button>
+    {{/unless}}
   </div>
 </form>
