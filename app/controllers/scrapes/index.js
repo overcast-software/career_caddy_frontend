@@ -25,7 +25,8 @@ export default class ScrapesIndexController extends Controller {
     this.spinner.begin({ label: 'Retrying scrape...' });
     try {
       const adapter = this.store.adapterFor('scrape');
-      const url = `${adapter.buildURL('scrape', scrape.id)}/redo/`;
+      const base = adapter.buildURL('scrape', scrape.id).replace(/\/+$/, '');
+      const url = `${base}/redo/`;
       await adapter.ajax(url, 'POST');
       this.flashMessages.success('Scrape retry initiated');
       await scrape.reload();
