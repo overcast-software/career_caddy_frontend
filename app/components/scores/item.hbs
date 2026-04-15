@@ -52,27 +52,22 @@
         </dd>
       </div>
 
-      {{#if @score.status}}
+      {{#if (eq @score.status "pending")}}
         <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
           <dt class="font-medium text-gray-900">Status</dt>
           <dd class="text-gray-700 sm:col-span-2">
-            {{#if (eq @score.status "completed")}}
-              <span
-                class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
-              >Completed</span>
-            {{else if (eq @score.status "pending")}}
-              <span
-                class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20"
-              >Pending</span>
-            {{else if (eq @score.status "failed")}}
-              <span
-                class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20"
-              >Failed</span>
-            {{else}}
-              <span
-                class="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300/20"
-              >{{@score.status}}</span>
-            {{/if}}
+            <span
+              class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20"
+            >Pending</span>
+          </dd>
+        </div>
+      {{else if (eq @score.status "failed")}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Status</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            <span
+              class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20"
+            >Failed</span>
           </dd>
         </div>
       {{/if}}

@@ -5,8 +5,6 @@ export default class ResumesShowRoute extends Route {
   @service store;
 
   async model({ resume_id }) {
-    const resume = await this.store.findRecord('resume', resume_id);
-    await resume.skills;
-    return resume;
+    return this.store.findRecord('resume', resume_id, { reload: true });
   }
 }
