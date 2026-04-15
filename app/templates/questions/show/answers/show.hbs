@@ -2,9 +2,12 @@
   <:actions>
     <button
       type="button"
-      class="btn small"
+      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
       {{on "click" this.copyToClipboard}}
     >{{this.copyButtonText}}</button>
-    <LinkTo @route="questions.show.answers" class="btn small">All Answers</LinkTo>
+    <LinkTo
+      @route="questions.show.answers"
+      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+    >All Answers</LinkTo>
   </:actions>
 </Answers::Show>

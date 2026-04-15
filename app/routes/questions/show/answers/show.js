@@ -7,4 +7,9 @@ export default class QuestionsShowAnswersShowRoute extends Route {
   async model({ answer_id }) {
     return await this.store.findRecord('answer', answer_id);
   }
+
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    controller.startPollingIfPending();
+  }
 }

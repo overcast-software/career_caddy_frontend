@@ -1,10 +1,8 @@
-import Controller from '@ember/controller';
+import PollableController from 'career-caddy-frontend/controllers/pollable';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-import { service } from '@ember/service';
 
-export default class QuestionsShowAnswersShowController extends Controller {
-  @service flashMessages;
+export default class QuestionsShowAnswersShowController extends PollableController {
   @tracked copyButtonText = 'Copy';
 
   @action

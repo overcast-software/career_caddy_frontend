@@ -6,10 +6,7 @@ export default class JobPostsShowQuestionsNewRoute extends Route {
 
   model() {
     const jobPost = this.modelFor('job-posts.show');
-    const companyId = jobPost?.get('company.id');
-    const company = companyId
-      ? this.store.peekRecord('company', companyId)
-      : null;
+    const company = jobPost?.belongsTo('company').value() ?? null;
     return this.store.createRecord('question', {
       jobPost,
       company,

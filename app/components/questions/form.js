@@ -20,23 +20,24 @@ export default class QuestionsFormComponent extends Component {
     const q = args.question;
     if (!q) return;
 
-    const company = q.company;
+    const company = q.belongsTo('company').value();
     if (company) {
       this.selectedCompany = company;
       this._preloadCompanyRelated(company, q);
     }
-    const jobPost = q.jobPost;
+    const jobPost = q.belongsTo('jobPost').value();
     if (jobPost) {
       this.selectedJobPost = jobPost;
       this.loadedJobPosts = [jobPost];
     }
-    const jobApp = q.jobApplication;
+    const jobApp = q.belongsTo('jobApplication').value();
     if (jobApp) {
-      const title = jobPost?.get('title') ?? jobApp.get('jobPost.title');
-      const status = jobApp.get('status') ?? '';
+      const title =
+        jobPost?.title ?? jobApp.belongsTo('jobPost').value()?.title;
+      const status = jobApp.status ?? '';
       const label = title
         ? `${title} — ${status}`
-        : `Application #${jobApp.get('id')} (${status})`;
+        : `Application #${jobApp.id} (${status})`;
       this.selectedJobAppOption = { record: jobApp, label };
       this.loadedJobAppOptions = [this.selectedJobAppOption];
     }
@@ -171,7 +172,11 @@ export default class QuestionsFormComponent extends Component {
     try {
       const q = await this.args.question.save();
       this.flashMessages.success('Question saved.');
-      this.router.transitionTo('questions.show', q.id);
+      if (this.args.onSave) {
+        this.args.onSave(q);
+      } else {
+        this.router.transitionTo('questions.show', q.id);
+      }
     } catch (error) {
       if (error?.status !== 403) {
         this.flashMessages.danger('Failed to save question.');

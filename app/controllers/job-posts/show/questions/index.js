@@ -21,6 +21,17 @@ export default class JobPostsShowQuestionsIndexController extends Controller {
     this.answeringQuestionId = null;
   }
 
+  @action answerSaved(answer, question) {
+    this.answeringQuestionId = null;
+    const { job_post_id } = this.router.currentRoute.parent.parent.params;
+    this.router.transitionTo(
+      'job-posts.show.questions.show.answers.show',
+      job_post_id,
+      question.id,
+      answer.id,
+    );
+  }
+
   @action deleteQuestion(question) {
     if (!window.confirm('Delete this question?')) return;
     question

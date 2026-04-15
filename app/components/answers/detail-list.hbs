@@ -1,0 +1,26 @@
+<div class="space-y-4">
+  {{#each @answers as |answer|}}
+    {{#if answer.id}}
+      <Answers::Show @answer={{answer}} @editRoute={{@editRoute}}>
+        <:actions>
+          {{#if @onToggleFavorite}}
+            <button
+              type="button"
+              class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+              {{on "click" (fn @onToggleFavorite answer)}}
+            >{{if answer.favorite "Unfavorite" "Favorite"}}</button>
+          {{/if}}
+          {{#if @showRoute}}
+            <LinkTo
+              @route={{@showRoute}}
+              @model={{answer}}
+              class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+            >View</LinkTo>
+          {{/if}}
+        </:actions>
+      </Answers::Show>
+    {{/if}}
+  {{else}}
+    <EmptyState @message={{or @emptyMessage "No answers found."}} />
+  {{/each}}
+</div>

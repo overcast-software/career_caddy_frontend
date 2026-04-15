@@ -1,18 +1,95 @@
-<div class="mt-4 border-t border-gray-100 pt-4">
-  <div class="flex items-center justify-between mb-3">
-    <h3 class="text-sm font-semibold text-gray-700">Answer</h3>
-    <div class="flex gap-2">
-      {{yield to="actions"}}
-      {{#if @editRoute}}
-        <LinkTo
-          @route={{@editRoute}}
-          @model={{@answer}}
-          class="btn small"
-        >Edit</LinkTo>
+<div class="rounded border border-gray-200 bg-white">
+  <div class="flow-root p-4">
+    <dl class="-my-3 divide-y divide-gray-200 text-sm">
+      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <dt class="font-medium text-gray-900">Question</dt>
+        <dd class="text-gray-700 sm:col-span-2">
+          {{#if @answer.question.id}}
+            <LinkTo
+              @route="questions.show.answers.show"
+              @models={{array @answer.question.id @answer.id}}
+              class="text-blue-600 hover:underline"
+            >{{@answer.question.content.content}}</LinkTo>
+          {{else}}
+            <span class="italic text-gray-400">No question</span>
+          {{/if}}
+        </dd>
+      </div>
+
+      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <dt class="font-medium text-gray-900">Answer</dt>
+        <dd class="text-gray-700 sm:col-span-2">
+          {{#if @answer.content}}
+            <MarkdownToHtml @markdown={{@answer.content}} />
+          {{else if (eq @answer.status "pending")}}
+            <span class="italic text-gray-400">AI is generating…</span>
+          {{else}}
+            <span class="italic text-gray-400">No content</span>
+          {{/if}}
+        </dd>
+      </div>
+
+      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <dt class="font-medium text-gray-900">Favorite</dt>
+        <dd class="text-gray-700 sm:col-span-2">
+          {{#if @answer.favorite}}
+            <span
+              class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20"
+            >Favorited</span>
+          {{else}}
+            <span
+              class="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300/20"
+            >Not favorited</span>
+          {{/if}}
+        </dd>
+      </div>
+
+      {{#if (eq @answer.status "pending")}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Status</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            <span
+              class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20"
+            >Pending</span>
+          </dd>
+        </div>
+      {{else if (eq @answer.status "failed")}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Status</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            <span
+              class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20"
+            >Failed</span>
+          </dd>
+        </div>
       {{/if}}
-    </div>
+
+      {{#if @answer.ai_assist}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Source</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            <span
+              class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20"
+            >AI Generated</span>
+          </dd>
+        </div>
+      {{/if}}
+    </dl>
   </div>
-  <div class="panel-card">
-    <MarkdownToHtml @markdown={{@answer.content}} />
+
+  <div class="flex items-center gap-2 border-t border-gray-200 px-4 py-3">
+    {{yield to="actions"}}
+    {{#if @editRoute}}
+      <LinkTo
+        @route={{@editRoute}}
+        @model={{@answer}}
+        class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+      >Edit</LinkTo>
+    {{/if}}
+    <button
+      type="button"
+      class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
+      {{on "click" this.deleteAnswer}}
+    >Delete</button>
   </div>
 </div>

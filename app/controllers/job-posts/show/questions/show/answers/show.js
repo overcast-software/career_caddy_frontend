@@ -1,16 +1,9 @@
-import Controller from '@ember/controller';
+import PollableController from 'career-caddy-frontend/controllers/pollable';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-import { service } from '@ember/service';
 
-export default class AnswersShowController extends Controller {
-  @service flashMessages;
-  @service router;
+export default class JobPostsShowQuestionsShowAnswersShowController extends PollableController {
   @tracked copyButtonText = 'Copy';
-
-  @action afterDelete() {
-    this.router.transitionTo('answers');
-  }
 
   @action
   async copyToClipboard() {

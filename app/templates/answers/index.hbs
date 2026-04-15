@@ -16,7 +16,7 @@
     {{#if this.isSearching}}
       <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
     {{else}}
-      <Answers::List
+      <Answers::DetailList
         @answers={{this.model}}
         @showRoute="answers.show"
         @editRoute="answers.edit"

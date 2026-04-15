@@ -8,15 +8,16 @@ export default class AnswersEditController extends Controller {
   @service router;
 
   @action deleteAnswer() {
+    const questionId = this.model.belongsTo('question').id();
     this.model
       .destroyRecord()
       .then(() => {
-        this.store.peekRecord('career-data', '1')?.markDirty();
         this.flashMessages.success('Answer deleted.');
-        this.router.transitionTo(
-          'questions.show.answers.index',
-          this.model.question,
-        );
+        if (questionId) {
+          this.router.transitionTo('questions.show.answers.index', questionId);
+        } else {
+          this.router.transitionTo('answers');
+        }
       })
       .catch((error) => {
         if (error?.status !== 403) {

@@ -1,21 +1,15 @@
 {{page-title "Answer"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
-  <:subnav>
-    answer details
-    {{#if this.model.favorite}}⭐{{/if}}
-  </:subnav>
   <:main>
-    <div class="panel-card">
-      <div class="field">
-        <h3>Question:</h3>
-        {{this.model.question.content.content}}
-      </div>
-    </div>
-    <Answers::Show @answer={{this.model}} @editRoute="answers.edit">
+    <Answers::Show
+      @answer={{this.model}}
+      @editRoute="answers.edit"
+      @onDelete={{this.afterDelete}}
+    >
       <:actions>
         <button
           type="button"
-          class="btn small"
+          class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
           {{on "click" this.copyToClipboard}}
         >{{this.copyButtonText}}</button>
       </:actions>
