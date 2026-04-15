@@ -37,21 +37,32 @@ module('Integration | Component | main-application', function (hooks) {
       .doesNotHaveClass('course--sidebar-open', 'sidebar closes after toggle');
   });
 
-  test('clicking a desktop sidebar nav link closes the sidebar', async function (assert) {
+  test('desktop sidebar stays open when close is called', async function (assert) {
+    // On wide viewports (≥768px), close() is a no-op — sidebar stays open.
+    // Test environment viewport is narrow, so we verify close() checks width.
+    Object.defineProperty(window, 'innerWidth', {
+      value: 1024,
+      writable: true,
+    });
+
     await render(hbs`<MainApplication />`);
     assert.dom('.course').hasClass('course--sidebar-open', 'starts open');
 
-    // The back-arrow / close button is inside .course-sidebar (the desktop sidebar).
     await click('.course-sidebar .sidebar-back-btn');
     assert
       .dom('.course')
-      .doesNotHaveClass(
+      .hasClass(
         'course--sidebar-open',
-        'sidebar closes when a desktop nav link calls onClose',
+        'sidebar stays open on desktop when close is called',
       );
+
+    // Restore for other tests
+    Object.defineProperty(window, 'innerWidth', { value: 500, writable: true });
   });
 
-  test('clicking the mobile overlay closes the sidebar', async function (assert) {
+  test('mobile overlay click closes the sidebar', async function (assert) {
+    Object.defineProperty(window, 'innerWidth', { value: 500, writable: true });
+
     await render(hbs`<MainApplication />`);
     assert.dom('.mobile-overlay').exists('overlay present when open');
 
@@ -60,7 +71,7 @@ module('Integration | Component | main-application', function (hooks) {
       .dom('.course')
       .doesNotHaveClass(
         'course--sidebar-open',
-        'sidebar closes when overlay is clicked',
+        'sidebar closes on mobile when overlay is clicked',
       );
   });
 });

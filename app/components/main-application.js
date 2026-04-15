@@ -26,10 +26,9 @@ export default class MainApplicationComponent extends Component {
   }
 
   _onRouteChange(transition) {
-    // Skip initial load (transition.from is null); close on all subsequent navigation.
-    // This ensures the mobile sidebar overlay closes on mobile Firefox where touch
-    // events on <LinkTo> anchors may not reliably fire click handlers.
-    if (transition.from) {
+    // Close sidebar on navigation for mobile only. On wide viewports (≥768px)
+    // the persistent sidebar stays open — closing it on every click is jarring.
+    if (transition.from && window.innerWidth < 768) {
       this.sidebarOpen = false;
     }
 
@@ -53,7 +52,9 @@ export default class MainApplicationComponent extends Component {
 
   @action
   close() {
-    this.sidebarOpen = false;
+    if (window.innerWidth < 768) {
+      this.sidebarOpen = false;
+    }
   }
 
   @action
