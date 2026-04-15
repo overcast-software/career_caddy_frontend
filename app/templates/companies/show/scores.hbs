@@ -1,46 +1,7 @@
-{{#if this.model.length}}
-  <div
-    class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-  >
-    <table class="min-w-full text-sm">
-      <thead
-        class="bg-gray-50 border-b border-gray-200 dark:bg-gray-700 dark:border-gray-600"
-      >
-        <tr>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-          >Job Post</th>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-          >Score</th>
-          <th
-            class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
-          >Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-        {{#each this.model as |score|}}
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-            <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
-              <LinkTo @route="job-posts.show.scores" @model={{score.jobPost}}>
-                {{score.jobPost.title}}
-              </LinkTo>
-            </td>
-            <td
-              class="px-4 py-3 font-medium text-accent-600 dark:text-accent-400"
-            >{{score.score}}</td>
-            <td class="px-4 py-3 text-right">
-              <LinkTo
-                @route="scores.show"
-                @model={{score}}
-                class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-              >View</LinkTo>
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  </div>
-{{else}}
-  <EmptyState @message="No scores for this company." />
-{{/if}}
+<Scores::List
+  @scores={{this.model}}
+  @showResume={{false}}
+  @showStatus={{false}}
+  @showCreated={{false}}
+  @emptyMessage="No scores for this company."
+/>

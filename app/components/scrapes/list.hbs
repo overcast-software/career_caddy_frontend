@@ -4,14 +4,22 @@
       <thead class="bg-gray-50 border-b border-gray-200">
         <tr>
           <th class="px-4 py-3 text-left font-semibold text-gray-600">URL</th>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Company</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
+          {{#unless (eq @showCompany false)}}
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600"
+            >Company</th>
+          {{/unless}}
+          {{#unless (eq @showJobPost false)}}
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600"
+            >Job Post</th>
+          {{/unless}}
           <th
             class="px-4 py-3 text-left font-semibold text-gray-600"
           >Status</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Scraped At</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Scraped At</th>
           <th
             class="px-4 py-3 text-right font-semibold text-gray-600"
           >Actions</th>
@@ -29,55 +37,86 @@
                   class="hover:underline"
                 >{{scrape.url}}</a>
               {{else}}
-                <span class="text-gray-400">—</span>
+                <span class="text-gray-400">&mdash;</span>
               {{/if}}
             </td>
-            <td class="px-4 py-3 text-gray-600">
-              {{#if scrape.company.name}}
-                <LinkTo @route="companies.show" @model={{scrape.company}}>
-                  {{scrape.company.name}}
-                </LinkTo>
-              {{else}}
-                <span class="text-gray-400">—</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3 text-gray-600">
-              {{#if scrape.jobPost.id}}
-                <LinkTo @route="job-posts.show" @model={{scrape.jobPost}}>
-                  {{scrape.jobPost.title}}
-                </LinkTo>
-              {{else}}
-                <span class="text-gray-400">—</span>
-              {{/if}}
-            </td>
+            {{#unless (eq @showCompany false)}}
+              <td class="px-4 py-3 text-gray-600">
+                {{#if scrape.company.name}}
+                  <LinkTo @route="companies.show" @model={{scrape.company}}>
+                    {{scrape.company.name}}
+                  </LinkTo>
+                {{else}}
+                  <span class="text-gray-400">&mdash;</span>
+                {{/if}}
+              </td>
+            {{/unless}}
+            {{#unless (eq @showJobPost false)}}
+              <td class="px-4 py-3 text-gray-600">
+                {{#if scrape.jobPost.id}}
+                  <LinkTo @route="job-posts.show" @model={{scrape.jobPost}}>
+                    {{scrape.jobPost.title}}
+                  </LinkTo>
+                {{else}}
+                  <span class="text-gray-400">&mdash;</span>
+                {{/if}}
+              </td>
+            {{/unless}}
             <td class="px-4 py-3">
-              <span
-                class="px-2 py-0.5 rounded-full text-xs font-medium
-                  {{if
-                    (eq scrape.state 'completed')
-                    'bg-green-100 text-green-700'
-                  }}
-                  {{if (eq scrape.state 'done') 'bg-green-100 text-green-700'}}
-                  {{if (eq scrape.state 'failed') 'bg-red-100 text-red-700'}}
-                  {{if (eq scrape.state 'error') 'bg-red-100 text-red-700'}}
-                  {{if
-                    (eq scrape.state 'pending')
-                    'bg-yellow-100 text-yellow-700'
-                  }}
-                  {{if
-                    (eq scrape.state 'running')
-                    'bg-accent-100 text-accent-700'
-                  }}
-                  "
-              >
-                {{or scrape.status "unknown"}}
-              </span>
+              {{#if (and @isPending (@isPending scrape))}}
+                <span class="inline-flex items-center gap-1.5 text-gray-400">
+                  <svg
+                    class="animate-spin size-3.5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    ></path>
+                  </svg>
+                  {{or scrape.status "pending"}}
+                </span>
+              {{else}}
+                <span
+                  class="px-2 py-0.5 rounded-full text-xs font-medium
+                    {{if
+                      (eq scrape.status 'completed')
+                      'bg-green-100 text-green-700'
+                    }}
+                    {{if
+                      (eq scrape.status 'done')
+                      'bg-green-100 text-green-700'
+                    }}
+                    {{if (eq scrape.status 'failed') 'bg-red-100 text-red-700'}}
+                    {{if (eq scrape.status 'error') 'bg-red-100 text-red-700'}}
+                    {{if
+                      (eq scrape.status 'pending')
+                      'bg-yellow-100 text-yellow-700'
+                    }}
+                    {{if
+                      (eq scrape.status 'running')
+                      'bg-accent-100 text-accent-700'
+                    }}
+                    "
+                >{{or scrape.status "unknown"}}</span>
+              {{/if}}
             </td>
             <td class="px-4 py-3 text-gray-600">
               {{#if scrape.scrapedAt}}
                 {{moment-format scrape.scrapedAt "MMM D, YYYY h:mm a"}}
               {{else}}
-                <span class="text-gray-400">—</span>
+                <span class="text-gray-400">&mdash;</span>
               {{/if}}
             </td>
             <td class="px-4 py-3 text-right">
@@ -87,11 +126,13 @@
                   @model={{scrape}}
                   class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
                 >View</LinkTo>
-                <button
-                  type="button"
-                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                  {{on "click" (fn @onRetry scrape)}}
-                >Retry</button>
+                {{#if @onRetry}}
+                  <button
+                    type="button"
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                    {{on "click" (fn @onRetry scrape)}}
+                  >Retry</button>
+                {{/if}}
               </div>
             </td>
           </tr>
@@ -100,5 +141,5 @@
     </table>
   </div>
 {{else}}
-  <EmptyState @message="No scrapes found." />
+  <EmptyState @message={{or @emptyMessage "No scrapes found."}} />
 {{/if}}

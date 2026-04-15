@@ -1,10 +1,84 @@
-{{#if this.currentSummary}}
-  <div class="flex items-center gap-2 mb-2">
-    <button type="button" class="btn small" {{on "click" this.prev}}>←</button>
-    <span class="text-sm text-accent-500">{{this.positionLabel}}</span>
-    <button type="button" class="btn small" {{on "click" this.next}}>→</button>
+{{#if @summaries.length}}
+  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Summary</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Resume</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Active</th>
+          <th
+            class="px-4 py-3 text-right font-semibold text-gray-600"
+          >Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {{#each @summaries as |summary|}}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-gray-900 max-w-md truncate">
+              {{#if (and @isPending (@isPending summary))}}
+                <span class="inline-flex items-center gap-1.5 text-gray-400">
+                  <svg
+                    class="animate-spin size-3.5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    ></path>
+                  </svg>
+                  Generating…
+                </span>
+              {{else}}
+                {{summary.content}}
+              {{/if}}
+            </td>
+            <td class="px-4 py-3 text-gray-600">
+              {{#if summary.resume.id}}
+                {{or summary.resume.name summary.resume.title}}
+              {{else}}
+                <span class="italic text-gray-500">Career Data</span>
+              {{/if}}
+            </td>
+            <td class="px-4 py-3">
+              {{#if summary.active}}
+                <span
+                  class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
+                >Active</span>
+              {{/if}}
+            </td>
+            <td class="px-4 py-3 text-right">
+              {{#if (and @isPending (@isPending summary))}}
+                {{! pending — no actions }}
+              {{else}}
+                <LinkTo
+                  @route="summaries.show"
+                  @model={{summary}}
+                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                >View</LinkTo>
+              {{/if}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
   </div>
-  <Summaries::Form @summary={{this.currentSummary}} />
 {{else}}
-  <p class="text-sm text-gray-500">No summaries yet.</p>
+  <EmptyState @message={{or @emptyMessage "No summaries found."}} />
 {{/if}}

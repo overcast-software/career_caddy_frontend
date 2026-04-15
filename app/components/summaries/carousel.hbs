@@ -1,0 +1,10 @@
+{{#if this.currentSummary}}
+  <div class="flex items-center gap-2 mb-2">
+    <button type="button" class="btn small" {{on "click" this.prev}}>←</button>
+    <span class="text-sm text-accent-500">{{this.positionLabel}}</span>
+    <button type="button" class="btn small" {{on "click" this.next}}>→</button>
+  </div>
+  <Summaries::Form @summary={{this.currentSummary}} />
+{{else}}
+  <p class="text-sm text-gray-500">No summaries yet.</p>
+{{/if}}

@@ -15,79 +15,11 @@
   >Score</button>
 </div>
 
-{{#if this.model.length}}
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b border-gray-200">
-        <tr>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Resume</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Score</th>
-          <th
-            class="px-4 py-3 text-right font-semibold text-gray-600"
-          >Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100">
-        {{#each this.model as |score|}}
-          <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-gray-900">{{or
-                score.resume.name
-                "Career Data"
-              }}</td>
-            <td class="px-4 py-3 font-medium">
-              {{#if (this.isPending score)}}
-                <span class="inline-flex items-center gap-1.5 text-gray-400">
-                  <svg
-                    class="animate-spin size-3.5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    ></path>
-                  </svg>
-                  {{or score.status "Scoring…"}}
-                </span>
-              {{else if score.score}}
-                <span class="text-accent-600">{{score.score}}</span>
-              {{else if score.status}}
-                <span
-                  class="px-2 py-0.5 rounded-full text-xs font-medium
-                    {{if (eq score.status 'failed') 'bg-red-100 text-red-700'}}
-                    {{if (eq score.status 'error') 'bg-red-100 text-red-700'}}
-                    "
-                >{{score.status}}</span>
-              {{else}}
-                <span class="text-gray-400">—</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3 text-right">
-              {{#unless (this.isPending score)}}
-                <LinkTo
-                  @route="scores.show"
-                  @model={{score}}
-                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                >View</LinkTo>
-              {{/unless}}
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  </div>
-{{else}}
-  <EmptyState @message="No scores yet." />
-{{/if}}
+<Scores::List
+  @scores={{this.model}}
+  @isPending={{this.isPending}}
+  @showJobPost={{false}}
+  @showStatus={{false}}
+  @showCreated={{false}}
+  @emptyMessage="No scores yet."
+/>

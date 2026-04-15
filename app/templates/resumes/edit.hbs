@@ -41,7 +41,7 @@
           <PersonalInformation::Form @user={{this.model.user}} />
         </Panel::Card>
         <Panel::Card @title="Summary" @collapsible={{true}}>
-          <Summaries::List
+          <Summaries::Carousel
             @summaries={{this.resumeSummaries}}
             @resume={{this.model}}
           />

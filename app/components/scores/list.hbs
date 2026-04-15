@@ -1,103 +1,156 @@
 {{#if @scores.length}}
-  <div
-    class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-  >
+  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
     <table class="min-w-full text-sm">
-      <thead
-        class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600"
-      >
+      <thead class="bg-gray-50 border-b border-gray-200">
         <tr>
+          {{#unless (eq @showResume false)}}
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600"
+            >Resume</th>
+          {{/unless}}
           <th
-            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+            class="px-4 py-3 text-left font-semibold text-gray-600"
           >Score</th>
+          {{#unless (eq @showJobPost false)}}
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600"
+            >Job Post</th>
+          {{/unless}}
+          {{#unless (eq @showStatus false)}}
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600"
+            >Status</th>
+          {{/unless}}
+          {{#unless (eq @showCreated false)}}
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600"
+            >Created</th>
+          {{/unless}}
           <th
-            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-          >Job Post</th>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-          >Resume</th>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-          >Status</th>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-          >Created</th>
-          <th
-            class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
+            class="px-4 py-3 text-right font-semibold text-gray-600"
           >Actions</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+      <tbody class="divide-y divide-gray-100">
         {{#each @scores as |score|}}
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-            <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
-              <LinkTo @route="scores.show" @model={{score}}>
-                {{if score.score score.score "—"}}
-              </LinkTo>
-            </td>
-            <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
-              {{#if score.jobPost.id}}
-                <LinkTo @route="job-posts.show" @model={{score.jobPost}}>
-                  {{score.jobPost.title}}
-                </LinkTo>
-              {{else}}
-                <span class="text-gray-400">—</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
-              {{#if score.resume.id}}
-                <LinkTo @route="resumes.show" @model={{score.resume}}>
-                  {{score.resume.title}}
-                </LinkTo>
-              {{else}}
-                <LinkTo
-                  @route="career-data"
-                  class="text-gray-500 italic hover:text-gray-700 dark:hover:text-gray-300"
-                >
-                  Career Data
-                </LinkTo>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3">
-              <span
-                class="inline-block whitespace-nowrap px-2 py-0.5 rounded-full text-xs font-medium
-                  {{if
-                    (eq score.status 'completed')
-                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  }}
-                  {{if
-                    (eq score.status 'pending')
-                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                  }}
-                  {{if
-                    (eq score.status 'failed')
-                    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                  }}
-                  "
-              >
-                {{or score.status "unknown"}}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
-              {{#if score.createdAt}}
-                {{moment-format score.createdAt "MMM D, YYYY"}}
-              {{else}}
-                <span class="text-gray-400">—</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3 text-right">
-              <div class="flex items-center justify-end gap-2">
+          <tr class="hover:bg-gray-50">
+            {{#unless (eq @showResume false)}}
+              <td class="px-4 py-3 text-gray-900">
+                {{#if score.resume.id}}
+                  <LinkTo @route="resumes.show" @model={{score.resume}}>
+                    {{score.resume.title}}
+                  </LinkTo>
+                {{else}}
+                  <LinkTo
+                    @route="career-data"
+                    class="text-gray-500 italic hover:text-gray-700"
+                  >Career Data</LinkTo>
+                {{/if}}
+              </td>
+            {{/unless}}
+            <td class="px-4 py-3 font-medium">
+              {{#if (and @isPending (@isPending score))}}
+                <span class="inline-flex items-center gap-1.5 text-gray-400">
+                  <svg
+                    class="animate-spin size-3.5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    ></path>
+                  </svg>
+                  {{or score.status "Scoring…"}}
+                </span>
+              {{else if score.score}}
                 <LinkTo
                   @route="scores.show"
                   @model={{score}}
-                  class="px-2 py-1 text-xs rounded border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >View</LinkTo>
-                <button
-                  type="button"
-                  class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
-                  {{on "click" (fn @onDelete score)}}
-                >Delete</button>
-              </div>
+                  class="text-accent-600"
+                >{{score.score}}</LinkTo>
+              {{else if score.status}}
+                <span
+                  class="px-2 py-0.5 rounded-full text-xs font-medium
+                    {{if (eq score.status 'failed') 'bg-red-100 text-red-700'}}
+                    {{if (eq score.status 'error') 'bg-red-100 text-red-700'}}
+                    "
+                >{{score.status}}</span>
+              {{else}}
+                <span class="text-gray-400">&mdash;</span>
+              {{/if}}
+            </td>
+            {{#unless (eq @showJobPost false)}}
+              <td class="px-4 py-3 text-gray-600">
+                {{#if score.jobPost.id}}
+                  <LinkTo @route="job-posts.show" @model={{score.jobPost}}>
+                    {{score.jobPost.title}}
+                  </LinkTo>
+                {{else}}
+                  <span class="text-gray-400">&mdash;</span>
+                {{/if}}
+              </td>
+            {{/unless}}
+            {{#unless (eq @showStatus false)}}
+              <td class="px-4 py-3">
+                <span
+                  class="inline-block whitespace-nowrap px-2 py-0.5 rounded-full text-xs font-medium
+                    {{if
+                      (eq score.status 'completed')
+                      'bg-green-100 text-green-700'
+                    }}
+                    {{if
+                      (eq score.status 'pending')
+                      'bg-yellow-100 text-yellow-700'
+                    }}
+                    {{if
+                      (eq score.status 'failed')
+                      'bg-red-100 text-red-700'
+                    }}
+                    "
+                >
+                  {{or score.status "unknown"}}
+                </span>
+              </td>
+            {{/unless}}
+            {{#unless (eq @showCreated false)}}
+              <td class="px-4 py-3 text-gray-600">
+                {{#if score.createdAt}}
+                  {{moment-format score.createdAt "MMM D, YYYY"}}
+                {{else}}
+                  <span class="text-gray-400">&mdash;</span>
+                {{/if}}
+              </td>
+            {{/unless}}
+            <td class="px-4 py-3 text-right">
+              {{#if (and @isPending (@isPending score))}}
+                {{! pending — no actions }}
+              {{else}}
+                <div class="flex items-center justify-end gap-2">
+                  <LinkTo
+                    @route="scores.show"
+                    @model={{score}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >View</LinkTo>
+                  {{#if @onDelete}}
+                    <button
+                      type="button"
+                      class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
+                      {{on "click" (fn @onDelete score)}}
+                    >Delete</button>
+                  {{/if}}
+                </div>
+              {{/if}}
             </td>
           </tr>
         {{/each}}
@@ -105,5 +158,5 @@
     </table>
   </div>
 {{else}}
-  <EmptyState @message="No scores found." />
+  <EmptyState @message={{or @emptyMessage "No scores found."}} />
 {{/if}}

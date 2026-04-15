@@ -1,11 +1,110 @@
-<ul>
-  {{#each @coverLetters as |coverLetter|}}
-    {{#if coverLetter.isSaving}}
-      <Panel::Card @sandtrap={{true}}>
-        <span class="loader"></span>
-      </Panel::Card>
-    {{else}}
-      <CoverLetters::Compact @coverLetter={{coverLetter}} />
-    {{/if}}
-  {{/each}}
-</ul>
+{{#if @coverLetters.length}}
+  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Status</th>
+          {{#unless (eq @showJobPost false)}}
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600"
+            >Job Post</th>
+          {{/unless}}
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Created</th>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Favorite</th>
+          <th
+            class="px-4 py-3 text-right font-semibold text-gray-600"
+          >Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {{#each @coverLetters as |coverLetter|}}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3">
+              {{#if (and @isPending (@isPending coverLetter))}}
+                <span class="inline-flex items-center gap-1.5 text-gray-400">
+                  <svg
+                    class="animate-spin size-3.5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    ></path>
+                  </svg>
+                  Generating…
+                </span>
+              {{else}}
+                {{or coverLetter.status "—"}}
+              {{/if}}
+            </td>
+            {{#unless (eq @showJobPost false)}}
+              <td class="px-4 py-3 text-gray-600">
+                {{#if coverLetter.jobPost.id}}
+                  <LinkTo
+                    @route="job-posts.show"
+                    @model={{coverLetter.jobPost}}
+                  >{{coverLetter.jobPost.title}}</LinkTo>
+                {{else}}
+                  <span class="text-gray-400">&mdash;</span>
+                {{/if}}
+              </td>
+            {{/unless}}
+            <td class="px-4 py-3 text-gray-600">
+              {{#if coverLetter.createdAt}}
+                {{moment-format coverLetter.createdAt "MMM D, YYYY"}}
+              {{else}}
+                <span class="text-gray-400">&mdash;</span>
+              {{/if}}
+            </td>
+            <td class="px-4 py-3 text-gray-600">
+              {{#if coverLetter.favorite}}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  class="size-4 text-amber-400"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              {{/if}}
+            </td>
+            <td class="px-4 py-3 text-right">
+              {{#if (and @isPending (@isPending coverLetter))}}
+                {{! pending — no actions }}
+              {{else}}
+                <LinkTo
+                  @route="cover-letters.show"
+                  @model={{coverLetter}}
+                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                >View</LinkTo>
+              {{/if}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <EmptyState @message={{or @emptyMessage "No cover letters found."}} />
+{{/if}}
