@@ -1,25 +1,81 @@
-{{! TODO don't need this anymore}}
-<Panel::Card>
-  <PowerSelect
-    @options={{this.companies}}
-    @onChange={{this.updateCompany}}
-    @searchEnabled={{true}}
-    @searchField="name"
-    @selected={{this.selectedCompany}}
-    @placeholder="Select a Company"
-    @labelText="Filter by Company"
-    as |company|
-  >
-    {{company.name}}
-  </PowerSelect>
-  {{#each this.companyQuestions as |question|}}
-    <div class="panel-card">
-      {{question.company.name}}:
-      {{question.jobApplication.jobPost.name}}{{question.content}}<LinkTo
-        @route="questions.show"
-        @model={{question}}
-      >show</LinkTo>
-    </div>
-  {{/each}}
-</Panel::Card>
-{{yield}}
+{{#if @questions.length}}
+  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th
+            class="px-4 py-3 text-left font-semibold text-gray-600"
+          >Question</th>
+          <th
+            class="px-4 py-3 text-center font-semibold text-gray-600 w-24"
+          >Answers</th>
+          <th
+            class="px-4 py-3 text-center font-semibold text-gray-600 w-16"
+          >Fav</th>
+          <th
+            class="px-4 py-3 text-right font-semibold text-gray-600 w-40"
+          >Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {{#each @questions as |question|}}
+          <tr class="hover:bg-gray-50">
+            <td
+              class="px-4 py-3 text-gray-900 whitespace-pre-wrap break-words max-w-lg"
+            >
+              {{question.content}}
+            </td>
+            <td class="px-4 py-3 text-center">
+              {{#if question.answers.length}}
+                <LinkTo
+                  @route={{or @answersRoute "questions.show.answers"}}
+                  @model={{question}}
+                  class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold hover:bg-accent-200"
+                >{{question.answers.length}}</LinkTo>
+              {{else}}
+                <span class="text-gray-300 text-xs">&mdash;</span>
+              {{/if}}
+            </td>
+            <td class="px-4 py-3 text-center text-base">
+              {{if question.favorite "★" "☆"}}
+            </td>
+            <td class="px-4 py-3 text-right">
+              <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                {{#if @showRoute}}
+                  <LinkTo
+                    @route={{@showRoute}}
+                    @model={{question}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >Show</LinkTo>
+                {{/if}}
+                {{#if @editRoute}}
+                  <LinkTo
+                    @route={{@editRoute}}
+                    @model={{question}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >Edit</LinkTo>
+                {{/if}}
+                {{#if @answerRoute}}
+                  <LinkTo
+                    @route={{@answerRoute}}
+                    @model={{question}}
+                    class="px-2 py-1 text-xs rounded border border-accent-200 text-accent-600 hover:bg-accent-50"
+                  >Answer</LinkTo>
+                {{/if}}
+                {{#if @onDelete}}
+                  <button
+                    type="button"
+                    class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
+                    {{on "click" (fn @onDelete question)}}
+                  >Delete</button>
+                {{/if}}
+              </div>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <EmptyState @message={{or @emptyMessage "No questions found."}} />
+{{/if}}
