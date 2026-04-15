@@ -22,11 +22,6 @@ export default class JobPostsShowSummariesController extends Controller {
     return [CAREER_DATA_OPTION, ...Array.from(all)];
   }
 
-  get jobPost() {
-    const { job_post_id } = this.router.currentRoute.parent.params;
-    return this.store.peekRecord('job-post', job_post_id);
-  }
-
   @action isPending(summary) {
     return this.pendingIds.has(summary.id);
   }
@@ -44,9 +39,11 @@ export default class JobPostsShowSummariesController extends Controller {
   }
 
   @action async createSummary() {
+    const { job_post_id } = this.router.currentRoute.parent.params;
+    const jobPost = this.store.peekRecord('job-post', job_post_id);
     const resume = this.store.peekRecord('resume', this.selectedResume.id);
     const summary = this.store.createRecord('summary', {
-      jobPost: this.jobPost,
+      jobPost,
       resume,
       content: '',
     });

@@ -5,8 +5,7 @@ export default class JobPostsShowScrapesRoute extends Route {
   @service store;
 
   async model() {
-    const { job_post_id } = this.paramsFor('job-posts.show');
-    const jobPost = this.store.peekRecord('job-post', job_post_id);
+    const jobPost = this.modelFor('job-posts.show');
     return await jobPost.scrapes;
   }
 }

@@ -24,11 +24,6 @@ export default class JobPostsShowScoresController extends Controller {
     return [CAREER_DATA_OPTION, ...Array.from(all)];
   }
 
-  get jobPost() {
-    const { job_post_id } = this.router.currentRoute.parent.params;
-    return this.store.peekRecord('job-post', job_post_id);
-  }
-
   @action isPending(score) {
     return this.pendingIds.has(score.id);
   }
@@ -46,10 +41,12 @@ export default class JobPostsShowScoresController extends Controller {
   }
 
   @action async scoreResume() {
+    const { job_post_id } = this.router.currentRoute.parent.params;
+    const jobPost = this.store.peekRecord('job-post', job_post_id);
     const resume = this.store.peekRecord('resume', this.selectedResume.id);
     const newScore = this.store.createRecord('score', {
       resume,
-      jobPost: this.jobPost,
+      jobPost,
       user: this.currentUser.user,
     });
     try {

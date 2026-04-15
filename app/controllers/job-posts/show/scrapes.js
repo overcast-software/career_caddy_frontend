@@ -14,11 +14,6 @@ export default class JobPostsShowScrapesController extends Controller {
 
   @tracked pendingIds = new Set();
 
-  get jobPost() {
-    const { job_post_id } = this.router.currentRoute.parent.params;
-    return this.store.peekRecord('job-post', job_post_id);
-  }
-
   @action isPending(scrape) {
     return this.pendingIds.has(scrape.id);
   }
@@ -32,7 +27,8 @@ export default class JobPostsShowScrapesController extends Controller {
   }
 
   @action async createScrape() {
-    const jobPost = this.jobPost;
+    const { job_post_id } = this.router.currentRoute.parent.params;
+    const jobPost = this.store.peekRecord('job-post', job_post_id);
     const scrape = this.store.createRecord('scrape', {
       jobPost,
       url: jobPost.link ?? '',

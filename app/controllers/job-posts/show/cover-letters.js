@@ -22,11 +22,6 @@ export default class JobPostsShowCoverLettersController extends Controller {
     return [CAREER_DATA_OPTION, ...Array.from(all)];
   }
 
-  get jobPost() {
-    const { job_post_id } = this.router.currentRoute.parent.params;
-    return this.store.peekRecord('job-post', job_post_id);
-  }
-
   @action isPending(coverLetter) {
     return this.pendingIds.has(coverLetter.id);
   }
@@ -44,10 +39,12 @@ export default class JobPostsShowCoverLettersController extends Controller {
   }
 
   @action async createCoverLetter() {
+    const { job_post_id } = this.router.currentRoute.parent.params;
+    const jobPost = this.store.peekRecord('job-post', job_post_id);
     const resume = this.store.peekRecord('resume', this.selectedResume.id);
     const cl = this.store.createRecord('cover-letter', {
       resume,
-      jobPost: this.jobPost,
+      jobPost,
     });
     this.flashMessages.info('Creating cover letter…');
     try {

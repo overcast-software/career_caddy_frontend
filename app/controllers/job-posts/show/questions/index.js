@@ -19,10 +19,6 @@ export default class JobPostsShowQuestionsIndexController extends Controller {
   @tracked additionalPrompt = '';
   @tracked isPollingAnswerId = null;
 
-  get jobPostId() {
-    return this.router.currentRoute.parent.params.job_post_id;
-  }
-
   @action startAnswering(question) {
     if (this.newAnswer?.isNew) {
       this.newAnswer.unloadRecord();
@@ -122,8 +118,10 @@ export default class JobPostsShowQuestionsIndexController extends Controller {
     try {
       await question.destroyRecord();
       this.flashMessages.success('Question deleted.');
-    } catch {
-      this.flashMessages.danger('Failed to delete question.');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to delete question.');
+      }
     }
   }
 
