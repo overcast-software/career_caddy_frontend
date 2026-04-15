@@ -7,6 +7,14 @@ export default class JobPostsShowQuestionsShowController extends Controller {
   @service flashMessages;
   @service store;
 
+  get showAnswersList() {
+    const route = this.router.currentRouteName;
+    return (
+      route === 'job-posts.show.questions.show' ||
+      route === 'job-posts.show.questions.show.index'
+    );
+  }
+
   @action onAnswerSave() {
     this.store.findRecord('question', this.model.question.id, {
       include: 'answers',

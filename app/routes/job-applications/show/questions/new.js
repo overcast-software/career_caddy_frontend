@@ -10,13 +10,20 @@ export default class JobApplicationsShowQuestionsNewRoute extends Route {
       'job-application',
       application_id,
     );
-
-    // Create the question and attach it to the job-application
+    const jobPostId = jobApplication?.get('jobPost.id');
+    const jobPost = jobPostId
+      ? this.store.peekRecord('job-post', jobPostId)
+      : null;
+    const companyId = jobPost?.get('company.id');
+    const company = companyId
+      ? this.store.peekRecord('company', companyId)
+      : null;
     const question = this.store.createRecord('question', {
-      jobApplication: jobApplication,
-      company: jobApplication.get('jobPost.company'),
+      jobApplication,
+      jobPost,
+      company,
     });
 
-    return question;
+    return { question, jobApplication };
   }
 }

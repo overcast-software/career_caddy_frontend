@@ -9,8 +9,8 @@ export default class JobPostsShowQuestionsShowRoute extends Route {
     const jobPost = this.store.peekRecord('job-post', job_post_id);
     const question = await this.store.findRecord('question', question_id, {
       include: 'answers',
+      reload: true,
     });
-    const answers = await question.answers;
-    return { jobPost, question, answers };
+    return { jobPost, question };
   }
 }

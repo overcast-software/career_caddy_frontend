@@ -11,17 +11,16 @@
     <div class="field">
       <label class="field-label">Company
         <span class="required">*</span></label>
-      {{#if @jobPost}}
+      {{#if this.hasLockedContext}}
         <input
           type="text"
-          value={{@jobPost.company.name}}
+          value={{this.selectedCompany.name}}
           disabled="true"
           aria-label="Company"
         />
       {{else}}
         <PowerSelectWithCreate
-          @options={{this.companies}}
-          @searchField="name"
+          @search={{this.searchCompanies}}
           @placeholder="Search or create a company…"
           @onCreate={{this.addCompanyToQuestion}}
           @onChange={{this.updateCompany}}
@@ -39,10 +38,10 @@
 
     <div class="field">
       <label class="field-label">Job Post</label>
-      {{#if @jobPost}}
+      {{#if this.hasLockedContext}}
         <input
           type="text"
-          value={{@jobPost.title}}
+          value={{this.selectedJobPost.title}}
           disabled="true"
           aria-label="Job Post"
         />
@@ -67,21 +66,30 @@
 
     <div class="field">
       <label class="field-label">Job Application</label>
-      <PowerSelect
-        @options={{this.filteredJobAppOptions}}
-        @onChange={{this.updateJobApplication}}
-        @selected={{this.selectedJobAppOption}}
-        @placeholder={{if
-          this.selectedCompany
-          "Select an application (optional)"
-          "Select a company first"
-        }}
-        @allowClear={{true}}
-        @disabled={{not this.selectedCompany}}
-        as |opt|
-      >
-        {{opt.label}}
-      </PowerSelect>
+      {{#if this.hasLockedContext}}
+        <input
+          type="text"
+          value={{if this.selectedJobAppOption.label this.selectedJobAppOption.label "None"}}
+          disabled="true"
+          aria-label="Job Application"
+        />
+      {{else}}
+        <PowerSelect
+          @options={{this.filteredJobAppOptions}}
+          @onChange={{this.updateJobApplication}}
+          @selected={{this.selectedJobAppOption}}
+          @placeholder={{if
+            this.selectedCompany
+            "Select an application (optional)"
+            "Select a company first"
+          }}
+          @allowClear={{true}}
+          @disabled={{not this.selectedCompany}}
+          as |opt|
+        >
+          {{opt.label}}
+        </PowerSelect>
+      {{/if}}
     </div>
 
     <div class="field-full">

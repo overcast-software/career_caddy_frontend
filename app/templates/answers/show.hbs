@@ -22,6 +22,11 @@
         {{/if}}
       </div>
       <div class="actions">
+        <button
+          type="button"
+          class="btn small"
+          {{on "click" this.copyToClipboard}}
+        >{{this.copyButtonText}}</button>
         <LinkTo
           @route="answers.edit"
           @model={{this.model}}

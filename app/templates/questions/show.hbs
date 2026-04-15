@@ -1,30 +1,37 @@
 {{page-title "Show"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <button
-      type="button"
-      class="btn"
-      {{on "click" this.deleteQuestion}}
-    >Delete</button>
-    <LinkTo class="btn" @route="questions.new">New Question</LinkTo>
-    <LinkTo
-      class="btn"
-      @route="questions.edit"
-      @model={{this.model}}
-    >edit</LinkTo>
-    <LinkTo
-      class="btn"
-      @route="questions.show.answers.new"
-      @model={{this.model}}
-    >manually answer</LinkTo>
-    <LinkTo
-      class="btn"
-      @route="questions.show.answers"
-      @model={{this.model}}
-    >answers</LinkTo>
+    question
   </:subnav>
   <:main>
     <Questions::Item @question={{this.model}} @askAI={{this.askAI}} />
+    <div class="flex flex-wrap gap-2 mt-3 mb-4">
+      <LinkTo
+        class="btn small"
+        @route="questions.show.answers.new"
+        @model={{this.model}}
+      >Manually Answer</LinkTo>
+      <LinkTo
+        class="btn small"
+        @route="questions.show.answers"
+        @model={{this.model}}
+      >Answers</LinkTo>
+      <LinkTo
+        class="btn small"
+        @route="questions.edit"
+        @model={{this.model}}
+      >Edit</LinkTo>
+      <button
+        type="button"
+        class="btn small"
+        {{on "click" this.newQuestion}}
+      >New Question</button>
+      <button
+        type="button"
+        class="btn small danger"
+        {{on "click" this.deleteQuestion}}
+      >Delete</button>
+    </div>
     {{outlet}}
   </:main>
 </RouteLayout>

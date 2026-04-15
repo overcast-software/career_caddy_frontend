@@ -18,40 +18,27 @@ export default class QuestionsFormComponent extends Component {
   constructor(owner, args) {
     super(owner, args);
     const q = args.question;
-    // Pre-select company when passed directly (e.g. from company context)
-    if (args.company) {
-      this.selectedCompany = args.company;
-      this._preloadCompanyRelated(args.company, q);
+    if (!q) return;
+
+    const company = q.company;
+    if (company) {
+      this.selectedCompany = company;
+      this._preloadCompanyRelated(company, q);
     }
-    // Pre-select job post (and its company) when coming from a job post context
-    if (args.jobPost) {
-      this.selectedJobPost = args.jobPost;
-      const company = args.jobPost.belongsTo('company').value();
-      if (company) {
-        this.selectedCompany = company;
-        this._preloadCompanyRelated(company, q);
-      }
+    const jobPost = q.jobPost;
+    if (jobPost) {
+      this.selectedJobPost = jobPost;
+      this.loadedJobPosts = [jobPost];
     }
-    if (q && !q.isNew) {
-      const company = q.belongsTo('company').value();
-      if (company) {
-        this.selectedCompany = company;
-        this._preloadCompanyRelated(company, q);
-      }
-      const jobPost = q.belongsTo('jobPost').value();
-      if (jobPost) {
-        this.selectedJobPost = jobPost;
-        this.loadedJobPosts = [jobPost];
-      }
-      const jobApp = q.belongsTo('jobApplication').value();
-      if (jobApp) {
-        const jp = jobApp.belongsTo('jobPost').value();
-        const label = jp
-          ? `${jp.title} — ${jobApp.status}`
-          : `Application #${jobApp.id} (${jobApp.status})`;
-        this.selectedJobAppOption = { record: jobApp, label };
-        this.loadedJobAppOptions = [this.selectedJobAppOption];
-      }
+    const jobApp = q.jobApplication;
+    if (jobApp) {
+      const title = jobPost?.get('title') ?? jobApp.get('jobPost.title');
+      const status = jobApp.get('status') ?? '';
+      const label = title
+        ? `${title} — ${status}`
+        : `Application #${jobApp.get('id')} (${status})`;
+      this.selectedJobAppOption = { record: jobApp, label };
+      this.loadedJobAppOptions = [this.selectedJobAppOption];
     }
   }
 
@@ -93,8 +80,15 @@ export default class QuestionsFormComponent extends Component {
     return this.args.question && !this.args.question.isNew;
   }
 
-  get companies() {
-    return this.store.peekAll('company');
+  get hasLockedContext() {
+    return this.selectedJobPost || this.selectedJobAppOption;
+  }
+
+  @action
+  async searchCompanies(term) {
+    const params = term ? { 'filter[query]': term } : {};
+    const results = await this.store.query('company', params);
+    return results.slice();
   }
 
   get filteredJobAppOptions() {
@@ -193,9 +187,26 @@ export default class QuestionsFormComponent extends Component {
     try {
       await this.args.question.save();
       this.flashMessages.success('Question saved.');
-      this.router.transitionTo('questions.new', {
-        queryParams: { companyId: this.selectedCompany?.id },
-      });
+      const jobApp = this.selectedJobAppOption?.record;
+      if (jobApp) {
+        this.router.transitionTo(
+          'job-applications.show.questions.new',
+          jobApp.id,
+        );
+      } else if (this.selectedJobPost) {
+        this.router.transitionTo(
+          'job-posts.show.questions.new',
+          this.selectedJobPost.id,
+        );
+      } else {
+        this.router.transitionTo('questions.new', {
+          queryParams: {
+            companyId: this.selectedCompany?.id ?? null,
+            jobPostId: null,
+            jobApplicationId: null,
+          },
+        });
+      }
     } catch (error) {
       if (error?.status !== 403) {
         this.flashMessages.danger('Failed to save question.');
@@ -210,13 +221,18 @@ export default class QuestionsFormComponent extends Component {
     this.args.question.rollbackAttributes?.();
     if (wasEditing && questionId) {
       this.router.transitionTo('questions.show', questionId);
-    } else if (this.args.company) {
-      this.router.transitionTo('companies.show.answers', this.args.company);
-    } else if (this.args.jobPost) {
+    } else if (this.selectedJobAppOption?.record) {
+      this.router.transitionTo(
+        'job-applications.show',
+        this.selectedJobAppOption.record.id,
+      );
+    } else if (this.selectedJobPost) {
       this.router.transitionTo(
         'job-posts.show.questions.index',
-        this.args.jobPost,
+        this.selectedJobPost.id,
       );
+    } else if (this.selectedCompany) {
+      this.router.transitionTo('companies.show.answers', this.selectedCompany.id);
     } else {
       this.router.transitionTo('questions.index');
     }

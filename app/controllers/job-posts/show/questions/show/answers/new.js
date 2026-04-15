@@ -8,7 +8,9 @@ export default class JobPostsShowQuestionsShowAnswersNewController extends Contr
   @action onSave(answer) {
     this.router.transitionTo(
       'job-posts.show.questions.show.answers.show',
-      answer,
+      this.model.jobPost.id,
+      this.model.question.id,
+      answer.id,
     );
   }
 }

@@ -8,7 +8,9 @@ export default class JobApplicationsShowQuestionsShowAnswersNewController extend
   @action onSave(answer) {
     this.router.transitionTo(
       'job-applications.show.questions.show.answers.show',
-      answer,
+      this.model.jobApplication.id,
+      this.model.question.id,
+      answer.id,
     );
   }
 }

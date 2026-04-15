@@ -52,10 +52,11 @@ export default class AnswersForm extends Component {
     const afterSave = () => {
       if (this.args.onSave) {
         this.args.onSave(this.args.answer);
-      } else if (question) {
+      } else if (question?.id) {
         this.router.transitionTo(
           'questions.show.answers.show',
-          this.args.answer,
+          question.id,
+          this.args.answer.id,
         );
       }
     };
