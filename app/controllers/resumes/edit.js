@@ -80,7 +80,7 @@ export default class ResumesEditController extends Controller {
   };
 
   get resumeSummaries() {
-    return this.model.summaries;
+    return this.store.peekAll('summary');
   }
 
   get isDirty() {

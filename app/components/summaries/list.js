@@ -21,6 +21,12 @@ export default class SummariesList extends Component {
     return 0;
   }
 
+  get positionLabel() {
+    const count = this.args.summaries?.length ?? 0;
+    if (count === 0) return '';
+    return `${this.currentIndex + 1} / ${count}`;
+  }
+
   get currentSummary() {
     const summaries = this.args.summaries;
     if (!summaries?.length) return null;
@@ -50,9 +56,9 @@ export default class SummariesList extends Component {
     const newSummary = this._at(this.args.summaries, newIndex);
     this._currentIndex = newIndex;
     if (resume && newSummary) {
-      const rel = await resume.summaries;
-      if (!rel.includes(newSummary)) rel.push(newSummary);
-      await resume.save();
+      newSummary.active = true;
+      newSummary.resume = resume;
+      await newSummary.save();
     }
   }
 }
