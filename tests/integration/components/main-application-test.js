@@ -6,6 +6,11 @@ import { hbs } from 'ember-cli-htmlbars';
 module('Integration | Component | main-application', function (hooks) {
   setupRenderingTest(hooks);
 
+  hooks.beforeEach(function () {
+    localStorage.removeItem('cc:sidebar-open');
+    localStorage.removeItem('cc:chat-open');
+  });
+
   test('it renders', async function (assert) {
     await render(hbs`<MainApplication />`);
     assert.ok(this.element, 'component renders');

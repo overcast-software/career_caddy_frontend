@@ -3,15 +3,19 @@ import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
 
+const SIDEBAR_KEY = 'cc:sidebar-open';
+const CHAT_KEY = 'cc:chat-open';
+
 export default class MainApplicationComponent extends Component {
   @service currentUser;
   @service chat;
   @service router;
   @service spinner;
-  @tracked sidebarOpen = true;
+  @tracked sidebarOpen = localStorage.getItem(SIDEBAR_KEY) !== 'false';
 
   constructor(owner, args) {
     super(owner, args);
+    this.chat.sidebarOpen = localStorage.getItem(CHAT_KEY) === 'true';
     this.chat.currentPage = {
       route: this.router.currentRouteName,
       url: this.router.currentURL,
@@ -26,10 +30,9 @@ export default class MainApplicationComponent extends Component {
   }
 
   _onRouteChange(transition) {
-    // Close sidebar on navigation for mobile only. On wide viewports (≥768px)
-    // the persistent sidebar stays open — closing it on every click is jarring.
     if (transition.from && window.innerWidth < 768) {
       this.sidebarOpen = false;
+      localStorage.setItem(SIDEBAR_KEY, 'false');
     }
 
     if (transition.to) {
@@ -45,8 +48,10 @@ export default class MainApplicationComponent extends Component {
   @action
   toggle() {
     this.sidebarOpen = !this.sidebarOpen;
+    localStorage.setItem(SIDEBAR_KEY, this.sidebarOpen);
     if (this.sidebarOpen) {
       this.chat.sidebarOpen = false;
+      localStorage.setItem(CHAT_KEY, 'false');
     }
   }
 
@@ -54,19 +59,23 @@ export default class MainApplicationComponent extends Component {
   close() {
     if (window.innerWidth < 768) {
       this.sidebarOpen = false;
+      localStorage.setItem(SIDEBAR_KEY, 'false');
     }
   }
 
   @action
   closeSidebarForChat() {
     this.sidebarOpen = false;
+    localStorage.setItem(SIDEBAR_KEY, 'false');
   }
 
   @action
   toggleChat() {
     this.chat.sidebarOpen = !this.chat.sidebarOpen;
+    localStorage.setItem(CHAT_KEY, this.chat.sidebarOpen);
     if (this.chat.sidebarOpen) {
       this.sidebarOpen = false;
+      localStorage.setItem(SIDEBAR_KEY, 'false');
     }
   }
 }
