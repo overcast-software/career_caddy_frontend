@@ -52,6 +52,15 @@ export default class AnswersForm extends Component {
     const afterSave = () => {
       if (this.args.onSave) {
         this.args.onSave(this.args.answer);
+        return;
+      }
+      const current = this.router.currentRouteName;
+      const showRoute = current.replace(
+        /\.answers\.(new|edit)$/,
+        '.answers.show',
+      );
+      if (showRoute !== current) {
+        this.router.transitionTo(showRoute, this.args.answer.id);
       } else if (question?.id) {
         this.router.transitionTo(
           'questions.show.answers.show',

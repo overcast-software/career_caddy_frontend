@@ -11,10 +11,18 @@ export default class ResumesIndexController extends Controller {
     return !this.model?.length;
   }
 
-  @action async deleteResume(resume) {
+  @action deleteResume(resume) {
     if (!confirm('Delete this resume? This cannot be undone.')) return;
-    await this.spinner.wrap(resume.destroyRecord());
-    this.flashMessages.success('Resume deleted.');
+    this.spinner
+      .wrap(resume.destroyRecord())
+      .then(() => {
+        this.flashMessages.success('Resume deleted.');
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete resume.');
+        }
+      });
   }
 
   @action async toggleFavorite(resume) {

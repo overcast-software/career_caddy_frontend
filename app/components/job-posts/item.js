@@ -59,8 +59,10 @@ export default class JobPostsItemComponent extends Component {
       try {
         await jobPost.destroyRecord();
         this.flashMessages.success('Job post deleted.');
-      } catch {
-        this.flashMessages.danger('Failed to delete job post.');
+      } catch (error) {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete job post.');
+        }
       }
     }
   }

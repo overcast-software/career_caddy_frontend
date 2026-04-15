@@ -9,7 +9,12 @@ export default class QuestionsShowController extends Controller {
   @action deleteQuestion() {
     this.model
       .destroyRecord()
-      .then(() => this.flashMessages.success('Question deleted'));
+      .then(() => this.flashMessages.success('Question deleted.'))
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete question.');
+        }
+      });
   }
   get answers() {
     return this.model.answers;

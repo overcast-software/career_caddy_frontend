@@ -10,7 +10,6 @@ export default class SettingsAiSpendController extends Controller {
   @service store;
 
   @tracked isLoading = false;
-  @tracked spendData = null;
   @tracked period = 'daily';
   @tracked groupBy = 'agent_name';
   @tracked days = 30;
@@ -18,11 +17,11 @@ export default class SettingsAiSpendController extends Controller {
   @tracked users = [];
 
   get buckets() {
-    return this.spendData?.data?.buckets ?? [];
+    return this.model?.data?.buckets ?? [];
   }
 
   get totals() {
-    return this.spendData?.data?.totals ?? {};
+    return this.model?.data?.totals ?? {};
   }
 
   get hasBuckets() {
@@ -66,11 +65,11 @@ export default class SettingsAiSpendController extends Controller {
   @action
   setUser(event) {
     this.selectedUserId = event.target.value;
-    if (this.spendData) this.loadData();
+    this.reloadData();
   }
 
   @action
-  async loadData() {
+  async reloadData() {
     if (this.isStaff && this.users.length === 0) {
       await this.loadUsers();
     }
@@ -92,7 +91,7 @@ export default class SettingsAiSpendController extends Controller {
         this.flashMessages.danger('Failed to load AI spend data.');
         return;
       }
-      this.spendData = await response.json();
+      this.model = await response.json();
     } catch {
       this.flashMessages.danger('Failed to load AI spend data.');
     } finally {
@@ -103,18 +102,18 @@ export default class SettingsAiSpendController extends Controller {
   @action
   setPeriod(value) {
     this.period = value;
-    this.loadData();
+    this.reloadData();
   }
 
   @action
   setGroupBy(value) {
     this.groupBy = value;
-    this.loadData();
+    this.reloadData();
   }
 
   @action
   setDays(value) {
     this.days = parseInt(value, 10) || 30;
-    this.loadData();
+    this.reloadData();
   }
 }

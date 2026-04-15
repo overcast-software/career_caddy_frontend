@@ -6,10 +6,18 @@ export default class CoverLettersEditController extends Controller {
   @service flashMessages;
   @service router;
 
-  @action async deleteCoverLetter() {
+  @action deleteCoverLetter() {
     if (!confirm('Delete this cover letter?')) return;
-    await this.model.destroyRecord();
-    this.flashMessages.success('Cover letter deleted.');
-    this.router.transitionTo('cover-letters.index');
+    this.model
+      .destroyRecord()
+      .then(() => {
+        this.flashMessages.success('Cover letter deleted.');
+        this.router.transitionTo('cover-letters.index');
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete cover letter.');
+        }
+      });
   }
 }

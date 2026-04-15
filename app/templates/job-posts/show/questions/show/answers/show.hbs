@@ -1,13 +1,4 @@
-<div class="mt-4 border-t border-gray-100 pt-4">
-  <div class="flex items-center justify-between mb-3">
-    <h3 class="text-sm font-semibold text-gray-700">Answer</h3>
-    <LinkTo
-      @route="job-posts.show.questions.show.answers.edit"
-      @model={{this.model}}
-      class="btn small"
-    >Edit</LinkTo>
-  </div>
-  <div class="panel-card">
-    <MarkdownToHtml @markdown={{this.model.content}} />
-  </div>
-</div>
+<Answers::Show
+  @answer={{this.model}}
+  @editRoute="job-posts.show.questions.show.answers.edit"
+/>

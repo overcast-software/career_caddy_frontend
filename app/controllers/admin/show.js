@@ -23,8 +23,9 @@ export default class ApiKeysShowController extends Controller {
       this.flashMessages.success('API key revoked successfully');
       this.router.transitionTo('admin.index');
     } catch (error) {
-      this.flashMessages.danger('Failed to revoke API key');
-      console.error('Error revoking API key:', error);
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to revoke API key.');
+      }
     }
   }
 }

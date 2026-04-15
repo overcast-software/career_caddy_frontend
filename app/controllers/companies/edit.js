@@ -6,11 +6,18 @@ export default class CompaniesEditController extends Controller {
   @service flashMessages;
   @service router;
 
-  @action
-  async deleteCompany() {
+  @action deleteCompany() {
     if (!confirm(`Delete ${this.model.name}?`)) return;
-    await this.model.destroyRecord();
-    this.flashMessages.success('Company deleted.');
-    this.router.transitionTo('companies.index');
+    this.model
+      .destroyRecord()
+      .then(() => {
+        this.flashMessages.success('Company deleted.');
+        this.router.transitionTo('companies.index');
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete company.');
+        }
+      });
   }
 }

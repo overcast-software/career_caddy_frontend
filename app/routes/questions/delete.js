@@ -20,8 +20,10 @@ export default class QuestionsDeleteRoute extends Route {
       });
       await question.destroyRecord();
       this.flashMessages?.success?.('Question deleted.');
-    } catch {
-      this.flashMessages?.danger?.('Failed to delete question.');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages?.danger?.('Failed to delete question.');
+      }
     }
 
     return this.router.transitionTo('questions.index');

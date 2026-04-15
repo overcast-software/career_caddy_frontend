@@ -18,12 +18,20 @@ export default class JobApplicationsShowController extends Controller {
     return TERMINAL_STATES;
   }
 
-  @action async destroyRecord(event) {
+  @action destroyRecord(event) {
     event.preventDefault();
-    if (!confirm('Delete application? This can not be undone')) return;
+    if (!confirm('Delete application? This can not be undone.')) return;
     const jobPost = this.model.jobPost;
-    await this.model.destroyRecord();
-    this.flashMessages.success('Application deleted.');
-    this.router.transitionTo('job-posts.show', jobPost);
+    this.model
+      .destroyRecord()
+      .then(() => {
+        this.flashMessages.success('Application deleted.');
+        this.router.transitionTo('job-posts.show', jobPost);
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete application.');
+        }
+      });
   }
 }

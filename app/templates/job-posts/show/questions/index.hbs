@@ -4,10 +4,7 @@
   <h2
     class="text-lg font-semibold text-gray-800 dark:text-gray-200"
   >Questions</h2>
-  <LinkTo
-    @route="job-posts.show.questions.new"
-    class="btn"
-  >New Question</LinkTo>
+  <LinkTo @route="job-posts.show.questions.new" class="btn">New Question</LinkTo>
 </div>
 
 {{#if this.model.length}}
@@ -55,7 +52,9 @@
                   class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold hover:bg-accent-200 dark:bg-accent-900 dark:text-accent-300 dark:hover:bg-accent-800"
                 >{{question.answers.length}}</LinkTo>
               {{else}}
-                <span class="text-gray-300 dark:text-gray-600 text-xs">&mdash;</span>
+                <span
+                  class="text-gray-300 dark:text-gray-600 text-xs"
+                >&mdash;</span>
               {{/if}}
             </td>
             <td class="px-4 py-3 text-center text-base">

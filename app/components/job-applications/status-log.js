@@ -202,8 +202,10 @@ export default class JobApplicationsStatusLogComponent extends Component {
     try {
       await record.destroyRecord();
       await this.args.jobApplication.reload();
-    } catch {
-      this.flashMessages.danger('Failed to delete status entry.');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to delete status entry.');
+      }
     }
   }
 }

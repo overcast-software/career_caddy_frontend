@@ -47,8 +47,10 @@ export default class ScrapesFormComponent extends Component {
       await this.args.scrape.destroyRecord();
       this.flashMessages.success('Scrape deleted');
       this.router.transitionTo('scrapes.index');
-    } catch {
-      this.flashMessages.danger('Failed to delete scrape');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to delete scrape.');
+      }
     }
   }
 }

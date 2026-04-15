@@ -1,19 +1,10 @@
-<Panel::Card>
-  <div class="flex items-center justify-between mb-3">
-    <h3 class="text-sm font-semibold text-gray-700">Answer</h3>
-    <div class="flex gap-2">
-      <button
-        type="button"
-        class="btn small"
-        {{on "click" this.copyToClipboard}}
-      >{{this.copyButtonText}}</button>
-      <LinkTo
-        @route="questions.show.answers.edit"
-        @model={{this.model}}
-        class="btn small"
-      >Edit</LinkTo>
-      <LinkTo @route="questions.show.answers" class="btn small">All Answers</LinkTo>
-    </div>
-  </div>
-  <MarkdownToHtml @markdown={{this.model.content}} />
-</Panel::Card>
+<Answers::Show @answer={{this.model}} @editRoute="questions.show.answers.edit">
+  <:actions>
+    <button
+      type="button"
+      class="btn small"
+      {{on "click" this.copyToClipboard}}
+    >{{this.copyButtonText}}</button>
+    <LinkTo @route="questions.show.answers" class="btn small">All Answers</LinkTo>
+  </:actions>
+</Answers::Show>

@@ -34,11 +34,17 @@ export default class SummariesEditController extends Controller {
   }
 
   @action deleteSummary() {
-    const allowed = confirm('Are you sure you want to delete this summary?');
-    if (!allowed) return;
-    this.model.destroyRecord().then(() => {
-      this.flashMessages.success('Summary deleted');
-      this.router.transitionTo('summaries.index');
-    });
+    if (!confirm('Are you sure you want to delete this summary?')) return;
+    this.model
+      .destroyRecord()
+      .then(() => {
+        this.flashMessages.success('Summary deleted.');
+        this.router.transitionTo('summaries.index');
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete summary.');
+        }
+      });
   }
 }

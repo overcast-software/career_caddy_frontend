@@ -40,8 +40,10 @@ export default class AdminUsersIndexController extends Controller {
     try {
       await user.destroyRecord();
       this.flashMessages.success('User deleted.');
-    } catch {
-      this.flashMessages.danger('Failed to delete user.');
+    } catch (error) {
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to delete user.');
+      }
     }
   }
 }

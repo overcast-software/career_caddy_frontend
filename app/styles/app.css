@@ -357,6 +357,7 @@ body {
 .course-main:has(.caddy-fullpage) {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .course-main:has(.caddy-fullpage) .fairway {
@@ -371,7 +372,8 @@ body {
 .caddy-fullpage {
   flex: 1;
   min-height: 0;
-  padding-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
 }
 
 /* On mobile, the desktop sidebar is hidden; chat takes full width */

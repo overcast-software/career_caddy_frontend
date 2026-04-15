@@ -8,6 +8,7 @@ const NAVIGATE_RE = /<!--\s*navigate:(\/[^\s]*)\s*-->/g;
 export default class ChatService extends Service {
   @service router;
   @service session;
+  @service store;
 
   @tracked messages = [];
   @tracked isStreaming = false;
@@ -115,6 +116,8 @@ export default class ChatService extends Service {
               this._replaceLastMessage(accumulated);
             } else if (event.type === 'navigate') {
               this.router.transitionTo(event.url);
+            } else if (event.type === 'reload') {
+              this._reloadResource(event.resource, event.id);
             } else if (event.type === 'error') {
               this._replaceLastMessage(`Error: ${event.content}`);
             }
@@ -149,6 +152,19 @@ export default class ChatService extends Service {
   clearConversation() {
     this.messages = [];
     this.conversationId = null;
+  }
+
+  _reloadResource(resource, id) {
+    if (!resource) return;
+    try {
+      if (id) {
+        this.store.findRecord(resource, id, { reload: true });
+      } else {
+        this.store.findAll(resource, { reload: true });
+      }
+    } catch {
+      // Non-critical — resource may not be on screen
+    }
   }
 
   _buildHistory() {

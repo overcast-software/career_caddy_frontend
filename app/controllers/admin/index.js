@@ -21,8 +21,9 @@ export default class ApiKeysIndexController extends Controller {
       await apiKey.destroyRecord();
       this.flashMessages.success('API key revoked successfully');
     } catch (error) {
-      this.flashMessages.danger('Failed to revoke API key');
-      console.error('Error revoking API key:', error);
+      if (error?.status !== 403) {
+        this.flashMessages.danger('Failed to revoke API key.');
+      }
     }
   }
 

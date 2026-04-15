@@ -1,10 +1,8 @@
 {{page-title "New Question"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <LinkTo
-      @route="job-applications.show"
-      class="nav-link"
-    >&larr; Back to Application</LinkTo>
+    <LinkTo @route="job-applications.show" class="nav-link">&larr; Back to
+      Application</LinkTo>
   </:subnav>
   <:main>
     <Questions::Form @question={{this.model}} />

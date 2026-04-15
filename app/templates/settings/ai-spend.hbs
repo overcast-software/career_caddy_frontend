@@ -19,7 +19,7 @@
           type="button"
           class="btn primary inline-flex items-center gap-2"
           disabled={{this.isLoading}}
-          {{on "click" this.loadData}}
+          {{on "click" this.reloadData}}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -35,11 +35,11 @@
               d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182"
             />
           </svg>
-          {{if this.isLoading "Loading\u2026" "Load"}}
+          {{if this.isLoading "Refreshing\u2026" "Refresh"}}
         </button>
       </div>
 
-      {{#if this.spendData}}
+      {{#if this.model}}
         {{! Summary cards }}
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
           <div
@@ -176,9 +176,10 @@
               <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 {{#each this.buckets as |bucket|}}
                   <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td
-                      class="px-3 py-2 whitespace-nowrap"
-                    >{{bucket.period}}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">{{format-date
+                        bucket.period
+                        "MMM D, YYYY"
+                      }}</td>
                     <td class="px-3 py-2">{{get bucket this.groupBy}}</td>
                     <td
                       class="px-3 py-2 text-right tabular-nums"
@@ -201,10 +202,6 @@
           <p class="text-sm text-gray-500 dark:text-gray-400">No usage data for
             this period.</p>
         {{/if}}
-      {{else if (not this.isLoading)}}
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Click Load to fetch AI usage data.
-        </p>
       {{/if}}
     </div>
   </:main>

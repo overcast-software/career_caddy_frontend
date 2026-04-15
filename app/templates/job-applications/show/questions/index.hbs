@@ -1,10 +1,8 @@
 <Panel::Card>
   <div class="flex items-center justify-between mb-3">
     <h3 class="panel-title">Questions</h3>
-    <LinkTo
-      @route="job-applications.show.questions.new"
-      class="btn small"
-    >New Question</LinkTo>
+    <LinkTo @route="job-applications.show.questions.new" class="btn small">New
+      Question</LinkTo>
   </div>
   {{#if this.model.length}}
     <ul class="space-y-2">

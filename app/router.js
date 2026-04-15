@@ -53,6 +53,13 @@ Router.map(function () {
         this.route('answers');
         this.route('questions', function () {
           this.route('new');
+          this.route('show', { path: '/:question_id' }, function () {
+            this.route('answers', function () {
+              this.route('new');
+              this.route('show', { path: '/:answer_id' });
+              this.route('edit', { path: '/:answer_id/edit' });
+            });
+          });
         });
         this.route('scores');
       },

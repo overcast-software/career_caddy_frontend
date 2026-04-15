@@ -14,7 +14,7 @@
     {{#if this.isSearching}}
       <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
     {{else}}
-      <Summaries::List
+      <Summaries::DetailList
         @summaries={{this.model}}
         @emptyMessage="No summaries yet."
       />

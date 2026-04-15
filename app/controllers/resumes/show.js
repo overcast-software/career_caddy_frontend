@@ -34,13 +34,19 @@ export default class ResumesShowController extends Controller {
     }
   }
 
-  @action
-  async deleteResume() {
+  @action deleteResume() {
     if (!confirm('Delete this resume? This cannot be undone.')) return;
-    await this.model.destroyRecord();
-    this.router.transitionTo('resumes').then(() => {
-      this.flashMessages.success('Resume deleted.');
-    });
+    this.model
+      .destroyRecord()
+      .then(() => {
+        this.flashMessages.success('Resume deleted.');
+        this.router.transitionTo('resumes');
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete resume.');
+        }
+      });
   }
 
   isExporting = false;

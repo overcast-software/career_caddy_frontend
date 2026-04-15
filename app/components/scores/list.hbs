@@ -8,13 +8,9 @@
               class="px-4 py-3 text-left font-semibold text-gray-600"
             >Resume</th>
           {{/unless}}
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Score</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-600">Score</th>
           {{#unless (eq @showJobPost false)}}
-            <th
-              class="px-4 py-3 text-left font-semibold text-gray-600"
-            >Job Post</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
           {{/unless}}
           {{#unless (eq @showStatus false)}}
             <th
@@ -113,10 +109,7 @@
                       (eq score.status 'pending')
                       'bg-yellow-100 text-yellow-700'
                     }}
-                    {{if
-                      (eq score.status 'failed')
-                      'bg-red-100 text-red-700'
-                    }}
+                    {{if (eq score.status 'failed') 'bg-red-100 text-red-700'}}
                     "
                 >
                   {{or score.status "unknown"}}

@@ -1,0 +1,76 @@
+<div class="space-y-4">
+  {{#each @summaries as |summary|}}
+    {{#if summary.id}}
+      <div class="rounded border border-gray-200 bg-white">
+        <div class="flow-root p-4">
+          <dl class="-my-3 divide-y divide-gray-200 text-sm">
+            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+              <dt class="font-medium text-gray-900">Summary</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2 whitespace-pre-line"
+              >{{summary.content}}</dd>
+            </div>
+
+            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+              <dt class="font-medium text-gray-900">Resume</dt>
+              <dd class="text-gray-700 sm:col-span-2">
+                {{#if summary.resume.id}}
+                  <LinkTo
+                    @route="resumes.show"
+                    @model={{summary.resume}}
+                    class="text-blue-600 hover:underline"
+                  >{{or summary.resume.name summary.resume.title}}</LinkTo>
+                {{else}}
+                  <span class="italic text-gray-400">Career Data</span>
+                {{/if}}
+              </dd>
+            </div>
+
+            {{#if summary.jobPost.id}}
+              <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+                <dt class="font-medium text-gray-900">Job Post</dt>
+                <dd class="text-gray-700 sm:col-span-2">
+                  <LinkTo
+                    @route="job-posts.show"
+                    @model={{summary.jobPost}}
+                    class="text-blue-600 hover:underline"
+                  >{{summary.jobPost.title}}</LinkTo>
+                </dd>
+              </div>
+            {{/if}}
+
+            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+              <dt class="font-medium text-gray-900">Status</dt>
+              <dd class="text-gray-700 sm:col-span-2">
+                {{#if summary.active}}
+                  <span
+                    class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
+                  >Active</span>
+                {{else}}
+                  <span
+                    class="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300/20"
+                  >Inactive</span>
+                {{/if}}
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="flex items-center gap-2 border-t border-gray-200 px-4 py-3">
+          <button
+            type="button"
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+            {{on "click" (fn this.copyToClipboard summary)}}
+          >{{if (eq this.copiedId summary.id) "Copied!" "Copy"}}</button>
+          <LinkTo
+            @route="summaries.show"
+            @model={{summary}}
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+          >View</LinkTo>
+        </div>
+      </div>
+    {{/if}}
+  {{else}}
+    <EmptyState @message={{or @emptyMessage "No summaries found."}} />
+  {{/each}}
+</div>

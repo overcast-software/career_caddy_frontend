@@ -1,0 +1,26 @@
+{{page-title this.model.content}}
+<div class="space-y-4">
+  <div class="flex items-center justify-between">
+    <LinkTo
+      @route="companies.show.questions"
+      class="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
+    >&larr; Questions</LinkTo>
+    <LinkTo
+      @route="companies.show.questions.show.answers.new"
+      class="btn small"
+    >New Answer</LinkTo>
+  </div>
+
+  <Questions::Item @question={{this.model}} />
+
+  {{outlet}}
+
+  {{#if this.showAnswersList}}
+    <Answers::List
+      @answers={{this.model.answers}}
+      @showRoute="companies.show.questions.show.answers.show"
+      @editRoute="companies.show.questions.show.answers.edit"
+      @onDelete={{this.deleteAnswer}}
+    />
+  {{/if}}
+</div>
