@@ -1,0 +1,87 @@
+{{page-title (if @score.id "Edit Score" "New Score")}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:main>
+    <form class="builder-form" {{on "submit" this.saveScore}}>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Company</label>
+          <Companies::Selector
+            @companies={{this.companies}}
+            @companyCallback={{this.updateCompany}}
+            @placeHolder="Select a company…"
+          />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Job Post</label>
+          <PowerSelect
+            @options={{this.jobPosts}}
+            @selected={{this.selectedJobPost}}
+            @onChange={{this.updateJobPost}}
+            @searchEnabled={{true}}
+            @searchField="title"
+            @placeholder={{if
+              this.selectedCompany
+              "Select a job post…"
+              "Select a company first"
+            }}
+            @disabled={{unless this.selectedCompany true}}
+            as |jobPost|
+          >
+            {{jobPost.title}}
+          </PowerSelect>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Resume</label>
+          <PowerSelect
+            @options={{this.resumes}}
+            @selected={{this.selectedResume}}
+            @onChange={{this.updateResume}}
+            @searchEnabled={{true}}
+            @searchField="name"
+            @placeholder="Career Data (no resume)"
+            @allowClear={{true}}
+            as |resume|
+          >
+            {{resume.name}}
+          </PowerSelect>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="score-value">Score</label>
+          <input
+            id="score-value"
+            type="number"
+            min="0"
+            max="100"
+            value={{this.score}}
+            {{on "input" this.updateScore}}
+            placeholder="0–100"
+          />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="explanation">Explanation</label>
+          <textarea
+            id="explanation"
+            rows="8"
+            {{on "input" this.updateExplanation}}
+          >{{this.explanation}}</textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn">Save Score</button>
+      </div>
+    </form>
+  </:main>
+</RouteLayout>

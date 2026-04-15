@@ -12,9 +12,9 @@ module('Integration | Component | scores/item', function (hooks) {
 
     await render(hbs`<Scores::Item />`);
 
-    assert.dom().includesText('score:');
-    assert.dom().includesText('Resume scored:');
-    assert.dom().includesText('Job post:');
+    assert.dom().includesText('Score');
+    assert.dom().includesText('Resume');
+    assert.dom().includesText('Job Post');
 
     // Template block usage:
     await render(hbs`

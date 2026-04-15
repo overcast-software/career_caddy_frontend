@@ -1,8 +1,6 @@
 {{page-title "Score"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
-    <Panel::Card @title="Score" @collapsible={{true}}>
-      <Scores::Item @score={{this.model}} />
-    </Panel::Card>
+    <Scores::Item @score={{this.model}} />
   </:main>
 </RouteLayout>

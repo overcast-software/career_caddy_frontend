@@ -1,31 +1,99 @@
-{{yield}}
-<h2>
-  Job post:
-  <LinkTo
-    @route="job-posts.show"
-    @model={{@score.jobPost}}
-  >{{@score.jobPost.title}}</LinkTo>
-</h2>
-<h2>
-  At
-  <LinkTo
-    @route="companies.show"
-    @model={{@score.jobPost.company}}
-  >{{@score.jobPost.company.name}}</LinkTo>
-</h2>
-<h2>
-  Resume scored:
-  {{#if @score.resume.id}}
-    <LinkTo
-      @route="resumes.show"
-      @model={{@score.resume}}
-    >{{@score.resume.name}}</LinkTo>
-  {{else}}
-    <LinkTo @route="career-data" class="italic">Career Data</LinkTo>
-  {{/if}}
-</h2>
-<h2>
-  score:
-  {{@score.score}}
-</h2>
-<MarkdownToHtml @markdown={{@score.explanation}} />
+<div class="rounded border border-gray-200 bg-white">
+  <div class="flow-root p-4">
+    <dl class="-my-3 divide-y divide-gray-200 text-sm">
+      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <dt class="font-medium text-gray-900">Job Post</dt>
+        <dd class="text-gray-700 sm:col-span-2">
+          <LinkTo
+            @route="job-posts.show"
+            @model={{@score.jobPost}}
+            class="text-blue-600 hover:underline"
+          >{{@score.jobPost.title}}</LinkTo>
+        </dd>
+      </div>
+
+      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <dt class="font-medium text-gray-900">Company</dt>
+        <dd class="text-gray-700 sm:col-span-2">
+          <LinkTo
+            @route="companies.show"
+            @model={{@score.jobPost.company}}
+            class="text-blue-600 hover:underline"
+          >{{@score.jobPost.company.name}}</LinkTo>
+        </dd>
+      </div>
+
+      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <dt class="font-medium text-gray-900">Resume</dt>
+        <dd class="text-gray-700 sm:col-span-2">
+          {{#if @score.resume.id}}
+            <LinkTo
+              @route="resumes.show"
+              @model={{@score.resume}}
+              class="text-blue-600 hover:underline"
+            >{{@score.resume.name}}</LinkTo>
+          {{else}}
+            <LinkTo
+              @route="career-data"
+              class="italic text-gray-400 hover:underline"
+            >Career Data</LinkTo>
+          {{/if}}
+        </dd>
+      </div>
+
+      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <dt class="font-medium text-gray-900">Score</dt>
+        <dd class="text-gray-700 sm:col-span-2">
+          {{#if @score.score}}
+            <span class="font-semibold">{{@score.score}}</span>
+          {{else}}
+            <span class="italic text-gray-400">Not scored</span>
+          {{/if}}
+        </dd>
+      </div>
+
+      {{#if @score.status}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Status</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            {{#if (eq @score.status "completed")}}
+              <span
+                class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
+              >Completed</span>
+            {{else if (eq @score.status "pending")}}
+              <span
+                class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20"
+              >Pending</span>
+            {{else if (eq @score.status "failed")}}
+              <span
+                class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20"
+              >Failed</span>
+            {{else}}
+              <span
+                class="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300/20"
+              >{{@score.status}}</span>
+            {{/if}}
+          </dd>
+        </div>
+      {{/if}}
+
+      {{#if @score.createdAt}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Created</dt>
+          <dd class="text-gray-700 sm:col-span-2">{{format-date
+              @score.createdAt
+            }}</dd>
+        </div>
+      {{/if}}
+
+      {{#if @score.explanation}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Explanation</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            <MarkdownToHtml @markdown={{@score.explanation}} />
+          </dd>
+        </div>
+      {{/if}}
+    </dl>
+  </div>
+</div>
