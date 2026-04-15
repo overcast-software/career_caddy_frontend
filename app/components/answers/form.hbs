@@ -39,6 +39,7 @@
       <label class="field-label" for="answer-content">Answer</label>
       <textarea
         id="answer-content"
+        rows="12"
         {{on "change" this.updateContent}}
       >{{@answer.content}}</textarea>
     </div>
@@ -55,5 +56,6 @@
       class="btn {{if this.isPolling 'primary opacity-60'}}"
       disabled={{this.isPolling}}
     >{{if this.isPolling "AI Generating…" "Save"}}</button>
+    <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
   </div>
 </form>

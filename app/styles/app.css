@@ -351,6 +351,8 @@ body {
   grid-area: chat;
   overflow-y: auto;
   border-left: 1px solid var(--border);
+  position: relative;
+  z-index: 50;
 }
 
 /* Full-page chat (/caddy): fill entire course-main area */
@@ -836,7 +838,7 @@ a.btn:active {
 .alert-box.active {
   opacity: 1;
   bottom: 0;
-  z-index: 50;
+  z-index: 40;
 }
 
 .alert.active.exiting,

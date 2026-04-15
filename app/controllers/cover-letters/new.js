@@ -37,6 +37,11 @@ export default class CoverLettersNewController extends Controller {
     this.instructions = event.target.value;
   }
 
+  @action cancel() {
+    this.model.rollbackAttributes();
+    this.router.transitionTo('cover-letters');
+  }
+
   @action saveCoverLetter() {
     if (this.model.isSaving) return;
     const resumeId = this.selectedResume?.id;

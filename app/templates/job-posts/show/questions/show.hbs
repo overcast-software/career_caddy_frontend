@@ -15,11 +15,10 @@
   {{outlet}}
 
   {{#if this.showAnswersList}}
-    <Answers::List
+    <Answers::DetailList
       @answers={{this.model.answers}}
-      @showRoute="job-posts.show.questions.show.answers.show"
       @editRoute="job-posts.show.questions.show.answers.edit"
-      @onDelete={{this.deleteAnswer}}
+      @showQuestion={{false}}
     />
   {{/if}}
 </div>

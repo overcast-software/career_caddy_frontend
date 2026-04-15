@@ -16,6 +16,7 @@ export default class SettingsIndexController extends Controller {
   @tracked links = [];
   @tracked isEditing = false;
   @tracked isSubmitting = false;
+  @tracked copiedSnippetIndex = null;
 
   @action updateField(field, event) {
     this[field] = event.target.value;
@@ -38,6 +39,20 @@ export default class SettingsIndexController extends Controller {
 
   @action removeLink(index) {
     this.links = this.links.filter((_, i) => i !== index);
+  }
+
+  @action async copySnippet(index) {
+    const link = this.links[index];
+    if (!link?.url) return;
+    try {
+      await navigator.clipboard.writeText(link.url);
+      this.copiedSnippetIndex = index;
+      setTimeout(() => {
+        this.copiedSnippetIndex = null;
+      }, 2000);
+    } catch {
+      this.flashMessages.danger('Failed to copy to clipboard.');
+    }
   }
 
   @action cancel() {

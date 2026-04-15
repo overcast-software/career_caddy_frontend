@@ -106,6 +106,15 @@ export default class AnswersForm extends Component {
     }
   }
 
+  @action cancel() {
+    this.args.answer.rollbackAttributes();
+    if (this.args.onCancel) {
+      this.args.onCancel();
+      return;
+    }
+    window.history.back();
+  }
+
   @action async toggleFavorite(answer) {
     answer.favorite = !answer.favorite;
   }

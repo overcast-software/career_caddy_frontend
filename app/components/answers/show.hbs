@@ -1,20 +1,22 @@
 <div class="rounded border border-gray-200 bg-white">
   <div class="flow-root p-4">
     <dl class="-my-3 divide-y divide-gray-200 text-sm">
-      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-        <dt class="font-medium text-gray-900">Question</dt>
-        <dd class="text-gray-700 sm:col-span-2">
-          {{#if @answer.question.id}}
-            <LinkTo
-              @route="questions.show.answers.show"
-              @models={{array @answer.question.id @answer.id}}
-              class="text-blue-600 hover:underline"
-            >{{@answer.question.content.content}}</LinkTo>
-          {{else}}
-            <span class="italic text-gray-400">No question</span>
-          {{/if}}
-        </dd>
-      </div>
+      {{#if this.showQuestion}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Question</dt>
+          <dd class="text-gray-700 sm:col-span-2">
+            {{#if @answer.question.id}}
+              <LinkTo
+                @route="questions.show.answers.show"
+                @models={{array @answer.question.id @answer.id}}
+                class="text-blue-600 hover:underline"
+              >{{@answer.question.content.content}}</LinkTo>
+            {{else}}
+              <span class="italic text-gray-400">No question</span>
+            {{/if}}
+          </dd>
+        </div>
+      {{/if}}
 
       <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
         <dt class="font-medium text-gray-900">Answer</dt>
@@ -74,10 +76,39 @@
           </dd>
         </div>
       {{/if}}
+
+      {{#if @answer.createdAt}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Created</dt>
+          <dd class="text-gray-700 sm:col-span-2">{{format-date
+              @answer.createdAt
+            }}</dd>
+        </div>
+      {{/if}}
     </dl>
   </div>
 
   <div class="flex items-center gap-2 border-t border-gray-200 px-4 py-3">
+    <button
+      type="button"
+      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+      {{on "click" this.copyToClipboard}}
+    >{{this.copyButtonText}}</button>
+    <button
+      type="button"
+      class="px-2 py-1 text-xs rounded border
+        {{if
+          @answer.favorite
+          'border-yellow-300 bg-yellow-50 text-yellow-700'
+          'border-gray-200 text-gray-600 hover:bg-gray-100'
+        }}"
+      {{on "click" this.toggleFavorite}}
+    >{{if @answer.favorite "Favorited" "Favorite"}}</button>
+    <LinkTo
+      @route={{this.answerShowRoute}}
+      @model={{@answer.id}}
+      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+    >View</LinkTo>
     {{yield to="actions"}}
     {{#if @editRoute}}
       <LinkTo

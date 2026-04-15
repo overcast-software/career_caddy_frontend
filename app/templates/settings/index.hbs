@@ -98,23 +98,25 @@
             </div>
 
             <div class="field-row">
-              <label class="field-label w-full">Links</label>
+              <label class="field-label w-full">Snippets</label>
+              <p class="text-xs text-gray-400 -mt-1 mb-1">Reusable text you can
+                copy with one click — prompts, URLs, taglines, etc.</p>
             </div>
             {{#each this.links as |link index|}}
-              <div class="field-row items-center">
+              <div class="flex items-center gap-2 col-span-full">
                 <input
                   type="text"
                   value={{link.name}}
                   placeholder="Label"
-                  aria-label="Link label"
-                  class="w-1/3 rounded border border-gray-300 px-3 py-2 text-sm"
+                  aria-label="Snippet label"
+                  class="w-1/4 rounded border border-gray-300 px-3 py-2 text-sm"
                   {{on "change" (fn this.updateLinkField index "name")}}
                 />
                 <input
-                  type="url"
+                  type="text"
                   value={{link.url}}
-                  placeholder="https://..."
-                  aria-label="Link URL"
+                  placeholder="Content to copy"
+                  aria-label="Snippet content"
                   class="flex-1 rounded border border-gray-300 px-3 py-2 text-sm"
                   {{on "change" (fn this.updateLinkField index "url")}}
                 />
@@ -130,7 +132,7 @@
                 type="button"
                 class="btn small"
                 {{on "click" this.addLink}}
-              >Add Link</button>
+              >Add Snippet</button>
             </div>
 
             <div class="form-actions">
@@ -203,22 +205,28 @@
             <div class="col-span-2">
               <dt
                 class="font-medium text-gray-500 dark:text-gray-400"
-              >Links</dt>
+              >Snippets</dt>
               <dd class="mt-1">
                 <ul class="space-y-1">
-                  {{#each this.links as |link|}}
+                  {{#each this.links as |link index|}}
                     <li class="text-sm">
                       <span
                         class="font-medium text-gray-700 dark:text-gray-300"
                       >{{link.name}}</span>
                       {{#if link.url}}
                         —
-                        <a
-                          href={{link.url}}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="text-accent-600 hover:underline dark:text-accent-400"
-                        >{{link.url}}</a>
+                        <span
+                          class="text-gray-500 dark:text-gray-400"
+                        >{{link.url}}</span>
+                        <button
+                          type="button"
+                          class="ml-1 px-2 py-0.5 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                          {{on "click" (fn this.copySnippet index)}}
+                        >{{if
+                            (eq this.copiedSnippetIndex index)
+                            "Copied!"
+                            "Copy"
+                          }}</button>
                       {{/if}}
                     </li>
                   {{/each}}

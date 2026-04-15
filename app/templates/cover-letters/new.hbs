@@ -1,12 +1,4 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
-  <:subnav>
-    <button
-      type="button"
-      class="btn"
-      disabled={{this.model.isSaving}}
-      {{on "click" this.saveCoverLetter}}
-    >Save</button>
-  </:subnav>
   <:main>
     <Panel::Card @collapsible={{true}} @title="Resume (optional)">
       <div class="field-full">
@@ -42,14 +34,21 @@
         </div>
       </Panel::Card>
       <Panel::Card>
-        <button
-          type="button"
-          class="btn primary"
-          disabled={{this.model.isSaving}}
-          {{on "click" this.saveCoverLetter}}
-        >
-          AI Craft Cover Letter
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="btn primary"
+            disabled={{this.model.isSaving}}
+            {{on "click" this.saveCoverLetter}}
+          >
+            AI Craft Cover Letter
+          </button>
+          <button
+            type="button"
+            class="btn"
+            {{on "click" this.cancel}}
+          >Cancel</button>
+        </div>
       </Panel::Card>
     {{/if}}
     <Panel::Card @collapsible={{true}}>

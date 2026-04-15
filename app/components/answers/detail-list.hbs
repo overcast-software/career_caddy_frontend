@@ -1,15 +1,12 @@
 <div class="space-y-4">
   {{#each @answers as |answer|}}
     {{#if answer.id}}
-      <Answers::Show @answer={{answer}} @editRoute={{@editRoute}}>
+      <Answers::Show
+        @answer={{answer}}
+        @editRoute={{@editRoute}}
+        @showQuestion={{@showQuestion}}
+      >
         <:actions>
-          {{#if @onToggleFavorite}}
-            <button
-              type="button"
-              class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-              {{on "click" (fn @onToggleFavorite answer)}}
-            >{{if answer.favorite "Unfavorite" "Favorite"}}</button>
-          {{/if}}
           {{#if @showRoute}}
             <LinkTo
               @route={{@showRoute}}
