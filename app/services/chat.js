@@ -9,6 +9,7 @@ export default class ChatService extends Service {
   @service router;
   @service session;
   @service store;
+  @service poller;
 
   @tracked messages = [];
   @tracked isStreaming = false;
@@ -154,17 +155,31 @@ export default class ChatService extends Service {
     this.conversationId = null;
   }
 
-  _reloadResource(resource, id) {
+  async _reloadResource(resource, id) {
     if (!resource) return;
     try {
       if (id) {
-        this.store.findRecord(resource, id, { reload: true });
+        const record = await this.store.findRecord(resource, id, {
+          reload: true,
+        });
+        this._pollIfPending(resource, record);
       } else {
-        this.store.findAll(resource, { reload: true });
+        const records = await this.store.findAll(resource, { reload: true });
+        records.forEach((record) => this._pollIfPending(resource, record));
       }
     } catch {
       // Non-critical — resource may not be on screen
     }
+  }
+
+  _pollIfPending(resource, record) {
+    const POLL_TYPES = new Set(['score', 'scrape']);
+    const TERMINAL = new Set(['completed', 'done', 'failed', 'error']);
+    if (!POLL_TYPES.has(resource)) return;
+    if (!record.status || TERMINAL.has(record.status)) return;
+    this.poller.watchRecord(record, {
+      isTerminal: (rec) => TERMINAL.has(rec.status),
+    });
   }
 
   _buildHistory() {
