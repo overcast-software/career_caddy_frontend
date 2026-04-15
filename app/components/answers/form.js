@@ -4,7 +4,6 @@ import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 
 const TERMINAL_STATUSES = ['completed', 'done', 'failed', 'error'];
-const POLL_INTERVAL_MS = 3000;
 
 export default class AnswersForm extends Component {
   @service flashMessages;
@@ -68,7 +67,6 @@ export default class AnswersForm extends Component {
         this.isPolling = true;
         this.spinner.begin({ label: 'AI is generating your answer…' });
         this.poller.watchRecord(this.args.answer, {
-          intervalMs: POLL_INTERVAL_MS,
           isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
           onStop: (rec) => {
             this.isPolling = false;

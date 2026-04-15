@@ -3,7 +3,6 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 
 const TERMINAL_STATUSES = ['completed', 'done', 'failed', 'error'];
-const POLL_INTERVAL_MS = 3000;
 
 export default class ScrapesShowController extends Controller {
   @service spinner;
@@ -24,7 +23,6 @@ export default class ScrapesShowController extends Controller {
     this.flashMessages.info('Scrape in progress — waiting for results…');
     this.spinner.begin({ label: 'Scraping…' });
     this.poller.watchRecord(scrape, {
-      intervalMs: POLL_INTERVAL_MS,
       isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
       onUpdate: (rec) => this._refreshStatuses(rec),
       onStop: async (rec) => {

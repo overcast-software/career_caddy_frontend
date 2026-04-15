@@ -4,7 +4,6 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 const TERMINAL_STATUSES = ['completed', 'done', 'failed', 'error'];
-const POLL_INTERVAL_MS = 3000;
 
 export default class JobPostsShowQuestionsIndexController extends Controller {
   @service store;
@@ -79,7 +78,6 @@ export default class JobPostsShowQuestionsIndexController extends Controller {
       if (this.useAI) {
         this.isPollingAnswerId = saved.id;
         this.poller.watchRecord(saved, {
-          intervalMs: POLL_INTERVAL_MS,
           isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
           onStop: async (rec) => {
             this.isPollingAnswerId = null;

@@ -3,7 +3,6 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 
 const TERMINAL_STATUSES = ['completed', 'done', 'failed', 'error'];
-const POLL_INTERVAL_MS = 3000;
 
 export default class CoverLettersShowController extends Controller {
   @service flashMessages;
@@ -23,7 +22,6 @@ export default class CoverLettersShowController extends Controller {
     if (coverLetter.status && !TERMINAL_STATUSES.includes(coverLetter.status)) {
       this.flashMessages.info('Generating cover letter — waiting for results…');
       this.poller.watchRecord(coverLetter, {
-        intervalMs: POLL_INTERVAL_MS,
         isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
         onStop: (rec) => {
           if (rec.status === 'failed' || rec.status === 'error') {
