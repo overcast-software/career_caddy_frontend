@@ -1,0 +1,42 @@
+{{#each @answers as |answer|}}
+  {{#if answer.id}}
+    <div class="panel-card flex items-start justify-between gap-4">
+      {{#if @onToggleFavorite}}
+        <button
+          type="button"
+          class="btn favorite {{if answer.favorite 'favorited'}}"
+          data-tooltip="Favorited answers appear in Career Data"
+          {{on "click" (fn @onToggleFavorite answer)}}
+        >★</button>
+      {{/if}}
+      <div class="flex-1 min-w-0">
+        <MarkdownToHtml @markdown={{answer.content}} />
+      </div>
+      <div class="flex gap-1.5 shrink-0">
+        {{#if @showRoute}}
+          <LinkTo
+            @route={{@showRoute}}
+            @model={{answer.id}}
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+          >View</LinkTo>
+        {{/if}}
+        {{#if @editRoute}}
+          <LinkTo
+            @route={{@editRoute}}
+            @model={{answer.id}}
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+          >Edit</LinkTo>
+        {{/if}}
+        {{#if @onDelete}}
+          <button
+            type="button"
+            class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
+            {{on "click" (fn @onDelete answer)}}
+          >Delete</button>
+        {{/if}}
+      </div>
+    </div>
+  {{/if}}
+{{else}}
+  <p class="text-sm text-gray-400 text-center py-4">{{or @emptyMessage "No answers yet."}}</p>
+{{/each}}

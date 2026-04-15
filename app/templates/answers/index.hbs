@@ -16,35 +16,12 @@
     {{#if this.isSearching}}
       <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
     {{else}}
-      {{#each this.model as |answer|}}
-        <Panel::Card>
-          <div class="flex items-start gap-2">
-            <button
-              type="button"
-              class="btn favorite {{if answer.favorite 'favorited'}}"
-              data-tooltip="Favorited answers appear in Career Data"
-              {{on "click" (fn this.toggleFavorite answer)}}
-            >★</button>
-            <div class="flex-1">
-              <p>{{answer.content}}</p>
-              <div class="flex gap-2 mt-2">
-                <LinkTo
-                  @route="answers.edit"
-                  @model={{answer}}
-                  class="btn small"
-                >edit</LinkTo>
-                <LinkTo
-                  @route="questions.show.answers.show"
-                  @models={{array answer.question.id answer.id}}
-                  class="btn small"
-                >show</LinkTo>
-              </div>
-            </div>
-          </div>
-        </Panel::Card>
-      {{else}}
-        <EmptyState @message="No answers found." />
-      {{/each}}
+      <Answers::List
+        @answers={{this.model}}
+        @showRoute="answers.show"
+        @editRoute="answers.edit"
+        @onToggleFavorite={{this.toggleFavorite}}
+      />
       <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
         <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
       </InfinityLoader>
