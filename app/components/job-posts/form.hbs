@@ -34,6 +34,16 @@
     </PowerSelectWithCreate>
   </div>
 
+  <div class="field">
+    <label class="field-label" for="posted-date">Posted Date</label>
+    <input
+      id="posted-date"
+      type="date"
+      value={{format-date @jobPost.postedDate}}
+      {{on "change" (fn this.updateDateField "postedDate")}}
+    />
+  </div>
+
   <div class="field-full">
     <label class="field-label" for="description">Description</label>
     <textarea

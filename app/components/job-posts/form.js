@@ -32,6 +32,11 @@ export default class JobPostsFormComponent extends Component {
   }
 
   @action
+  updateDateField(field, event) {
+    this.args.jobPost[field] = event.target.valueAsDate ?? null;
+  }
+
+  @action
   addCompanyToJobPost(companyName) {
     const company = this.store.createRecord('company', { name: companyName });
     this._selectedCompany = company;
@@ -63,16 +68,20 @@ export default class JobPostsFormComponent extends Component {
   }
 
   @action
-  async submitDelete(event) {
+  submitDelete(event) {
     event.preventDefault();
-    try {
-      await this.args.jobPost.destroyRecord();
-      this.flashMessages.success('Job post deleted.');
-      this.router.transitionTo('job-posts.index');
-    } catch (error) {
-      if (error?.status !== 403) {
-        this.flashMessages.danger('Failed to delete job post.');
-      }
-    }
+    if (!confirm('Delete this job post?')) return;
+    this.args.jobPost
+      .destroyRecord()
+      .then(() => {
+        this.args.jobPost.unloadRecord();
+        this.flashMessages.success('Job post deleted.');
+        this.router.transitionTo('job-posts.index');
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete job post.');
+        }
+      });
   }
 }
