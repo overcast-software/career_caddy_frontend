@@ -98,7 +98,10 @@
 
     <div class="form-actions">
       {{yield}}
-      <button type="submit" class="btn">Save</button>
+      <button type="submit" class="btn primary">Save</button>
+      {{#if @cancel}}
+        <button type="button" class="btn" {{on "click" @cancel}}>Cancel</button>
+      {{/if}}
     </div>
   </form>
 </Panel::Card>

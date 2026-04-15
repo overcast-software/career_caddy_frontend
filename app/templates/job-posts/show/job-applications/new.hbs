@@ -1,13 +1,13 @@
 {{page-title "New Application"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <button type="button" class="btn" {{on "click" this.save}}>Save</button>
-    <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
+    new application
   </:subnav>
   <:main>
     <JobApplications::Edit
-      @jobApplication={{this.jobApplication}}
-      @resumes={{this.resumes}}
+      @jobApplication={{this.model}}
+      @save={{this.save}}
+      @cancel={{this.cancel}}
     />
   </:main>
 </RouteLayout>

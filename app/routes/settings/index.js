@@ -10,6 +10,7 @@ export default class SettingsIndexRoute extends Route {
     controller.linkedin = model.linkedin ?? '';
     controller.github = model.github ?? '';
     controller.address = model.address ?? '';
+    controller.links = Array.isArray(model.links) ? model.links.map((l) => ({ ...l })) : [];
     controller.isEditing = false;
   }
 }

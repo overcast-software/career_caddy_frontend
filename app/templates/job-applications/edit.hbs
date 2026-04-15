@@ -1,18 +1,17 @@
 {{page-title "Edit"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <button {{on "click" this.save}} class="btn" type="button">Save</button>
-    <button {{on "click" this.cancel}} class="btn" type="button">Cancel</button>
+    edit application
   </:subnav>
   <:main>
     <JobApplications::Edit
-      @jobApplication={{this.model.jobApplication}}
-      @resumes={{this.model.resumes}}
-      @coverLetters={{this.model.coverLetters}}
+      @jobApplication={{this.model}}
+      @save={{this.save}}
+      @cancel={{this.cancel}}
     />
     <div class="panel-card mt-4">
       <JobApplications::StatusLog
-        @jobApplication={{this.model.jobApplication}}
+        @jobApplication={{this.model}}
       />
     </div>
   </:main>

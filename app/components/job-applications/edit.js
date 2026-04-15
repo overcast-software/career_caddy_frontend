@@ -15,11 +15,11 @@ export default class JobApplicationsEdit extends Component {
   @tracked disableCompanySelector = false;
 
   get resumes() {
-    return this.args.resumes || [];
+    return this.store.peekAll('resume');
   }
 
   get coverLetters() {
-    return this.args.coverLetters || [];
+    return this.store.peekAll('cover-letter');
   }
 
   @action updateNotes(event) {
@@ -49,6 +49,10 @@ export default class JobApplicationsEdit extends Component {
 
   @action async saveApplication(event) {
     event?.preventDefault();
+    if (this.args.save) {
+      this.args.save();
+      return;
+    }
     try {
       await this.jobApplication.save();
       this.flashMessages.success('Application saved.');

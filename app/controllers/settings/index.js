@@ -13,6 +13,7 @@ export default class SettingsIndexController extends Controller {
   @tracked linkedin = '';
   @tracked github = '';
   @tracked address = '';
+  @tracked links = [];
   @tracked isEditing = false;
   @tracked isSubmitting = false;
 
@@ -24,6 +25,21 @@ export default class SettingsIndexController extends Controller {
     this.isEditing = true;
   }
 
+  @action addLink() {
+    this.links = [...this.links, { name: '', url: '' }];
+  }
+
+  @action updateLinkField(index, field, event) {
+    const updated = this.links.map((link, i) =>
+      i === index ? { ...link, [field]: event.target.value } : link,
+    );
+    this.links = updated;
+  }
+
+  @action removeLink(index) {
+    this.links = this.links.filter((_, i) => i !== index);
+  }
+
   @action cancel() {
     const user = this.model;
     this.firstName = user.firstName ?? '';
@@ -33,6 +49,7 @@ export default class SettingsIndexController extends Controller {
     this.linkedin = user.linkedin ?? '';
     this.github = user.github ?? '';
     this.address = user.address ?? '';
+    this.links = Array.isArray(user.links) ? user.links.map((l) => ({ ...l })) : [];
     this.isEditing = false;
   }
 
@@ -50,6 +67,7 @@ export default class SettingsIndexController extends Controller {
     user.linkedin = this.linkedin;
     user.github = this.github;
     user.address = this.address;
+    user.links = this.links.filter((l) => l.name || l.url);
 
     try {
       await user.save();

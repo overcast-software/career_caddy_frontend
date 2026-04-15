@@ -15,10 +15,14 @@
 </h2>
 <h2>
   Resume scored:
-  <LinkTo
-    @route="resumes.show"
-    @model={{@score.resume}}
-  >{{@score.resume.name}}</LinkTo>
+  {{#if @score.resume.id}}
+    <LinkTo
+      @route="resumes.show"
+      @model={{@score.resume}}
+    >{{@score.resume.name}}</LinkTo>
+  {{else}}
+    <LinkTo @route="career-data" class="italic">Career Data</LinkTo>
+  {{/if}}
 </h2>
 <h2>
   score:

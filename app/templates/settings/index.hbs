@@ -7,7 +7,7 @@
     <LinkTo @route="settings.ai-spend" class="nav-link">AI Spend</LinkTo>
   </:subnav>
   <:main>
-    <div class="panel-card max-w-lg">
+    <div class="panel-card">
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-xl font-semibold">Profile</h1>
         {{#unless this.isEditing}}
@@ -21,7 +21,7 @@
 
       {{#if this.isEditing}}
         <fieldset disabled={{this.isSubmitting}}>
-          <form class="builder-form" {{on "submit" this.save}}>
+          <form class="builder-form two-col" {{on "submit" this.save}}>
             <div class="field">
               <label class="field-label" for="settings-first-name">First name</label>
               <input
@@ -87,7 +87,7 @@
               />
             </div>
 
-            <div class="field">
+            <div class="field-full">
               <label class="field-label" for="settings-address">Address</label>
               <textarea
                 id="settings-address"
@@ -95,6 +95,40 @@
                 value={{this.address}}
                 {{on "input" (fn this.updateField "address")}}
               ></textarea>
+            </div>
+
+            <div class="field-row">
+              <label class="field-label w-full">Links</label>
+            </div>
+            {{#each this.links as |link index|}}
+              <div class="field-row items-center">
+                <input
+                  type="text"
+                  value={{link.name}}
+                  placeholder="Label"
+                  class="w-1/3 rounded border border-gray-300 px-3 py-2 text-sm"
+                  {{on "change" (fn this.updateLinkField index "name")}}
+                />
+                <input
+                  type="url"
+                  value={{link.url}}
+                  placeholder="https://..."
+                  class="flex-1 rounded border border-gray-300 px-3 py-2 text-sm"
+                  {{on "change" (fn this.updateLinkField index "url")}}
+                />
+                <button
+                  type="button"
+                  class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50 shrink-0"
+                  {{on "click" (fn this.removeLink index)}}
+                >Remove</button>
+              </div>
+            {{/each}}
+            <div class="field-row">
+              <button
+                type="button"
+                class="btn small"
+                {{on "click" this.addLink}}
+              >Add Link</button>
             </div>
 
             <div class="form-actions">
@@ -110,59 +144,58 @@
           </form>
         </fieldset>
       {{else}}
-        <dl class="space-y-4 text-sm">
+        <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
           <div>
             <dt class="font-medium text-gray-500 dark:text-gray-400">Name</dt>
-            <dd
-              class="mt-1 text-gray-900 dark:text-gray-100"
-            >{{this.model.name}}</dd>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{this.model.name}}</dd>
           </div>
           <div>
-            <dt
-              class="font-medium text-gray-500 dark:text-gray-400"
-            >Username</dt>
-            <dd
-              class="mt-1 text-gray-900 dark:text-gray-100"
-            >{{this.model.username}}</dd>
+            <dt class="font-medium text-gray-500 dark:text-gray-400">Username</dt>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{this.model.username}}</dd>
           </div>
           <div>
             <dt class="font-medium text-gray-500 dark:text-gray-400">Email</dt>
-            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
-                this.model.email
-                "—"
-              }}</dd>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or this.model.email "—"}}</dd>
           </div>
           <div>
             <dt class="font-medium text-gray-500 dark:text-gray-400">Phone</dt>
-            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
-                this.model.phone
-                "—"
-              }}</dd>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or this.model.phone "—"}}</dd>
           </div>
           <div>
-            <dt
-              class="font-medium text-gray-500 dark:text-gray-400"
-            >LinkedIn</dt>
-            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
-                this.model.linkedin
-                "—"
-              }}</dd>
+            <dt class="font-medium text-gray-500 dark:text-gray-400">LinkedIn</dt>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100 truncate">{{or this.model.linkedin "—"}}</dd>
           </div>
           <div>
             <dt class="font-medium text-gray-500 dark:text-gray-400">GitHub</dt>
-            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
-                this.model.github
-                "—"
-              }}</dd>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100 truncate">{{or this.model.github "—"}}</dd>
           </div>
-          <div>
-            <dt
-              class="font-medium text-gray-500 dark:text-gray-400"
-            >Address</dt>
-            <dd
-              class="mt-1 text-gray-900 dark:text-gray-100 whitespace-pre-line"
-            >{{or this.model.address "—"}}</dd>
+          <div class="col-span-2">
+            <dt class="font-medium text-gray-500 dark:text-gray-400">Address</dt>
+            <dd class="mt-1 text-gray-900 dark:text-gray-100 whitespace-pre-line">{{or this.model.address "—"}}</dd>
           </div>
+          {{#if this.links.length}}
+            <div class="col-span-2">
+              <dt class="font-medium text-gray-500 dark:text-gray-400">Links</dt>
+              <dd class="mt-1">
+                <ul class="space-y-1">
+                  {{#each this.links as |link|}}
+                    <li class="text-sm">
+                      <span class="font-medium text-gray-700 dark:text-gray-300">{{link.name}}</span>
+                      {{#if link.url}}
+                        —
+                        <a
+                          href={{link.url}}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="text-accent-600 hover:underline dark:text-accent-400"
+                        >{{link.url}}</a>
+                      {{/if}}
+                    </li>
+                  {{/each}}
+                </ul>
+              </dd>
+            </div>
+          {{/if}}
         </dl>
       {{/if}}
     </div>

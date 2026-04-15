@@ -50,7 +50,9 @@
                   {{score.resume.title}}
                 </LinkTo>
               {{else}}
-                <span class="text-gray-400">—</span>
+                <LinkTo @route="career-data" class="text-gray-500 italic hover:text-gray-700 dark:hover:text-gray-300">
+                  Career Data
+                </LinkTo>
               {{/if}}
             </td>
             <td class="px-4 py-3">

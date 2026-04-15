@@ -99,7 +99,7 @@ export default class JobApplicationsNewController extends Controller {
         this.flashMessages.success('Application saved.');
         return app;
       })
-      .then((app) => this.router.transitionTo('job-applications.show', app))
+      .then((app) => this.router.transitionTo('job-applications.show', app.id))
       .catch((error) => this.flashMessages.danger(error));
   }
 

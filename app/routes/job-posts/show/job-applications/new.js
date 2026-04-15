@@ -6,16 +6,12 @@ export default class JobPostsShowJobApplicationsNewRoute extends Route {
 
   async model() {
     const { job_post_id } = this.paramsFor('job-posts.show');
-    const [jobApplication, resumes] = await Promise.all([
-      Promise.resolve(
-        this.store.createRecord('job-application', {
-          appliedAt: new Date(),
-          status: 'Applied',
-        }),
-      ),
-      this.store.query('resume', { slim: 1 }),
-    ]);
-    jobApplication.jobPost = this.store.peekRecord('job-post', job_post_id);
-    return { jobApplication, resumes };
+    await this.store.query('resume', { slim: 1 });
+    const jobPost = this.store.peekRecord('job-post', job_post_id);
+    return this.store.createRecord('job-application', {
+      appliedAt: new Date(),
+      status: 'Applied',
+      jobPost,
+    });
   }
 }
