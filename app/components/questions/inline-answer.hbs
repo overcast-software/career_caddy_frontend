@@ -1,0 +1,100 @@
+<form {{on "submit" this.submit}}>
+  <div class="flex flex-col gap-3">
+
+    <div class="flex items-center gap-2">
+      <span
+        class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+      >Answering:</span>
+      <span
+        class="text-sm text-gray-700 dark:text-gray-300 italic"
+      >{{@question.content}}</span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="px-3 py-1.5 text-xs rounded border font-medium
+          {{if
+            this.useAI
+            'bg-accent-600 border-accent-600 text-white hover:bg-accent-700'
+            'border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
+          }}"
+        disabled={{this.isPolling}}
+        {{on "click" this.toggleAI}}
+      >
+        {{if this.useAI "✓ Ask AI" "Ask AI"}}
+      </button>
+      {{#if this.isPolling}}
+        <span
+          class="text-xs text-accent-500 italic flex items-center gap-1"
+        >
+          <svg
+            class="animate-spin size-3"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            ></path>
+          </svg>
+          AI is generating…
+        </span>
+      {{/if}}
+    </div>
+
+    {{#if this.useAI}}
+      <div class="flex flex-col gap-1">
+        <label
+          for="additional-prompt"
+          class="text-xs font-medium text-gray-500 dark:text-gray-400"
+        >Additional context for AI (optional)</label>
+        <textarea
+          id="additional-prompt"
+          class="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-300 focus:border-accent-400 resize-y dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-accent-600 dark:focus:border-accent-500"
+          rows="2"
+          placeholder="e.g. Emphasize my background in distributed systems…"
+          {{on "input" this.updateAdditionalPrompt}}
+        >{{this.additionalPrompt}}</textarea>
+      </div>
+    {{else}}
+      <div class="flex flex-col gap-1">
+        <label
+          for="answer-content"
+          class="text-xs font-medium text-gray-500 dark:text-gray-400"
+        >Your answer</label>
+        <textarea
+          id="answer-content"
+          class="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-300 focus:border-accent-400 resize-y dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-accent-600 dark:focus:border-accent-500"
+          rows="4"
+          placeholder="Write your answer here…"
+          {{on "input" this.updateAnswerContent}}
+        >{{this.answerContent}}</textarea>
+      </div>
+    {{/if}}
+
+    <div class="flex items-center gap-2">
+      <button
+        type="submit"
+        class="btn primary"
+        disabled={{this.isPolling}}
+      >Save</button>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" @onCancel}}
+      >Cancel</button>
+    </div>
+
+  </div>
+</form>
