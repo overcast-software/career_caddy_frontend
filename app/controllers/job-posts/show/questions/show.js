@@ -15,29 +15,21 @@ export default class JobPostsShowQuestionsShowController extends Controller {
     );
   }
 
-  @action onAnswerSave() {
-    this.store.findRecord('question', this.model.question.id, {
-      include: 'answers',
-      reload: true,
-    });
-    this.router.transitionTo(
-      'job-posts.show.questions.show',
-      this.model.jobPost,
-      this.model.question,
-    );
-  }
-
-  @action async deleteAnswer(answer) {
+  @action deleteAnswer(answer) {
     if (!window.confirm('Delete this answer?')) return;
-    try {
-      await answer.destroyRecord();
-      this.flashMessages.success('Answer deleted.');
-      await this.store.findRecord('question', this.model.question.id, {
-        include: 'answers',
-        reload: true,
+    answer
+      .destroyRecord()
+      .then(() => {
+        this.flashMessages.success('Answer deleted.');
+        this.store.findRecord('question', this.model.id, {
+          include: 'answers',
+          reload: true,
+        });
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete answer.');
+        }
       });
-    } catch {
-      this.flashMessages.danger('Failed to delete answer.');
-    }
   }
 }

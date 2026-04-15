@@ -5,15 +5,9 @@ export default class JobApplicationsShowQuestionsShowRoute extends Route {
   @service store;
 
   async model({ question_id }) {
-    const { application_id } = this.paramsFor('job-applications.show');
-    const jobApplication = this.store.peekRecord(
-      'job-application',
-      application_id,
-    );
-    const question = await this.store.findRecord('question', question_id, {
+    return await this.store.findRecord('question', question_id, {
       include: 'answers',
+      reload: true,
     });
-    const answers = await question.answers;
-    return { jobApplication, question, answers };
   }
 }

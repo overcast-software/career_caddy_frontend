@@ -1,45 +1,24 @@
-<Panel::Card>
-  <div class="space-y-4">
-    <div class="flex items-center justify-between">
-      <LinkTo
-        @route="job-applications.show.questions"
-        @model={{this.model.jobApplication}}
-        class="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
-      >← Questions</LinkTo>
-      <LinkTo
-        @route="job-applications.show.questions.show.answers.new"
-        class="btn small"
-      >New Answer</LinkTo>
-    </div>
-
-    <p
-      class="text-sm font-medium text-gray-900"
-    >{{this.model.question.content}}</p>
-
-    {{outlet}}
-
-    {{#each this.model.answers as |answer|}}
-      <div
-        class="flex items-start justify-between gap-4 py-3 border-t border-gray-100"
-      >
-        <div class="flex-1 min-w-0">
-          <MarkdownToHtml @markdown={{answer.content}} />
-        </div>
-        <div class="flex gap-1.5 shrink-0">
-          <LinkTo
-            @route="job-applications.show.questions.show.answers.edit"
-            @model={{answer}}
-            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-          >Edit</LinkTo>
-          <button
-            type="button"
-            class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
-            {{on "click" (fn this.deleteAnswer answer)}}
-          >Delete</button>
-        </div>
-      </div>
-    {{else}}
-      <p class="text-sm text-gray-400 text-center py-4">No answers yet.</p>
-    {{/each}}
+<div class="space-y-4">
+  <div class="flex items-center justify-between">
+    <LinkTo
+      @route="job-applications.show.questions"
+      class="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
+    >&larr; Questions</LinkTo>
+    <LinkTo
+      @route="job-applications.show.questions.show.answers.new"
+      class="btn small"
+    >New Answer</LinkTo>
   </div>
-</Panel::Card>
+
+  <Questions::Item @question={{this.model}} />
+
+  {{outlet}}
+
+  {{#if this.showAnswersList}}
+    <Answers::List
+      @answers={{this.model.answers}}
+      @editRoute="job-applications.show.questions.show.answers.edit"
+      @onDelete={{this.deleteAnswer}}
+    />
+  {{/if}}
+</div>

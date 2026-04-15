@@ -5,14 +5,7 @@ export default class JobPostsShowQuestionsShowAnswersNewRoute extends Route {
   @service store;
 
   model() {
-    const { job_post_id } = this.paramsFor('job-posts.show');
-    const { question_id } = this.paramsFor('job-posts.show.questions.show');
-    const jobPost = this.store.peekRecord('job-post', job_post_id);
-    const question = this.store.peekRecord('question', question_id);
-    return {
-      answer: this.store.createRecord('answer', { question }),
-      jobPost,
-      question,
-    };
+    const question = this.modelFor('job-posts.show.questions.show');
+    return this.store.createRecord('answer', { question });
   }
 }

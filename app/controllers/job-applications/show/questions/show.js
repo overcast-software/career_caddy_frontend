@@ -7,29 +7,29 @@ export default class JobApplicationsShowQuestionsShowController extends Controll
   @service flashMessages;
   @service store;
 
-  @action onAnswerSave() {
-    this.store.findRecord('question', this.model.question.id, {
-      include: 'answers',
-      reload: true,
-    });
-    this.router.transitionTo(
-      'job-applications.show.questions.show',
-      this.model.jobApplication,
-      this.model.question,
+  get showAnswersList() {
+    const route = this.router.currentRouteName;
+    return (
+      route === 'job-applications.show.questions.show' ||
+      route === 'job-applications.show.questions.show.index'
     );
   }
 
-  @action async deleteAnswer(answer) {
+  @action deleteAnswer(answer) {
     if (!window.confirm('Delete this answer?')) return;
-    try {
-      await answer.destroyRecord();
-      this.flashMessages.success('Answer deleted.');
-      await this.store.findRecord('question', this.model.question.id, {
-        include: 'answers',
-        reload: true,
+    answer
+      .destroyRecord()
+      .then(() => {
+        this.flashMessages.success('Answer deleted.');
+        this.store.findRecord('question', this.model.id, {
+          include: 'answers',
+          reload: true,
+        });
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to delete answer.');
+        }
       });
-    } catch {
-      this.flashMessages.danger('Failed to delete answer.');
-    }
   }
 }

@@ -49,6 +49,7 @@
       @model={{@answer}}
       @onToggle={{fn this.toggleFavorite @answer}}
     />
+    {{yield to="actions"}}
     <button
       type="submit"
       class="btn {{if this.isPolling 'primary opacity-60'}}"
@@ -56,4 +57,3 @@
     >{{if this.isPolling "AI Generating…" "Save"}}</button>
   </div>
 </form>
-{{yield}}

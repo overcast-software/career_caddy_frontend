@@ -4,28 +4,14 @@
     answer edit
   </:subnav>
   <:main>
-    <form class="builder-form" {{on "submit" this.saveAnswer}}>
-      <p class="muted">{{this.model.question.content.content}}</p>
-      <div class="field-full">
-        <label class="field-label" for="answer-content">Content</label>
-        <textarea
-          id="answer-content"
-          {{on "change" this.updateContent}}
-          rows="{{this.textareaRows}}"
-        >{{this.model.content}}</textarea>
-      </div>
-      <div class="form-actions">
-        <Buttons::Favorite
-          @model={{this.model}}
-          @onToggle={{this.toggleFavorite}}
-        />
-        <button type="submit" class="btn">Save</button>
+    <Answers::Form @answer={{this.model}} @showQuestion={{true}}>
+      <:actions>
         <button
           type="button"
           class="btn danger"
           {{on "click" this.deleteAnswer}}
         >Delete</button>
-      </div>
-    </form>
+      </:actions>
+    </Answers::Form>
   </:main>
 </RouteLayout>
