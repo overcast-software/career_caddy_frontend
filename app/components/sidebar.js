@@ -22,7 +22,8 @@ export default class SidebarComponent extends Component {
     if (user.links) {
       const links = Array.isArray(user.links) ? user.links : [];
       links.forEach((link) => {
-        if (link.url) items.push({ label: link.name || link.url, value: link.url });
+        if (link.url)
+          items.push({ label: link.name || link.url, value: link.url });
       });
     }
     return items;

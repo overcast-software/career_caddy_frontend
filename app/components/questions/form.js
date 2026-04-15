@@ -232,7 +232,10 @@ export default class QuestionsFormComponent extends Component {
         this.selectedJobPost.id,
       );
     } else if (this.selectedCompany) {
-      this.router.transitionTo('companies.show.answers', this.selectedCompany.id);
+      this.router.transitionTo(
+        'companies.show.answers',
+        this.selectedCompany.id,
+      );
     } else {
       this.router.transitionTo('questions.index');
     }

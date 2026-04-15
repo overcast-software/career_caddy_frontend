@@ -69,7 +69,11 @@
       {{#if this.hasLockedContext}}
         <input
           type="text"
-          value={{if this.selectedJobAppOption.label this.selectedJobAppOption.label "None"}}
+          value={{if
+            this.selectedJobAppOption.label
+            this.selectedJobAppOption.label
+            "None"
+          }}
           disabled="true"
           aria-label="Job Application"
         />

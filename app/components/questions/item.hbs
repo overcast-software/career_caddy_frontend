@@ -1,16 +1,26 @@
 <div class="panel-card">
-  <p class="text-sm font-medium text-gray-900 whitespace-pre-wrap">{{@question.content}}</p>
+  <p
+    class="text-sm font-medium text-gray-900 whitespace-pre-wrap"
+  >{{@question.content}}</p>
   <div class="mt-2 text-xs text-gray-500 flex flex-wrap gap-x-3">
     {{#if @question.company.name}}
       <span>
-        <LinkTo @route="companies.show" @model={{@question.company.id}} class="hover:text-gray-700">
+        <LinkTo
+          @route="companies.show"
+          @model={{@question.company.id}}
+          class="hover:text-gray-700"
+        >
           {{@question.company.name}}
         </LinkTo>
       </span>
     {{/if}}
     {{#if @question.jobPost.title}}
       <span>
-        <LinkTo @route="job-posts.show" @model={{@question.jobPost.id}} class="hover:text-gray-700">
+        <LinkTo
+          @route="job-posts.show"
+          @model={{@question.jobPost.id}}
+          class="hover:text-gray-700"
+        >
           {{@question.jobPost.title}}
         </LinkTo>
       </span>

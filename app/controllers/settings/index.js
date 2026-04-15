@@ -49,7 +49,9 @@ export default class SettingsIndexController extends Controller {
     this.linkedin = user.linkedin ?? '';
     this.github = user.github ?? '';
     this.address = user.address ?? '';
-    this.links = Array.isArray(user.links) ? user.links.map((l) => ({ ...l })) : [];
+    this.links = Array.isArray(user.links)
+      ? user.links.map((l) => ({ ...l }))
+      : [];
     this.isEditing = false;
   }
 

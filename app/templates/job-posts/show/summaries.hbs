@@ -8,11 +8,8 @@
       as |resume|
     >{{or resume.name resume.title}}</PowerSelect>
   </div>
-  <button
-    type="button"
-    class="btn shrink-0"
-    {{on "click" this.createSummary}}
-  >+ New Summary</button>
+  <button type="button" class="btn shrink-0" {{on "click" this.createSummary}}>+
+    New Summary</button>
 </div>
 
 {{#if this.model.summaries.length}}

@@ -630,9 +630,10 @@
         <ul class="mt-1 space-y-1 pl-11">
           {{#each this.clipboardItems as |item|}}
             <li>
-              <button
-                type="button"
-                class="w-full text-left block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              {{! template-lint-disable no-nested-interactive }}
+              <a
+                href="#"
+                class="w-full text-left block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 cursor-pointer"
                 {{on "click" (fn this.copyToClipboard item)}}
               >
                 {{#if (eq this.copiedField item.label)}}
@@ -640,7 +641,7 @@
                 {{else}}
                   {{item.label}}
                 {{/if}}
-              </button>
+              </a>
             </li>
           {{/each}}
         </ul>

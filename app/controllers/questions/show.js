@@ -18,10 +18,7 @@ export default class QuestionsShowController extends Controller {
   @action newQuestion() {
     const jobAppId = this.model.get('jobApplication.id');
     if (jobAppId) {
-      this.router.transitionTo(
-        'job-applications.show.questions.new',
-        jobAppId,
-      );
+      this.router.transitionTo('job-applications.show.questions.new', jobAppId);
       return;
     }
     const jobPostId = this.model.get('jobPost.id');
