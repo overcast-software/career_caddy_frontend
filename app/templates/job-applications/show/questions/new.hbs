@@ -3,14 +3,10 @@
   <:subnav>
     <LinkTo
       @route="job-applications.show"
-      @model={{this.model.jobApplication}}
       class="nav-link"
-    >← Back to Application</LinkTo>
+    >&larr; Back to Application</LinkTo>
   </:subnav>
   <:main>
-    <Questions::Form
-      @question={{this.model.question}}
-      @jobApplication={{this.model.jobApplication}}
-    />
+    <Questions::Form @question={{this.model}} />
   </:main>
 </RouteLayout>

@@ -5,12 +5,11 @@ export default class JobPostsShowSummariesRoute extends Route {
   @service store;
 
   async model() {
-    const { job_post_id } = this.paramsFor('job-posts.show');
-    const jobPost = this.store.peekRecord('job-post', job_post_id);
+    const jobPost = this.modelFor('job-posts.show');
     const [summaries] = await Promise.all([
       jobPost.summaries,
       this.store.query('resume', { slim: 1 }),
     ]);
-    return { jobPost, summaries };
+    return summaries;
   }
 }

@@ -7,7 +7,6 @@ const CAREER_DATA_OPTION = { id: '0', name: 'Career Data (internal)' };
 
 export default class JobPostsShowJobApplicationsIndexController extends Controller {
   @service store;
-  @service router;
   @service flashMessages;
 
   @tracked selectedResume = CAREER_DATA_OPTION;
@@ -16,10 +15,6 @@ export default class JobPostsShowJobApplicationsIndexController extends Controll
     const all = this.store.peekAll('resume');
     if (!all?.length) return [CAREER_DATA_OPTION];
     return [CAREER_DATA_OPTION, ...Array.from(all)];
-  }
-
-  get jobPost() {
-    return this.model.jobPost;
   }
 
   @action selectResume(resume) {

@@ -4,26 +4,11 @@
     <LinkTo
       class="btn small"
       @route="questions.show.answers.new"
-      @model={{this.model.question}}
     >New Answer</LinkTo>
   </div>
-  {{#each this.model.answers as |answer|}}
-    <div class="panel-card">
-      <MarkdownToHtml @markdown={{answer.content}} />
-      <div class="flex gap-2 mt-2">
-        <LinkTo
-          @route="questions.show.answers.show"
-          @model={{answer}}
-          class="btn small"
-        >View</LinkTo>
-        <LinkTo
-          @route="questions.show.answers.edit"
-          @model={{answer}}
-          class="btn small"
-        >Edit</LinkTo>
-      </div>
-    </div>
-  {{else}}
-    <p class="text-sm text-gray-400">No answers yet.</p>
-  {{/each}}
+  <Answers::List
+    @answers={{this.model}}
+    @showRoute="questions.show.answers.show"
+    @editRoute="questions.show.answers.edit"
+  />
 </div>

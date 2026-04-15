@@ -12,12 +12,11 @@
   </div>
   <LinkTo
     @route="job-posts.show.job-applications.new"
-    @model={{this.jobPost}}
     class="btn shrink-0"
   >Apply</LinkTo>
 </div>
 
-{{#if this.model.jobApplications.length}}
+{{#if this.model.length}}
   <div
     class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
   >
@@ -44,7 +43,7 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-        {{#each this.model.jobApplications as |jobApplication|}}
+        {{#each this.model as |jobApplication|}}
           <JobApplications::Compact @jobApplication={{jobApplication}} />
         {{/each}}
       </tbody>

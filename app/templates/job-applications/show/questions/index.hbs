@@ -3,17 +3,16 @@
     <h3 class="panel-title">Questions</h3>
     <LinkTo
       @route="job-applications.show.questions.new"
-      @model={{this.model.jobApplication}}
       class="btn small"
     >New Question</LinkTo>
   </div>
-  {{#if this.model.questions.length}}
+  {{#if this.model.length}}
     <ul class="space-y-2">
-      {{#each this.model.questions as |question|}}
+      {{#each this.model as |question|}}
         <li class="flex items-center justify-between text-sm">
           <LinkTo
             @route="job-applications.show.questions.show"
-            @models={{array this.model.jobApplication question}}
+            @model={{question}}
             class="text-gray-700 hover:text-accent-600"
           >{{question.content}}</LinkTo>
           <span class="text-xs text-gray-400 ml-2 shrink-0">

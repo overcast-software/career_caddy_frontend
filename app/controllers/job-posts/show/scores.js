@@ -25,7 +25,8 @@ export default class JobPostsShowScoresController extends Controller {
   }
 
   get jobPost() {
-    return this.model.jobPost;
+    const { job_post_id } = this.router.currentRoute.parent.params;
+    return this.store.peekRecord('job-post', job_post_id);
   }
 
   @action isPending(score) {

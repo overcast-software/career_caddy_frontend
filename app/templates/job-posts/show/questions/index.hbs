@@ -6,12 +6,11 @@
   >Questions</h2>
   <LinkTo
     @route="job-posts.show.questions.new"
-    @model={{this.model.jobPost}}
     class="btn"
   >New Question</LinkTo>
 </div>
 
-{{#if this.model.questions.length}}
+{{#if this.model.length}}
   <div
     class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
   >
@@ -35,7 +34,7 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-        {{#each this.model.questions as |question|}}
+        {{#each this.model as |question|}}
           <tr
             class="hover:bg-gray-50 dark:hover:bg-gray-700
               {{if
@@ -52,7 +51,7 @@
               {{#if question.answers.length}}
                 <LinkTo
                   @route="job-posts.show.questions.show"
-                  @models={{array this.model.jobPost.id question.id}}
+                  @model={{question}}
                   class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold hover:bg-accent-200 dark:bg-accent-900 dark:text-accent-300 dark:hover:bg-accent-800"
                 >{{question.answers.length}}</LinkTo>
               {{else}}
@@ -66,7 +65,7 @@
               <div class="flex items-center justify-end gap-1.5 flex-wrap">
                 <LinkTo
                   @route="job-posts.show.questions.show"
-                  @models={{array this.model.jobPost.id question.id}}
+                  @model={{question}}
                   class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                 >Show</LinkTo>
                 <button
@@ -213,7 +212,6 @@
     <p class="text-sm">No questions yet.</p>
     <LinkTo
       @route="job-posts.show.questions.new"
-      @model={{this.model.jobPost}}
       class="mt-2 inline-block text-sm text-accent-500 hover:underline dark:text-accent-400"
     >Add the first one →</LinkTo>
   </div>

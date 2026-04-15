@@ -5,11 +5,7 @@ export default class JobApplicationsShowQuestionsNewRoute extends Route {
   @service store;
 
   async model() {
-    const { application_id } = this.paramsFor('job-applications.show');
-    const jobApplication = this.store.peekRecord(
-      'job-application',
-      application_id,
-    );
+    const jobApplication = this.modelFor('job-applications.show');
     const jobPostId = jobApplication?.get('jobPost.id');
     const jobPost = jobPostId
       ? this.store.peekRecord('job-post', jobPostId)
@@ -18,12 +14,10 @@ export default class JobApplicationsShowQuestionsNewRoute extends Route {
     const company = companyId
       ? this.store.peekRecord('company', companyId)
       : null;
-    const question = this.store.createRecord('question', {
+    return this.store.createRecord('question', {
       jobApplication,
       jobPost,
       company,
     });
-
-    return { question, jobApplication };
   }
 }

@@ -12,7 +12,7 @@
     New Summary</button>
 </div>
 
-{{#if this.model.summaries.length}}
+{{#if this.model.length}}
   <div
     class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
   >
@@ -36,7 +36,7 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-        {{#each this.model.summaries as |summary|}}
+        {{#each this.model as |summary|}}
           <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
             <td
               class="px-4 py-3 text-gray-900 dark:text-gray-100 max-w-md truncate"
