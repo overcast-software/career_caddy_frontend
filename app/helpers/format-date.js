@@ -13,7 +13,11 @@ export default class FormatDateHelper extends Helper {
     ) {
       return this.currentDate(format);
     }
-    return this.moment.moment(date).format(format);
+
+    const m = this.moment.moment(date);
+    if (!m.isValid()) return '';
+
+    return m.local().format(format);
   }
 
   currentDate(format = 'YYYY-MM-DD') {
