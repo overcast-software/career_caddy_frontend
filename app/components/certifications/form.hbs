@@ -1,39 +1,46 @@
-<form class="builder-form">
-  {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
-  <div class="field">
-    <label class="field-label" for="cert-issuer">Issuer</label>
-    <input
-      id="cert-issuer"
-      type="text"
-      value={{@certification.issuer}}
-      {{on "input" (fn this.updateField "issuer")}}
-    />
+<div class="grid gap-3">
+  {{#if this.errorMessage}}<p class="text-xs text-red-400">{{this.errorMessage}}</p>{{/if}}
+
+  <div class="grid grid-cols-2 gap-3">
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Issuer</span>
+      <input
+        type="text"
+        value={{@certification.issuer}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+        {{on "input" (fn this.updateField "issuer")}}
+      />
+    </label>
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Title</span>
+      <input
+        type="text"
+        value={{@certification.title}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+        {{on "input" (fn this.updateField "title")}}
+      />
+    </label>
   </div>
-  <div class="field">
-    <label class="field-label" for="cert-title">Title</label>
+
+  <label class="flex flex-col gap-1">
+    <span class="text-xs text-gray-400 uppercase tracking-wide">Issue Date</span>
     <input
-      id="cert-title"
-      type="text"
-      value={{@certification.title}}
-      {{on "input" (fn this.updateField "title")}}
-    />
-  </div>
-  <div class="field">
-    <label class="field-label" for="cert-issue-date">Issue Date</label>
-    <input
-      id="cert-issue-date"
       type="date"
       value={{this.formattedIssueDate}}
+      class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
       {{on "input" (fn this.updateField "issueDate")}}
     />
-  </div>
-  <div class="field">
-    <label class="field-label" for="cert-content">Content</label>
+  </label>
+
+  <label class="flex flex-col gap-1">
+    <span class="text-xs text-gray-400 uppercase tracking-wide">Content
+      <span class="normal-case font-normal" style="color: var(--muted)">&mdash; overrides default display (issuer, title, date)</span>
+    </span>
     <textarea
-      id="cert-content"
-      class="certification-content-textarea"
-      value={{@certification.content}}
+      rows="3"
+      placeholder="Leave blank to auto-generate from fields above"
+      class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
       {{on "input" (fn this.updateField "content")}}
-    ></textarea>
-  </div>
-</form>
+    >{{@certification.content}}</textarea>
+  </label>
+</div>

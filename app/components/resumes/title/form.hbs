@@ -1,32 +1,34 @@
-<form class="builder-form">
-  <div class="field-row">
-    <label class="field">
-      <span class="field-label">Job Title</span>
+<div class="grid gap-3">
+  <div class="grid grid-cols-2 gap-3">
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Job Title</span>
       <input
         type="text"
         name="title"
         value={{this.title}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" this.updateTitle}}
       />
     </label>
-    <label class="field">
-      <span class="field-label">Internal Resume Name</span>
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Internal Resume Name</span>
       <input
         type="text"
         name="name"
         value={{this.name}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" this.updateName}}
       />
     </label>
   </div>
-  <label class="field">
-    <span class="field-label">Resume Notes</span>
+  <label class="flex flex-col gap-1">
+    <span class="text-xs text-gray-400 uppercase tracking-wide">Resume Notes</span>
     <textarea
       name="notes"
       rows="2"
-      value={{this.notes}}
+      class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
       {{on "input" this.updateNotes}}
-    ></textarea>
+    >{{this.notes}}</textarea>
   </label>
-</form>
+</div>
 {{yield}}

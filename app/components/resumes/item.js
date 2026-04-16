@@ -1,32 +1,27 @@
 import Component from '@glimmer/component';
-import { cached } from '@glimmer/tracking';
 
 export default class ResumesItemComponent extends Component {
-  get groups() {
-    return Object.keys(this.groupedSkillsMap);
+  get sortedExperiences() {
+    return this.args.resume.sortedExperiences;
   }
 
-  @cached get groupedSkillsMap() {
+  get groupedSkillsMap() {
+    const skills = this.args.resume.hasMany('skills').value();
+    if (!skills) return {};
     const result = {};
-    this.args.resume?.skills?.forEach((skill) => {
+    for (const skill of skills) {
       const skillType = skill.skillType || 'Other';
       result[skillType] = result[skillType] || [];
       result[skillType].push(skill);
-    });
+    }
     return result;
   }
 
   get hasSkills() {
-    return this.groups.length > 0;
+    return Object.keys(this.groupedSkillsMap).length > 0;
   }
 
   get activeSummary() {
-    const summaries = this.args.resume?.summaries;
-    const len = summaries?.length ?? 0;
-    for (let i = 0; i < len; i++) {
-      const s = summaries.objectAt ? summaries.objectAt(i) : summaries[i];
-      if (s?.active) return s;
-    }
-    return null;
+    return this.args.activeSummary ?? this.args.resume.activeSummary;
   }
 }

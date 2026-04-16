@@ -5,7 +5,7 @@
     </LinkTo>
   </td>
   <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-400">
-    {{@resume.jobApplications.length}}
+    {{if @resume.jobApplicationCount @resume.jobApplicationCount 0}}
   </td>
   <td class="px-4 py-3 text-gray-600 dark:text-gray-400 truncate max-w-xs">
     {{or @resume.notes "—"}}
@@ -18,7 +18,7 @@
       />
       <LinkTo
         @route="resumes.edit"
-        @model={{@resume}}
+        @model={{@resume.id}}
         class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
       >Edit</LinkTo>
       <button

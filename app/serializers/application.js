@@ -19,6 +19,14 @@ export default class ApplicationSerializer extends JSONAPISerializer {
     return toSnakeCase(attr);
   }
 
+  normalize(modelClass, resourceHash) {
+    if (resourceHash.meta) {
+      resourceHash.attributes = resourceHash.attributes || {};
+      Object.assign(resourceHash.attributes, resourceHash.meta);
+    }
+    return super.normalize(modelClass, resourceHash);
+  }
+
   serializeAttribute(snapshot, json, key, attribute) {
     super.serializeAttribute(snapshot, json, key, attribute);
     if (attribute.type === 'date') {

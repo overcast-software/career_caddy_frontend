@@ -5,38 +5,36 @@ import { action } from '@ember/object';
 export default class SummariesCarousel extends Component {
   @tracked _currentIndex = null;
 
-  _at(summaries, idx) {
-    if (typeof summaries.objectAt === 'function')
-      return summaries.objectAt(idx);
-    return summaries[idx];
+  get summariesArray() {
+    const summaries = this.args.summaries;
+    if (!summaries) return [];
+    return summaries.toArray ? summaries.toArray() : [...summaries];
   }
 
   get currentIndex() {
     if (this._currentIndex !== null) return this._currentIndex;
-    const summaries = this.args.summaries;
-    if (!summaries?.length) return 0;
+    const summaries = this.summariesArray;
     for (let i = 0; i < summaries.length; i++) {
-      if (this._at(summaries, i)?.active) return i;
+      if (summaries[i]?.active) return i;
     }
     return 0;
   }
 
   get positionLabel() {
-    const count = this.args.summaries?.length ?? 0;
+    const count = this.summariesArray.length;
     if (count === 0) return '';
     return `${this.currentIndex + 1} / ${count}`;
   }
 
   get currentSummary() {
-    const summaries = this.args.summaries;
-    if (!summaries?.length) return null;
-    return this._at(summaries, this.currentIndex) ?? this._at(summaries, 0);
+    const summaries = this.summariesArray;
+    if (!summaries.length) return null;
+    return summaries[this.currentIndex] ?? summaries[0];
   }
 
   @action
   prev() {
-    const summaries = this.args.summaries;
-    const count = summaries?.length ?? 0;
+    const count = this.summariesArray.length;
     if (count < 2) return;
     const newIndex = (this.currentIndex - 1 + count) % count;
     this._navigate(newIndex);
@@ -44,8 +42,7 @@ export default class SummariesCarousel extends Component {
 
   @action
   next() {
-    const summaries = this.args.summaries;
-    const count = summaries?.length ?? 0;
+    const count = this.summariesArray.length;
     if (count < 2) return;
     const newIndex = (this.currentIndex + 1) % count;
     this._navigate(newIndex);
@@ -53,11 +50,12 @@ export default class SummariesCarousel extends Component {
 
   async _navigate(newIndex) {
     const resume = this.args.resume;
-    const newSummary = this._at(this.args.summaries, newIndex);
+    const newSummary = this.summariesArray[newIndex];
     this._currentIndex = newIndex;
     if (resume && newSummary) {
       newSummary.active = true;
       newSummary.resume = resume;
+      this.args.onChange?.(newSummary);
       await newSummary.save();
     }
   }

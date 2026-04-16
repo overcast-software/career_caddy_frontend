@@ -1,55 +1,55 @@
-<form class="builder-form">
-  {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
+<div class="grid gap-3">
+  {{#if this.errorMessage}}<p class="text-xs text-red-400">{{this.errorMessage}}</p>{{/if}}
 
-  <div class="field">
-    <label class="field-label" for="edu-institution">Institution</label>
+  <label class="flex flex-col gap-1">
+    <span class="text-xs text-gray-400 uppercase tracking-wide">Institution</span>
     <input
-      id="edu-institution"
       type="text"
       value={{this.education.institution}}
+      class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
       {{on "input" (fn this.updateField "institution")}}
     />
-  </div>
+  </label>
 
-  <div class="field-row">
-    <div class="field">
-      <label class="field-label" for="edu-issue-date">Issue Date</label>
+  <div class="grid grid-cols-2 gap-3">
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Issue Date</span>
       <input
-        id="edu-issue-date"
         type="date"
         value={{this.formattedIssueDate}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" (fn this.updateField "issueDate")}}
       />
-    </div>
-    <div class="field">
-      <label class="field-label" for="edu-degree">Degree</label>
+    </label>
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Degree</span>
       <input
-        id="edu-degree"
         type="text"
         value={{this.education.degree}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" (fn this.updateField "degree")}}
       />
-    </div>
+    </label>
   </div>
 
-  <div class="field-row">
-    <div class="field">
-      <label class="field-label" for="edu-major">Major</label>
+  <div class="grid grid-cols-2 gap-3">
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Major</span>
       <input
-        id="edu-major"
         type="text"
         value={{this.education.major}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" (fn this.updateField "major")}}
       />
-    </div>
-    <div class="field">
-      <label class="field-label" for="edu-minor">Minor</label>
+    </label>
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Minor</span>
       <input
-        id="edu-minor"
         type="text"
         value={{this.education.minor}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" (fn this.updateField "minor")}}
       />
-    </div>
+    </label>
   </div>
-</form>
+</div>

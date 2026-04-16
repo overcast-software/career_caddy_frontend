@@ -1,148 +1,154 @@
-<form class="builder-form" {{on "submit" this.save}}>
-  <div class="exp-header">
+<div class="border-b border-gray-700/30">
+  <div class="flex items-center gap-2">
     <button
       type="button"
-      class="exp-header-toggle"
+      class="flex flex-1 items-center justify-between px-2 py-2 text-sm text-gray-200 hover:bg-gray-800/60 transition-colors"
       aria-expanded={{if this.isExpanded "true" "false"}}
       {{on "click" this.toggleExperience}}
     >
-      <div class="exp-header-info">
-        <span class="exp-header-title">{{if
-            @experience.title
-            @experience.title
-            "New Experience"
-          }}</span>
+      <div class="min-w-0">
+        <span class="font-medium truncate">{{if @experience.title @experience.title "New Experience"}}</span>
         {{#if @experience.company.name}}
-          <span class="exp-header-company">{{@experience.company.name}}</span>
+          <span class="ml-1 text-gray-400 text-xs">{{@experience.company.name}}</span>
         {{/if}}
       </div>
       <svg
         aria-hidden="true"
-        class="exp-chevron {{if this.isExpanded 'expanded'}}"
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-        width="16"
-        height="16"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-4 shrink-0 transition-transform duration-200 {{if this.isExpanded 'rotate-180'}}"
       >
-        <path
-          fill-rule="evenodd"
-          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-          clip-rule="evenodd"
-        />
+        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
       </svg>
     </button>
     <button
       type="button"
-      class="exp-delete"
-      title="Delete"
+      class="rounded p-1 text-gray-500 hover:text-red-400 shrink-0"
+      title="Delete experience"
       {{on "click" this.deleteExperience}}
-      {{on "click" this.stopPropagation}}
-    >✕</button>
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+      </svg>
+    </button>
   </div>
+
   {{#if this.isExpanded}}
-    {{#if this.errorMessage}}<p class="error">{{this.errorMessage}}</p>{{/if}}
-    <input type="hidden" name="resume_id" value={{@experience.resumeId}} />
-
-    <div class="field">
-      <label class="field-label" for="exp-company">Company</label>
-      <input
-        id="exp-company"
-        type="text"
-        value={{@experience.company.name}}
-        disabled
-      />
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label class="field-label" for="exp-title">Title</label>
-        <input
-          id="exp-title"
-          type="text"
-          value={{@experience.title}}
-          {{on "input" (fn this.updateField "title")}}
-        />
-      </div>
-      <div class="field">
-        <label class="field-label" for="exp-location">Location</label>
-        <input
-          id="exp-location"
-          type="text"
-          value={{@experience.location}}
-          {{on "input" (fn this.updateField "location")}}
-        />
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label class="field-label" for="exp-start-date">Start Date</label>
-        <input
-          id="exp-start-date"
-          type="date"
-          value={{this.formattedStartDate}}
-          {{on "input" (fn this.updateField "startDate")}}
-        />
-      </div>
-      {{#if this.currentlyWorking}}
-        <div class="field">
-          <label class="field-label" for="exp-end-date">End Date</label>
-          <input id="exp-end-date" type="text" value="Present" disabled />
-        </div>
-      {{else}}
-        <div class="field">
-          <label class="field-label" for="exp-end-date">End Date</label>
-          <input
-            id="exp-end-date"
-            type="date"
-            value={{this.formattedEndDate}}
-            {{on "input" (fn this.updateField "endDate")}}
-            disabled={{this.currentlyWorking}}
-          />
-        </div>
+    <div class="px-2 pb-3">
+      {{#if this.errorMessage}}
+        <p class="text-xs text-red-400 mb-2">{{this.errorMessage}}</p>
       {{/if}}
-    </div>
 
-    <label>
-      <input
-        type="checkbox"
-        checked={{this.currentlyWorking}}
-        {{on "change" this.toggleCurrentlyWorking}}
-      />
-      I currently work here
-    </label>
-
-    <div class="field-label">Description</div>
-    <section class="descriptions">
-      <h4 class="section-title">Descriptions</h4>
-      <ul class="desc-list editable">
-        {{#each @experience.descriptions as |d|}}
-          <Descriptions::Editor::Form
-            @description={{d}}
-            @onDelete={{fn this.removeDescription d}}
+      <div class="grid gap-3">
+        <label class="flex flex-col gap-1">
+          <span class="text-xs text-gray-400 uppercase tracking-wide">Company</span>
+          <input
+            type="text"
+            value={{@experience.company.name}}
+            disabled
+            class="w-full rounded-md border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
           />
-        {{/each}}
-      </ul>
-      <button
-        type="button"
-        class="btn small"
-        {{on "click" this.addDescription}}
-      >Add description</button>
-    </section>
+        </label>
 
-    <div class="form-actions">
-      <button type="submit" class="btn primary">Save</button>
-      <button
-        type="button"
-        class="btn"
-        {{on "click" this.cancel}}
-      >Cancel</button>
-      <button
-        type="button"
-        class="btn"
-        {{on "click" this.deleteExperience}}
-      >Delete</button>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col gap-1">
+            <span class="text-xs text-gray-400 uppercase tracking-wide">Title</span>
+            <input
+              type="text"
+              value={{@experience.title}}
+              class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+              {{on "input" (fn this.updateField "title")}}
+            />
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-xs text-gray-400 uppercase tracking-wide">Location</span>
+            <input
+              type="text"
+              value={{@experience.location}}
+              class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+              {{on "input" (fn this.updateField "location")}}
+            />
+          </label>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col gap-1">
+            <span class="text-xs text-gray-400 uppercase tracking-wide">Start Date</span>
+            <input
+              type="date"
+              value={{this.formattedStartDate}}
+              class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+              {{on "input" (fn this.updateField "startDate")}}
+            />
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-xs text-gray-400 uppercase tracking-wide">End Date</span>
+            {{#if this.currentlyWorking}}
+              <input
+                type="text"
+                value="Present"
+                disabled
+                class="w-full rounded-md border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+              />
+            {{else}}
+              <input
+                type="date"
+                value={{this.formattedEndDate}}
+                class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+                {{on "input" (fn this.updateField "endDate")}}
+              />
+            {{/if}}
+          </label>
+        </div>
+
+        <label class="flex items-center gap-2 text-sm text-gray-300">
+          <input
+            type="checkbox"
+            checked={{this.currentlyWorking}}
+            class="rounded border-gray-600 bg-gray-800 text-accent-500 focus:ring-accent-500"
+            {{on "change" this.toggleCurrentlyWorking}}
+          />
+          I currently work here
+        </label>
+
+        <div>
+          <span class="text-xs text-gray-400 uppercase tracking-wide">Descriptions</span>
+          <ul class="mt-1 space-y-2">
+            {{#each @experience.descriptions as |d|}}
+              <Descriptions::Editor::Form
+                @description={{d}}
+                @onDelete={{fn this.removeDescription d}}
+              />
+            {{/each}}
+          </ul>
+          <button
+            type="button"
+            class="mt-2 rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600"
+            {{on "click" this.addDescription}}
+          >+ Add description</button>
+        </div>
+
+        <div class="flex gap-2 pt-1">
+          <button
+            type="button"
+            class="rounded bg-accent-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-700"
+            {{on "click" this.save}}
+          >Save</button>
+          <button
+            type="button"
+            class="rounded bg-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-600"
+            {{on "click" this.cancel}}
+          >Cancel</button>
+          <button
+            type="button"
+            class="rounded bg-gray-700 px-3 py-1.5 text-xs text-red-400 hover:bg-red-900/30"
+            {{on "click" this.deleteExperience}}
+          >Delete</button>
+        </div>
+      </div>
     </div>
   {{/if}}
-</form>
+</div>

@@ -4,140 +4,88 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 export default class ExperiencesEditorForm extends Component {
-  @service router;
   @service store;
   @service flashMessages;
+
   @tracked errorMessage = null;
-  @tracked editingDesc = null;
-  @tracked editingDraft = '';
   @tracked isExpanded = false;
   @tracked currentlyWorking = false;
 
   constructor() {
     super(...arguments);
-    this.currentlyWorking = !this.experience?.endDate;
+    this.currentlyWorking = !this.args.experience?.endDate;
     if (this.args.experience?.isNew) {
       this.isExpanded = true;
     }
   }
 
-  get experience() {
-    return this.args.experience ?? this.args.model;
-  }
-
-  get resumeId() {
-    return this.experience.resume.id;
-  }
-
   get formattedStartDate() {
-    const d = this.experience?.startDate;
+    const d = this.args.experience?.startDate;
     return d ? new Date(d).toISOString().slice(0, 10) : '';
   }
 
   get formattedEndDate() {
-    const d = this.experience?.endDate;
+    const d = this.args.experience?.endDate;
     return d ? new Date(d).toISOString().slice(0, 10) : '';
-  }
-
-  get companyDisplayName() {
-    const c = this.experience?.company;
-    return (c?.displayName || c?.name || '') ?? '';
-  }
-
-  get orderedDescriptions() {
-    const rel = this.experience?.descriptions;
-    const arr = rel?.toArray?.() ?? Array.from(rel ?? []);
-    return arr.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
 
   @action updateField(field, event) {
     if (field === 'startDate' || field === 'endDate') {
-      if (field === 'endDate' && this.currentlyWorking) {
-        return; // no-op when currently working
-      }
-      this.experience[field] = event.target.valueAsDate ?? null;
-    } else if (field === 'content' && event?.target?.isContentEditable) {
-      this.experience.content = event.target.innerHTML;
+      if (field === 'endDate' && this.currentlyWorking) return;
+      this.args.experience[field] = event.target.valueAsDate ?? null;
     } else {
-      this.experience[field] = event.target.value;
+      this.args.experience[field] = event.target.value;
     }
   }
 
-  @action async deleteExperience() {
-    try {
-      const resumeId = this.experience?.belongsTo?.('resume')?.id?.();
-      const resume = this.experience?.belongsTo?.('resume')?.value?.();
-
-      resume.removeObject(this.experience);
-
-      await this.experience.destroyRecord();
-      this.router.transitionTo('resumes.show.experience.index', resumeId);
-    } catch (e) {
-      this.errorMessage = e?.message ?? 'Failed to delete experience';
-    }
-  }
-
-  @action async save(event) {
-    event?.preventDefault();
-    try {
-      if (this.currentlyWorking) {
-        this.experience.endDate = null;
-      }
-      await this.experience.save();
-      // XXX this might be redundant
-      // check the PATCH to see what comes across
-      this.experience.descriptions
-        .then((descriptions) => {
-          Promise.all(descriptions.map((d) => d.save()));
-        })
-        .then(() => {
-          this.flashMessages.success('saved experience');
-        })
-        .catch((error) => {
-          this.flashMessages.danger(error);
-        });
-      // what is this doing?
-    } catch (e) {
-      this.errorMessage = e?.message ?? 'Failed to save experience';
-    }
-  }
-
-  @action cancel() {
-    if (this.experience?.isNew) this.experience.rollbackAttributes();
-    const resumeId =
-      this.experience?.belongsTo('resume')?.id() ?? this.args.resume?.id;
-    this.router.transitionTo('resumes.show.experience.index', resumeId);
-  }
-
-  @action updateEditingDraft(event) {
-    this.editingDraft = event.target.value;
-  }
-
-  @action
-  toggleExperience() {
+  @action toggleExperience() {
     this.isExpanded = !this.isExpanded;
   }
 
-  @action
-  stopPropagation(event) {
-    event.stopPropagation();
+  @action toggleCurrentlyWorking(event) {
+    this.currentlyWorking = event.target.checked;
+    if (this.currentlyWorking) {
+      this.args.experience.endDate = null;
+    }
   }
 
-  @action async commitDescription(index, desc) {
-    desc.content = (this.editingDraft ?? '').trim();
-    // No persistence here; defer saving until the whole resume is saved/cloned
-    this.editingIndex = null;
-    this.editingDraft = '';
+  @action save(event) {
+    event?.preventDefault?.();
+    if (this.currentlyWorking) {
+      this.args.experience.endDate = null;
+    }
+    this.args.experience
+      .save()
+      .then(() => this.flashMessages.success('Experience saved.'))
+      .catch((e) => {
+        this.errorMessage = e?.message ?? 'Failed to save experience';
+      });
+  }
+
+  @action cancel() {
+    if (this.args.experience?.isNew) {
+      this.args.experience.rollbackAttributes();
+    }
+    this.isExpanded = false;
+  }
+
+  @action deleteExperience() {
+    this.args.experience
+      .destroyRecord()
+      .then(() => this.flashMessages.success('Experience deleted.'))
+      .catch((e) => {
+        this.errorMessage = e?.message ?? 'Failed to delete experience';
+      });
   }
 
   @action addDescription() {
-    const exp = this.experience ?? this.args.experience;
+    const exp = this.args.experience;
     if (!exp) return;
 
-    const current = exp.descriptions;
+    const descriptions = exp.descriptions;
     const nextOrder =
-      (current?.toArray?.()?.length ??
-        (Array.isArray(current) ? current.length : 0)) + 1;
+      (descriptions?.toArray?.()?.length ??
+        (Array.isArray(descriptions) ? descriptions.length : 0)) + 1;
 
     const desc = this.store.createRecord('description', {
       content: '',
@@ -145,27 +93,17 @@ export default class ExperiencesEditorForm extends Component {
       experience: exp,
     });
 
-    current?.pushObject?.(desc);
+    descriptions?.pushObject?.(desc);
   }
 
-  @action async removeDescription(desc) {
+  @action removeDescription(desc) {
     if (!desc) return;
-    (this.experience ?? this.args.experience)?.descriptions?.removeObject?.(
-      desc,
-    );
+    this.args.experience?.descriptions?.removeObject?.(desc);
 
     if (desc.isNew) {
       desc.unloadRecord?.();
     } else {
-      await desc.destroyRecord?.();
-    }
-  }
-
-  @action toggleCurrentlyWorking(event) {
-    const checked = event.target.checked;
-    this.currentlyWorking = checked;
-    if (checked) {
-      this.experience.endDate = null;
+      desc.destroyRecord();
     }
   }
 }

@@ -1,36 +1,35 @@
-<form class="builder-form">
-
-  <div class="field-row">
-
-    <label class="field">
-      <span class="field-label">Name</span>
+<div class="grid gap-3">
+  <div class="grid grid-cols-2 gap-3">
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Name</span>
       <input
         type="text"
         name="name"
         value={{@user.name}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" this.updateName}}
       />
     </label>
-    <label class="field">
-      <span class="field-label">Phone</span>
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Phone</span>
       <input
         type="tel"
         name="phone"
         value={{@user.phone}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" this.updatePhone}}
       />
     </label>
   </div>
-
-  <label class="field">
-    <span class="field-label">Email</span>
+  <label class="flex flex-col gap-1">
+    <span class="text-xs text-gray-400 uppercase tracking-wide">Email</span>
     <input
       type="email"
       name="email"
       value={{@user.email}}
+      class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
       {{on "input" this.updateEmail}}
     />
   </label>
-
   {{yield}}
-</form>
+</div>

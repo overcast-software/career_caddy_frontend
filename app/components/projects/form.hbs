@@ -1,55 +1,51 @@
-<form class="builder-form">
-  <div class="field">
-    <label class="field-label" for="proj-title-{{@project.id}}">Title</label>
+<div class="grid gap-3">
+  <label class="flex flex-col gap-1">
+    <span class="text-xs text-gray-400 uppercase tracking-wide">Title</span>
     <input
-      id="proj-title-{{@project.id}}"
       type="text"
       value={{@project.title}}
+      class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
       {{on "input" (fn this.updateField "title")}}
     />
-  </div>
+  </label>
 
-  <div class="field">
-    <label
-      class="field-label"
-      for="proj-description-{{@project.id}}"
-    >Description</label>
+  <label class="flex flex-col gap-1">
+    <span class="text-xs text-gray-400 uppercase tracking-wide">Description</span>
     <textarea
-      id="proj-description-{{@project.id}}"
-      value={{@project.description}}
-      {{on "input" (fn this.updateField "description")}}
       rows="3"
-    ></textarea>
-  </div>
+      class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+      {{on "input" (fn this.updateField "description")}}
+    >{{@project.description}}</textarea>
+  </label>
 
-  <div class="field-row">
-    <div class="field">
-      <label class="field-label" for="proj-start-{{@project.id}}">Start Date</label>
+  <div class="grid grid-cols-2 gap-3">
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Start Date</span>
       <input
-        id="proj-start-{{@project.id}}"
         type="date"
         value={{this.formattedStartDate}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" (fn this.updateField "startDate")}}
       />
-    </div>
-    <div class="field">
-      <label class="field-label" for="proj-end-{{@project.id}}">End Date</label>
+    </label>
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">End Date</span>
       <input
-        id="proj-end-{{@project.id}}"
         type="date"
         value={{this.formattedEndDate}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" (fn this.updateField "endDate")}}
       />
-    </div>
+    </label>
   </div>
 
-  <div class="field">
-    <label class="field-label" for="proj-active-{{@project.id}}">Active</label>
+  <label class="flex items-center gap-2 text-sm text-gray-300">
     <input
-      id="proj-active-{{@project.id}}"
       type="checkbox"
       checked={{@project.isActive}}
+      class="rounded border-gray-600 bg-gray-800 text-accent-500 focus:ring-accent-500"
       {{on "change" (fn this.updateField "isActive")}}
     />
-  </div>
-</form>
+    Active
+  </label>
+</div>

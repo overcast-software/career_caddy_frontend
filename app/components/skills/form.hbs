@@ -1,41 +1,46 @@
-<form class="builder-form">
-
-  <div class="skill-groups">
+<div class="grid gap-3">
+  <div class="space-y-2">
     {{#each-in this.groupedSkillsMap as |group skills|}}
-      <div class="skill-group">
-        <div class="group-title">{{group}}</div>
-        <div class="tags">
+      <div>
+        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">{{group}}</span>
+        <div class="flex flex-wrap gap-1.5 mt-1">
           {{#each skills as |skill|}}
-            <div class="skill-tag">
+            <span class="inline-flex items-center gap-1 rounded-full bg-accent-100 text-accent-800 px-2.5 py-0.5 text-xs">
+              {{skill.text}}
               <button
                 type="button"
-                class="tag-remove"
+                class="text-accent-600 hover:text-red-500"
                 {{on "click" (fn this.removeSkill skill)}}
-              >x</button>
-              <span class="tag-text">{{skill.text}}</span>
-            </div>
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
           {{/each}}
         </div>
       </div>
     {{/each-in}}
   </div>
 
-  <div class="field-row">
-    <label class="field">
-      <span class="field-label">Skill</span>
+  <div class="grid grid-cols-2 gap-3">
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Skill</span>
       <input
         type="text"
         placeholder="e.g., JavaScript"
         value={{this.newSkillText}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" this.updateNewSkillText}}
       />
     </label>
-    <label class="field">
-      <span class="field-label">Type</span>
+    <label class="flex flex-col gap-1">
+      <span class="text-xs text-gray-400 uppercase tracking-wide">Type</span>
       <input
         type="text"
         placeholder="e.g., Languages, Tools"
         value={{this.newSkillType}}
+        class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         {{on "input" this.updateNewSkillType}}
       />
     </label>
@@ -43,9 +48,8 @@
 
   <button
     type="button"
-    class="btn primary"
+    class="rounded bg-accent-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-700 disabled:opacity-40"
     disabled={{eq this.newSkillText.length 0}}
     {{on "click" this.addSkill}}
   >Add Skill</button>
-
-</form>
+</div>

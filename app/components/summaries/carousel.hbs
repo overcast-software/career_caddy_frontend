@@ -1,8 +1,24 @@
 {{#if this.currentSummary}}
   <div class="flex items-center gap-2 mb-2">
-    <button type="button" class="btn small" {{on "click" this.prev}}>←</button>
+    <button
+      type="button"
+      class="rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600"
+      {{on "click" this.prev}}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+      </svg>
+    </button>
     <span class="text-sm text-accent-500">{{this.positionLabel}}</span>
-    <button type="button" class="btn small" {{on "click" this.next}}>→</button>
+    <button
+      type="button"
+      class="rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600"
+      {{on "click" this.next}}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+      </svg>
+    </button>
   </div>
   <Summaries::Form @summary={{this.currentSummary}} />
 {{else}}

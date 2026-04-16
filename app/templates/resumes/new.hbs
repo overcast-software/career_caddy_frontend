@@ -1,80 +1,60 @@
 {{page-title "New Resume"}}
 <RouteLayout @flashMessages={{this.flashMessages}} @mainClass="builder-page">
   <:main>
-    <div class="builder-layout">
-      <aside class="editor-panel">
-        <Panel::Card @title="Job Title" @collapsible={{false}}>
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(380px,1fr)_minmax(0,1fr)] min-h-screen">
+      <aside class="builder-editor flex flex-col overflow-y-auto lg:sticky lg:top-0 lg:h-screen" style="background: transparent; color: var(--text)">
+
+        <Builder::Section @title="Job Title" @collapsible={{false}}>
           <Resumes::Title::Form @resume={{this.model}} />
-        </Panel::Card>
-        <Panel::Card @title="Personal Information" @collapsible={{true}}>
+        </Builder::Section>
+
+        <Builder::Section @title="Personal Information">
           <PersonalInformation::Form @user={{this.model.user}} />
-        </Panel::Card>
-        <Panel::Card
-          @title="Summary"
-          @collapsible={{true}}
-          @startCollapsed={{true}}
-        >
+        </Builder::Section>
+
+        <Builder::Section @title="Summary" @startCollapsed={{true}}>
           <Summary::Form @summary={{this.model.summary}} />
-        </Panel::Card>
-        <Panel::Card
-          @title="Skills"
-          @collapsible={{true}}
-          @startCollapsed={{true}}
-        >
+        </Builder::Section>
+
+        <Builder::Section @title="Skills" @startCollapsed={{true}}>
           <Skills::Form @skills={{this.model.skills}} @resume={{this.model}} />
-        </Panel::Card>
-        <Panel::Card @title="Experience" @collapsible={{true}}>
-          <:top as |panel|>
-            <Panel::Navigation
-              @collapsible={{true}}
-              @collapsed={{panel.collapsed}}
-              @toggleCollapsed={{panel.toggleCollapsed}}
-            >
-              <button
-                type="button"
-                class="btn small"
-                {{on "click" this.addExperience}}
-              >+ Add Experience</button>
-            </Panel::Navigation>
-          </:top>
+        </Builder::Section>
+
+        <Builder::Section @title="Experience">
+          <:actions>
+            <button
+              type="button"
+              class="rounded bg-gray-700 px-2 py-0.5 text-xs text-gray-300 hover:bg-gray-600"
+              {{on "click" this.addExperience}}
+            >+ Add</button>
+          </:actions>
           <:default>
             <Experiences::List @experiences={{this.model.experiences}} />
           </:default>
-        </Panel::Card>
-        <Panel::Card
-          @title="Certifications"
-          @collapsible={{true}}
-          @startCollapsed={{true}}
-        >
-          <:top as |panel|>
-            <Panel::Navigation
-              @collapsible={{true}}
-              @collapsed={{panel.collapsed}}
-              @toggleCollapsed={{panel.toggleCollapsed}}
-            >
-              <button
-                type="button"
-                class="btn small"
-                {{on "click" this.addCertification}}
-              >+ Add Certification</button>
-            </Panel::Navigation>
-          </:top>
+        </Builder::Section>
+
+        <Builder::Section @title="Certifications" @startCollapsed={{true}}>
+          <:actions>
+            <button
+              type="button"
+              class="rounded bg-gray-700 px-2 py-0.5 text-xs text-gray-300 hover:bg-gray-600"
+              {{on "click" this.addCertification}}
+            >+ Add</button>
+          </:actions>
           <:default>
             {{#each this.model.certifications as |cert|}}
               <Certifications::Form @certification={{cert}} />
             {{/each}}
           </:default>
-        </Panel::Card>
-        <Panel::Card
-          @title="Education"
-          @collapsible={{true}}
-          @startCollapsed={{true}}
-        >
+        </Builder::Section>
+
+        <Builder::Section @title="Education" @startCollapsed={{true}}>
           <Educations::Form @education={{this.model.education}} />
-        </Panel::Card>
+        </Builder::Section>
+
       </aside>
-      <main class="preview-panel">
-        <div class="resume-preview">
+      <main class="bg-gray-100 p-8 overflow-y-auto lg:h-screen">
+        <div class="mx-auto max-w-[8.5in] bg-white shadow-lg rounded-sm p-10 min-h-[11in]">
           <Resumes::Item @resume={{this.model}} />
         </div>
       </main>

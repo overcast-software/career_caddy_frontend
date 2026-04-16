@@ -7,7 +7,7 @@
  *   TOKENS       — :root design tokens (colors, spacing, radius)
  *   BASE         — html/body reset
  *   APP SHELL    — .course grid layout, sidebar, mobile drawer
- *   TAGS         — .skill-tag, .tag-remove
+ *   TAGS         — (migrated to Tailwind)
  *   BUILDER FORM — .builder-form grid, .field variants, container query
  *   EXPERIENCE   — .experience, .desc-list, .rich-text
  *   BUTTONS      — .btn variants, tooltips, .actions, .form-actions
@@ -463,39 +463,7 @@ a {
 }
 
 /* ===== TAGS ===== */
-.skill-tag {
-  pointer-events: auto;
-  background-color: #eff4ff;
-  border: none;
-  color: #2557d6;
-  padding: 3px 8px;
-  font-size: 12px;
-  line-height: 1.2;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-right: 6px;
-  margin-left: 0;
-  margin-bottom: 6px;
-  border-radius: 12px;
-}
-
-.tag-remove {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: #eaf2fb;
-  color: #2557d6;
-  font-size: 12px;
-  line-height: 1;
-  border: 1px solid #d2e4f9;
-  cursor: pointer;
-  pointer-events: auto;
-}
+/* Skill tags — replaced by Tailwind pill components */
 
 /* ===== BUILDER FORM ===== */
 .builder-form {
@@ -993,83 +961,7 @@ p.tee {
 }
 
 /* Experience accordion header */
-.exp-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  margin: calc(-1 * var(--space-5));
-  margin-bottom: 0;
-  border-radius: var(--radius) var(--radius) 0 0;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  user-select: none;
-}
-
-.exp-header:hover {
-  background: var(--surface-hover);
-}
-
-.exp-header-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.exp-header-title {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.exp-header-company {
-  font-size: 0.8rem;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.exp-delete {
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: var(--radius);
-  font-size: 0.8rem;
-  line-height: 1;
-}
-
-.exp-delete:hover {
-  color: #ef4444;
-  background: #fee2e2;
-}
-
-.exp-chevron {
-  color: var(--muted);
-  transition: transform 0.15s ease;
-  flex-shrink: 0;
-}
-
-.exp-chevron.expanded {
-  transform: rotate(180deg);
-}
-
-/* Strip card chrome when builder-form is nested inside a panel-card */
-.panel-card .builder-form,
-.panel-card > .builder-form {
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  padding: var(--space-2) var(--space-3);
-}
+/* Experience header + panel-card builder-form override — replaced by Tailwind */
 
 /* Two-column builder form variant */
 /* Two-column tile layout: equal-width fields tiling across 2 columns */
@@ -1445,6 +1337,60 @@ a.landing-btn-primary:hover {
   top: 4lh;
 }
 
+/* ===== BUILDER EDITOR — inputs + labels ===== */
+.builder-editor input,
+.builder-editor textarea,
+.builder-editor select {
+  background-color: #fff !important;
+  color: #1e293b !important;
+  border-color: #d1d5db !important;
+}
+
+.builder-editor input::placeholder,
+.builder-editor textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+.builder-editor input:focus,
+.builder-editor textarea:focus,
+.builder-editor select:focus {
+  border-color: rgb(var(--accent-500)) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px rgb(var(--accent-500)) !important;
+}
+
+.builder-editor input:disabled {
+  background-color: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+}
+
+.builder-editor label span {
+  color: #6b7280 !important;
+}
+
+[data-theme="dark"] .builder-editor input,
+[data-theme="dark"] .builder-editor textarea,
+[data-theme="dark"] .builder-editor select {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+[data-theme="dark"] .builder-editor input::placeholder,
+[data-theme="dark"] .builder-editor textarea::placeholder {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .builder-editor input:disabled {
+  background-color: #1e293b !important;
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .builder-editor label span {
+  color: #94a3b8 !important;
+}
+
 /* ===== LAYOUTS ===== */
 /* Builder page full-width */
 .builder-page {
@@ -1518,18 +1464,6 @@ a.landing-btn-primary:hover {
 }
 
 @media (width <= 1080px) {
-  .builder-page .builder-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .editor-panel {
-    position: static;
-  }
-
-  .input-group {
-    display: block;
-  }
-
   .builder-form {
     grid-template-columns: 1fr;
   }
@@ -1579,35 +1513,7 @@ a.landing-btn-primary:hover {
   }
 }
 
-/* Builder side-by-side layout */
-.builder-page .builder-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-  padding: var(--space-6) 0;
-  align-items: start;
-}
-
-.editor-panel {
-  display: flex;
-  flex-direction: column;
-  top: 16px;
-  gap: var(--space-4);
-  align-self: start;
-  container-type: inline-size;
-  container-name: editor;
-}
-
-.preview-panel {
-  display: grid;
-  gap: var(--space-4);
-  padding-bottom: 4em;
-}
-
-.builder-page .builder-layout > .editor-panel,
-.builder-page .builder-layout > .preview-panel {
-  min-width: 0;
-}
+/* Builder layout — replaced by Tailwind grid in resumes/edit.hbs */
 
 .panel-card {
   min-width: 0;
@@ -1823,39 +1729,7 @@ pre {
   outline: 3px solid rgb(63 126 255 / 14%);
 }
 
-@media (width >= 1080px) {
-  .builder-page .container {
-    overflow: hidden;
-  }
-
-  .builder-page .builder-layout {
-    height: 100%;
-    min-height: 0;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  }
-
-  .editor-panel,
-  .preview-panel {
-    height: 100%;
-    min-height: 0;
-    overflow-y: auto;
-    position: static; /* override sticky on large screens */
-    padding-bottom: 4em; /* clear fixed footer */
-  }
-
-  .preview-panel {
-    padding-right: var(--space-4);
-  }
-
-  .input-group > .btn {
-    border-radius: 0;
-  }
-
-  .input-group > .btn:last-child {
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-  }
-}
+/* Large-screen builder layout — replaced by Tailwind lg: breakpoints */
 
 /* ===== TOPBAR ===== */
 /* Top bar styles */

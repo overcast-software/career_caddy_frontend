@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 import cloneResume from 'career-caddy-frontend/utils/clone-resume';
 import exportResumeToWord from 'career-caddy-frontend/utils/export-resume-to-word';
 
@@ -9,6 +10,17 @@ export default class ResumesEditController extends Controller {
   @service router;
   @service flashMessages;
   @service session;
+
+  @tracked sideBySide = (() => {
+    const stored = localStorage.getItem('cc:builder-layout');
+    if (stored !== null) return stored === 'split';
+    return typeof window !== 'undefined' && window.innerWidth >= 1024;
+  })();
+
+  @action toggleLayout() {
+    this.sideBySide = !this.sideBySide;
+    localStorage.setItem('cc:builder-layout', this.sideBySide ? 'split' : 'stack');
+  }
 
   @action
   async cloneResume() {
@@ -27,6 +39,11 @@ export default class ResumesEditController extends Controller {
     } catch (e) {
       console.error('Failed to save resume', e);
     }
+  }
+
+  @action cancel() {
+    this.model.rollbackAttributes();
+    this.router.transitionTo('resumes.show', this.model);
   }
 
   @action deleteResume() {
@@ -85,8 +102,18 @@ export default class ResumesEditController extends Controller {
     if (!rel.includes(cert)) rel.unshiftObject(cert);
   };
 
+  @tracked _activeSummary = null;
+
   get resumeSummaries() {
     return this.store.peekAll('summary');
+  }
+
+  get activeSummary() {
+    return this._activeSummary ?? this.model?.activeSummary;
+  }
+
+  @action onSummaryChange(summary) {
+    this._activeSummary = summary;
   }
 
   get isDirty() {
