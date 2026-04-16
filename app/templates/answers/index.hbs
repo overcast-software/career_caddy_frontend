@@ -16,11 +16,7 @@
     {{#if this.isSearching}}
       <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
     {{else}}
-      <Answers::DetailList
-        @answers={{this.model}}
-        @showRoute="answers.show"
-        @editRoute="answers.edit"
-      />
+      <Answers::DetailList @answers={{this.model}} @editRoute="answers.edit" />
       <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
         <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
       </InfinityLoader>

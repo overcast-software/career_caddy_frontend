@@ -14,6 +14,10 @@ export default class AnswersShowComponent extends Component {
 
   get answerShowRoute() {
     const route = this.router.currentRouteName;
+    // Top-level /answers page
+    if (route === 'answers.index' || route === 'answers.show') {
+      return 'answers.show';
+    }
     const base = route
       .replace(/\.index$/, '')
       .replace(/\.answers\.show$/, '')

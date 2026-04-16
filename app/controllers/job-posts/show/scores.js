@@ -42,8 +42,16 @@ export default class JobPostsShowScoresController extends Controller {
 
   @action async scoreResume() {
     const { job_post_id } = this.router.currentRoute.parent.params;
+    if (!job_post_id) {
+      this.flashMessages.warning('Could not determine job post.');
+      return;
+    }
     const jobPost = this.store.peekRecord('job-post', job_post_id);
-    const resume = this.store.peekRecord('resume', this.selectedResume.id);
+    const resumeId = this.selectedResume?.id;
+    const resume =
+      resumeId && resumeId !== '0'
+        ? this.store.peekRecord('resume', resumeId)
+        : null;
     const newScore = this.store.createRecord('score', {
       resume,
       jobPost,
