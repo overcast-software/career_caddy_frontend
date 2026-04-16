@@ -14,8 +14,14 @@ const TERMINAL = new Set(['completed', 'done', 'failed', 'error']);
 export default class PollableController extends Controller {
   @service poller;
   @service flashMessages;
+  @service spinner;
 
   _polledRecord = null;
+
+  /** Override to set a custom spinner label. */
+  get spinnerLabel() {
+    return 'Processing…';
+  }
 
   /** Override to customise the terminal check. */
   isTerminal(record) {
@@ -46,15 +52,17 @@ export default class PollableController extends Controller {
   startPollingIfPending() {
     this.stopPolling();
     const record = this.model;
-    if (!record || this.isTerminal(record)) return;
+    if (!record || !record.status || this.isTerminal(record)) return;
 
     this.onPollStart(record);
+    this.spinner.begin({ label: this.spinnerLabel });
 
     this._polledRecord = record;
     this.poller.watchRecord(record, {
       isTerminal: (rec) => this.isTerminal(rec),
       onUpdate: (rec) => this.onPollUpdate(rec),
       onStop: (rec) => {
+        this.spinner.end();
         this._polledRecord = null;
         if (rec.status === 'failed' || rec.status === 'error') {
           this.onPollFailed(rec);
@@ -63,6 +71,7 @@ export default class PollableController extends Controller {
         }
       },
       onError: (err) => {
+        this.spinner.end();
         this._polledRecord = null;
         this.onPollError(err, record);
       },
@@ -71,6 +80,7 @@ export default class PollableController extends Controller {
 
   stopPolling() {
     if (this._polledRecord) {
+      this.spinner.end();
       this.poller.stop(this._polledRecord);
       this._polledRecord = null;
     }

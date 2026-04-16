@@ -5,6 +5,10 @@ import { tracked } from '@glimmer/tracking';
 export default class JobPostsShowQuestionsShowAnswersShowController extends PollableController {
   @tracked copyButtonText = 'Copy';
 
+  get spinnerLabel() {
+    return 'Generating answer…';
+  }
+
   @action
   async copyToClipboard() {
     try {

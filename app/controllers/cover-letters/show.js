@@ -7,6 +7,10 @@ export default class CoverLettersShowController extends PollableController {
   @service session;
   isExporting = false;
 
+  get spinnerLabel() {
+    return 'Generating cover letter…';
+  }
+
   onPollStart() {
     this.flashMessages.info('Generating cover letter — waiting for results…');
   }

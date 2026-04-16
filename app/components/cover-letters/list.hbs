@@ -3,9 +3,6 @@
     <table class="min-w-full text-sm">
       <thead class="bg-gray-50 border-b border-gray-200">
         <tr>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Status</th>
           {{#unless (eq @showJobPost false)}}
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
           {{/unless}}
@@ -23,35 +20,6 @@
       <tbody class="divide-y divide-gray-100">
         {{#each @coverLetters as |coverLetter|}}
           <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3">
-              {{#if (and @isPending (@isPending coverLetter))}}
-                <span class="inline-flex items-center gap-1.5 text-gray-400">
-                  <svg
-                    class="animate-spin size-3.5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    ></path>
-                  </svg>
-                  Generating…
-                </span>
-              {{else}}
-                {{or coverLetter.status "—"}}
-              {{/if}}
-            </td>
             {{#unless (eq @showJobPost false)}}
               <td class="px-4 py-3 text-gray-600">
                 {{#if coverLetter.jobPost.id}}

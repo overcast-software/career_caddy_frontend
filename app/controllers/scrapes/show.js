@@ -3,13 +3,15 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 
 export default class ScrapesShowController extends PollableController {
-  @service spinner;
   @service store;
   @service router;
 
+  get spinnerLabel() {
+    return 'Scraping…';
+  }
+
   onPollStart() {
     this.flashMessages.info('Scrape in progress — waiting for results…');
-    this.spinner.begin({ label: 'Scraping…' });
   }
 
   onPollUpdate(rec) {
@@ -17,7 +19,6 @@ export default class ScrapesShowController extends PollableController {
   }
 
   async onPollComplete(rec) {
-    this.spinner.end();
     this.flashMessages.success('Scrape completed.');
     await this.store.findRecord('scrape', rec.id, {
       reload: true,
@@ -26,12 +27,10 @@ export default class ScrapesShowController extends PollableController {
   }
 
   onPollFailed() {
-    this.spinner.end();
     this.flashMessages.danger('Scrape failed.');
   }
 
   onPollError() {
-    this.spinner.end();
     this.flashMessages.danger('Lost connection while waiting for scrape.');
   }
 

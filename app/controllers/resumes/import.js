@@ -49,20 +49,22 @@ export default class ResumesImportController extends Controller {
           sticky: true,
         });
         this.isUploading = false;
+        this.spinner.begin({ label: 'Parsing resume…' });
 
         this.poller.watchRecord(resume, {
           isTerminal: (r) => ['completed', 'failed'].includes(r.status),
           onStop: (r) => {
+            this.spinner.end();
             this.flashMessages.clearMessages();
             if (r.status === 'completed') {
               this.uploadSucceeded = true;
               this.flashMessages.success('Resume imported successfully.');
-              this.router.transitionTo('resumes.edit', r.id);
             } else {
               this.flashMessages.danger('Resume import failed.');
             }
           },
           onError: () => {
+            this.spinner.end();
             this.flashMessages.clearMessages();
             this.flashMessages.danger(
               'Lost connection while importing resume.',
