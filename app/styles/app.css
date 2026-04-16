@@ -43,6 +43,7 @@
   --surface: #fafafa;
   --surface-alt: #f5f6f8;
   --surface-hover: #f0f4f8;
+  --oc-sidebar: 280px;
   --radius: 8px;
   --space-1: 4px;
   --space-2: 8px;
@@ -315,7 +316,7 @@ body {
 }
 
 .course--sidebar-open {
-  grid-template-columns: 280px 1fr 0;
+  grid-template-columns: var(--oc-sidebar) 1fr 0;
 }
 
 .course--chat-open {
@@ -323,7 +324,7 @@ body {
 }
 
 .course--sidebar-open.course--chat-open {
-  grid-template-columns: 280px 1fr 24rem;
+  grid-template-columns: var(--oc-sidebar) 1fr 24rem;
 }
 
 .course > header {
@@ -1435,7 +1436,7 @@ a.landing-btn-primary:hover {
 /* On desktop with sidebars open, footer must not cover them */
 @media (width >= 768px) {
   .course--sidebar-open .route-footer {
-    left: 280px;
+    left: var(--oc-sidebar);
   }
 
   .course--chat-open .route-footer {
