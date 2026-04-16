@@ -1,47 +1,39 @@
-import Controller from '@ember/controller';
+import PollableController from 'career-caddy-frontend/controllers/pollable';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 
-const TERMINAL_STATUSES = ['completed', 'done', 'failed', 'error'];
-
-export default class ScrapesShowController extends Controller {
+export default class ScrapesShowController extends PollableController {
   @service spinner;
-  @service flashMessages;
   @service store;
-  @service poller;
   @service router;
 
-  willDestroy() {
-    super.willDestroy(...arguments);
-    if (this.model) {
-      this.poller.stop(this.model);
-    }
-  }
-
-  startPollingIfNeeded(scrape) {
-    if (TERMINAL_STATUSES.includes(scrape.status)) return;
+  startPollingIfPending() {
     this.flashMessages.info('Scrape in progress — waiting for results…');
     this.spinner.begin({ label: 'Scraping…' });
-    this.poller.watchRecord(scrape, {
-      isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
-      onUpdate: (rec) => this._refreshStatuses(rec),
-      onStop: async (rec) => {
-        this.spinner.end();
-        if (rec.status === 'failed' || rec.status === 'error') {
-          this.flashMessages.danger('Scrape failed.');
-        } else {
-          this.flashMessages.success('Scrape completed.');
-          await this.store.findRecord('scrape', rec.id, {
-            reload: true,
-            include: 'company,job-post',
-          });
-        }
-      },
-      onError: () => {
-        this.spinner.end();
-        this.flashMessages.danger('Lost connection while waiting for scrape.');
-      },
+    super.startPollingIfPending();
+  }
+
+  onPollUpdate(rec) {
+    this._refreshStatuses(rec);
+  }
+
+  async onPollComplete(rec) {
+    this.spinner.end();
+    this.flashMessages.success('Scrape completed.');
+    await this.store.findRecord('scrape', rec.id, {
+      reload: true,
+      include: 'company,job-post',
     });
+  }
+
+  onPollFailed() {
+    this.spinner.end();
+    this.flashMessages.danger('Scrape failed.');
+  }
+
+  onPollError() {
+    this.spinner.end();
+    this.flashMessages.danger('Lost connection while waiting for scrape.');
   }
 
   async _refreshStatuses(scrape) {
@@ -60,7 +52,7 @@ export default class ScrapesShowController extends Controller {
       const base = adapter.buildURL('scrape', scrape.id).replace(/\/+$/, '');
       await adapter.ajax(`${base}/parse/`, 'POST');
       await scrape.reload();
-      this.startPollingIfNeeded(scrape);
+      this.startPollingIfPending();
     } catch (error) {
       this.flashMessages.danger('Failed to parse scrape: ' + error.message);
     }
@@ -77,7 +69,7 @@ export default class ScrapesShowController extends Controller {
       this.flashMessages.success('Scrape retry initiated successfully');
 
       await scrape.reload();
-      this.startPollingIfNeeded(scrape);
+      this.startPollingIfPending();
     } catch (error) {
       this.flashMessages.danger('Failed to retry scrape: ' + error.message);
     } finally {

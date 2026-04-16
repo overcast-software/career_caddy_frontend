@@ -1,20 +1,17 @@
-import Controller from '@ember/controller';
+import PollableListController from 'career-caddy-frontend/controllers/pollable-list';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 const CAREER_DATA_OPTION = { id: '0', name: 'Career Data (internal)' };
-const TERMINAL_STATUSES = new Set(['completed', 'done', 'failed', 'error']);
 
-export default class JobPostsShowCoverLettersController extends Controller {
-  @service store;
+export default class JobPostsShowCoverLettersController extends PollableListController {
   @service router;
   @service spinner;
-  @service flashMessages;
-  @service poller;
+
+  recordType = 'cover-letter';
 
   @tracked selectedResume = CAREER_DATA_OPTION;
-  @tracked pendingIds = new Set();
   @tracked instructions = '';
 
   get resumes() {
@@ -23,16 +20,16 @@ export default class JobPostsShowCoverLettersController extends Controller {
     return [CAREER_DATA_OPTION, ...Array.from(all)];
   }
 
-  @action isPending(coverLetter) {
-    return this.pendingIds.has(coverLetter.id);
+  onRecordComplete() {
+    this.flashMessages.success('Cover letter ready.');
   }
 
-  willDestroy() {
-    super.willDestroy(...arguments);
-    for (const id of this.pendingIds) {
-      const record = this.store.peekRecord('cover-letter', id);
-      if (record) this.poller.stop(record);
-    }
+  onRecordFailed() {
+    this.flashMessages.danger('Cover letter generation failed.');
+  }
+
+  onRecordError() {
+    this.flashMessages.danger('Lost connection while waiting for cover letter.');
   }
 
   @action selectResume(resume) {
@@ -56,37 +53,12 @@ export default class JobPostsShowCoverLettersController extends Controller {
     try {
       const saved = await this.spinner.wrap(cl.save());
       this.instructions = '';
-      if (!saved.status || !TERMINAL_STATUSES.has(saved.status)) {
-        this._pollCoverLetter(saved);
+      if (!this.isTerminal(saved)) {
+        this.pollRecord(saved);
       }
     } catch {
       cl.unloadRecord();
       this.flashMessages.danger('Failed to create cover letter.');
     }
   }
-
-  _pollCoverLetter = (cl) => {
-    this.pendingIds = new Set([...this.pendingIds, cl.id]);
-    this.poller.watchRecord(cl, {
-      isTerminal: (rec) => TERMINAL_STATUSES.has(rec.status),
-      onStop: (rec) => {
-        this.pendingIds = new Set(
-          [...this.pendingIds].filter((id) => id !== cl.id),
-        );
-        if (rec.status === 'failed' || rec.status === 'error') {
-          this.flashMessages.danger('Cover letter generation failed.');
-        } else {
-          this.flashMessages.success('Cover letter ready.');
-        }
-      },
-      onError: () => {
-        this.pendingIds = new Set(
-          [...this.pendingIds].filter((id) => id !== cl.id),
-        );
-        this.flashMessages.danger(
-          'Lost connection while waiting for cover letter.',
-        );
-      },
-    });
-  };
 }

@@ -1,20 +1,18 @@
-import Controller from '@ember/controller';
+import PollableListController from 'career-caddy-frontend/controllers/pollable-list';
+import { TERMINAL } from 'career-caddy-frontend/controllers/pollable';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 const CAREER_DATA_OPTION = { id: '0', name: 'Career Data (internal)' };
-const TERMINAL_STATUSES = new Set(['completed', 'done', 'failed', 'error']);
 
-export default class JobPostsShowSummariesController extends Controller {
-  @service store;
+export default class JobPostsShowSummariesController extends PollableListController {
   @service router;
   @service spinner;
-  @service flashMessages;
-  @service poller;
+
+  recordType = 'summary';
 
   @tracked selectedResume = CAREER_DATA_OPTION;
-  @tracked pendingIds = new Set();
   @tracked instructions = '';
 
   get resumes() {
@@ -23,16 +21,12 @@ export default class JobPostsShowSummariesController extends Controller {
     return [CAREER_DATA_OPTION, ...Array.from(all)];
   }
 
-  @action isPending(summary) {
-    return this.pendingIds.has(summary.id);
+  isTerminal(rec) {
+    return !!rec.content || TERMINAL.has(rec.active);
   }
 
-  willDestroy() {
-    super.willDestroy(...arguments);
-    for (const id of this.pendingIds) {
-      const record = this.store.peekRecord('summary', id);
-      if (record) this.poller.stop(record);
-    }
+  onRecordError() {
+    this.flashMessages.danger('Lost connection while waiting for summary.');
   }
 
   @action selectResume(resume) {
@@ -59,29 +53,11 @@ export default class JobPostsShowSummariesController extends Controller {
       });
       this.instructions = '';
       if (!saved.content) {
-        this._pollSummary(saved);
+        this.pollRecord(saved);
       }
     } catch {
       summary.unloadRecord();
       this.flashMessages.danger('Failed to create summary.');
     }
-  }
-
-  _pollSummary(summary) {
-    this.pendingIds = new Set([...this.pendingIds, summary.id]);
-    this.poller.watchRecord(summary, {
-      isTerminal: (rec) => !!rec.content || TERMINAL_STATUSES.has(rec.active),
-      onStop: () => {
-        this.pendingIds = new Set(
-          [...this.pendingIds].filter((id) => id !== summary.id),
-        );
-      },
-      onError: () => {
-        this.pendingIds = new Set(
-          [...this.pendingIds].filter((id) => id !== summary.id),
-        );
-        this.flashMessages.danger('Lost connection while waiting for summary.');
-      },
-    });
   }
 }

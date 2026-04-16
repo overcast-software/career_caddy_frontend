@@ -10,6 +10,6 @@ export default class ScrapesShowRoute extends Route {
 
   setupController(controller, model) {
     super.setupController(controller, model);
-    controller.startPollingIfNeeded(model);
+    controller.startPollingIfPending();
   }
 }

@@ -11,6 +11,6 @@ export default class CoverLettersShowRoute extends Route {
 
   setupController(controller, model) {
     super.setupController(controller, model);
-    controller.startPollingIfNeeded(model);
+    controller.startPollingIfPending();
   }
 }

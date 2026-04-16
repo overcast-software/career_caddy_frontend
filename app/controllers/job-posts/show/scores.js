@@ -1,22 +1,18 @@
-import Controller from '@ember/controller';
+import PollableListController from 'career-caddy-frontend/controllers/pollable-list';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 const CAREER_DATA_OPTION = { id: '0', name: 'Career Data (internal)' };
-const TERMINAL_STATUSES = new Set(['completed', 'done', 'failed', 'error']);
 
-export default class JobPostsShowScoresController extends Controller {
-  @service store;
+export default class JobPostsShowScoresController extends PollableListController {
   @service router;
   @service currentUser;
   @service spinner;
-  @service flashMessages;
-  @service poller;
+
+  recordType = 'score';
 
   @tracked selectedResume = CAREER_DATA_OPTION;
-  // Set of record ids currently being polled
-  @tracked pendingIds = new Set();
   @tracked instructions = '';
 
   get resumes() {
@@ -25,16 +21,12 @@ export default class JobPostsShowScoresController extends Controller {
     return [CAREER_DATA_OPTION, ...Array.from(all)];
   }
 
-  @action isPending(score) {
-    return this.pendingIds.has(score.id);
+  onRecordFailed() {
+    this.flashMessages.danger('Scoring failed.');
   }
 
-  willDestroy() {
-    super.willDestroy(...arguments);
-    for (const id of this.pendingIds) {
-      const record = this.store.peekRecord('score', id);
-      if (record) this.poller.stop(record);
-    }
+  onRecordError() {
+    this.flashMessages.danger('Lost connection while waiting for score.');
   }
 
   @action selectResume(resume) {
@@ -68,8 +60,8 @@ export default class JobPostsShowScoresController extends Controller {
         label: 'Requesting score…',
       });
       this.instructions = '';
-      if (!saved.status || !TERMINAL_STATUSES.has(saved.status)) {
-        this._pollScore(saved);
+      if (!this.isTerminal(saved)) {
+        this.pollRecord(saved);
       }
     } catch (e) {
       newScore.unloadRecord();
@@ -77,26 +69,5 @@ export default class JobPostsShowScoresController extends Controller {
         e?.errors?.[0]?.detail ?? 'Failed to create score.',
       );
     }
-  }
-
-  _pollScore(score) {
-    this.pendingIds = new Set([...this.pendingIds, score.id]);
-    this.poller.watchRecord(score, {
-      isTerminal: (rec) => TERMINAL_STATUSES.has(rec.status),
-      onStop: (rec) => {
-        this.pendingIds = new Set(
-          [...this.pendingIds].filter((id) => id !== score.id),
-        );
-        if (rec.status === 'failed' || rec.status === 'error') {
-          this.flashMessages.danger('Scoring failed.');
-        }
-      },
-      onError: () => {
-        this.pendingIds = new Set(
-          [...this.pendingIds].filter((id) => id !== score.id),
-        );
-        this.flashMessages.danger('Lost connection while waiting for score.');
-      },
-    });
   }
 }

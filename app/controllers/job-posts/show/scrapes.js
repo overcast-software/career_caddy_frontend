@@ -1,29 +1,23 @@
-import Controller from '@ember/controller';
+import PollableListController from 'career-caddy-frontend/controllers/pollable-list';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
-import { tracked } from '@glimmer/tracking';
 
-const TERMINAL_STATUSES = new Set(['completed', 'done', 'failed', 'error']);
-
-export default class JobPostsShowScrapesController extends Controller {
-  @service store;
+export default class JobPostsShowScrapesController extends PollableListController {
   @service router;
   @service spinner;
-  @service flashMessages;
-  @service poller;
 
-  @tracked pendingIds = new Set();
+  recordType = 'scrape';
 
-  @action isPending(scrape) {
-    return this.pendingIds.has(scrape.id);
+  onRecordComplete() {
+    this.flashMessages.success('Scrape completed.');
   }
 
-  willDestroy() {
-    super.willDestroy(...arguments);
-    for (const id of this.pendingIds) {
-      const record = this.store.peekRecord('scrape', id);
-      if (record) this.poller.stop(record);
-    }
+  onRecordFailed() {
+    this.flashMessages.danger('Scrape failed.');
+  }
+
+  onRecordError() {
+    this.flashMessages.danger('Lost connection while waiting for scrape.');
   }
 
   @action async createScrape() {
@@ -37,35 +31,12 @@ export default class JobPostsShowScrapesController extends Controller {
       const saved = await this.spinner.wrap(scrape.save(), {
         label: 'Creating scrape…',
       });
-      if (!TERMINAL_STATUSES.has(saved.status)) {
-        this._pollScrape(saved);
+      if (!this.isTerminal(saved)) {
+        this.pollRecord(saved);
       }
     } catch {
       scrape.unloadRecord();
       this.flashMessages.danger('Failed to create scrape.');
     }
-  }
-
-  _pollScrape(scrape) {
-    this.pendingIds = new Set([...this.pendingIds, scrape.id]);
-    this.poller.watchRecord(scrape, {
-      isTerminal: (rec) => TERMINAL_STATUSES.has(rec.status),
-      onStop: (rec) => {
-        this.pendingIds = new Set(
-          [...this.pendingIds].filter((id) => id !== scrape.id),
-        );
-        if (rec.status === 'failed' || rec.status === 'error') {
-          this.flashMessages.danger('Scrape failed.');
-        } else {
-          this.flashMessages.success('Scrape completed.');
-        }
-      },
-      onError: () => {
-        this.pendingIds = new Set(
-          [...this.pendingIds].filter((id) => id !== scrape.id),
-        );
-        this.flashMessages.danger('Lost connection while waiting for scrape.');
-      },
-    });
   }
 }

@@ -1,40 +1,23 @@
-import Controller from '@ember/controller';
+import PollableController from 'career-caddy-frontend/controllers/pollable';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 
-const TERMINAL_STATUSES = ['completed', 'done', 'failed', 'error'];
-
-export default class CoverLettersShowController extends Controller {
-  @service flashMessages;
+export default class CoverLettersShowController extends PollableController {
   @service store;
   @service session;
-  @service poller;
   isExporting = false;
 
-  willDestroy() {
-    super.willDestroy(...arguments);
-    if (this.model) {
-      this.poller.stop(this.model);
-    }
+  startPollingIfPending() {
+    this.flashMessages.info('Generating cover letter — waiting for results…');
+    super.startPollingIfPending();
   }
 
-  startPollingIfNeeded(coverLetter) {
-    if (coverLetter.status && !TERMINAL_STATUSES.includes(coverLetter.status)) {
-      this.flashMessages.info('Generating cover letter — waiting for results…');
-      this.poller.watchRecord(coverLetter, {
-        isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
-        onStop: (rec) => {
-          if (rec.status === 'failed' || rec.status === 'error') {
-            this.flashMessages.danger('Cover letter generation failed.');
-          }
-        },
-        onError: () => {
-          this.flashMessages.danger(
-            'Lost connection while waiting for cover letter.',
-          );
-        },
-      });
-    }
+  onPollFailed() {
+    this.flashMessages.danger('Cover letter generation failed.');
+  }
+
+  onPollError() {
+    this.flashMessages.danger('Lost connection while waiting for cover letter.');
   }
 
   @action async toggleFavorite() {
