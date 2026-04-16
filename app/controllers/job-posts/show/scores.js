@@ -17,6 +17,7 @@ export default class JobPostsShowScoresController extends Controller {
   @tracked selectedResume = CAREER_DATA_OPTION;
   // Set of record ids currently being polled
   @tracked pendingIds = new Set();
+  @tracked instructions = '';
 
   get resumes() {
     const all = this.store.peekAll('resume');
@@ -40,6 +41,10 @@ export default class JobPostsShowScoresController extends Controller {
     this.selectedResume = resume;
   }
 
+  @action updateInstructions(event) {
+    this.instructions = event.target.value;
+  }
+
   @action async scoreResume() {
     const { job_post_id } = this.router.currentRoute.parent.params;
     if (!job_post_id) {
@@ -56,11 +61,13 @@ export default class JobPostsShowScoresController extends Controller {
       resume,
       jobPost,
       user: this.currentUser.user,
+      instructions: this.instructions,
     });
     try {
       const saved = await this.spinner.wrap(newScore.save(), {
         label: 'Requesting score…',
       });
+      this.instructions = '';
       if (!saved.status || !TERMINAL_STATUSES.has(saved.status)) {
         this._pollScore(saved);
       }

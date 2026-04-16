@@ -11,6 +11,15 @@
   <button type="button" class="btn shrink-0" {{on "click" this.createSummary}}>+
     New Summary</button>
 </div>
+<div class="mb-4">
+  <textarea
+    id="summary-instructions"
+    class="w-full bg-accent-50"
+    rows="3"
+    placeholder="Instructions for AI (optional)..."
+    {{on "input" this.updateInstructions}}
+  >{{this.instructions}}</textarea>
+</div>
 
 <Summaries::List
   @summaries={{this.model}}

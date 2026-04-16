@@ -79,8 +79,22 @@
         </div>
       </div>
 
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="score-instructions">Instructions for
+            AI (optional)</label>
+          <textarea
+            id="score-instructions"
+            class="bg-accent-50"
+            rows="3"
+            placeholder="Add any additional context or instructions for the AI..."
+            {{on "input" this.updateInstructions}}
+          >{{this.instructions}}</textarea>
+        </div>
+      </div>
+
       <div class="form-actions">
-        <button type="submit" class="btn">Save Score</button>
+        <button type="submit" class="btn primary">Score with AI</button>
       </div>
     </form>
   </:main>

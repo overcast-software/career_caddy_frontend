@@ -4,6 +4,7 @@ export default class ScoreModel extends Model {
   @attr('number') score;
   @attr('string') explanation;
   @attr('string') status;
+  @attr('string') instructions;
   @attr('date') createdAt;
   @belongsTo('resume', { async: true, inverse: 'scores' }) resume;
   @belongsTo('job-post', { async: true, inverse: 'scores' }) jobPost;

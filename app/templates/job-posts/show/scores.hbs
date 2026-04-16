@@ -14,6 +14,15 @@
     {{on "click" this.scoreResume}}
   >Score</button>
 </div>
+<div class="mb-4">
+  <textarea
+    id="score-instructions"
+    class="w-full bg-accent-50"
+    rows="3"
+    placeholder="Instructions for AI (optional)..."
+    {{on "input" this.updateInstructions}}
+  >{{this.instructions}}</textarea>
+</div>
 
 <Scores::List
   @scores={{this.model}}

@@ -15,6 +15,7 @@ export default class JobPostsShowSummariesController extends Controller {
 
   @tracked selectedResume = CAREER_DATA_OPTION;
   @tracked pendingIds = new Set();
+  @tracked instructions = '';
 
   get resumes() {
     const all = this.store.peekAll('resume');
@@ -38,6 +39,10 @@ export default class JobPostsShowSummariesController extends Controller {
     this.selectedResume = resume;
   }
 
+  @action updateInstructions(event) {
+    this.instructions = event.target.value;
+  }
+
   @action async createSummary() {
     const { job_post_id } = this.router.currentRoute.parent.params;
     const jobPost = this.store.peekRecord('job-post', job_post_id);
@@ -46,11 +51,13 @@ export default class JobPostsShowSummariesController extends Controller {
       jobPost,
       resume,
       content: '',
+      instructions: this.instructions,
     });
     try {
       const saved = await this.spinner.wrap(summary.save(), {
         label: 'Creating summary…',
       });
+      this.instructions = '';
       if (!saved.content) {
         this._pollSummary(saved);
       }

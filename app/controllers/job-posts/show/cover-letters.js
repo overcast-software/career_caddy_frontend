@@ -15,6 +15,7 @@ export default class JobPostsShowCoverLettersController extends Controller {
 
   @tracked selectedResume = CAREER_DATA_OPTION;
   @tracked pendingIds = new Set();
+  @tracked instructions = '';
 
   get resumes() {
     const all = this.store.peekAll('resume');
@@ -38,6 +39,10 @@ export default class JobPostsShowCoverLettersController extends Controller {
     this.selectedResume = resume;
   }
 
+  @action updateInstructions(event) {
+    this.instructions = event.target.value;
+  }
+
   @action async createCoverLetter() {
     const { job_post_id } = this.router.currentRoute.parent.params;
     const jobPost = this.store.peekRecord('job-post', job_post_id);
@@ -45,10 +50,12 @@ export default class JobPostsShowCoverLettersController extends Controller {
     const cl = this.store.createRecord('cover-letter', {
       resume,
       jobPost,
+      instructions: this.instructions,
     });
     this.flashMessages.info('Creating cover letter…');
     try {
       const saved = await this.spinner.wrap(cl.save());
+      this.instructions = '';
       if (!saved.status || !TERMINAL_STATUSES.has(saved.status)) {
         this._pollCoverLetter(saved);
       }

@@ -28,6 +28,7 @@
           <label class="field-label" for="cl-instructions">Instructions for AI</label>
           <textarea
             id="cl-instructions"
+            class="bg-accent-50"
             placeholder="Add any additional context or instructions for the AI..."
             {{on "input" this.updateInstructions}}
           >{{this.instructions}}</textarea>

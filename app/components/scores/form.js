@@ -13,6 +13,7 @@ export default class ScoresFormComponent extends Component {
   @tracked selectedResume = null;
   @tracked _score = '';
   @tracked _explanation = '';
+  @tracked _instructions = '';
   @tracked companies = [];
   @tracked resumes = [];
 
@@ -83,6 +84,15 @@ export default class ScoresFormComponent extends Component {
   }
 
   @action
+  updateInstructions(event) {
+    this._instructions = event.target.value;
+  }
+
+  get instructions() {
+    return this._instructions;
+  }
+
+  @action
   saveScore(event) {
     event.preventDefault();
 
@@ -96,6 +106,7 @@ export default class ScoresFormComponent extends Component {
     score.resume = this.selectedResume;
     score.score = this._score ? Number(this._score) : null;
     score.explanation = this._explanation || null;
+    score.instructions = this._instructions || null;
 
     score
       .save()
