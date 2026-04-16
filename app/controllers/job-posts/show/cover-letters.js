@@ -29,7 +29,9 @@ export default class JobPostsShowCoverLettersController extends PollableListCont
   }
 
   onRecordError() {
-    this.flashMessages.danger('Lost connection while waiting for cover letter.');
+    this.flashMessages.danger(
+      'Lost connection while waiting for cover letter.',
+    );
   }
 
   @action selectResume(resume) {

@@ -1,8 +1,12 @@
 <div class="grid gap-3">
-  {{#if this.errorMessage}}<p class="text-xs text-red-400">{{this.errorMessage}}</p>{{/if}}
+  {{#if this.errorMessage}}<p
+      class="text-xs text-red-400"
+    >{{this.errorMessage}}</p>{{/if}}
 
   <label class="flex flex-col gap-1">
-    <span class="text-xs text-gray-400 uppercase tracking-wide">Institution</span>
+    <span
+      class="text-xs text-gray-400 uppercase tracking-wide"
+    >Institution</span>
     <input
       type="text"
       value={{this.education.institution}}

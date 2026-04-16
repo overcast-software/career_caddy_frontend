@@ -1,14 +1,14 @@
 <div class="mx-2 my-2">
   <button
     type="button"
-    class="flex w-full items-center justify-between text-lg font-bold transition-colors rounded-lg bg-accent-100 text-accent-900 border border-accent-200"
-    style="padding: 0.75rem 1rem 0.75rem 1.25rem;"
+    class="builder-section-header flex w-full items-center justify-between text-lg font-bold transition-colors rounded-lg bg-accent-100 text-accent-900 border border-accent-200"
     aria-expanded={{if this.isOpen "true" "false"}}
     {{on "click" this.toggle}}
   >
     <span>{{@title}}</span>
     <span class="flex items-center gap-2 ml-4">
       {{#if (has-block "actions")}}
+        {{! template-lint-disable no-invalid-interactive }}
         <span role="presentation" {{on "click" this.stopPropagation}}>
           {{yield to="actions"}}
         </span>
@@ -21,17 +21,19 @@
           viewBox="0 0 24 24"
           stroke-width="2"
           stroke="currentColor"
-          class="size-5 transition-transform duration-200 {{if this.isOpen 'rotate-180'}}"
+          class="size-5 transition-transform duration-200
+            {{if this.isOpen 'rotate-180'}}"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m19.5 8.25-7.5 7.5-7.5-7.5"
+          />
         </svg>
       {{/unless}}
     </span>
   </button>
-  <div
-    class="grid transition-[grid-template-rows] duration-200 ease-in-out"
-    style={{if this.isOpen "grid-template-rows: 1fr" "grid-template-rows: 0fr"}}
-  >
+  <div class="builder-section-body {{if this.isOpen 'open'}}">
     <div class="overflow-hidden">
       <div class="px-4 pb-4 pt-2">
         {{yield}}

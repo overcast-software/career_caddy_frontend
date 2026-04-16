@@ -3,13 +3,17 @@
 
   {{#if this.activeSummary}}
     <section>
-      <h2 class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2">Summary</h2>
+      <h2
+        class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2"
+      >Summary</h2>
       <div class="summary">{{this.activeSummary.content}}</div>
     </section>
   {{/if}}
   {{#if this.hasSkills}}
     <section>
-      <h2 class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2">Skills</h2>
+      <h2
+        class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2"
+      >Skills</h2>
       {{#each-in this.groupedSkillsMap as |group skills|}}
         <div class="skills-row">
           <div class="skills-group-title">{{group}}:</div>
@@ -25,7 +29,9 @@
 
   {{#if @resume.experiences.length}}
     <section>
-      <h2 class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2">Experience</h2>
+      <h2
+        class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2"
+      >Experience</h2>
       {{#each this.sortedExperiences as |exp|}}
         <article class="experience">
           <div class="job-header">
@@ -70,7 +76,9 @@
 
   {{#if @resume.projects.length}}
     <section>
-      <h2 class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2">Projects</h2>
+      <h2
+        class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2"
+      >Projects</h2>
       {{#each @resume.projects as |proj|}}
         <article class="experience">
           <div class="job-header">
@@ -106,7 +114,9 @@
 
   {{#if @resume.certifications.length}}
     <section>
-      <h2 class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2">Certifications</h2>
+      <h2
+        class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2"
+      >Certifications</h2>
       {{#each @resume.certifications as |certification|}}
         <Certifications::Item @certification={{certification}} />
       {{/each}}
@@ -116,7 +126,9 @@
 
   {{#if @resume.educations.length}}
     <section>
-      <h2 class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2">Education</h2>
+      <h2
+        class="text-base font-bold uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-2"
+      >Education</h2>
       {{#each @resume.educations as |education|}}
         <Educations::Item @education={{education}} />
       {{/each}}

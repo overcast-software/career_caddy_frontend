@@ -16,7 +16,9 @@ module('Unit | Controller | pollable-list', function (hooks) {
     };
     this.controller.poller = {
       watchRecord: () => {},
-      stop: (rec) => { this.stoppedRecords.push(rec); },
+      stop: (rec) => {
+        this.stoppedRecords.push(rec);
+      },
     };
     this.controller.store = this.fakeStore;
   });

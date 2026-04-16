@@ -1,8 +1,8 @@
 {{page-title "New Resume"}}
 <RouteLayout @flashMessages={{this.flashMessages}} @mainClass="builder-page">
   <:main>
-    <div class="grid grid-cols-1 lg:grid-cols-[minmax(380px,1fr)_minmax(0,1fr)] min-h-screen">
-      <aside class="builder-editor flex flex-col overflow-y-auto lg:sticky lg:top-0 lg:h-screen" style="background: transparent; color: var(--text)">
+    <div class="grid min-h-screen builder-grid split">
+      <aside class="builder-editor flex flex-col overflow-y-auto pr-2">
 
         <Builder::Section @title="Job Title" @collapsible={{false}}>
           <Resumes::Title::Form @resume={{this.model}} />
@@ -24,7 +24,7 @@
           <:actions>
             <button
               type="button"
-              class="rounded bg-gray-700 px-2 py-0.5 text-xs text-gray-300 hover:bg-gray-600"
+              class="rounded bg-accent-100 px-2 py-0.5 text-xs text-accent-800 hover:bg-accent-200"
               {{on "click" this.addExperience}}
             >+ Add</button>
           </:actions>
@@ -37,7 +37,7 @@
           <:actions>
             <button
               type="button"
-              class="rounded bg-gray-700 px-2 py-0.5 text-xs text-gray-300 hover:bg-gray-600"
+              class="rounded bg-accent-100 px-2 py-0.5 text-xs text-accent-800 hover:bg-accent-200"
               {{on "click" this.addCertification}}
             >+ Add</button>
           </:actions>
@@ -53,8 +53,10 @@
         </Builder::Section>
 
       </aside>
-      <main class="bg-gray-100 p-8 overflow-y-auto lg:h-screen">
-        <div class="mx-auto max-w-[8.5in] bg-white shadow-lg rounded-sm p-10 min-h-[11in]">
+      <main class="builder-preview bg-gray-100 p-8 overflow-y-auto">
+        <div
+          class="builder-preview-wrap mx-auto max-w-[8.5in] bg-white shadow-lg rounded-lg min-h-[11in]"
+        >
           <Resumes::Item @resume={{this.model}} />
         </div>
       </main>

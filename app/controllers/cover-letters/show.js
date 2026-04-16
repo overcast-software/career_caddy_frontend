@@ -17,7 +17,9 @@ export default class CoverLettersShowController extends PollableController {
   }
 
   onPollError() {
-    this.flashMessages.danger('Lost connection while waiting for cover letter.');
+    this.flashMessages.danger(
+      'Lost connection while waiting for cover letter.',
+    );
   }
 
   @action async toggleFavorite() {

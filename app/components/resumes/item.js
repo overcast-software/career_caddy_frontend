@@ -2,11 +2,11 @@ import Component from '@glimmer/component';
 
 export default class ResumesItemComponent extends Component {
   get sortedExperiences() {
-    return this.args.resume.sortedExperiences;
+    return this.args.resume?.sortedExperiences ?? [];
   }
 
   get groupedSkillsMap() {
-    const skills = this.args.resume.hasMany('skills').value();
+    const skills = this.args.resume?.hasMany('skills')?.value();
     if (!skills) return {};
     const result = {};
     for (const skill of skills) {
@@ -22,6 +22,6 @@ export default class ResumesItemComponent extends Component {
   }
 
   get activeSummary() {
-    return this.args.activeSummary ?? this.args.resume.activeSummary;
+    return this.args.activeSummary ?? this.args.resume?.activeSummary;
   }
 }

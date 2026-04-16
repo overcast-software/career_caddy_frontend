@@ -19,7 +19,10 @@ export default class ResumesEditController extends Controller {
 
   @action toggleLayout() {
     this.sideBySide = !this.sideBySide;
-    localStorage.setItem('cc:builder-layout', this.sideBySide ? 'split' : 'stack');
+    localStorage.setItem(
+      'cc:builder-layout',
+      this.sideBySide ? 'split' : 'stack',
+    );
   }
 
   @action

@@ -7,9 +7,15 @@
       {{on "click" this.toggleExperience}}
     >
       <div class="min-w-0">
-        <span class="font-medium truncate">{{if @experience.title @experience.title "New Experience"}}</span>
+        <span class="font-medium truncate">{{if
+            @experience.title
+            @experience.title
+            "New Experience"
+          }}</span>
         {{#if @experience.company.name}}
-          <span class="ml-1 text-gray-400 text-xs">{{@experience.company.name}}</span>
+          <span
+            class="ml-1 text-gray-400 text-xs"
+          >{{@experience.company.name}}</span>
         {{/if}}
       </div>
       <svg
@@ -19,9 +25,14 @@
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-4 shrink-0 transition-transform duration-200 {{if this.isExpanded 'rotate-180'}}"
+        class="size-4 shrink-0 transition-transform duration-200
+          {{if this.isExpanded 'rotate-180'}}"
       >
-        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="m19.5 8.25-7.5 7.5-7.5-7.5"
+        />
       </svg>
     </button>
     <button
@@ -30,8 +41,19 @@
       title="Delete experience"
       {{on "click" this.deleteExperience}}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-4"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6 18 18 6M6 6l12 12"
+        />
       </svg>
     </button>
   </div>
@@ -44,7 +66,9 @@
 
       <div class="grid gap-3">
         <label class="flex flex-col gap-1">
-          <span class="text-xs text-gray-400 uppercase tracking-wide">Company</span>
+          <span
+            class="text-xs text-gray-400 uppercase tracking-wide"
+          >Company</span>
           <input
             type="text"
             value={{@experience.company.name}}
@@ -55,7 +79,9 @@
 
         <div class="grid grid-cols-2 gap-3">
           <label class="flex flex-col gap-1">
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Title</span>
+            <span
+              class="text-xs text-gray-400 uppercase tracking-wide"
+            >Title</span>
             <input
               type="text"
               value={{@experience.title}}
@@ -64,7 +90,9 @@
             />
           </label>
           <label class="flex flex-col gap-1">
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Location</span>
+            <span
+              class="text-xs text-gray-400 uppercase tracking-wide"
+            >Location</span>
             <input
               type="text"
               value={{@experience.location}}
@@ -76,7 +104,8 @@
 
         <div class="grid grid-cols-2 gap-3">
           <label class="flex flex-col gap-1">
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Start Date</span>
+            <span class="text-xs text-gray-400 uppercase tracking-wide">Start
+              Date</span>
             <input
               type="date"
               value={{this.formattedStartDate}}
@@ -84,10 +113,14 @@
               {{on "input" (fn this.updateField "startDate")}}
             />
           </label>
-          <label class="flex flex-col gap-1">
-            <span class="text-xs text-gray-400 uppercase tracking-wide">End Date</span>
+          <div class="flex flex-col gap-1">
+            <label
+              for="exp-end-date"
+              class="text-xs text-gray-400 uppercase tracking-wide"
+            >End Date</label>
             {{#if this.currentlyWorking}}
               <input
+                id="exp-end-date"
                 type="text"
                 value="Present"
                 disabled
@@ -95,27 +128,31 @@
               />
             {{else}}
               <input
+                id="exp-end-date"
                 type="date"
                 value={{this.formattedEndDate}}
                 class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
                 {{on "input" (fn this.updateField "endDate")}}
               />
             {{/if}}
-          </label>
+          </div>
         </div>
 
-        <label class="flex items-center gap-2 text-sm text-gray-300">
+        <div class="flex items-center gap-2 text-sm text-gray-300">
           <input
+            id="exp-currently-working"
             type="checkbox"
             checked={{this.currentlyWorking}}
             class="rounded border-gray-600 bg-gray-800 text-accent-500 focus:ring-accent-500"
             {{on "change" this.toggleCurrentlyWorking}}
           />
-          I currently work here
-        </label>
+          <label for="exp-currently-working">I currently work here</label>
+        </div>
 
         <div>
-          <span class="text-xs text-gray-400 uppercase tracking-wide">Descriptions</span>
+          <span
+            class="text-xs text-gray-400 uppercase tracking-wide"
+          >Descriptions</span>
           <ul class="mt-1 space-y-2">
             {{#each @experience.descriptions as |d|}}
               <Descriptions::Editor::Form

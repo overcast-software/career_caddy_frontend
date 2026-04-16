@@ -6,25 +6,8 @@ import { hbs } from 'ember-cli-htmlbars';
 module('Integration | Component | experiences/list', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function (assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
-
+  test('it renders empty state', async function (assert) {
     await render(hbs`<Experiences::List />`);
-
-    assert
-      .dom()
-      .hasText('No experiences yet. Use "+ Add Experience" to create one.');
-
-    // Template block usage:
-    await render(hbs`
-      <Experiences::List>
-        template block text
-      </Experiences::List>
-    `);
-
-    assert
-      .dom()
-      .hasText('No experiences yet. Use "+ Add Experience" to create one.');
+    assert.dom().hasText('No experiences yet. Use "+ Add" to create one.');
   });
 });

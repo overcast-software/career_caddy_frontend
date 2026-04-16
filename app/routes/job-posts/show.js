@@ -13,10 +13,9 @@ export default class JobPostsShowRoute extends Route {
   setupController(controller, model) {
     super.setupController(controller, model);
     if (!model.belongsTo('company').id()) {
-      this.flashMessages.warning(
-        'This job post has no associated company.',
-        { sticky: true },
-      );
+      this.flashMessages.warning('This job post has no associated company.', {
+        sticky: true,
+      });
     }
   }
 

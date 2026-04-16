@@ -1337,7 +1337,64 @@ a.landing-btn-primary:hover {
   top: 4lh;
 }
 
-/* ===== BUILDER EDITOR — inputs + labels ===== */
+/* ===== BUILDER EDITOR — layout + inputs ===== */
+.builder-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.builder-grid {
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+.builder-grid.split {
+  grid-template-columns: minmax(380px, 1fr) minmax(0, 1fr);
+}
+
+.builder-editor {
+  background: transparent;
+  color: var(--text);
+}
+
+.builder-grid.split > .builder-editor {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.builder-preview-wrap {
+  padding: 3.5rem 2.5rem 2.5rem;
+}
+
+.builder-grid.split > .builder-preview {
+  height: 100vh;
+}
+
+.builder-section-header {
+  padding: 0.75rem 1rem 0.75rem 1.25rem;
+}
+
+.builder-section-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 200ms ease-in-out;
+}
+
+.builder-section-body.open {
+  grid-template-rows: 1fr;
+}
+
+.builder-divider {
+  border-color: var(--border);
+}
+
+.builder-label-hint {
+  color: var(--muted);
+}
+
+/* Builder editor — inputs + labels */
 .builder-editor input,
 .builder-editor textarea,
 .builder-editor select {

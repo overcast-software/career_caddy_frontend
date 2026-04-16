@@ -2,18 +2,33 @@
   <div class="space-y-2">
     {{#each-in this.groupedSkillsMap as |group skills|}}
       <div>
-        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">{{group}}</span>
+        <span
+          class="text-xs font-semibold text-gray-400 uppercase tracking-wide"
+        >{{group}}</span>
         <div class="flex flex-wrap gap-1.5 mt-1">
           {{#each skills as |skill|}}
-            <span class="inline-flex items-center gap-1 rounded-full bg-accent-100 text-accent-800 px-2.5 py-0.5 text-xs">
+            <span
+              class="inline-flex items-center gap-1 rounded-full bg-accent-100 text-accent-800 px-2.5 py-0.5 text-xs"
+            >
               {{skill.text}}
               <button
                 type="button"
                 class="text-accent-600 hover:text-red-500"
                 {{on "click" (fn this.removeSkill skill)}}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-3"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6 18 18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </span>

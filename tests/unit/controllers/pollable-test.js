@@ -28,23 +28,37 @@ module('Unit | Controller | pollable', function (hooks) {
   test('startPollingIfPending does nothing when model status is terminal', function (assert) {
     let controller = this.owner.lookup('controller:pollable');
     let watchCalled = false;
-    controller.poller = { watchRecord: () => { watchCalled = true; }, stop: () => {} };
+    controller.poller = {
+      watchRecord: () => {
+        watchCalled = true;
+      },
+      stop: () => {},
+    };
     controller.model = { status: 'completed' };
     controller.startPollingIfPending();
-    assert.false(watchCalled, 'watchRecord should not be called for terminal status');
+    assert.false(
+      watchCalled,
+      'watchRecord should not be called for terminal status',
+    );
   });
 
   test('startPollingIfPending calls poller.watchRecord for non-terminal status', function (assert) {
     let controller = this.owner.lookup('controller:pollable');
     let watchedRecord = null;
     controller.poller = {
-      watchRecord: (rec) => { watchedRecord = rec; },
+      watchRecord: (rec) => {
+        watchedRecord = rec;
+      },
       stop: () => {},
     };
     const fakeModel = { status: 'pending' };
     controller.model = fakeModel;
     controller.startPollingIfPending();
-    assert.strictEqual(watchedRecord, fakeModel, 'watchRecord called with the model');
+    assert.strictEqual(
+      watchedRecord,
+      fakeModel,
+      'watchRecord called with the model',
+    );
   });
 
   test('stopPolling calls poller.stop on the tracked record', function (assert) {
@@ -52,20 +66,30 @@ module('Unit | Controller | pollable', function (hooks) {
     let stoppedRecord = null;
     controller.poller = {
       watchRecord: () => {},
-      stop: (rec) => { stoppedRecord = rec; },
+      stop: (rec) => {
+        stoppedRecord = rec;
+      },
     };
     const fakeModel = { status: 'pending' };
     controller.model = fakeModel;
     controller.startPollingIfPending();
     controller.stopPolling();
-    assert.strictEqual(stoppedRecord, fakeModel, 'poller.stop called with the record');
+    assert.strictEqual(
+      stoppedRecord,
+      fakeModel,
+      'poller.stop called with the record',
+    );
     assert.strictEqual(controller._polledRecord, null, '_polledRecord cleared');
   });
 
   test('stopPolling is a no-op when nothing is being polled', function (assert) {
     let controller = this.owner.lookup('controller:pollable');
     let stopCalled = false;
-    controller.poller = { stop: () => { stopCalled = true; } };
+    controller.poller = {
+      stop: () => {
+        stopCalled = true;
+      },
+    };
     controller.stopPolling();
     assert.false(stopCalled, 'poller.stop should not be called');
   });
