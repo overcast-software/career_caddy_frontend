@@ -185,11 +185,13 @@
                     {{on "click" (fn this.toggleScreenshot shot)}}
                   >{{shot.filename}}</button>
                   {{#if shot.revealed}}
-                    <img
-                      src={{shot.blobUrl}}
-                      alt={{shot.filename}}
-                      class="mt-2 rounded border border-gray-200 dark:border-gray-700 max-w-full"
-                    />
+                    <a href={{shot.blobUrl}} class="mt-2 block">
+                      <img
+                        src={{shot.blobUrl}}
+                        alt={{shot.filename}}
+                        class="rounded border border-gray-200 dark:border-gray-700 max-w-full cursor-pointer hover:opacity-80 transition-opacity"
+                      />
+                    </a>
                   {{/if}}
                 </li>
               {{/each}}
@@ -241,4 +243,5 @@
       {{/if}}
     </dl>
   </div>
+
 </div>

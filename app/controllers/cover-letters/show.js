@@ -7,9 +7,8 @@ export default class CoverLettersShowController extends PollableController {
   @service session;
   isExporting = false;
 
-  startPollingIfPending() {
+  onPollStart() {
     this.flashMessages.info('Generating cover letter — waiting for results…');
-    super.startPollingIfPending();
   }
 
   onPollFailed() {

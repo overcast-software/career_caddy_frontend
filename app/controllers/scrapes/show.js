@@ -7,10 +7,9 @@ export default class ScrapesShowController extends PollableController {
   @service store;
   @service router;
 
-  startPollingIfPending() {
+  onPollStart() {
     this.flashMessages.info('Scrape in progress — waiting for results…');
     this.spinner.begin({ label: 'Scraping…' });
-    super.startPollingIfPending();
   }
 
   onPollUpdate(rec) {

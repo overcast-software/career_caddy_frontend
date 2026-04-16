@@ -40,10 +40,15 @@ export default class PollableController extends Controller {
   /** Called on every poll tick (after reload). Override for status refresh etc. */
   onPollUpdate(/* record */) {}
 
+  /** Called when polling actually starts (record is non-terminal). Override for flash/spinner. */
+  onPollStart(/* record */) {}
+
   startPollingIfPending() {
     this.stopPolling();
     const record = this.model;
     if (!record || this.isTerminal(record)) return;
+
+    this.onPollStart(record);
 
     this._polledRecord = record;
     this.poller.watchRecord(record, {
