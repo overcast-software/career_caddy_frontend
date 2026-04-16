@@ -11,4 +11,14 @@ export default class JobApplicationsShowRoute extends Route {
     }
     return this.store.findRecord('job-application', application_id);
   }
+
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    if (!model.belongsTo('company').id()) {
+      this.flashMessages.warning(
+        'This application has no associated company.',
+        { sticky: true },
+      );
+    }
+  }
 }

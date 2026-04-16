@@ -3,7 +3,13 @@
     <div class="panel-card space-y-1 pb-4">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <p class="text-xs text-gray-500">{{this.model.company.name}}</p>
+          <p class="text-xs text-gray-500">
+            {{~#if this.model.company.name~}}
+              {{this.model.company.name}}
+            {{~else~}}
+              <span class="italic text-amber-500">Company missing</span>
+            {{~/if~}}
+          </p>
           <h1 class="text-lg font-semibold text-gray-900">
             {{this.model.title}}
             {{#if this.model.link}}

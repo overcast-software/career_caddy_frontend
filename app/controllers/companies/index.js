@@ -6,10 +6,15 @@ import { tracked } from '@glimmer/tracking';
 export default class CompaniesIndexController extends Controller {
   queryParams = ['search'];
 
+  @service currentUser;
   @service flashMessages;
   @service store;
   @tracked search = '';
   @tracked isSearching = false;
+
+  get isStaff() {
+    return this.currentUser.user?.isStaff;
+  }
 
   @action updateSearch(value) {
     this.search = value;

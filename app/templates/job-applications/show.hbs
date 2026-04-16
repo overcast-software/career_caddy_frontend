@@ -29,9 +29,14 @@
           <dl class="-my-3 divide-y divide-gray-200 text-sm">
             <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
               <dt class="font-medium text-gray-900">Application for</dt>
-              <dd
-                class="text-gray-700 sm:col-span-2"
-              >{{this.model.jobPost.title}} at {{this.model.company.name}}</dd>
+              <dd class="text-gray-700 sm:col-span-2">
+                {{this.model.jobPost.title}} at
+                {{~#if this.model.company.name~}}
+                  {{~this.model.company.name~}}
+                {{~else~}}
+                  <span class="italic text-amber-500">company missing</span>
+                {{~/if~}}
+              </dd>
             </div>
             <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
               <dt class="font-medium text-gray-900">Resume</dt>

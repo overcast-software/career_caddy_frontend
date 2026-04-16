@@ -17,6 +17,7 @@
       <Companies::List
         @companies={{this.model}}
         @onDelete={{this.deleteCompany}}
+        @canDelete={{this.isStaff}}
       />
       <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
         <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>

@@ -24,7 +24,13 @@
                 {{jobPost.title}}
               </LinkTo>
             </td>
-            <td class="px-4 py-3 text-gray-600">{{jobPost.company.name}}</td>
+            <td class="px-4 py-3 text-gray-600">
+              {{~#if jobPost.company.name~}}
+                {{jobPost.company.name}}
+              {{~else~}}
+                <span class="italic text-amber-500">missing</span>
+              {{~/if~}}
+            </td>
             <td class="px-4 py-3 text-gray-600">
               {{moment-format jobPost.postedDate "MMM D, YYYY"}}
             </td>

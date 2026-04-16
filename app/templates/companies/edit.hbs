@@ -1,10 +1,12 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <button
-      type="button"
-      class="btn danger"
-      {{on "click" this.deleteCompany}}
-    >Delete</button>
+    {{#if this.isStaff}}
+      <button
+        type="button"
+        class="btn danger"
+        {{on "click" this.deleteCompany}}
+      >Delete</button>
+    {{/if}}
   </:subnav>
   <:main>
     <Companies::Form @company={{this.model}} />

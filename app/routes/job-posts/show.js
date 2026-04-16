@@ -10,6 +10,16 @@ export default class JobPostsShowRoute extends Route {
     return await this.store.findRecord('job-post', job_post_id);
   }
 
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    if (!model.belongsTo('company').id()) {
+      this.flashMessages.warning(
+        'This job post has no associated company.',
+        { sticky: true },
+      );
+    }
+  }
+
   error() {
     this.flashMessages.danger('Job post not found.');
     this.router.transitionTo('job-posts.index');
