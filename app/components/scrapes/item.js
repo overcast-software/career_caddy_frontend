@@ -42,11 +42,11 @@ export default class ScrapesItemComponent extends Component {
   constructor() {
     super(...arguments);
     if (this.isStaff) {
-      this._loadScreenshots();
+      this._loadScreenshotList();
     }
   }
 
-  async _loadScreenshots() {
+  async _loadScreenshotList() {
     const id = this.args.scrape?.id;
     if (!id) return;
     try {
@@ -59,11 +59,39 @@ export default class ScrapesItemComponent extends Component {
         this.screenshots = (json.data || []).map((s) => ({
           filename: s.filename,
           url: `/api/v1/scrapes/${id}/screenshots/${s.filename}`,
+          revealed: false,
         }));
       }
     } catch {
       // Screenshots are optional debug info
     }
+  }
+
+  @action async toggleScreenshot(shot) {
+    if (shot.revealed) {
+      const updated = this.screenshots.map((s) =>
+        s.filename === shot.filename ? { ...s, revealed: false } : s,
+      );
+      this.screenshots = updated;
+      return;
+    }
+
+    let blobUrl = shot.blobUrl;
+    if (!blobUrl) {
+      const token = this.session.data?.authenticated?.access;
+      const resp = await fetch(shot.url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (resp.ok) {
+        const blob = await resp.blob();
+        blobUrl = URL.createObjectURL(blob);
+      }
+    }
+
+    const updated = this.screenshots.map((s) =>
+      s.filename === shot.filename ? { ...s, revealed: true, blobUrl } : s,
+    );
+    this.screenshots = updated;
   }
 
   @action toggleJobContent() {

@@ -59,6 +59,18 @@ export default class ScrapesShowController extends PollableController {
   }
 
   @action
+  async queueScrape(scrape) {
+    try {
+      scrape.status = 'hold';
+      await scrape.save();
+      this.flashMessages.success('Scrape queued for poller');
+      this.startPollingIfPending();
+    } catch (error) {
+      this.flashMessages.danger('Failed to queue scrape: ' + error.message);
+    }
+  }
+
+  @action
   async retryScrape(scrape) {
     this.spinner.begin({ label: 'Retrying scrape...' });
     try {

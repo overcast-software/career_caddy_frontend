@@ -14,6 +14,11 @@
     <button
       type="button"
       class="btn"
+      {{on "click" (fn this.queueScrape this.model)}}
+    >Queue</button>
+    <button
+      type="button"
+      class="btn"
       {{on "click" (fn this.parseScrape this.model)}}
     >Parse</button>
   </:subnav>
