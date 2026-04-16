@@ -36,11 +36,8 @@ export default class ResumesImportController extends Controller {
         const headers = this.api.headers();
         return new UploadFile(file).upload({ url, headers });
       })
-      .then((response) => {
-        const data =
-          typeof response.body === 'string'
-            ? JSON.parse(response.body)
-            : response.body;
+      .then((response) => response.json())
+      .then((data) => {
         const resumeId = data?.data?.id;
         if (!resumeId) throw new Error('No resume ID in response');
 
