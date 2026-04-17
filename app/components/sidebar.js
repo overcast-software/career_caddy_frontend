@@ -5,9 +5,24 @@ import { service } from '@ember/service';
 
 export default class SidebarComponent extends Component {
   @service currentUser;
+  @service extensions;
   @service router;
   @service theme;
   @tracked copiedField = null;
+
+  get sidebarExtensions() {
+    const authed = !this.currentUser.isGuest;
+    return this.extensions
+      .entriesAt('sidebar')
+      .filter((e) => !e.authOnly || authed);
+  }
+
+  get footerExtensions() {
+    const authed = !this.currentUser.isGuest;
+    return this.extensions
+      .entriesAt('footer')
+      .filter((e) => !e.authOnly || authed);
+  }
 
   get isDocsRoute() {
     return this.router.currentRouteName?.startsWith('docs');
