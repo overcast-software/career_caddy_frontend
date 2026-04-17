@@ -1,5 +1,6 @@
 import EmberRouter from '@ember/routing/router';
 import config from 'career-caddy-frontend/config/environment';
+import { dependencySatisfies, macroCondition } from '@embroider/macros';
 
 export default class Router extends EmberRouter {
   location = config.locationType;
@@ -255,4 +256,8 @@ Router.map(function () {
   });
   this.route('favorites');
   this.route('caddy');
+
+  if (macroCondition(dependencySatisfies('@careercaddy/site-chrome', '*'))) {
+    this.mount('@careercaddy/site-chrome', { as: 'site-chrome', path: '/' });
+  }
 });

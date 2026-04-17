@@ -20,6 +20,7 @@ export default class ApplicationRoute extends Route {
   @service flashMessages;
   @service router;
   @service health;
+  @service publicRoutes;
   @service session;
   @service store;
 
@@ -31,17 +32,7 @@ export default class ApplicationRoute extends Route {
     }
 
     const routeName = transition.to?.name;
-    const isPublic =
-      routeName === 'setup' ||
-      routeName === 'login' ||
-      routeName === 'waitlist' ||
-      routeName === 'forgot-password' ||
-      routeName === 'reset-password' ||
-      routeName === 'accept-invite' ||
-      routeName === 'signup' ||
-      routeName === 'about' ||
-      (routeName && routeName.startsWith('docs'));
-    if (isPublic) {
+    if (this.publicRoutes.isPublic(routeName)) {
       return;
     }
 
