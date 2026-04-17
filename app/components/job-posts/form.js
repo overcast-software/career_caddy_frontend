@@ -7,7 +7,13 @@ export default class JobPostsFormComponent extends Component {
   @service store;
   @service flashMessages;
   @service router;
+  @service currentUser;
   @tracked _selectedCompany = null;
+  @tracked showDeleteConfirm = false;
+
+  get isStaff() {
+    return this.currentUser.user?.isStaff;
+  }
 
   get selectedCompany() {
     return this._selectedCompany ?? this.args.jobPost?.company;
@@ -68,9 +74,18 @@ export default class JobPostsFormComponent extends Component {
   }
 
   @action
-  submitDelete(event) {
-    event.preventDefault();
-    if (!confirm('Delete this job post?')) return;
+  confirmDelete() {
+    this.showDeleteConfirm = true;
+  }
+
+  @action
+  cancelDelete() {
+    this.showDeleteConfirm = false;
+  }
+
+  @action
+  submitDelete() {
+    this.showDeleteConfirm = false;
     this.args.jobPost
       .destroyRecord()
       .then(() => {
@@ -82,6 +97,30 @@ export default class JobPostsFormComponent extends Component {
         if (error?.status !== 403) {
           this.flashMessages.danger('Failed to delete job post.');
         }
+      });
+  }
+
+  @action
+  nuclearDelete() {
+    this.showDeleteConfirm = false;
+    const adapter = this.store.adapterFor('job-post');
+    const id = this.args.jobPost.id;
+    const url = adapter.buildURL('job-post', id) + 'nuclear/';
+    adapter
+      .ajax(url, 'DELETE')
+      .then(() => {
+        this.store.unloadAll('score');
+        this.store.unloadAll('question');
+        this.store.unloadAll('scrape');
+        this.store.unloadAll('cover-letter');
+        this.store.unloadAll('job-application');
+        this.store.unloadAll('summary');
+        this.args.jobPost.unloadRecord();
+        this.flashMessages.success('Job post and all children deleted.');
+        this.router.transitionTo('job-posts.index');
+      })
+      .catch(() => {
+        this.flashMessages.danger('Nuclear delete failed.');
       });
   }
 }

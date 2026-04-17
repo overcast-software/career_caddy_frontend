@@ -59,7 +59,9 @@ export default class JobPostsNewController extends Controller {
       this.router.transitionTo('job-posts.show.job-applications', record);
     } catch (error) {
       if (error?.status !== 403) {
-        this.flashMessages.danger('Failed to save job post.');
+        this.flashMessages.danger(
+          error?.errors?.[0]?.detail ?? 'Failed to save job post.',
+        );
       }
     }
   }
@@ -71,7 +73,9 @@ export default class JobPostsNewController extends Controller {
       this.router.transitionTo('job-posts.show.job-applications.new', record);
     } catch (error) {
       if (error?.status !== 403) {
-        this.flashMessages.danger('Failed to save job post.');
+        this.flashMessages.danger(
+          error?.errors?.[0]?.detail ?? 'Failed to save job post.',
+        );
       }
     }
   }
@@ -83,7 +87,9 @@ export default class JobPostsNewController extends Controller {
       this.router.transitionTo('job-posts.show.scores', record);
     } catch (error) {
       if (error?.status !== 403) {
-        this.flashMessages.danger('Failed to save job post.');
+        this.flashMessages.danger(
+          error?.errors?.[0]?.detail ?? 'Failed to save job post.',
+        );
       }
     }
   }

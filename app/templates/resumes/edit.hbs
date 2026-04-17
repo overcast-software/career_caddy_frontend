@@ -93,7 +93,18 @@
             @summaries={{this.resumeSummaries}}
             @resume={{this.model}}
             @onChange={{this.onSummaryChange}}
-          />
+          >
+            <:empty>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Generate a summary from a
+                <LinkTo
+                  @route="job-posts"
+                  class="text-accent-600 hover:underline dark:text-accent-400"
+                >job post</LinkTo>
+                to tailor this resume.
+              </p>
+            </:empty>
+          </Summaries::Carousel>
         </Builder::Section>
 
         <Builder::Section @title="Skills">

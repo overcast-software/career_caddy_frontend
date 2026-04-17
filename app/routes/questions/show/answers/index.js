@@ -5,9 +5,7 @@ export default class QuestionsShowAnswersIndexRoute extends Route {
   @service store;
 
   async model() {
-    const { question_id } = this.paramsFor('questions.show');
-    return await this.store.query('answer', {
-      'filter[question_id]': question_id,
-    });
+    const question = this.modelFor('questions.show');
+    return await question.answers;
   }
 }

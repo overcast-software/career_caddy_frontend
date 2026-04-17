@@ -45,4 +45,7 @@
   <Summaries::Form @summary={{this.currentSummary}} />
 {{else}}
   <p class="text-sm text-gray-500">No summaries yet.</p>
+  {{#if (has-block "empty")}}
+    {{yield to="empty"}}
+  {{/if}}
 {{/if}}

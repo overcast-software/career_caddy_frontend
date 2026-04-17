@@ -63,7 +63,52 @@
     <button
       type="button"
       class="btn danger"
-      {{on "click" this.submitDelete}}
+      {{on "click" this.confirmDelete}}
     >Delete</button>
   </div>
+
+  {{#if this.showDeleteConfirm}}
+    <div
+      class="field-full mt-4 rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/40 p-4"
+    >
+      <p class="text-sm font-medium text-red-800 dark:text-red-300 mb-3">
+        Are you sure you want to delete this job post?
+      </p>
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          class="btn danger"
+          {{on "click" this.submitDelete}}
+        >Delete post only</button>
+        {{#if this.isStaff}}
+          <button
+            type="button"
+            class="btn bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-500 dark:hover:bg-amber-600"
+            title="Delete job post AND all scores, scrapes, applications, questions, cover letters, summaries"
+            {{on "click" this.nuclearDelete}}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-5 shrink-0 inline-block mr-1"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+              />
+            </svg>
+            Nuclear — delete everything</button>
+        {{/if}}
+        <button
+          type="button"
+          class="btn"
+          {{on "click" this.cancelDelete}}
+        >Cancel</button>
+      </div>
+    </div>
+  {{/if}}
 </form>

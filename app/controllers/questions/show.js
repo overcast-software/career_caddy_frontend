@@ -7,9 +7,13 @@ export default class QuestionsShowController extends Controller {
   @service router;
   @service spinner;
   @action deleteQuestion() {
+    if (!window.confirm('Delete this question?')) return;
     this.model
       .destroyRecord()
-      .then(() => this.flashMessages.success('Question deleted.'))
+      .then(() => {
+        this.flashMessages.success('Question deleted.');
+        this.router.transitionTo('questions');
+      })
       .catch((error) => {
         if (error?.status !== 403) {
           this.flashMessages.danger('Failed to delete question.');
@@ -42,7 +46,6 @@ export default class QuestionsShowController extends Controller {
   }
 
   @action askAI(question) {
-    this.flashMessages.success('Asking AI...');
     const answer = this.store.createRecord('answer', {
       question,
       ai_assist: true,
@@ -50,8 +53,14 @@ export default class QuestionsShowController extends Controller {
     this.spinner.wrap(
       answer
         .save()
-        .then(() => this.flashMessages.success('Answer returned'))
-        .then(() => this.router.transitionTo('questions.show.answers')),
+        .then((saved) =>
+          this.router.transitionTo(
+            'questions.show.answers.show',
+            question.id,
+            saved.id,
+          ),
+        )
+        .catch(() => this.flashMessages.danger('Failed to create answer.')),
     );
   }
 }
