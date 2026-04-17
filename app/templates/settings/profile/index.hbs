@@ -1,0 +1,117 @@
+{{page-title "Profile — Settings"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="settings.profile" class="nav-link">Profile</LinkTo>
+    <LinkTo @route="settings.data" class="nav-link">Data</LinkTo>
+    <LinkTo @route="settings.appearance" class="nav-link">Appearance</LinkTo>
+    <LinkTo @route="settings.ai-spend" class="nav-link">AI Spend</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold">Profile</h1>
+        <LinkTo @route="settings.profile.edit" class="btn primary">Edit</LinkTo>
+      </div>
+
+      <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+        <div>
+          <dt class="font-medium text-gray-500 dark:text-gray-400">Name</dt>
+          <dd
+            class="mt-1 text-gray-900 dark:text-gray-100"
+          >{{this.model.name}}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500 dark:text-gray-400">Username</dt>
+          <dd
+            class="mt-1 text-gray-900 dark:text-gray-100"
+          >{{this.model.username}}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500 dark:text-gray-400">Email</dt>
+          <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
+              this.model.email
+              "—"
+            }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500 dark:text-gray-400">Phone</dt>
+          <dd class="mt-1 text-gray-900 dark:text-gray-100">{{or
+              this.model.phone
+              "—"
+            }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500 dark:text-gray-400">LinkedIn</dt>
+          <dd class="mt-1 flex items-baseline gap-1 min-w-0">
+            <span class="text-gray-900 dark:text-gray-100 truncate">{{or
+                this.model.linkedin
+                "—"
+              }}</span>
+            {{#if this.model.linkedin}}
+              <button
+                type="button"
+                class="ml-1 px-2 py-0.5 text-xs rounded border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
+                {{on "click" (fn this.copyField "linkedin")}}
+              >{{if (eq this.copiedField "linkedin") "Copied!" "Copy"}}</button>
+            {{/if}}
+          </dd>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500 dark:text-gray-400">GitHub</dt>
+          <dd class="mt-1 flex items-baseline gap-1 min-w-0">
+            <span class="text-gray-900 dark:text-gray-100 truncate">{{or
+                this.model.github
+                "—"
+              }}</span>
+            {{#if this.model.github}}
+              <button
+                type="button"
+                class="ml-1 px-2 py-0.5 text-xs rounded border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
+                {{on "click" (fn this.copyField "github")}}
+              >{{if (eq this.copiedField "github") "Copied!" "Copy"}}</button>
+            {{/if}}
+          </dd>
+        </div>
+        <div class="col-span-2">
+          <dt class="font-medium text-gray-500 dark:text-gray-400">Address</dt>
+          <dd
+            class="mt-1 text-gray-900 dark:text-gray-100 whitespace-pre-line"
+          >{{or this.model.address "—"}}</dd>
+        </div>
+        {{#if this.model.links.length}}
+          <div class="col-span-2">
+            <dt
+              class="font-medium text-gray-500 dark:text-gray-400"
+            >Snippets</dt>
+            <dd class="mt-1">
+              <ul class="space-y-1">
+                {{#each this.model.links as |link index|}}
+                  <li class="flex items-baseline gap-1 text-sm min-w-0">
+                    <span
+                      class="font-medium text-gray-700 dark:text-gray-300 shrink-0"
+                    >{{link.name}}</span>
+                    {{#if link.url}}
+                      <span class="text-gray-400 shrink-0">—</span>
+                      <span
+                        class="text-gray-500 dark:text-gray-400 truncate min-w-0"
+                      >{{link.url}}</span>
+                      <button
+                        type="button"
+                        class="ml-1 px-2 py-0.5 text-xs rounded border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
+                        {{on "click" (fn this.copySnippet index)}}
+                      >{{if
+                          (eq this.copiedSnippetIndex index)
+                          "Copied!"
+                          "Copy"
+                        }}</button>
+                    {{/if}}
+                  </li>
+                {{/each}}
+              </ul>
+            </dd>
+          </div>
+        {{/if}}
+      </dl>
+    </div>
+  </:main>
+</RouteLayout>

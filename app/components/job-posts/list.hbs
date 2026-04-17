@@ -32,7 +32,10 @@
               {{~/if~}}
             </td>
             <td class="px-4 py-3 text-gray-600">
-              {{moment-format jobPost.postedDate "MMM D, YYYY"}}
+              {{moment-format
+                (if jobPost.postedDate jobPost.postedDate jobPost.createdAt)
+                "MMM D, YYYY"
+              }}
             </td>
             <td class="px-4 py-3 text-gray-600">
               {{#if jobPost.topScore.score}}

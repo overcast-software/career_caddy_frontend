@@ -39,7 +39,11 @@
     <input
       id="posted-date"
       type="date"
-      value={{format-date @jobPost.postedDate}}
+      value={{if
+        @jobPost.postedDate
+        (moment-format @jobPost.postedDate "YYYY-MM-DD")
+        ""
+      }}
       {{on "change" (fn this.updateDateField "postedDate")}}
     />
   </div>

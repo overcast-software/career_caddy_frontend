@@ -1,6 +1,7 @@
 import PollableListController from 'career-caddy-frontend/controllers/pollable-list';
 import { TERMINAL } from 'career-caddy-frontend/controllers/pollable';
 import { service } from '@ember/service';
+import { getOwner } from '@ember/owner';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
@@ -38,8 +39,9 @@ export default class JobPostsShowSummariesController extends PollableListControl
   }
 
   @action async createSummary() {
-    const { job_post_id } = this.router.currentRoute.parent.params;
-    const jobPost = this.store.peekRecord('job-post', job_post_id);
+    const jobPost = getOwner(this)
+      .lookup('route:job-posts.show')
+      .modelFor('job-posts.show');
     const resume = this.store.peekRecord('resume', this.selectedResume.id);
     const summary = this.store.createRecord('summary', {
       jobPost,

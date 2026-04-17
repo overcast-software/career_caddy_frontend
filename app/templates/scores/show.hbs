@@ -1,6 +1,6 @@
 {{page-title "Score"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
-    <Scores::Item @score={{this.model}} />
+    <Scores::Item @score={{this.model}} @onDelete={{this.deleteScore}} />
   </:main>
 </RouteLayout>
