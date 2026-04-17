@@ -40,6 +40,16 @@
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0">
+          {{#if this.model.link}}
+            <button
+              type="button"
+              class="btn small"
+              disabled={{this.scrapeSubmitting}}
+              {{on "click" this.runScrape}}
+            >
+              {{if this.scrapeSubmitting "Queuing…" "Run scrape"}}
+            </button>
+          {{/if}}
           <button
             type="button"
             class="btn small"

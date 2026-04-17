@@ -16,4 +16,8 @@ export default class JobPostModel extends Model {
   jobApplications;
   @hasMany('question', { async: true, inverse: 'jobPost' }) questions;
   @hasMany('summary', { async: true, inverse: 'jobPost' }) summaries;
+
+  get needsScrape() {
+    return !this.description?.trim();
+  }
 }

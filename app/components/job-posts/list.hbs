@@ -23,6 +23,13 @@
               <LinkTo @route="job-posts.show" @model={{jobPost}}>
                 {{jobPost.title}}
               </LinkTo>
+              {{#if jobPost.needsScrape}}
+                <span
+                  class="ml-2 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600"
+                >
+                  needs scrape
+                </span>
+              {{/if}}
             </td>
             <td class="px-4 py-3 text-gray-600">
               {{~#if jobPost.company.name~}}

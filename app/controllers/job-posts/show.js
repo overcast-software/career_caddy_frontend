@@ -9,6 +9,7 @@ export default class JobPostsShowController extends Controller {
   @service router;
 
   @tracked copyButtonText = 'Copy Description';
+  @tracked scrapeSubmitting = false;
 
   @action
   async copyDescription() {
@@ -19,5 +20,31 @@ export default class JobPostsShowController extends Controller {
     } catch {
       this.flashMessages.danger('Failed to copy.');
     }
+  }
+
+  @action
+  runScrape() {
+    if (this.scrapeSubmitting || !this.model.link) return;
+    this.scrapeSubmitting = true;
+    const scrape = this.store.createRecord('scrape', {
+      jobPost: this.model,
+      company: this.model.company,
+      url: this.model.link,
+      status: 'hold',
+    });
+    scrape
+      .save()
+      .then(() => {
+        this.flashMessages.success(
+          'Scrape queued — the poller will pick it up.',
+        );
+      })
+      .catch(() => {
+        scrape.rollbackAttributes();
+        this.flashMessages.danger('Failed to queue scrape.');
+      })
+      .finally(() => {
+        this.scrapeSubmitting = false;
+      });
   }
 }
