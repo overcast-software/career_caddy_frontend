@@ -1,15 +1,16 @@
-import PollableListController from 'career-caddy-frontend/controllers/pollable-list';
+import Controller from '@ember/controller';
 import { service } from '@ember/service';
+import { getOwner } from '@ember/owner';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 const CAREER_DATA_OPTION = { id: '0', name: 'Career Data (internal)' };
 
-export default class JobPostsShowCoverLettersController extends PollableListController {
-  @service router;
+export default class JobPostsShowCoverLettersController extends Controller {
+  @service pollable;
+  @service store;
   @service spinner;
-
-  recordType = 'cover-letter';
+  @service flashMessages;
 
   @tracked selectedResume = CAREER_DATA_OPTION;
   @tracked instructions = '';
@@ -20,18 +21,8 @@ export default class JobPostsShowCoverLettersController extends PollableListCont
     return [CAREER_DATA_OPTION, ...Array.from(all)];
   }
 
-  onRecordComplete() {
-    this.flashMessages.success('Cover letter ready.');
-  }
-
-  onRecordFailed() {
-    this.flashMessages.danger('Cover letter generation failed.');
-  }
-
-  onRecordError() {
-    this.flashMessages.danger(
-      'Lost connection while waiting for cover letter.',
-    );
+  @action isPending(record) {
+    return this.pollable.isPending(record);
   }
 
   @action selectResume(resume) {
@@ -43,22 +34,36 @@ export default class JobPostsShowCoverLettersController extends PollableListCont
   }
 
   @action async createCoverLetter() {
-    const { job_post_id } = this.router.currentRoute.parent.params;
-    const jobPost = this.store.peekRecord('job-post', job_post_id);
+    const jobPost = getOwner(this)
+      .lookup('route:job-posts.show')
+      .modelFor('job-posts.show');
     const resume = this.store.peekRecord('resume', this.selectedResume.id);
     const cl = this.store.createRecord('cover-letter', {
       resume,
       jobPost,
       instructions: this.instructions,
     });
-    this.flashMessages.info('Creating cover letter…');
     try {
-      const saved = await this.spinner.wrap(cl.save());
+      this.spinner.begin({ label: 'Generating cover letter…' });
+      const saved = await cl.save();
       this.instructions = '';
-      if (!this.isTerminal(saved)) {
-        this.pollRecord(saved);
+      if (!this.pollable.isTerminal(saved)) {
+        this.pollable.poll(saved, {
+          successMessage: 'Cover letter ready.',
+          failedMessage: 'Cover letter generation failed.',
+          onComplete: () => this.flashMessages.success('Cover letter ready.'),
+          onFailed: () =>
+            this.flashMessages.danger('Cover letter generation failed.'),
+          onError: () =>
+            this.flashMessages.danger(
+              'Lost connection while waiting for cover letter.',
+            ),
+        });
+      } else {
+        this.spinner.end();
       }
     } catch {
+      this.spinner.end();
       cl.unloadRecord();
       this.flashMessages.danger('Failed to create cover letter.');
     }

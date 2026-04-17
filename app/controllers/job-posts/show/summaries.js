@@ -1,17 +1,17 @@
-import PollableListController from 'career-caddy-frontend/controllers/pollable-list';
-import { TERMINAL } from 'career-caddy-frontend/controllers/pollable';
+import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { getOwner } from '@ember/owner';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import { TERMINAL } from 'career-caddy-frontend/services/pollable';
 
 const CAREER_DATA_OPTION = { id: '0', name: 'Career Data (internal)' };
 
-export default class JobPostsShowSummariesController extends PollableListController {
-  @service router;
+export default class JobPostsShowSummariesController extends Controller {
+  @service pollable;
+  @service store;
   @service spinner;
-
-  recordType = 'summary';
+  @service flashMessages;
 
   @tracked selectedResume = CAREER_DATA_OPTION;
   @tracked instructions = '';
@@ -22,12 +22,8 @@ export default class JobPostsShowSummariesController extends PollableListControl
     return [CAREER_DATA_OPTION, ...Array.from(all)];
   }
 
-  isTerminal(rec) {
-    return !!rec.content || TERMINAL.has(rec.active);
-  }
-
-  onRecordError() {
-    this.flashMessages.danger('Lost connection while waiting for summary.');
+  @action isPending(record) {
+    return this.pollable.isPending(record);
   }
 
   @action selectResume(resume) {
@@ -50,14 +46,24 @@ export default class JobPostsShowSummariesController extends PollableListControl
       instructions: this.instructions,
     });
     try {
-      const saved = await this.spinner.wrap(summary.save(), {
-        label: 'Creating summary…',
-      });
+      this.spinner.begin({ label: 'Generating summary…' });
+      const saved = await summary.save();
       this.instructions = '';
       if (!saved.content) {
-        this.pollRecord(saved);
+        this.pollable.poll(saved, {
+          isTerminal: (rec) => !!rec.content || TERMINAL.has(rec.active),
+          successMessage: 'Summary ready.',
+          failedMessage: 'Summary generation failed.',
+          onError: () =>
+            this.flashMessages.danger(
+              'Lost connection while waiting for summary.',
+            ),
+        });
+      } else {
+        this.spinner.end();
       }
     } catch {
+      this.spinner.end();
       summary.unloadRecord();
       this.flashMessages.danger('Failed to create summary.');
     }

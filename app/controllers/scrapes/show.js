@@ -1,37 +1,31 @@
-import PollableController from 'career-caddy-frontend/controllers/pollable';
+import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 
-export default class ScrapesShowController extends PollableController {
+export default class ScrapesShowController extends Controller {
+  @service pollable;
   @service store;
   @service router;
+  @service spinner;
+  @service flashMessages;
 
-  get spinnerLabel() {
-    return 'Scraping…';
-  }
-
-  onPollStart() {
-    this.flashMessages.info('Scrape in progress — waiting for results…');
-  }
-
-  onPollUpdate(rec) {
-    this._refreshStatuses(rec);
-  }
-
-  async onPollComplete(rec) {
-    this.flashMessages.success('Scrape completed.');
-    await this.store.findRecord('scrape', rec.id, {
-      reload: true,
-      include: 'company,job-post',
+  startPollingIfPending() {
+    this.pollable.pollIfPending(this.model, {
+      label: 'Scraping…',
+      successMessage: 'Scrape completed.',
+      failedMessage: 'Scrape failed.',
+      onUpdate: (rec) => this._refreshStatuses(rec),
+      onComplete: async (rec) => {
+        this.flashMessages.success('Scrape completed.');
+        await this.store.findRecord('scrape', rec.id, {
+          reload: true,
+          include: 'company,job-post',
+        });
+      },
+      onFailed: () => this.flashMessages.danger('Scrape failed.'),
+      onError: () =>
+        this.flashMessages.danger('Lost connection while waiting for scrape.'),
     });
-  }
-
-  onPollFailed() {
-    this.flashMessages.danger('Scrape failed.');
-  }
-
-  onPollError() {
-    this.flashMessages.danger('Lost connection while waiting for scrape.');
   }
 
   async _refreshStatuses(scrape) {

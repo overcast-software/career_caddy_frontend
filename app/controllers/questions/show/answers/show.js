@@ -1,12 +1,20 @@
-import PollableController from 'career-caddy-frontend/controllers/pollable';
+import Controller from '@ember/controller';
+import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
-export default class QuestionsShowAnswersShowController extends PollableController {
+export default class QuestionsShowAnswersShowController extends Controller {
+  @service pollable;
+  @service flashMessages;
+
   @tracked copyButtonText = 'Copy';
 
-  get spinnerLabel() {
-    return 'Generating answer…';
+  startPollingIfPending() {
+    this.pollable.pollIfPending(this.model, {
+      label: 'Generating answer…',
+      successMessage: 'Answer ready.',
+      failedMessage: 'Answer generation failed.',
+    });
   }
 
   @action

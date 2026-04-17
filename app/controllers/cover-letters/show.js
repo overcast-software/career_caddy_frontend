@@ -1,28 +1,27 @@
-import PollableController from 'career-caddy-frontend/controllers/pollable';
+import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 
-export default class CoverLettersShowController extends PollableController {
+export default class CoverLettersShowController extends Controller {
+  @service pollable;
   @service store;
   @service session;
+  @service flashMessages;
+
   isExporting = false;
 
-  get spinnerLabel() {
-    return 'Generating cover letter…';
-  }
-
-  onPollStart() {
-    this.flashMessages.info('Generating cover letter — waiting for results…');
-  }
-
-  onPollFailed() {
-    this.flashMessages.danger('Cover letter generation failed.');
-  }
-
-  onPollError() {
-    this.flashMessages.danger(
-      'Lost connection while waiting for cover letter.',
-    );
+  startPollingIfPending() {
+    this.pollable.pollIfPending(this.model, {
+      label: 'Generating cover letter…',
+      successMessage: 'Cover letter ready.',
+      failedMessage: 'Cover letter generation failed.',
+      onFailed: () =>
+        this.flashMessages.danger('Cover letter generation failed.'),
+      onError: () =>
+        this.flashMessages.danger(
+          'Lost connection while waiting for cover letter.',
+        ),
+    });
   }
 
   @action async toggleFavorite() {
