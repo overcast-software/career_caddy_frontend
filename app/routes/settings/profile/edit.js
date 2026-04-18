@@ -17,5 +17,7 @@ export default class SettingsProfileEditRoute extends Route {
     controller.links = Array.isArray(model.links)
       ? model.links.map((l) => ({ ...l }))
       : [];
+    const onboarding = model.onboarding || {};
+    controller.wizardEnabled = onboarding.wizard_enabled !== false;
   }
 }

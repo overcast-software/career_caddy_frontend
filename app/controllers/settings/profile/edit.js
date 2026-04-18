@@ -15,6 +15,7 @@ export default class SettingsProfileEditController extends Controller {
   @tracked github = '';
   @tracked address = '';
   @tracked links = [];
+  @tracked wizardEnabled = true;
   @tracked isSubmitting = false;
 
   get lastLinkIndex() {
@@ -40,6 +41,10 @@ export default class SettingsProfileEditController extends Controller {
     this.links = this.links.filter((_, i) => i !== index);
   }
 
+  @action updateWizardEnabled(event) {
+    this.wizardEnabled = Boolean(event.target.checked);
+  }
+
   @action cancel() {
     this.router.transitionTo('settings.profile');
   }
@@ -59,6 +64,10 @@ export default class SettingsProfileEditController extends Controller {
     user.github = this.github;
     user.address = this.address;
     user.links = this.links.filter((l) => l.name || l.url);
+    user.onboarding = {
+      ...(user.onboarding || {}),
+      wizard_enabled: Boolean(this.wizardEnabled),
+    };
 
     try {
       await user.save();

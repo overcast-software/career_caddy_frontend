@@ -11,6 +11,7 @@ export default class UserModel extends Model {
   @attr('string') github;
   @attr('string') address;
   @attr() links;
+  @attr() onboarding;
   @attr('boolean') isGuest;
   @attr('boolean', { defaultValue: false }) isStaff;
   @attr('boolean', { defaultValue: true }) isActive;

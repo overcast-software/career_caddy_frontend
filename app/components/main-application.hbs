@@ -47,8 +47,14 @@
         {{#unless this.chat.sidebarOpen}}
           <button
             type="button"
-            class="flex items-center gap-1 text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300"
-            title="Open Caddy AI chat"
+            class="relative flex items-center gap-1 text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300
+              {{if this.chat.hasUnread 'aw-shimmer'}}"
+            title={{if
+              this.chat.hasUnread
+              "Caddy has a new message for you"
+              "Open Caddy AI chat"
+            }}
+            data-test-aw-attention={{if this.chat.hasUnread "true" "false"}}
             {{on "click" this.toggleChat}}
           >
             <svg
@@ -66,6 +72,12 @@
               />
             </svg>
             Chat with AI
+            {{#if this.chat.hasUnread}}
+              <span
+                aria-hidden="true"
+                class="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-accent-500"
+              ></span>
+            {{/if}}
           </button>
         {{/unless}}
       {{/unless}}

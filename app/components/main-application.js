@@ -76,6 +76,7 @@ export default class MainApplicationComponent extends Component {
     if (this.chat.sidebarOpen) {
       this.sidebarOpen = false;
       localStorage.setItem(SIDEBAR_KEY, 'false');
+      this.chat.markRead();
     }
   }
 }

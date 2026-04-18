@@ -142,6 +142,27 @@
             </div>
           {{/unless}}
 
+          <div
+            class="col-span-full border-t border-gray-200 dark:border-gray-600 pt-4 mt-2"
+          >
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input
+                id="settings-wizard-enabled"
+                type="checkbox"
+                checked={{this.wizardEnabled}}
+                {{on "change" this.updateWizardEnabled}}
+                class="size-4"
+              />
+              <span>
+                <span class="field-label block">Let Caddy guide me through setup</span>
+                <span
+                  class="text-xs text-gray-500 dark:text-gray-400 block"
+                >When enabled, Caddy will suggest next steps and flag gaps in
+                  your setup from the chat sidebar.</span>
+              </span>
+            </label>
+          </div>
+
           <div class="form-actions justify-end">
             <button type="submit" class="btn primary">
               {{if this.isSubmitting "Saving\u2026" "Save"}}

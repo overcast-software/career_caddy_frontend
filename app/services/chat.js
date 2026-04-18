@@ -10,12 +10,17 @@ export default class ChatService extends Service {
   @service session;
   @service store;
   @service poller;
+  @service onboarding;
 
   @tracked messages = [];
   @tracked isStreaming = false;
   @tracked conversationId = null;
   @tracked sidebarOpen = false;
   @tracked currentPage = null;
+  /** True when the chat has assistant content the user hasn't seen yet.
+   *  Cleared when the sidebar opens; set when a `done` event lands while
+   *  the sidebar is closed. Drives the attention cue on the chat button. */
+  @tracked hasUnread = false;
 
   get hasMessages() {
     return this.messages.length > 0;
@@ -65,6 +70,7 @@ export default class ChatService extends Service {
           history: this._buildHistory(),
           conversation_id: this.conversationId,
           page_context: this.currentPage,
+          onboarding: this.onboarding.snapshotForChat(),
         }),
       });
 
@@ -115,6 +121,9 @@ export default class ChatService extends Service {
               this.conversationId =
                 event.conversation_id || this.conversationId;
               this._replaceLastMessage(accumulated);
+              if (!this.sidebarOpen && accumulated) {
+                this.hasUnread = true;
+              }
             } else if (event.type === 'navigate') {
               this.router.transitionTo(event.url);
             } else if (event.type === 'reload') {
@@ -153,6 +162,11 @@ export default class ChatService extends Service {
   clearConversation() {
     this.messages = [];
     this.conversationId = null;
+    this.hasUnread = false;
+  }
+
+  markRead() {
+    this.hasUnread = false;
   }
 
   async _reloadResource(resource, id) {
