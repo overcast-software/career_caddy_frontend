@@ -3,7 +3,25 @@ import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import { buildBaseUrl } from 'career-caddy-frontend/utils/base-url';
 
+// Kept across phases 3 → 4: the agent still emits <!-- navigate:/path -->
+// markers inside text content until the system prompt edit in phase 4
+// replaces them with propose_actions navigate buttons.
 const NAVIGATE_RE = /<!--\s*navigate:(\/[^\s]*)\s*-->/g;
+
+// AG-UI event type strings (see pydantic-ai chat_server.py + ag_ui.core.events).
+const AG_UI = {
+  RUN_STARTED: 'RUN_STARTED',
+  RUN_FINISHED: 'RUN_FINISHED',
+  RUN_ERROR: 'RUN_ERROR',
+  TEXT_MESSAGE_START: 'TEXT_MESSAGE_START',
+  TEXT_MESSAGE_CONTENT: 'TEXT_MESSAGE_CONTENT',
+  TEXT_MESSAGE_END: 'TEXT_MESSAGE_END',
+  TOOL_CALL_START: 'TOOL_CALL_START',
+  TOOL_CALL_ARGS: 'TOOL_CALL_ARGS',
+  TOOL_CALL_END: 'TOOL_CALL_END',
+  TOOL_CALL_RESULT: 'TOOL_CALL_RESULT',
+  CUSTOM: 'CUSTOM',
+};
 
 export default class ChatService extends Service {
   @service router;
@@ -18,8 +36,8 @@ export default class ChatService extends Service {
   @tracked sidebarOpen = false;
   @tracked currentPage = null;
   /** True when the chat has assistant content the user hasn't seen yet.
-   *  Cleared when the sidebar opens; set when a `done` event lands while
-   *  the sidebar is closed. Drives the attention cue on the chat button. */
+   *  Cleared when the sidebar opens; set on RUN_FINISHED when the sidebar
+   *  is closed. Drives the attention cue on the chat button. */
   @tracked hasUnread = false;
 
   get hasMessages() {
@@ -30,9 +48,7 @@ export default class ChatService extends Service {
     this._updateLastMessage({ content });
   }
 
-  /** Shallow-merge a patch into the last message. Use this when you want
-   *  to update fields (content, toolCalls, ...) without clobbering the
-   *  rest of the record. */
+  /** Shallow-merge a patch into the last message. */
   _updateLastMessage(patch) {
     const prev = this.messages[this.messages.length - 1];
     if (!prev) return;
@@ -40,9 +56,7 @@ export default class ChatService extends Service {
     this._scrollChat();
   }
 
-  /** Append a tool-call breadcrumb to the last assistant message. Used by
-   *  the `tool_call_start` SSE event; staff-gated rendering happens in
-   *  chat/panel.hbs via the assistant message's toolCalls array. */
+  /** Append a tool-call breadcrumb to the last assistant message. */
   _appendToolCall(call) {
     const prev = this.messages[this.messages.length - 1];
     if (!prev) return;
@@ -50,8 +64,7 @@ export default class ChatService extends Service {
     this._updateLastMessage({ toolCalls: [...existing, call] });
   }
 
-  /** Mark a previously-started tool call as finished and attach its
-   *  (truncated) result. Correlated by tool_call_id. */
+  /** Mark a previously-started tool call as finished / update fields. */
   _finishToolCall(id, patch) {
     const prev = this.messages[this.messages.length - 1];
     if (!prev) return;
@@ -78,6 +91,10 @@ export default class ChatService extends Service {
 
     this.isStreaming = true;
     let accumulated = '';
+    // Per-toolCallId bookkeeping for AG-UI's split tool-call events.
+    // name: so we can detect propose_actions on END
+    // argsBuffer: streamed JSON text from TOOL_CALL_ARGS deltas
+    const toolState = new Map();
 
     try {
       await this.session.ensureFreshToken(90);
@@ -138,35 +155,112 @@ export default class ChatService extends Service {
           try {
             const event = JSON.parse(jsonStr);
 
-            if (event.type === 'text') {
-              accumulated += event.content;
-              this._replaceLastMessage(accumulated);
-            } else if (event.type === 'tool_call_start') {
-              this._appendToolCall({
-                id: event.tool_call_id,
-                name: event.tool_name,
-                args: event.args,
-                status: 'pending',
-              });
-            } else if (event.type === 'tool_call_end') {
-              this._finishToolCall(event.tool_call_id, {
-                status: 'done',
-                result: event.content,
-              });
-            } else if (event.type === 'done') {
-              accumulated = event.content;
-              this.conversationId =
-                event.conversation_id || this.conversationId;
-              this._replaceLastMessage(accumulated);
-              if (!this.sidebarOpen && accumulated) {
-                this.hasUnread = true;
+            switch (event.type) {
+              case AG_UI.TEXT_MESSAGE_CONTENT: {
+                accumulated += event.delta || '';
+                this._replaceLastMessage(accumulated);
+                break;
               }
-            } else if (event.type === 'navigate') {
-              this.router.transitionTo(event.url);
-            } else if (event.type === 'reload') {
-              this._reloadResource(event.resource, event.id);
-            } else if (event.type === 'error') {
-              this._replaceLastMessage(`Error: ${event.content}`);
+
+              case AG_UI.TOOL_CALL_START: {
+                const id = event.toolCallId;
+                const name = event.toolCallName;
+                toolState.set(id, { name, argsBuffer: '' });
+                // propose_actions is the elicitation tool — don't render it
+                // as a tool-call chip (it has no user-facing work); the
+                // frontend renders its args as action buttons below the
+                // assistant bubble instead.
+                if (name !== 'propose_actions') {
+                  this._appendToolCall({
+                    id,
+                    name,
+                    args: null,
+                    status: 'pending',
+                  });
+                }
+                break;
+              }
+
+              case AG_UI.TOOL_CALL_ARGS: {
+                const id = event.toolCallId;
+                const state = toolState.get(id);
+                if (state) state.argsBuffer += event.delta || '';
+                break;
+              }
+
+              case AG_UI.TOOL_CALL_END: {
+                const id = event.toolCallId;
+                const state = toolState.get(id);
+                if (!state) break;
+                // Finalize args: parse the accumulated JSON. For
+                // propose_actions extract the actions array and attach it
+                // to the assistant message so <ChatMessage> can render
+                // buttons.
+                let parsedArgs = null;
+                try {
+                  parsedArgs = state.argsBuffer
+                    ? JSON.parse(state.argsBuffer)
+                    : {};
+                } catch {
+                  parsedArgs = { _raw: state.argsBuffer };
+                }
+                if (state.name === 'propose_actions') {
+                  const actions = Array.isArray(parsedArgs?.actions)
+                    ? parsedArgs.actions
+                    : [];
+                  if (actions.length > 0) {
+                    this._updateLastMessage({
+                      elicitation: { actions },
+                    });
+                  }
+                } else {
+                  this._finishToolCall(id, {
+                    args: parsedArgs,
+                    status: 'done',
+                  });
+                }
+                break;
+              }
+
+              case AG_UI.TOOL_CALL_RESULT: {
+                const id = event.toolCallId;
+                const state = toolState.get(id);
+                if (state && state.name !== 'propose_actions') {
+                  this._finishToolCall(id, { result: event.content });
+                }
+                break;
+              }
+
+              case AG_UI.CUSTOM: {
+                if (event.name === 'reload') {
+                  const { resource, id } = event.value || {};
+                  this._reloadResource(resource, id);
+                } else if (event.name === 'session_meta') {
+                  const { conversation_id, usage } = event.value || {};
+                  if (conversation_id) this.conversationId = conversation_id;
+                  // usage is available for future display; no-op for now.
+                  void usage;
+                }
+                break;
+              }
+
+              case AG_UI.RUN_FINISHED: {
+                if (!this.sidebarOpen && accumulated) {
+                  this.hasUnread = true;
+                }
+                break;
+              }
+
+              case AG_UI.RUN_ERROR: {
+                this._replaceLastMessage(
+                  `Error: ${event.message || 'stream error'}`,
+                );
+                break;
+              }
+
+              // RUN_STARTED, TEXT_MESSAGE_START/END intentionally ignored —
+              // we already synthesize a placeholder assistant message above
+              // and don't need message_id bookkeeping for a single-turn UI.
             }
           } catch {
             // skip malformed events
@@ -174,7 +268,9 @@ export default class ChatService extends Service {
         }
       }
 
-      // Strip navigate markers from final text and trigger navigation
+      // Strip navigate markers from final text and trigger navigation.
+      // Kept until phase 4 of the AG-UI migration moves navigate fully
+      // onto the propose_actions tool.
       if (accumulated) {
         const navMatches = [...accumulated.matchAll(NAVIGATE_RE)];
         if (navMatches.length > 0) {
@@ -185,7 +281,6 @@ export default class ChatService extends Service {
         }
       }
 
-      // If we never got any content, show that
       if (!accumulated) {
         this._replaceLastMessage('(no response from agent)');
       }
