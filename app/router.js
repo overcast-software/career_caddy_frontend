@@ -244,6 +244,7 @@ Router.map(function () {
     this.route('scrape-profiles', function () {
       this.route('show', { path: '/:scrape_profile_id' });
     });
+    this.route('ai-models');
   });
   this.route('career-data', function () {});
   this.route('settings', function () {
