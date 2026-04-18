@@ -12,6 +12,30 @@
       }}"
   >
     {{#if (eq @message.role "assistant")}}
+      {{#if this.showToolCalls}}
+        <div
+          class="flex flex-col gap-1 mb-2 pb-2 border-b border-gray-200 dark:border-gray-600"
+          data-test-tool-calls
+        >
+          {{#each this.toolCalls as |call|}}
+            <div
+              class="flex items-center gap-2 text-xs font-mono"
+              data-test-tool-call={{call.name}}
+            >
+              {{#if (eq call.status "done")}}
+                <span class="text-emerald-600 dark:text-emerald-400">✓</span>
+              {{else}}
+                <span
+                  class="inline-block size-2 rounded-full bg-accent-400 animate-pulse"
+                ></span>
+              {{/if}}
+              <span
+                class="text-gray-700 dark:text-gray-300 font-semibold"
+              >{{call.name}}</span>
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
       <div class="chat-markdown break-words">
         <MarkdownToHtml @markdown={{this.displayContent}} />
       </div>
@@ -23,7 +47,7 @@
             <button
               type="button"
               class="px-3 py-1.5 text-xs font-medium rounded-md bg-accent-100 dark:bg-accent-900 text-accent-700 dark:text-accent-200 hover:bg-accent-200 dark:hover:bg-accent-800 transition-colors"
-              {{on "click" (fn this.sendAction act.message)}}
+              {{on "click" (fn this.runAction act)}}
             >
               {{act.label}}
             </button>

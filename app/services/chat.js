@@ -27,12 +27,37 @@ export default class ChatService extends Service {
   }
 
   _replaceLastMessage(content) {
+    this._updateLastMessage({ content });
+  }
+
+  /** Shallow-merge a patch into the last message. Use this when you want
+   *  to update fields (content, toolCalls, ...) without clobbering the
+   *  rest of the record. */
+  _updateLastMessage(patch) {
     const prev = this.messages[this.messages.length - 1];
-    this.messages = [
-      ...this.messages.slice(0, -1),
-      { role: prev.role, content, timestamp: prev.timestamp },
-    ];
+    if (!prev) return;
+    this.messages = [...this.messages.slice(0, -1), { ...prev, ...patch }];
     this._scrollChat();
+  }
+
+  /** Append a tool-call breadcrumb to the last assistant message. Used by
+   *  the `tool_call_start` SSE event; staff-gated rendering happens in
+   *  chat/panel.hbs via the assistant message's toolCalls array. */
+  _appendToolCall(call) {
+    const prev = this.messages[this.messages.length - 1];
+    if (!prev) return;
+    const existing = prev.toolCalls || [];
+    this._updateLastMessage({ toolCalls: [...existing, call] });
+  }
+
+  /** Mark a previously-started tool call as finished and attach its
+   *  (truncated) result. Correlated by tool_call_id. */
+  _finishToolCall(id, patch) {
+    const prev = this.messages[this.messages.length - 1];
+    if (!prev) return;
+    const existing = prev.toolCalls || [];
+    const updated = existing.map((c) => (c.id === id ? { ...c, ...patch } : c));
+    this._updateLastMessage({ toolCalls: updated });
   }
 
   _scrollChat() {
@@ -116,6 +141,18 @@ export default class ChatService extends Service {
             if (event.type === 'text') {
               accumulated += event.content;
               this._replaceLastMessage(accumulated);
+            } else if (event.type === 'tool_call_start') {
+              this._appendToolCall({
+                id: event.tool_call_id,
+                name: event.tool_name,
+                args: event.args,
+                status: 'pending',
+              });
+            } else if (event.type === 'tool_call_end') {
+              this._finishToolCall(event.tool_call_id, {
+                status: 'done',
+                result: event.content,
+              });
             } else if (event.type === 'done') {
               accumulated = event.content;
               this.conversationId =

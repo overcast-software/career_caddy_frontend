@@ -23,7 +23,7 @@ const CHECKLIST_ORDER = [
     label: 'Fill in name + email',
     route: 'settings.profile.edit',
   },
-  { key: 'resume_imported', label: 'Import a resume', route: 'resumes.index' },
+  { key: 'resume_imported', label: 'Import a resume', route: 'resumes.import' },
   {
     key: 'resume_reviewed',
     label: 'Review extracted resume fields',
