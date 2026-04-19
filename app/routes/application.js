@@ -84,8 +84,9 @@ export default class ApplicationRoute extends Route {
   _redirectUnauthenticated(routeName) {
     const baseRoute = routeName?.split('.')[0];
     if (DOCS_ROUTES.has(baseRoute)) {
-      this.flashMessages.info(
-        'Looking for your data? Sign in using the button in the top right.',
+      this.flashMessages.warning(
+        'That page is only visible to signed-in users — here are the docs instead. Sign in (top right) to see your own data.',
+        { sticky: true },
       );
       this.router.transitionTo(`docs.${baseRoute}`);
     } else {
