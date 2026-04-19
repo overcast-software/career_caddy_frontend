@@ -14,6 +14,8 @@ export const NODE_LABELS = {
   declined: 'Declined',
   accepted: 'Accepted',
   stub: 'Stub',
+  scored: 'Scored',
+  unscored: 'Unscored',
   unknown: 'Unknown',
 };
 
@@ -30,6 +32,8 @@ export const NODE_COLORS = {
   declined: '#f87171',
   accepted: '#22c55e',
   stub: '#6b7280',
+  scored: '#8b5cf6',
+  unscored: '#d1d5db',
   unknown: '#64748b',
 };
 
