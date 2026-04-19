@@ -35,17 +35,14 @@ const APP_ROUTES = new Set([
 export default class ChatMessageComponent extends Component {
   @service chat;
   @service router;
-  @service currentUser;
   @service store;
   @service flashMessages;
 
-  /** Tool-call breadcrumbs for this message. Visible only to staff — the
-   *  debug-style view of what the agent actually did (which tools fired,
-   *  their arguments, their truncated results). Staff use this to detect
-   *  "agent promised but didn't execute" regressions at a glance. */
+  /** Tool-call breadcrumbs for this message: a collapsed view of what
+   *  the agent actually did (which tools fired, their arguments, their
+   *  truncated results). Surfaced to everyone so users can see "it
+   *  searched your job posts" or "it read your resume" in-context. */
   get showToolCalls() {
-    const user = this.currentUser.user;
-    if (!user?.isStaff) return false;
     const calls = this.args.message.toolCalls || [];
     return calls.length > 0;
   }
