@@ -2,9 +2,6 @@ import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 
-const ELICITATION_RE =
-  /```json\s*\n(\{[^`]*"elicitation"\s*:\s*true[^`]*\})\s*\n```\s*$/;
-
 /** Fields the agent is allowed to patch on each model type via
  *  `{label, model: {type, id, patch}}` action buttons. Anything not in
  *  this set is dropped before save — keeps an adversarial or confused
@@ -59,23 +56,18 @@ export default class ChatMessageComponent extends Component {
 
   get elicitation() {
     if (this.args.message.role !== 'assistant') return null;
-    const content = this.args.message.content || '';
-    const match = content.match(ELICITATION_RE);
-    if (!match) return null;
-    try {
-      const parsed = JSON.parse(match[1]);
-      if (parsed.elicitation && Array.isArray(parsed.actions)) {
-        return parsed;
-      }
-    } catch {
-      // malformed JSON — ignore
+    // Populated by services/chat.js from the propose_actions tool's
+    // ToolCallArgs payload under the AG-UI protocol. Shape:
+    //   { actions: [{label, navigate|model|message}, ...] }
+    const e = this.args.message.elicitation;
+    if (e && Array.isArray(e.actions) && e.actions.length > 0) {
+      return e;
     }
     return null;
   }
 
   get displayContent() {
-    if (!this.elicitation) return this.args.message.content;
-    return this.args.message.content.replace(ELICITATION_RE, '').trim();
+    return this.args.message.content;
   }
 
   @action
