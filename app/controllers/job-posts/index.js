@@ -4,14 +4,7 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 
 export default class JobPostsIndexController extends Controller {
-  queryParams = [
-    'search',
-    'hostname',
-    'stub',
-    'source',
-    'scored',
-    'bucket',
-  ];
+  queryParams = ['search', 'hostname', 'stub', 'source', 'scored', 'bucket'];
 
   @tracked search = '';
   @tracked hostname = '';

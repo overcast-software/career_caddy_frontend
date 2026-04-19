@@ -7,14 +7,7 @@ export default class ReportsSourcesController extends Controller {
   @service currentUser;
   @service router;
 
-  queryParams = [
-    'scope',
-    'source',
-    'from',
-    'to',
-    'user',
-    'exclude_stubs',
-  ];
+  queryParams = ['scope', 'source', 'from', 'to', 'user', 'exclude_stubs'];
   @tracked scope = 'mine';
   @tracked source = '';
   @tracked from = '';

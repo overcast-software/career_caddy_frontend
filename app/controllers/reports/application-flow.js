@@ -12,14 +12,7 @@ export default class ReportsApplicationFlowController extends Controller {
     return this.session.isAuthenticated;
   }
 
-  queryParams = [
-    'scope',
-    'source',
-    'from',
-    'to',
-    'user',
-    'exclude_stubs',
-  ];
+  queryParams = ['scope', 'source', 'from', 'to', 'user', 'exclude_stubs'];
   @tracked scope = 'mine';
   @tracked source = '';
   @tracked from = '';
