@@ -22,9 +22,16 @@
               class="px-4 py-3 text-left font-semibold text-gray-600"
             >Created</th>
           {{/unless}}
-          <th
-            class="px-4 py-3 text-right font-semibold text-gray-600"
-          >Actions</th>
+          {{#if @showExplanation}}
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600"
+            >Explanation</th>
+          {{/if}}
+          {{#unless (eq @showActions false)}}
+            <th
+              class="px-4 py-3 text-right font-semibold text-gray-600"
+            >Actions</th>
+          {{/unless}}
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
@@ -125,26 +132,39 @@
                 {{/if}}
               </td>
             {{/unless}}
-            <td class="px-4 py-3 text-right">
-              {{#if (and @isPending (@isPending score))}}
-                {{! pending — no actions }}
-              {{else}}
-                <div class="flex items-center justify-end gap-2">
-                  <LinkTo
-                    @route="scores.show"
-                    @model={{score}}
-                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                  >View</LinkTo>
-                  {{#if @onDelete}}
-                    <button
-                      type="button"
-                      class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
-                      {{on "click" (fn @onDelete score)}}
-                    >Delete</button>
-                  {{/if}}
-                </div>
-              {{/if}}
-            </td>
+            {{#if @showExplanation}}
+              <td
+                class="px-4 py-3 text-gray-700 dark:text-gray-200 whitespace-pre-wrap break-words max-w-xl align-top"
+              >
+                {{#if score.explanation}}
+                  {{score.explanation}}
+                {{else}}
+                  <span class="text-gray-400">&mdash;</span>
+                {{/if}}
+              </td>
+            {{/if}}
+            {{#unless (eq @showActions false)}}
+              <td class="px-4 py-3 text-right">
+                {{#if (and @isPending (@isPending score))}}
+                  {{! pending — no actions }}
+                {{else}}
+                  <div class="flex items-center justify-end gap-2">
+                    <LinkTo
+                      @route="scores.show"
+                      @model={{score}}
+                      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                    >View</LinkTo>
+                    {{#if @onDelete}}
+                      <button
+                        type="button"
+                        class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
+                        {{on "click" (fn @onDelete score)}}
+                      >Delete</button>
+                    {{/if}}
+                  </div>
+                {{/if}}
+              </td>
+            {{/unless}}
           </tr>
         {{/each}}
       </tbody>
