@@ -1,0 +1,46 @@
+{{page-title "Paste job posting"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="job-posts" class="nav-link">Back to Job Posts</LinkTo>
+    <LinkTo @route="job-posts.scrape" class="nav-link">Scrape a URL instead</LinkTo>
+  </:subnav>
+  <:main>
+    <Panel::Card>
+      <form class="builder-form" {{on "submit" this.submitPaste}}>
+        <div class="field">
+          <label class="field-label" for="paste-text">Job posting content</label>
+          <p class="mt-1 mb-2 text-sm text-gray-600 dark:text-gray-400">
+            Open the job posting in another tab, select all (<kbd
+              class="rounded bg-gray-200 px-1 py-0.5 font-mono text-xs dark:bg-gray-700"
+            >Ctrl</kbd>+<kbd
+              class="rounded bg-gray-200 px-1 py-0.5 font-mono text-xs dark:bg-gray-700"
+            >A</kbd>), copy (<kbd
+              class="rounded bg-gray-200 px-1 py-0.5 font-mono text-xs dark:bg-gray-700"
+            >Ctrl</kbd>+<kbd
+              class="rounded bg-gray-200 px-1 py-0.5 font-mono text-xs dark:bg-gray-700"
+            >C</kbd>), and paste below. The AI extracts the title, company,
+            salary, location, and description and creates a new Job Post. Use
+            this when the site blocks automated scraping (LinkedIn, Greenhouse
+            behind login, etc.).
+          </p>
+          <textarea
+            id="paste-text"
+            class="w-full min-h-[20rem] font-mono text-sm"
+            placeholder="Paste the full text of a job posting here — I'll pull out the key fields."
+            value={{this.text}}
+            disabled={{this.submitting}}
+            {{on "input" this.updateText}}
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn primary"
+            disabled={{not this.canSubmit}}
+          >{{if this.submitting "Parsing…" "Create from paste"}}</button>
+        </div>
+      </form>
+    </Panel::Card>
+  </:main>
+</RouteLayout>
