@@ -17,4 +17,12 @@ export default class SettingsAiSpendRoute extends Route {
     if (!response.ok) return null;
     return response.json();
   }
+
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    // Populate the staff-only user dropdown on first render. Controller's
+    // loadUsers() guards on isStaff and idempotency, so it's safe to call
+    // unconditionally here.
+    controller.loadUsers();
+  }
 }
