@@ -40,7 +40,6 @@ export default class MainApplicationComponent extends Component {
         url: this.router.currentURL,
         params: transition.to.params,
       };
-      console.log('[page-context]', transition.to.name, this.router.currentURL);
     }
   }
 
