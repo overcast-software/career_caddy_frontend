@@ -388,7 +388,9 @@ body {
   flex-direction: column;
 }
 
-/* On mobile, the desktop sidebar is hidden; chat takes full width */
+/* On mobile, the desktop sidebar is hidden; chat renders as a bottom
+ * sheet over the page so it's obviously a panel, not fullscreen, and
+ * the underlying page remains visible. */
 @media (width <= 767px) {
   .course--sidebar-open {
     grid-template-areas:
@@ -401,15 +403,32 @@ body {
     display: none;
   }
 
-  .course--chat-open {
-    grid-template-areas:
-      "header"
-      "chat";
-    grid-template-columns: 1fr;
+  .course-chat {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 80dvh;
+    width: 100vw;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    box-shadow: 0 -12px 32px rgb(0 0 0 / 25%);
+    transform: translateY(100%);
+    transition: transform 0.25s ease;
+    z-index: 60;
   }
 
-  .course--chat-open .course-main {
-    display: none;
+  .course--chat-open .course-chat {
+    transform: translateY(0);
+  }
+
+  .chat-mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / 40%);
+    z-index: 55;
   }
 }
 

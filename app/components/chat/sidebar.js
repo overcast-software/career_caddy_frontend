@@ -16,4 +16,9 @@ export default class ChatSidebarComponent extends Component {
       this.args.onOpen();
     }
   }
+
+  @action
+  close() {
+    this.chat.sidebarOpen = false;
+  }
 }
