@@ -12,7 +12,8 @@
             id="scrape-url"
             type="url"
             placeholder="https://..."
-            {{on "change" this.updateUrl}}
+            value={{this.url}}
+            {{on "input" this.updateUrl}}
           />
         </div>
 

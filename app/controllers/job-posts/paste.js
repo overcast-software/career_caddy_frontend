@@ -13,10 +13,18 @@ export default class JobPostsPasteController extends Controller {
   @service flashMessages;
 
   @tracked text = '';
+  @tracked url = '';
   @tracked submitting = false;
 
   get canSubmit() {
-    return !this.submitting && this.text.trim().length > 0;
+    if (this.submitting) return false;
+    return this.url.trim().length > 0 || this.text.trim().length > 0;
+  }
+
+  get submitLabel() {
+    if (this.submitting) return 'Parsing…';
+    if (this.url.trim().length > 0) return 'Scrape URL';
+    return 'Create from paste';
   }
 
   @action
@@ -25,9 +33,24 @@ export default class JobPostsPasteController extends Controller {
   }
 
   @action
+  updateUrl(event) {
+    this.url = event.target.value;
+  }
+
+  @action
   submitPaste(event) {
     event?.preventDefault?.();
     if (!this.canSubmit) return;
+
+    const url = this.url.trim();
+    if (url) {
+      const target = url;
+      this._reset();
+      this.router.transitionTo('job-posts.scrape', {
+        queryParams: { url: target },
+      });
+      return;
+    }
 
     this.submitting = true;
     this.flashMessages.info('Parsing the pasted content…');
@@ -98,6 +121,7 @@ export default class JobPostsPasteController extends Controller {
 
   _reset() {
     this.text = '';
+    this.url = '';
     this.submitting = false;
   }
 }

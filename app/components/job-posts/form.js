@@ -10,6 +10,8 @@ export default class JobPostsFormComponent extends Component {
   @service currentUser;
   @tracked _selectedCompany = null;
   @tracked showDeleteConfirm = false;
+  @tracked pasteText = '';
+  @tracked reextracting = false;
 
   get isStaff() {
     return this.currentUser.user?.isStaff;
@@ -97,6 +99,41 @@ export default class JobPostsFormComponent extends Component {
         if (error?.status !== 403) {
           this.flashMessages.danger('Failed to delete job post.');
         }
+      });
+  }
+
+  get canReextract() {
+    return !this.reextracting && this.pasteText.trim().length > 0;
+  }
+
+  @action
+  updatePasteText(event) {
+    this.pasteText = event.target.value;
+  }
+
+  @action
+  reextractFromPaste() {
+    if (!this.canReextract) return;
+    const adapter = this.store.adapterFor('job-post');
+    const id = this.args.jobPost.id;
+    const url = adapter.buildURL('job-post', id) + 'reextract/';
+    this.reextracting = true;
+    this.flashMessages.info('Re-extracting fields from pasted text…');
+    adapter
+      .ajax(url, 'POST', { data: { text: this.pasteText } })
+      .then((payload) => {
+        this.store.pushPayload('job-post', payload);
+        this.flashMessages.clearMessages();
+        this.flashMessages.success('Job post fields updated from paste.');
+        this.pasteText = '';
+      })
+      .catch((error) => {
+        this.flashMessages.clearMessages();
+        const detail = error?.errors?.[0]?.detail ?? 'Re-extract failed.';
+        this.flashMessages.danger(detail);
+      })
+      .finally(() => {
+        this.reextracting = false;
       });
   }
 
