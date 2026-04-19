@@ -10,6 +10,7 @@ export default class PublicRoutesService extends Service {
     'accept-invite',
     'signup',
     'about',
+    'not-found',
   ]);
 
   prefixes = new Set(['docs']);

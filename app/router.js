@@ -265,4 +265,6 @@ Router.map(function () {
   if (macroCondition(dependencySatisfies('@careercaddy/site-chrome', '*'))) {
     this.mount('@careercaddy/site-chrome', { as: 'site-chrome', path: '/' });
   }
+
+  this.route('not-found', { path: '/*path' });
 });
