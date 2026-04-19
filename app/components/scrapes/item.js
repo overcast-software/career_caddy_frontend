@@ -53,6 +53,9 @@ export default class ScrapesItemComponent extends Component {
       const token = this.session.data?.authenticated?.access;
       const resp = await fetch(`/api/v1/scrapes/${id}/screenshots/`, {
         headers: { Authorization: `Bearer ${token}` },
+        // Poller writes screenshots mid-lifecycle; without no-store the
+        // browser can 304 back to an earlier empty-list response.
+        cache: 'no-store',
       });
       if (resp.ok) {
         const json = await resp.json();
