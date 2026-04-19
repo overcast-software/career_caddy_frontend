@@ -13,7 +13,11 @@ import {
 
 const W = 720;
 const H = 460;
-const MARGIN = { top: 16, right: 140, bottom: 16, left: 140 };
+// Labels sit adjacent to their nodes (left-half nodes flow their text
+// rightward between the first and second columns; right-half nodes flow
+// left between the last and second-to-last columns). The margins are
+// mostly buffer — keeping them tight makes the sankey fill the card.
+const MARGIN = { top: 16, right: 90, bottom: 16, left: 16 };
 const TRANSITION_MS = 500;
 
 export default class ApplicationFlowSankeyComponent extends Component {
