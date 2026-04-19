@@ -4,18 +4,17 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 
 const SIDEBAR_KEY = 'cc:sidebar-open';
-const CHAT_KEY = 'cc:chat-open';
 
 export default class MainApplicationComponent extends Component {
   @service currentUser;
   @service chat;
   @service router;
   @service spinner;
-  @tracked sidebarOpen = localStorage.getItem(SIDEBAR_KEY) !== 'false';
+  @tracked sidebarOpen = localStorage.getItem(SIDEBAR_KEY) === 'true';
 
   constructor(owner, args) {
     super(owner, args);
-    this.chat.sidebarOpen = localStorage.getItem(CHAT_KEY) === 'true';
+    this.chat.sidebarOpen = false;
     this.chat.currentPage = {
       route: this.router.currentRouteName,
       url: this.router.currentURL,
@@ -51,7 +50,6 @@ export default class MainApplicationComponent extends Component {
     localStorage.setItem(SIDEBAR_KEY, this.sidebarOpen);
     if (this.sidebarOpen) {
       this.chat.sidebarOpen = false;
-      localStorage.setItem(CHAT_KEY, 'false');
     }
   }
 
@@ -72,7 +70,6 @@ export default class MainApplicationComponent extends Component {
   @action
   toggleChat() {
     this.chat.sidebarOpen = !this.chat.sidebarOpen;
-    localStorage.setItem(CHAT_KEY, this.chat.sidebarOpen);
     if (this.chat.sidebarOpen) {
       this.sidebarOpen = false;
       localStorage.setItem(SIDEBAR_KEY, 'false');
