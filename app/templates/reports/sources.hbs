@@ -1,11 +1,11 @@
-{{page-title "Application Flow"}}
+{{page-title "Sources"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
+    <LinkTo @route="reports.application-flow" class="nav-link">Application Flow</LinkTo>
     <LinkTo
-      @route="reports.application-flow"
+      @route="reports.sources"
       class="nav-link nav-link-active"
-    >Application Flow</LinkTo>
-    <LinkTo @route="reports.sources" class="nav-link">Sources</LinkTo>
+    >Sources</LinkTo>
     <span class="nav-link-divider" aria-hidden="true">·</span>
     <button
       type="button"
@@ -23,12 +23,11 @@
   <:main>
     <div class="space-y-4">
       <header class="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 class="text-xl font-semibold">Application Flow</h1>
+        <h1 class="text-xl font-semibold">Sources</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">
+          Outcome mix per job board — top 15 by volume ·
           {{@model.total_job_posts}}
-          job posts ·
-          {{@model.total_applications}}
-          applications
+          job posts
         </p>
       </header>
 
@@ -40,11 +39,11 @@
         <p class="text-sm text-gray-500">Could not load report.</p>
       {{else if this.isEmpty}}
         <p class="text-sm text-gray-500">No job posts tracked yet — once you add
-          a few, the funnel chart will appear here.</p>
+          a few, the source breakdown will appear here.</p>
       {{else}}
-        <Reports::ApplicationFlowSankey
-          @nodes={{@model.nodes}}
-          @links={{@model.links}}
+        <Reports::SourcesStackedBar
+          @rows={{@model.rows}}
+          @bucketOrder={{@model.bucket_order}}
         />
       {{/if}}
     </div>
