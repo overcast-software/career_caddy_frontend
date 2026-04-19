@@ -1,0 +1,46 @@
+{{page-title "Application Flow"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <button
+      type="button"
+      class="nav-link {{if this.isMine 'nav-link-active'}}"
+      {{on "click" this.showMine}}
+    >Mine</button>
+    {{#if this.isStaff}}
+      <button
+        type="button"
+        class="nav-link {{unless this.isMine 'nav-link-active'}}"
+        {{on "click" this.showGlobal}}
+      >Global</button>
+    {{/if}}
+  </:subnav>
+  <:main>
+    <div class="space-y-4">
+      <header class="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 class="text-xl font-semibold">Application Flow</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{@model.total_job_posts}}
+          job posts ·
+          {{@model.total_applications}}
+          applications
+        </p>
+      </header>
+
+      {{#if this.isForbidden}}
+        <p
+          class="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/40 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 text-sm"
+        >Global view is staff-only.</p>
+      {{else if this.isFailed}}
+        <p class="text-sm text-gray-500">Could not load report.</p>
+      {{else if this.isEmpty}}
+        <p class="text-sm text-gray-500">No job posts tracked yet — once you add
+          a few, the funnel chart will appear here.</p>
+      {{else}}
+        <Reports::ApplicationFlowSankey
+          @nodes={{@model.nodes}}
+          @links={{@model.links}}
+        />
+      {{/if}}
+    </div>
+  </:main>
+</RouteLayout>

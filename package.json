@@ -32,6 +32,8 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.27",
+    "d3-sankey": "^0.12.3",
+    "d3-selection": "^3.0.0",
     "ember-infinity": "^3.0.2",
     "ember-inflector": "^6.0.0",
     "ember-mobile-menu": "^6.1.0",

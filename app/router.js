@@ -248,6 +248,9 @@ Router.map(function () {
     this.route('ai-models');
   });
   this.route('career-data', function () {});
+  this.route('reports', function () {
+    this.route('application-flow');
+  });
   this.route('settings', function () {
     this.route('profile', function () {
       this.route('edit');
