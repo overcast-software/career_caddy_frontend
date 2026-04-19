@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
+import { service } from '@ember/service';
 import { htmlSafe } from '@ember/template';
 import { select } from 'd3-selection';
 import 'd3-transition'; // side-effect: adds .transition() to d3-selection
@@ -22,7 +23,14 @@ function colorFor(bucket) {
 }
 
 export default class SourcesStackedBarComponent extends Component {
+  @service router;
   el = null;
+
+  _goToHostname(hostname) {
+    this.router.transitionTo('job-posts.index', {
+      queryParams: { hostname, search: null },
+    });
+  }
 
   get bucketOrder() {
     return this.args.bucketOrder || Object.keys(NODE_COLORS);
@@ -64,15 +72,25 @@ export default class SourcesStackedBarComponent extends Component {
       .attr('transform', `translate(${MARGIN.left}, ${MARGIN.top})`);
 
     // Rows (hostname label + segments + total label).
+    const self = this;
     const rowGroups = g
       .selectAll('g.row')
       .data(rows)
       .join('g')
-      .attr('class', 'row')
+      .attr('class', 'row cursor-pointer')
+      .attr('tabindex', 0)
+      .attr('role', 'link')
       .attr(
         'transform',
         (_, i) => `translate(0, ${i * (ROW_HEIGHT + ROW_GAP)})`,
-      );
+      )
+      .on('click', (_event, d) => self._goToHostname(d.hostname))
+      .on('keydown', (event, d) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          self._goToHostname(d.hostname);
+        }
+      });
 
     // Hostname label (y-axis-side).
     rowGroups
@@ -87,7 +105,11 @@ export default class SourcesStackedBarComponent extends Component {
         d.hostname.length > 28 ? d.hostname.slice(0, 27) + '…' : d.hostname,
       );
 
-    rowGroups.append('title').text((d) => `${d.hostname} — ${d.total} posts`);
+    rowGroups
+      .append('title')
+      .text(
+        (d) => `${d.hostname} — ${d.total} posts (click to view job posts)`,
+      );
 
     rowGroups.each(function (row) {
       let cursor = 0;

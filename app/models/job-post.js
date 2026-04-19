@@ -1,5 +1,11 @@
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 
+// Keep in sync with STUB_MIN_WORDS in
+// api/job_hunting/lib/services/application_flow.py. A post is a "stub"
+// when its description is too thin to be useful — typically email-pipeline
+// junk that never got an enriched scrape.
+export const STUB_MIN_WORDS = 20;
+
 export default class JobPostModel extends Model {
   @attr('date') createdAt;
   @attr('string') description;
@@ -21,5 +27,11 @@ export default class JobPostModel extends Model {
 
   get needsScrape() {
     return !this.description?.trim();
+  }
+
+  get isStub() {
+    const desc = (this.description || '').trim();
+    if (!desc) return true;
+    return desc.split(/\s+/).length < STUB_MIN_WORDS;
   }
 }

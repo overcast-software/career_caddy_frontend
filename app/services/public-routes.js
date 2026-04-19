@@ -11,6 +11,7 @@ export default class PublicRoutesService extends Service {
     'signup',
     'about',
     'not-found',
+    'reports.application-flow',
   ]);
 
   prefixes = new Set(['docs']);

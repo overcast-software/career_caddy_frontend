@@ -7,12 +7,20 @@ export default class ReportsSourcesController extends Controller {
   @service currentUser;
   @service router;
 
-  queryParams = ['scope', 'source', 'from', 'to', 'user'];
+  queryParams = [
+    'scope',
+    'source',
+    'from',
+    'to',
+    'user',
+    'exclude_stubs',
+  ];
   @tracked scope = 'mine';
   @tracked source = '';
   @tracked from = '';
   @tracked to = '';
   @tracked user = '';
+  @tracked exclude_stubs = '';
 
   get isStaff() {
     return this.currentUser.user?.isStaff;
@@ -40,6 +48,7 @@ export default class ReportsSourcesController extends Controller {
       from: this.from || '',
       to: this.to || '',
       user: this.user || '',
+      exclude_stubs: this.exclude_stubs || '',
     };
   }
 

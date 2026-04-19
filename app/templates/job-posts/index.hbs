@@ -12,6 +12,81 @@
     </div>
   </:subnav>
   <:main>
+    {{#if (or this.hostname this.stub this.source this.scored this.bucket)}}
+      <div class="mb-3 flex flex-wrap items-center gap-2 text-sm">
+        <span class="text-gray-500 dark:text-gray-400">Filters:</span>
+        {{#if this.hostname}}
+          <span class="inline-flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 font-mono text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-100">
+            hostname: {{this.hostname}}
+            <button
+              type="button"
+              class="ml-1 text-blue-700 hover:text-blue-900 dark:text-blue-200 dark:hover:text-white"
+              aria-label="Clear hostname filter"
+              {{on "click" this.clearHostname}}
+            >×</button>
+          </span>
+        {{/if}}
+        {{#if this.stub}}
+          <span class="inline-flex items-center gap-1 rounded bg-gray-200 px-2 py-0.5 font-mono text-xs text-gray-800 dark:bg-gray-700 dark:text-gray-100">
+            {{#if (eq this.stub "true")}}stubs only{{else}}hide stubs{{/if}}
+            <button
+              type="button"
+              class="ml-1 text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
+              aria-label="Clear stub filter"
+              {{on "click" this.clearStub}}
+            >×</button>
+          </span>
+        {{/if}}
+        {{#if this.bucket}}
+          <span class="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 font-mono text-xs text-amber-800 dark:bg-amber-900 dark:text-amber-100">
+            bucket: {{this.bucket}}
+            <button
+              type="button"
+              class="ml-1 text-amber-700 hover:text-amber-900 dark:text-amber-200 dark:hover:text-white"
+              aria-label="Clear bucket filter"
+              {{on "click" this.clearBucket}}
+            >×</button>
+          </span>
+        {{/if}}
+        {{#if this.scored}}
+          <span class="inline-flex items-center gap-1 rounded bg-violet-100 px-2 py-0.5 font-mono text-xs text-violet-800 dark:bg-violet-900 dark:text-violet-100">
+            {{#if (eq this.scored "true")}}scored{{else}}unscored{{/if}}
+            <button
+              type="button"
+              class="ml-1 text-violet-700 hover:text-violet-900 dark:text-violet-200 dark:hover:text-white"
+              aria-label="Clear scored filter"
+              {{on "click" this.clearScored}}
+            >×</button>
+          </span>
+        {{/if}}
+        {{#if this.source}}
+          <span class="inline-flex items-center gap-1 rounded bg-emerald-100 px-2 py-0.5 font-mono text-xs text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100">
+            source: {{this.source}}
+            <button
+              type="button"
+              class="ml-1 text-emerald-700 hover:text-emerald-900 dark:text-emerald-200 dark:hover:text-white"
+              aria-label="Clear source filter"
+              {{on "click" this.clearSource}}
+            >×</button>
+          </span>
+        {{/if}}
+        {{#unless this.stub}}
+          <button
+            type="button"
+            class="ml-auto text-xs text-gray-500 underline hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
+            {{on "click" this.hideStubs}}
+          >Hide stubs</button>
+        {{/unless}}
+      </div>
+    {{else}}
+      <div class="mb-3 flex justify-end">
+        <button
+          type="button"
+          class="text-xs text-gray-500 underline hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
+          {{on "click" this.hideStubs}}
+        >Hide stubs</button>
+      </div>
+    {{/if}}
     {{#if this.isSearching}}
       <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
     {{else}}

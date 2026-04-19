@@ -10,6 +10,7 @@ export default class ReportsSourcesRoute extends Route {
     from: { refreshModel: true },
     to: { refreshModel: true },
     user: { refreshModel: true },
+    exclude_stubs: { refreshModel: true },
   };
 
   async model(params) {
@@ -19,6 +20,7 @@ export default class ReportsSourcesRoute extends Route {
     if (params.from) qs.set('from', params.from);
     if (params.to) qs.set('to', params.to);
     if (params.user) qs.set('user', params.user);
+    if (params.exclude_stubs) qs.set('exclude_stubs', '1');
     const response = await fetch(
       `${this.api.baseUrl}reports/sources/?${qs.toString()}`,
       { headers: this.api.headers() },

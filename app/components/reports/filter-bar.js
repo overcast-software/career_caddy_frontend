@@ -91,4 +91,9 @@ export default class ReportsFilterBarComponent extends Component {
   setTo(event) {
     this.args.onChange?.({ to: event.target.value });
   }
+
+  @action
+  toggleExcludeStubs(event) {
+    this.args.onChange?.({ exclude_stubs: event.target.checked ? '1' : '' });
+  }
 }

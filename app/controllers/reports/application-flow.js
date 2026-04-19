@@ -6,13 +6,26 @@ import { service } from '@ember/service';
 export default class ReportsApplicationFlowController extends Controller {
   @service currentUser;
   @service router;
+  @service session;
 
-  queryParams = ['scope', 'source', 'from', 'to', 'user'];
+  get isAuthenticated() {
+    return this.session.isAuthenticated;
+  }
+
+  queryParams = [
+    'scope',
+    'source',
+    'from',
+    'to',
+    'user',
+    'exclude_stubs',
+  ];
   @tracked scope = 'mine';
   @tracked source = '';
   @tracked from = '';
   @tracked to = '';
   @tracked user = '';
+  @tracked exclude_stubs = '';
 
   get isStaff() {
     return this.currentUser.user?.isStaff;
@@ -40,6 +53,7 @@ export default class ReportsApplicationFlowController extends Controller {
       from: this.from || '',
       to: this.to || '',
       user: this.user || '',
+      exclude_stubs: this.exclude_stubs || '',
     };
   }
 
