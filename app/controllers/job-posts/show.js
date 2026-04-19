@@ -7,6 +7,8 @@ export default class JobPostsShowController extends Controller {
   @service store;
   @service flashMessages;
   @service router;
+  @service spinner;
+  @service pollable;
 
   @tracked copyButtonText = 'Copy Description';
   @tracked scrapeSubmitting = false;
@@ -34,10 +36,25 @@ export default class JobPostsShowController extends Controller {
     });
     scrape
       .save()
-      .then(() => {
-        this.flashMessages.success(
-          'Scrape queued — the poller will pick it up.',
-        );
+      .then((saved) => {
+        this.flashMessages.success('Scrape queued — watching for completion.');
+        if (!this.pollable.isTerminal(saved)) {
+          this.spinner.begin({ label: 'Scraping…' });
+          this.pollable.poll(saved, {
+            successMessage: 'Scrape complete.',
+            failedMessage: 'Scrape failed.',
+            onComplete: () => {
+              this.flashMessages.clearMessages();
+              this.flashMessages.success('Scrape complete.');
+            },
+            onFailed: () => {
+              this.flashMessages.clearMessages();
+              this.flashMessages.danger(
+                'Scrape failed — try Run scrape again or paste the page text.',
+              );
+            },
+          });
+        }
       })
       .catch(() => {
         scrape.rollbackAttributes();

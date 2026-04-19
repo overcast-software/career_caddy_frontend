@@ -8,6 +8,8 @@ export default class JobPostsFormComponent extends Component {
   @service flashMessages;
   @service router;
   @service currentUser;
+  @service spinner;
+  @service pollable;
   @tracked _selectedCompany = null;
   @tracked showDeleteConfirm = false;
   @tracked pasteText = '';
@@ -118,23 +120,65 @@ export default class JobPostsFormComponent extends Component {
     const id = this.args.jobPost.id;
     const url = adapter.buildURL('job-post', id) + 'reextract/';
     this.reextracting = true;
-    this.flashMessages.info('Re-extracting fields from pasted text…');
+    this.flashMessages.info('Queued re-extraction — watching for completion.');
     adapter
       .ajax(url, 'POST', { data: { text: this.pasteText } })
       .then((payload) => {
-        this.store.pushPayload('job-post', payload);
-        this.flashMessages.clearMessages();
-        this.flashMessages.success('Job post fields updated from paste.');
-        this.pasteText = '';
+        // The endpoint returns the just-created Scrape (status: pending).
+        // Push it into the store, then poll until terminal — onComplete
+        // refreshes the JobPost so form fields update in place.
+        this.store.pushPayload('scrape', payload);
+        const scrapeId = payload?.data?.id;
+        const scrape = scrapeId
+          ? this.store.peekRecord('scrape', scrapeId)
+          : null;
+        if (!scrape || this.pollable.isTerminal(scrape)) {
+          this.flashMessages.clearMessages();
+          this.flashMessages.success('Re-extract complete.');
+          this._refreshJobPost();
+          this.pasteText = '';
+          this.reextracting = false;
+          return;
+        }
+        this.spinner.begin({ label: 'Re-extracting…' });
+        this.pollable.poll(scrape, {
+          successMessage: 'Re-extract complete — fields refreshed.',
+          failedMessage: 'Re-extract failed.',
+          onComplete: () => {
+            this._refreshJobPost();
+            this.flashMessages.clearMessages();
+            this.flashMessages.success(
+              'Re-extract complete — fields refreshed.',
+            );
+            this.pasteText = '';
+            this.reextracting = false;
+          },
+          onFailed: () => {
+            this.flashMessages.clearMessages();
+            this.flashMessages.danger(
+              'Re-extract failed — try a cleaner copy of the page.',
+            );
+            this.reextracting = false;
+          },
+          onError: () => {
+            this.flashMessages.clearMessages();
+            this.flashMessages.danger('Lost connection while re-extracting.');
+            this.reextracting = false;
+          },
+        });
       })
       .catch((error) => {
         this.flashMessages.clearMessages();
         const detail = error?.errors?.[0]?.detail ?? 'Re-extract failed.';
         this.flashMessages.danger(detail);
-      })
-      .finally(() => {
         this.reextracting = false;
       });
+  }
+
+  _refreshJobPost() {
+    const id = this.args.jobPost?.id;
+    if (!id) return;
+    this.store.findRecord('job-post', id, { reload: true }).catch(() => {});
   }
 
   @action
