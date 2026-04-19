@@ -25,30 +25,54 @@ module('Integration | Component | main-application', function (hooks) {
 
   // ── Sidebar open/close ────────────────────────────────────────────────────
 
-  test('sidebar is open by default', async function (assert) {
+  test('sidebar is closed by default', async function (assert) {
     await render(hbs`<MainApplication />`);
     assert
       .dom('.course')
-      .hasClass('course--sidebar-open', 'sidebar open on load');
+      .doesNotHaveClass(
+        'course--sidebar-open',
+        'sidebar starts closed when nothing stored',
+      );
   });
 
-  test('toggle button closes the sidebar', async function (assert) {
+  test('sidebar opens when localStorage says so', async function (assert) {
+    localStorage.setItem('cc:sidebar-open', 'true');
     await render(hbs`<MainApplication />`);
-    assert.dom('.course').hasClass('course--sidebar-open', 'starts open');
+    assert
+      .dom('.course')
+      .hasClass(
+        'course--sidebar-open',
+        'sidebar opens when explicitly stored as true',
+      );
+  });
+
+  test('toggle button opens then closes the sidebar', async function (assert) {
+    await render(hbs`<MainApplication />`);
+    assert
+      .dom('.course')
+      .doesNotHaveClass('course--sidebar-open', 'starts closed');
 
     await click('.topbar-hamburger');
     assert
       .dom('.course')
-      .doesNotHaveClass('course--sidebar-open', 'sidebar closes after toggle');
+      .hasClass('course--sidebar-open', 'sidebar opens on first toggle');
+
+    await click('.topbar-hamburger');
+    assert
+      .dom('.course')
+      .doesNotHaveClass(
+        'course--sidebar-open',
+        'sidebar closes on second toggle',
+      );
   });
 
   test('desktop sidebar stays open when close is called', async function (assert) {
     // On wide viewports (≥768px), close() is a no-op — sidebar stays open.
-    // Test environment viewport is narrow, so we verify close() checks width.
     Object.defineProperty(window, 'innerWidth', {
       value: 1024,
       writable: true,
     });
+    localStorage.setItem('cc:sidebar-open', 'true');
 
     await render(hbs`<MainApplication />`);
     assert.dom('.course').hasClass('course--sidebar-open', 'starts open');
@@ -67,6 +91,7 @@ module('Integration | Component | main-application', function (hooks) {
 
   test('mobile overlay click closes the sidebar', async function (assert) {
     Object.defineProperty(window, 'innerWidth', { value: 500, writable: true });
+    localStorage.setItem('cc:sidebar-open', 'true');
 
     await render(hbs`<MainApplication />`);
     assert.dom('.mobile-overlay').exists('overlay present when open');

@@ -67,6 +67,37 @@
     >Delete</button>
   </div>
 
+  <div
+    class="field-full mt-6 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+  >
+    <label class="field-label" for="reextract-text">Re-extract from paste</label>
+    <p class="mt-1 mb-2 text-sm text-gray-600 dark:text-gray-400">
+      Paste the job posting page text here and we'll re-run the AI extractor to
+      refresh title, description, salary, location, and posted date on this job
+      post. Company is left alone.
+    </p>
+    <textarea
+      id="reextract-text"
+      class="w-full min-h-[10rem] font-mono text-sm"
+      placeholder="Paste fresh job posting content…"
+      value={{this.pasteText}}
+      disabled={{this.reextracting}}
+      {{on "input" this.updatePasteText}}
+    ></textarea>
+    <div class="mt-3 flex justify-end">
+      <button
+        type="button"
+        class="btn"
+        disabled={{not this.canReextract}}
+        {{on "click" this.reextractFromPaste}}
+      >{{if
+          this.reextracting
+          "Re-extracting…"
+          "Re-extract from paste"
+        }}</button>
+    </div>
+  </div>
+
   {{#if this.showDeleteConfirm}}
     <div
       class="field-full mt-4 rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/40 p-4"

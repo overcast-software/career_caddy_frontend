@@ -1,5 +1,6 @@
 import Controller from '@ember/controller';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 
 export default class JobPostsScrapeController extends Controller {
@@ -8,6 +9,9 @@ export default class JobPostsScrapeController extends Controller {
   @service router;
   @service spinner;
   @service currentUser;
+
+  queryParams = ['url'];
+  @tracked url = '';
 
   get showHoldOption() {
     return this.currentUser.user?.isStaff;
