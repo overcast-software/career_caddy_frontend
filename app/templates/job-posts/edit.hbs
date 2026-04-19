@@ -1,6 +1,9 @@
 {{page-title "Edit Job Post"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
+    <div class="mb-4 flex justify-end">
+      <JobPosts::TriageActions @jobPost={{this.model}} />
+    </div>
     <JobPosts::Form @jobPost={{this.model}} />
   </:main>
 </RouteLayout>
