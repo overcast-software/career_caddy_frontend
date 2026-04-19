@@ -13,6 +13,7 @@ export const NODE_LABELS = {
   withdrew: 'Withdrew',
   declined: 'Declined',
   accepted: 'Accepted',
+  stub: 'Stub',
   unknown: 'Unknown',
 };
 
@@ -28,6 +29,7 @@ export const NODE_COLORS = {
   withdrew: '#fbbf24',
   declined: '#f87171',
   accepted: '#22c55e',
+  stub: '#6b7280',
   unknown: '#64748b',
 };
 

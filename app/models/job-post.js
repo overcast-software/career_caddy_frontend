@@ -8,6 +8,7 @@ export default class JobPostModel extends Model {
   @attr('date') extractionDate;
   @attr('string') link;
   @attr('string') activeApplicationStatus;
+  @attr('string', { defaultValue: 'manual' }) source;
   @belongsTo('score', { async: true, inverse: null }) topScore;
   @belongsTo('company', { async: true, inverse: 'jobPosts' }) company;
   @hasMany('score', { async: true, inverse: 'jobPost' }) scores;
