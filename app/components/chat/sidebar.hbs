@@ -1,4 +1,12 @@
 {{! Chat panel — always rendered so grid transition animates open/close }}
+{{#if this.isOpen}}
+  <button
+    type="button"
+    class="chat-mobile-backdrop md:hidden"
+    aria-label="Close chat"
+    {{on "click" this.close}}
+  ></button>
+{{/if}}
 <aside class="course-chat bg-white dark:bg-gray-800">
   {{#if this.isOpen}}
     <Chat::Panel />
