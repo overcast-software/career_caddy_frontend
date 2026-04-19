@@ -16,6 +16,7 @@ const STATE_MAP = {
 export default class ScrapesItemComponent extends Component {
   @service currentUser;
   @service session;
+  @service api;
 
   scrapeSteps = [
     'Hold',
@@ -50,9 +51,12 @@ export default class ScrapesItemComponent extends Component {
     const id = this.args.scrape?.id;
     if (!id) return;
     try {
-      const token = this.session.data?.authenticated?.access;
-      const resp = await fetch(`/api/v1/scrapes/${id}/screenshots/`, {
-        headers: { Authorization: `Bearer ${token}` },
+      // Use absolute API URL — in prod the frontend and API are on
+      // different origins, and a relative /api/v1/... resolves to the
+      // frontend origin which serves index.html as SPA fallback.
+      const listUrl = `${this.api.baseUrl}scrapes/${id}/screenshots/`;
+      const resp = await fetch(listUrl, {
+        headers: this.api.headers(),
         // Poller writes screenshots mid-lifecycle; without no-store the
         // browser can 304 back to an earlier empty-list response.
         cache: 'no-store',
@@ -61,7 +65,7 @@ export default class ScrapesItemComponent extends Component {
         const json = await resp.json();
         this.screenshots = (json.data || []).map((s) => ({
           filename: s.filename,
-          url: `/api/v1/scrapes/${id}/screenshots/${s.filename}`,
+          url: `${this.api.baseUrl}scrapes/${id}/screenshots/${s.filename}`,
           revealed: false,
         }));
       }
@@ -81,9 +85,8 @@ export default class ScrapesItemComponent extends Component {
 
     let blobUrl = shot.blobUrl;
     if (!blobUrl) {
-      const token = this.session.data?.authenticated?.access;
       const resp = await fetch(shot.url, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: this.api.headers(),
       });
       if (resp.ok) {
         const blob = await resp.blob();
