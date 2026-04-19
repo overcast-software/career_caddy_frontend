@@ -1,4 +1,8 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="job-posts" class="nav-link">Back to Job Posts</LinkTo>
+    <LinkTo @route="job-posts.paste" class="nav-link">Paste job text instead</LinkTo>
+  </:subnav>
   <:main>
     <Panel::Card>
       <form class="builder-form" {{on "submit" this.submitScrape}}>

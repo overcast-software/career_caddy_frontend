@@ -120,6 +120,7 @@ Router.map(function () {
     );
     this.route('new');
     this.route('scrape');
+    this.route('paste');
 
     this.route('edit', {
       path: '/:job_post_id/edit',
