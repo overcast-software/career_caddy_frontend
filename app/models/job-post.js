@@ -4,7 +4,7 @@ import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 // api/job_hunting/lib/services/application_flow.py. A post is a "stub"
 // when its description is too thin to be useful — typically email-pipeline
 // junk that never got an enriched scrape.
-export const STUB_MIN_WORDS = 20;
+export const STUB_MIN_WORDS = 60;
 
 export default class JobPostModel extends Model {
   @attr('date') createdAt;

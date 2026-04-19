@@ -53,7 +53,7 @@ export const NODE_DESCRIPTIONS = {
   withdrew: 'Applications you withdrew',
   declined: 'Offers you declined',
   accepted: 'Offers you accepted',
-  stub: 'Posts with a thin/empty description (< 20 words) — typically email pipeline junk',
+  stub: 'Posts with a thin/empty description (< 60 words) — typically email pipeline junk',
   scored: 'Posts that have been AI-scored for you',
   unscored: 'Posts that have not been AI-scored',
   unknown: 'Status does not map to a known bucket',
