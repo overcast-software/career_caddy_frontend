@@ -2,38 +2,11 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { select } from 'd3-selection';
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
+import { NODE_LABELS, NODE_COLORS } from './colors';
 
 const W = 720;
 const H = 460;
 const MARGIN = { top: 16, right: 140, bottom: 16, left: 140 };
-
-const NODE_LABELS = {
-  job_posts: 'Job Posts',
-  no_application: 'No Application',
-  applications: 'Applications',
-  applied: 'Applied',
-  interview: 'Interview',
-  offer: 'Offer',
-  ghosted: 'Ghosted',
-  rejected: 'Rejected',
-  withdrew: 'Withdrew',
-  declined: 'Declined',
-  accepted: 'Accepted',
-};
-
-const NODE_COLORS = {
-  job_posts: '#10b981',
-  applications: '#0ea5e9',
-  no_application: '#94a3b8',
-  applied: '#facc15',
-  interview: '#f97316',
-  offer: '#ec4899',
-  ghosted: '#f472b6',
-  rejected: '#a78bfa',
-  withdrew: '#fbbf24',
-  declined: '#f87171',
-  accepted: '#22c55e',
-};
 
 export default class ApplicationFlowSankeyComponent extends Component {
   el = null;
