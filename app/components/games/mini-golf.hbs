@@ -1,0 +1,52 @@
+{{! template-lint-disable no-inline-styles }}
+<div class="mx-auto my-6 max-w-lg">
+  <div
+    class="flex items-center justify-between gap-4 font-mono text-xs uppercase tracking-widest text-emerald-300 mb-2 px-1"
+  >
+    <span>{{this.strokeLabel}}</span>
+    <span>Total: {{this.totalStrokes}}</span>
+  </div>
+  <div
+    class="relative rounded border-4 border-emerald-900/60 shadow-[0_0_0_1px_rgba(0,0,0,0.6)] overflow-hidden"
+  >
+    <canvas
+      width="256"
+      height="192"
+      class="block w-full h-auto"
+      style="image-rendering: pixelated; image-rendering: crisp-edges; aspect-ratio: 4/3;"
+      {{on-insert this.setupCanvas}}
+    ></canvas>
+
+    {{#if this.sunk}}
+      <div
+        class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center font-mono text-center space-y-3 px-6"
+      >
+        {{#if this.gameComplete}}
+          <p class="text-emerald-300 text-xs uppercase tracking-[0.3em]">Course
+            clear</p>
+          <p class="text-white text-2xl font-bold">{{this.totalStrokes}}
+            strokes</p>
+          <p class="text-gray-300 text-xs">{{this.scorecardLabel}}</p>
+          <button
+            type="button"
+            class="mt-2 px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-gray-900 text-xs font-bold uppercase tracking-wider rounded"
+            {{on "click" this.restart}}
+          >Play Again</button>
+        {{else}}
+          <p
+            class="text-emerald-300 text-xs uppercase tracking-[0.3em]"
+          >{{this.scoreComment}}</p>
+          <p class="text-white text-xl font-bold">{{this.sunkLabel}}</p>
+          <button
+            type="button"
+            class="mt-2 px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-gray-900 text-xs font-bold uppercase tracking-wider rounded"
+            {{on "click" this.nextHole}}
+          >Next Hole →</button>
+        {{/if}}
+      </div>
+    {{/if}}
+  </div>
+  <p class="mt-3 font-mono text-[11px] text-gray-500 text-center">
+    Aim with the cursor · Hold to charge · Release to putt
+  </p>
+</div>
