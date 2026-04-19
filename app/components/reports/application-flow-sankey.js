@@ -1,12 +1,14 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { select } from 'd3-selection';
+import 'd3-transition'; // side-effect: adds .transition() to d3-selection
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import { NODE_LABELS, NODE_COLORS } from './colors';
 
 const W = 720;
 const H = 460;
 const MARGIN = { top: 16, right: 140, bottom: 16, left: 140 };
+const TRANSITION_MS = 500;
 
 export default class ApplicationFlowSankeyComponent extends Component {
   el = null;
@@ -25,8 +27,9 @@ export default class ApplicationFlowSankeyComponent extends Component {
   _render() {
     const nodes = (this.args.nodes || []).map((n) => ({ ...n }));
     const links = (this.args.links || []).map((l) => ({ ...l }));
+    const svg = select(this.el);
     if (!nodes.length || !links.length) {
-      select(this.el).selectAll('*').remove();
+      svg.selectAll('*').remove();
       return;
     }
 
@@ -39,61 +42,112 @@ export default class ApplicationFlowSankeyComponent extends Component {
         [W - MARGIN.right, H - MARGIN.bottom],
       ]);
 
-    // d3-sankey resolves source/target by index when using nodeId(d.index)
     const indexed = nodes.map((n, i) => ({ ...n, index: i }));
     const graph = layout({
       nodes: indexed,
       links: links.map((l) => ({ ...l })),
     });
 
-    const svg = select(this.el);
-    svg.selectAll('*').remove();
     svg.attr('viewBox', `0 0 ${W} ${H}`).attr('class', 'w-full h-auto');
 
-    // Links
-    svg
-      .append('g')
-      .attr('fill', 'none')
+    // Persistent group containers — established once; data joins animate in
+    // place on subsequent renders. Classic d3 enter/update/exit pattern.
+    let linkG = svg.select('g.sankey-links');
+    if (linkG.empty()) {
+      linkG = svg
+        .append('g')
+        .attr('class', 'sankey-links')
+        .attr('fill', 'none');
+    }
+    let nodeG = svg.select('g.sankey-nodes');
+    if (nodeG.empty()) {
+      nodeG = svg.append('g').attr('class', 'sankey-nodes');
+    }
+
+    const linkKey = (d) => `${d.source.id}->${d.target.id}`;
+    const nodeKey = (d) => d.id;
+
+    linkG
       .selectAll('path')
-      .data(graph.links)
-      .join('path')
-      .attr('d', sankeyLinkHorizontal())
-      .attr('stroke', (d) => NODE_COLORS[d.target.id] || '#cbd5e1')
-      .attr('stroke-opacity', 0.45)
-      .attr('stroke-width', (d) => Math.max(1, d.width));
+      .data(graph.links, linkKey)
+      .join(
+        (enter) =>
+          enter
+            .append('path')
+            .attr('stroke', (d) => NODE_COLORS[d.target.id] || '#cbd5e1')
+            .attr('stroke-opacity', 0.45)
+            .attr('stroke-width', (d) => Math.max(1, d.width))
+            .attr('d', sankeyLinkHorizontal())
+            .attr('opacity', 0)
+            .call((s) =>
+              s.transition().duration(TRANSITION_MS).attr('opacity', 1),
+            ),
+        (update) =>
+          update.call((s) =>
+            s
+              .transition()
+              .duration(TRANSITION_MS)
+              .attr('stroke', (d) => NODE_COLORS[d.target.id] || '#cbd5e1')
+              .attr('stroke-width', (d) => Math.max(1, d.width))
+              .attr('d', sankeyLinkHorizontal()),
+          ),
+        (exit) =>
+          exit.call((s) =>
+            s.transition().duration(TRANSITION_MS).attr('opacity', 0).remove(),
+          ),
+      );
 
-    // Nodes
-    const nodeG = svg.append('g').selectAll('g').data(graph.nodes).join('g');
+    const ng = nodeG
+      .selectAll('g.node')
+      .data(graph.nodes, nodeKey)
+      .join(
+        (enter) => {
+          const g = enter.append('g').attr('class', 'node').attr('opacity', 0);
+          g.append('rect');
+          g.append('text').attr('class', 'value');
+          g.append('text').attr('class', 'name');
+          g.call((s) =>
+            s.transition().duration(TRANSITION_MS).attr('opacity', 1),
+          );
+          return g;
+        },
+        (update) => update,
+        (exit) =>
+          exit.call((s) =>
+            s.transition().duration(TRANSITION_MS).attr('opacity', 0).remove(),
+          ),
+      );
 
-    nodeG
-      .append('rect')
+    ng.select('rect')
+      .attr('fill', (d) => NODE_COLORS[d.id] || '#64748b')
+      .transition()
+      .duration(TRANSITION_MS)
       .attr('x', (d) => d.x0)
       .attr('y', (d) => d.y0)
       .attr('height', (d) => Math.max(1, d.y1 - d.y0))
-      .attr('width', (d) => d.x1 - d.x0)
-      .attr('fill', (d) => NODE_COLORS[d.id] || '#64748b');
+      .attr('width', (d) => d.x1 - d.x0);
 
-    // Value labels (above the node label)
-    nodeG
-      .append('text')
-      .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
-      .attr('y', (d) => (d.y0 + d.y1) / 2 - 8)
+    ng.select('text.value')
       .attr('text-anchor', (d) => (d.x0 < W / 2 ? 'start' : 'end'))
       .attr('dominant-baseline', 'middle')
-      .attr('class', 'fill-gray-900 dark:fill-gray-100')
+      .attr('class', 'value fill-gray-900 dark:fill-gray-100')
       .attr('font-size', 16)
       .attr('font-weight', 600)
-      .text((d) => d.value || 0);
-
-    // Name labels (below the value)
-    nodeG
-      .append('text')
+      .text((d) => d.value || 0)
+      .transition()
+      .duration(TRANSITION_MS)
       .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
-      .attr('y', (d) => (d.y0 + d.y1) / 2 + 10)
+      .attr('y', (d) => (d.y0 + d.y1) / 2 - 8);
+
+    ng.select('text.name')
       .attr('text-anchor', (d) => (d.x0 < W / 2 ? 'start' : 'end'))
       .attr('dominant-baseline', 'middle')
-      .attr('class', 'fill-gray-500 dark:fill-gray-400')
+      .attr('class', 'name fill-gray-500 dark:fill-gray-400')
       .attr('font-size', 11)
-      .text((d) => NODE_LABELS[d.id] || d.id);
+      .text((d) => NODE_LABELS[d.id] || d.id)
+      .transition()
+      .duration(TRANSITION_MS)
+      .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
+      .attr('y', (d) => (d.y0 + d.y1) / 2 + 10);
   }
 }

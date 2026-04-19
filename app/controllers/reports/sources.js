@@ -7,8 +7,12 @@ export default class ReportsSourcesController extends Controller {
   @service currentUser;
   @service router;
 
-  queryParams = ['scope'];
+  queryParams = ['scope', 'source', 'from', 'to', 'user'];
   @tracked scope = 'mine';
+  @tracked source = '';
+  @tracked from = '';
+  @tracked to = '';
+  @tracked user = '';
 
   get isStaff() {
     return this.currentUser.user?.isStaff;
@@ -30,10 +34,19 @@ export default class ReportsSourcesController extends Controller {
     return !this.isForbidden && !this.isFailed && !this.model?.total_job_posts;
   }
 
+  get filters() {
+    return {
+      source: this.source || '',
+      from: this.from || '',
+      to: this.to || '',
+      user: this.user || '',
+    };
+  }
+
   @action
   showMine() {
     this.router.transitionTo('reports.sources', {
-      queryParams: { scope: 'mine' },
+      queryParams: { scope: 'mine', user: '' },
     });
   }
 
@@ -42,6 +55,13 @@ export default class ReportsSourcesController extends Controller {
     if (!this.isStaff) return;
     this.router.transitionTo('reports.sources', {
       queryParams: { scope: 'all' },
+    });
+  }
+
+  @action
+  applyFilter(patch) {
+    this.router.transitionTo('reports.sources', {
+      queryParams: { ...this.filters, ...patch },
     });
   }
 }
