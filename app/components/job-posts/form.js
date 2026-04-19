@@ -15,6 +15,12 @@ export default class JobPostsFormComponent extends Component {
   @tracked pasteText = '';
   @tracked reextracting = false;
 
+  // Canonical list — matches the backend's KNOWN_SOURCES constant. Kept
+  // hardcoded because it rarely changes; the reports filter options
+  // endpoint is the dynamic list, but the edit form wants a fixed set so
+  // users don't invent free-text values.
+  sourceOptions = ['manual', 'email', 'paste', 'scrape', 'chat', 'import'];
+
   get isStaff() {
     return this.currentUser.user?.isStaff;
   }

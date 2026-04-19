@@ -48,6 +48,18 @@
     />
   </div>
 
+  <div class="field">
+    <label class="field-label" for="source">Source</label>
+    <select id="source" {{on "change" (fn this.updateField "source")}}>
+      {{#each this.sourceOptions as |opt|}}
+        <option
+          value={{opt}}
+          selected={{eq @jobPost.source opt}}
+        >{{opt}}</option>
+      {{/each}}
+    </select>
+  </div>
+
   <div class="field-full">
     <label class="field-label" for="description">Description</label>
     <textarea

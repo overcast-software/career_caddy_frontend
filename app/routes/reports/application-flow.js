@@ -6,12 +6,21 @@ export default class ReportsApplicationFlowRoute extends Route {
 
   queryParams = {
     scope: { refreshModel: true },
+    source: { refreshModel: true },
+    from: { refreshModel: true },
+    to: { refreshModel: true },
+    user: { refreshModel: true },
   };
 
   async model(params) {
-    const scope = params.scope || 'mine';
+    const qs = new URLSearchParams();
+    qs.set('scope', params.scope || 'mine');
+    if (params.source) qs.set('source', params.source);
+    if (params.from) qs.set('from', params.from);
+    if (params.to) qs.set('to', params.to);
+    if (params.user) qs.set('user', params.user);
     const response = await fetch(
-      `${this.api.baseUrl}reports/application-flow/?scope=${encodeURIComponent(scope)}`,
+      `${this.api.baseUrl}reports/application-flow/?${qs.toString()}`,
       { headers: this.api.headers() },
     );
     if (!response.ok) {
@@ -20,7 +29,7 @@ export default class ReportsApplicationFlowRoute extends Route {
         links: [],
         total_job_posts: 0,
         total_applications: 0,
-        scope,
+        scope: params.scope || 'mine',
         error: response.status === 403 ? 'forbidden' : 'failed',
       };
     }
