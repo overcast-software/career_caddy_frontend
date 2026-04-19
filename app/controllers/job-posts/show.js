@@ -38,6 +38,9 @@ export default class JobPostsShowController extends Controller {
       .save()
       .then((saved) => {
         this.flashMessages.success('Scrape queued — watching for completion.');
+        // Park the user on the scrapes tab so they see the new row (which
+        // the scrapes route fetches fresh) while the poller works.
+        this.router.transitionTo('job-posts.show.scrapes', this.model);
         if (!this.pollable.isTerminal(saved)) {
           this.spinner.begin({ label: 'Scraping…' });
           this.pollable.poll(saved, {
@@ -46,6 +49,9 @@ export default class JobPostsShowController extends Controller {
             onComplete: () => {
               this.flashMessages.clearMessages();
               this.flashMessages.success('Scrape complete.');
+              // Refresh the jobPost so title/description/salary reflect
+              // the freshly-parsed values without a page reload.
+              this.model.reload().catch(() => {});
             },
             onFailed: () => {
               this.flashMessages.clearMessages();
