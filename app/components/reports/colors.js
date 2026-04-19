@@ -38,3 +38,40 @@ export const NODE_COLORS = {
 };
 
 export const FALLBACK_COLOR = '#64748b';
+
+// Human-readable descriptions for each sankey node. Used for on-hover
+// tooltips so viewers can tell what (e.g.) "stub" means without digging.
+export const NODE_DESCRIPTIONS = {
+  job_posts: 'All job posts in this scope',
+  no_application: 'Posts you have not applied to',
+  applications: 'Posts where you started an application',
+  applied: 'Applications currently in Applied stage',
+  interview: 'Applications that reached Interview',
+  offer: 'Applications that received an Offer',
+  ghosted: 'Applications with no status update in 30+ days',
+  rejected: 'Applications rejected by the employer',
+  withdrew: 'Applications you withdrew',
+  declined: 'Offers you declined',
+  accepted: 'Offers you accepted',
+  stub: 'Posts with a thin/empty description (< 20 words) — typically email pipeline junk',
+  scored: 'Posts that have been AI-scored for you',
+  unscored: 'Posts that have not been AI-scored',
+  unknown: 'Status does not map to a known bucket',
+};
+
+// Maps sankey node id → query params for job-posts.index when clicked.
+// null means the node is informational only (no drill-down filter).
+export const NODE_LINK_PARAMS = {
+  stub: { stub: 'true' },
+  scored: { scored: 'true' },
+  unscored: { scored: 'false' },
+  no_application: { bucket: 'no_application' },
+  applied: { bucket: 'applied' },
+  interview: { bucket: 'interview' },
+  offer: { bucket: 'offer' },
+  ghosted: { bucket: 'ghosted' },
+  rejected: { bucket: 'rejected' },
+  withdrew: { bucket: 'withdrew' },
+  accepted: { bucket: 'accepted' },
+  declined: { bucket: 'declined' },
+};

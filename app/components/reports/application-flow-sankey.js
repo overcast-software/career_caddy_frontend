@@ -1,9 +1,15 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
+import { service } from '@ember/service';
 import { select } from 'd3-selection';
 import 'd3-transition'; // side-effect: adds .transition() to d3-selection
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
-import { NODE_LABELS, NODE_COLORS } from './colors';
+import {
+  NODE_LABELS,
+  NODE_COLORS,
+  NODE_DESCRIPTIONS,
+  NODE_LINK_PARAMS,
+} from './colors';
 
 const W = 720;
 const H = 460;
@@ -11,7 +17,24 @@ const MARGIN = { top: 16, right: 140, bottom: 16, left: 140 };
 const TRANSITION_MS = 500;
 
 export default class ApplicationFlowSankeyComponent extends Component {
+  @service router;
   el = null;
+
+  _goToNode(d) {
+    const params = NODE_LINK_PARAMS[d.id];
+    if (!params) return;
+    this.router.transitionTo('job-posts.index', {
+      queryParams: {
+        search: null,
+        hostname: null,
+        stub: null,
+        source: null,
+        scored: null,
+        bucket: null,
+        ...params,
+      },
+    });
+  }
 
   @action
   setupSvg(el) {
@@ -102,10 +125,24 @@ export default class ApplicationFlowSankeyComponent extends Component {
       .data(graph.nodes, nodeKey)
       .join(
         (enter) => {
+          const self = this;
           const g = enter.append('g').attr('class', 'node').attr('opacity', 0);
           g.append('rect');
           g.append('text').attr('class', 'value');
           g.append('text').attr('class', 'name');
+          g.append('title');
+          g.attr('class', (d) =>
+            NODE_LINK_PARAMS[d.id] ? 'node cursor-pointer' : 'node',
+          )
+            .attr('tabindex', (d) => (NODE_LINK_PARAMS[d.id] ? 0 : null))
+            .attr('role', (d) => (NODE_LINK_PARAMS[d.id] ? 'link' : null))
+            .on('click', (_event, d) => self._goToNode(d))
+            .on('keydown', (event, d) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                self._goToNode(d);
+              }
+            });
           g.call((s) =>
             s.transition().duration(TRANSITION_MS).attr('opacity', 1),
           );
@@ -149,5 +186,14 @@ export default class ApplicationFlowSankeyComponent extends Component {
       .duration(TRANSITION_MS)
       .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
       .attr('y', (d) => (d.y0 + d.y1) / 2 + 10);
+
+    ng.select('title').text((d) => {
+      const label = NODE_LABELS[d.id] || d.id;
+      const desc = NODE_DESCRIPTIONS[d.id] || '';
+      const drill = NODE_LINK_PARAMS[d.id]
+        ? ' — click to view these job posts'
+        : '';
+      return desc ? `${label}: ${desc} (${d.value})${drill}` : label;
+    });
   }
 }

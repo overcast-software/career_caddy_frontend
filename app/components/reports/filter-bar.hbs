@@ -64,6 +64,18 @@
     {{/if}}
   </div>
 
+  <label
+    class="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300"
+  >
+    <input
+      type="checkbox"
+      class="rounded border-gray-300 dark:border-gray-600"
+      checked={{this.filters.exclude_stubs}}
+      {{on "change" this.toggleExcludeStubs}}
+    />
+    <span class="font-medium">Exclude stubs</span>
+  </label>
+
   {{#if this.showPersonFilter}}
     <label
       class="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300"

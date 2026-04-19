@@ -6,18 +6,20 @@
       class="nav-link nav-link-active"
     >Application Flow</LinkTo>
     <LinkTo @route="reports.sources" class="nav-link">Sources</LinkTo>
-    <span class="nav-link-divider" aria-hidden="true">·</span>
-    <button
-      type="button"
-      class="nav-link {{if this.isMine 'nav-link-active'}}"
-      {{on "click" this.showMine}}
-    >Mine</button>
-    {{#if this.isStaff}}
+    {{#if this.isAuthenticated}}
+      <span class="nav-link-divider" aria-hidden="true">·</span>
       <button
         type="button"
-        class="nav-link {{unless this.isMine 'nav-link-active'}}"
-        {{on "click" this.showGlobal}}
-      >Global</button>
+        class="nav-link {{if this.isMine 'nav-link-active'}}"
+        {{on "click" this.showMine}}
+      >Mine</button>
+      {{#if this.isStaff}}
+        <button
+          type="button"
+          class="nav-link {{unless this.isMine 'nav-link-active'}}"
+          {{on "click" this.showGlobal}}
+        >Global</button>
+      {{/if}}
     {{/if}}
   </:subnav>
   <:main>

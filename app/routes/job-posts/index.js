@@ -6,6 +6,11 @@ export default class JobPostsIndexRoute extends Route {
 
   queryParams = {
     search: { refreshModel: true },
+    hostname: { refreshModel: true },
+    stub: { refreshModel: true },
+    source: { refreshModel: true },
+    scored: { refreshModel: true },
+    bucket: { refreshModel: true },
   };
 
   setupController(controller, model) {
@@ -13,13 +18,18 @@ export default class JobPostsIndexRoute extends Route {
     controller.isSearching = false;
   }
 
-  model({ search }) {
+  model({ search, hostname, stub, source, scored, bucket }) {
     return this.infinity.model('job-post', {
       perPage: 20,
       startingPage: 1,
       include: 'company',
       sort: '-posted_date',
       ...(search ? { 'filter[query]': search } : {}),
+      ...(hostname ? { 'filter[hostname]': hostname } : {}),
+      ...(stub ? { 'filter[stub]': stub } : {}),
+      ...(source ? { 'filter[source]': source } : {}),
+      ...(scored ? { 'filter[scored]': scored } : {}),
+      ...(bucket ? { 'filter[bucket]': bucket } : {}),
     });
   }
 }
