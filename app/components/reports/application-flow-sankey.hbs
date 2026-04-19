@@ -1,0 +1,8 @@
+{{! template-lint-disable no-inline-styles }}
+<div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+  <svg
+    class="w-full h-auto"
+    style="aspect-ratio: 720/460;"
+    {{on-render this.setupSvg @nodes @links}}
+  ></svg>
+</div>
