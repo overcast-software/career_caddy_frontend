@@ -1,0 +1,33 @@
+<div class="flex flex-wrap items-center gap-2">
+  {{#if this.activeStatus}}
+    <span
+      class="inline-flex items-center rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-200"
+    >{{this.activeStatus}}</span>
+  {{/if}}
+  <button
+    type="button"
+    class="px-2 py-1 text-xs rounded border
+      {{if
+        this.isVettedGood
+        'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
+        'border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
+      }}"
+    disabled={{this.submitting}}
+    {{on "click" this.vetGood}}
+  >
+    {{if this.isVettedGood "✓ Vetted Good" "Vetted Good"}}
+  </button>
+  <button
+    type="button"
+    class="px-2 py-1 text-xs rounded border
+      {{if
+        this.isVettedBad
+        'border-red-500 bg-red-50 text-red-700 dark:bg-red-900/40 dark:text-red-200'
+        'border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
+      }}"
+    disabled={{this.submitting}}
+    {{on "click" this.vetBad}}
+  >
+    {{if this.isVettedBad "✗ Vetted Bad" "Vetted Bad"}}
+  </button>
+</div>
