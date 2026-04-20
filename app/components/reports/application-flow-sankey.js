@@ -131,9 +131,22 @@ export default class ApplicationFlowSankeyComponent extends Component {
         (enter) => {
           const self = this;
           const g = enter.append('g').attr('class', 'node').attr('opacity', 0);
-          g.append('rect');
-          g.append('text').attr('class', 'value');
-          g.append('text').attr('class', 'name');
+          // Seed every element at its final position up-front so the
+          // enter fade-in doesn't also animate (0, 0) → target, which
+          // read as labels sliding in from the top-left corner.
+          g.append('rect')
+            .attr('x', (d) => d.x0)
+            .attr('y', (d) => d.y0)
+            .attr('width', (d) => d.x1 - d.x0)
+            .attr('height', (d) => Math.max(1, d.y1 - d.y0));
+          g.append('text')
+            .attr('class', 'value')
+            .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
+            .attr('y', (d) => (d.y0 + d.y1) / 2 - 8);
+          g.append('text')
+            .attr('class', 'name')
+            .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
+            .attr('y', (d) => (d.y0 + d.y1) / 2 + 10);
           g.append('title');
           g.attr('class', (d) =>
             NODE_LINK_PARAMS[d.id] ? 'node cursor-pointer' : 'node',
