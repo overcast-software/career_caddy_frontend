@@ -69,21 +69,34 @@
             </td>
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-2">
-                <LinkTo
-                  @route="job-posts.show.job-applications"
-                  @model={{jobPost}}
-                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                >View</LinkTo>
-                <LinkTo
-                  @route="job-posts.edit"
-                  @model={{jobPost}}
-                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                >Edit</LinkTo>
-                <LinkTo
-                  @route="job-posts.show.scores"
-                  @model={{jobPost}}
-                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                >Score</LinkTo>
+                {{#if (and jobPost.isStub jobPost.link)}}
+                  {{! Stub + scrapable link: the most useful action is to
+                      enrich via scrape and then score against career-data. }}
+                  <button
+                    type="button"
+                    class="px-2 py-1 text-xs rounded border border-accent-200 text-accent-600 hover:bg-accent-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
+                    disabled={{this.isBusy jobPost}}
+                    {{on "click" (fn this.scrapeAndScore jobPost)}}
+                  >
+                    {{if (this.isBusy jobPost) "Working…" "Scrape & Score"}}
+                  </button>
+                {{else}}
+                  <LinkTo
+                    @route="job-posts.show.job-applications"
+                    @model={{jobPost}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >View</LinkTo>
+                  <LinkTo
+                    @route="job-posts.edit"
+                    @model={{jobPost}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >Edit</LinkTo>
+                  <LinkTo
+                    @route="job-posts.show.scores"
+                    @model={{jobPost}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >Score</LinkTo>
+                {{/if}}
               </div>
             </td>
           </tr>
