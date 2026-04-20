@@ -116,6 +116,19 @@ export default class AnswersForm extends Component {
   }
 
   @action async toggleFavorite(answer) {
-    answer.favorite = !answer.favorite;
+    // Previously only toggled the local attr without persisting — the
+    // star flipped state visually and then reverted on reload. Persist
+    // immediately (with rollback on failure) so the button works as a
+    // user expects without requiring a subsequent form save.
+    const previous = answer.favorite;
+    answer.favorite = !previous;
+    try {
+      await answer.save();
+    } catch (error) {
+      answer.favorite = previous;
+      this.flashMessages.danger(
+        error?.errors?.[0]?.detail ?? 'Failed to update favorite.',
+      );
+    }
   }
 }

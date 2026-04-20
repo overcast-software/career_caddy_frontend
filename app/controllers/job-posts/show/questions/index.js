@@ -21,15 +21,11 @@ export default class JobPostsShowQuestionsIndexController extends Controller {
     this.answeringQuestionId = null;
   }
 
-  @action answerSaved(answer, question) {
+  @action answerSaved() {
+    // Collapse the inline editor and stay on the list — the user was
+    // inline-answering here deliberately, routing away to the answer
+    // show page defeats the point of the inline affordance.
     this.answeringQuestionId = null;
-    const { job_post_id } = this.router.currentRoute.parent.parent.params;
-    this.router.transitionTo(
-      'job-posts.show.questions.show.answers.show',
-      job_post_id,
-      question.id,
-      answer.id,
-    );
   }
 
   @action deleteQuestion(question) {
@@ -47,6 +43,12 @@ export default class JobPostsShowQuestionsIndexController extends Controller {
   }
 
   @action editQuestion(question) {
-    this.router.transitionTo('questions.edit', question);
+    // Stay inside the job-posts.show subtree rather than jumping out
+    // to the global /questions/:id/edit form.
+    this.router.transitionTo(
+      'job-posts.show.questions.edit',
+      question.belongsTo('jobPost').id(),
+      question.id,
+    );
   }
 }

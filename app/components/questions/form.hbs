@@ -108,15 +108,15 @@
       ></textarea>
     </div>
 
+    {{! Favorite state is derived from whether any answer is favorited
+        — see models/question.js. The read-only indicator that used to
+        live here made the edit form look like it had a broken button;
+        the star now only appears where it means something (list +
+        show), not in the editor. }}
     <div class="form-actions">
-      <span
-        class="btn favorite {{if @question.favorite 'favorited'}}"
-        title="A question is favorited when it has a favorited answer. You cannot favorite a question directly."
-      >★</span>
       <button type="submit" class="btn primary" disabled={{@question.isSaving}}>
         Save
       </button>
-      {{! Save & Add Another hidden: not useful in current flow }}
       <button type="button" class="btn" {{on "click" this.cancel}}>
         Cancel
       </button>
