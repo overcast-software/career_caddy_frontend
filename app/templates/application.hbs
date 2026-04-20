@@ -1,7 +1,12 @@
 {{page-title "Career Caddy"}}
 <MainApplication @onToggleSidebar={{this.toggleSidebar}}>
+  {{! Experiment: explode transition on the application-level outlet.
+      Routes that share elements tagged [data-explode-pin] (typically
+      the page <h1>) will fly those elements between positions while
+      the rest crossfades. Non-pinned content still crossfades as a
+      whole — no-op visually for routes that don't opt in. }}
   <div class="greens">
-    {{outlet}}
+    <LiquidOutlet @class="top-outlet" />
   </div>
   {{#if this.isProduction}}
     {{! template-lint-disable no-forbidden-elements }}

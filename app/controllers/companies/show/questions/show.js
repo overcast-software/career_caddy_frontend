@@ -15,6 +15,22 @@ export default class CompaniesShowQuestionsShowController extends Controller {
     );
   }
 
+  // Toggle the answer's favorite state and persist immediately with
+  // rollback on failure — same pattern as <Answers::Form> so a click
+  // "just works" without needing a subsequent save.
+  @action async toggleAnswerFavorite(answer) {
+    const previous = answer.favorite;
+    answer.favorite = !previous;
+    try {
+      await answer.save();
+    } catch (error) {
+      answer.favorite = previous;
+      this.flashMessages.danger(
+        error?.errors?.[0]?.detail ?? 'Failed to update favorite.',
+      );
+    }
+  }
+
   @action deleteAnswer(answer) {
     if (!window.confirm('Delete this answer?')) return;
     answer

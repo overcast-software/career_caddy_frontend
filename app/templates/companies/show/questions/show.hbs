@@ -20,6 +20,7 @@
       @answers={{this.model.answers}}
       @showRoute="companies.show.questions.show.answers.show"
       @editRoute="companies.show.questions.show.answers.edit"
+      @onToggleFavorite={{this.toggleAnswerFavorite}}
       @onDelete={{this.deleteAnswer}}
     />
   {{/if}}

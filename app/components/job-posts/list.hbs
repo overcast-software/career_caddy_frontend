@@ -69,13 +69,17 @@
             </td>
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-2">
+                <JobPosts::TriageActions
+                  @jobPost={{jobPost}}
+                  @compact={{true}}
+                />
                 {{#if jobPost.isWorking}}
                   {{! Work already in flight for this post (scrape or
                       score). Disable the button and tell the user what's
                       happening — don't offer a second action. }}
                   <button
                     type="button"
-                    class="inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-accent-200 text-accent-600 opacity-70 cursor-not-allowed dark:border-accent-700 dark:text-accent-300"
+                    class="inline-flex items-center gap-1.5 px-2 py-1 text-xs whitespace-nowrap rounded border border-accent-200 text-accent-600 opacity-70 cursor-not-allowed dark:border-accent-700 dark:text-accent-300"
                     disabled
                     aria-label={{concat jobPost.busyPhase " in progress"}}
                   >
@@ -110,7 +114,7 @@
                       score against career-data. }}
                   <button
                     type="button"
-                    class="inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
+                    class="inline-flex items-center gap-1.5 px-2 py-1 text-xs whitespace-nowrap rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
                     {{on "click" (fn this.scrapeAndScore jobPost)}}
                   >
                     Scrape & Score
@@ -121,7 +125,7 @@
                       than routing away. }}
                   <button
                     type="button"
-                    class="inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
+                    class="inline-flex items-center gap-1.5 px-2 py-1 text-xs whitespace-nowrap rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
                     {{on "click" (fn this.scoreWithCareerData jobPost)}}
                   >
                     Score
