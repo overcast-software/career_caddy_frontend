@@ -54,7 +54,6 @@ export default class AnswersShowComponent extends Component {
     answer
       .destroyRecord()
       .then(() => {
-        answer.unloadRecord();
         this.flashMessages.success('Answer deleted.');
         if (this.args.onDelete) {
           this.args.onDelete();

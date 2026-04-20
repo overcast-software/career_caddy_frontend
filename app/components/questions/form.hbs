@@ -108,11 +108,21 @@
       ></textarea>
     </div>
 
-    {{! Favorite state is derived from whether any answer is favorited
-        — see models/question.js. The read-only indicator that used to
-        live here made the edit form look like it had a broken button;
-        the star now only appears where it means something (list +
-        show), not in the editor. }}
+    {{! Star toggles the favorite state of the question's lone answer.
+        Only meaningful when the question has exactly one answer;
+        clicking with 0 or >1 answers surfaces a flash error explaining
+        why — favoriting is a per-answer concept, not per-question. }}
+    {{#if @question.id}}
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn favorite {{if this.loneAnswerFavorited 'favorited'}}"
+          title="Favorite the lone answer"
+          {{on "click" this.toggleLoneAnswerFavorite}}
+        >{{if this.loneAnswerFavorited "★" "☆"}}</button>
+      </div>
+    {{/if}}
+
     <div class="form-actions">
       <button type="submit" class="btn primary" disabled={{@question.isSaving}}>
         Save

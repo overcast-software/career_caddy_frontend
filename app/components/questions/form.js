@@ -103,6 +103,52 @@ export default class QuestionsFormComponent extends Component {
     this.args.question.content = event.target.value;
   }
 
+  // Favoriting is a per-answer concept — the Question itself has no
+  // independent favorite flag. When the question has exactly one
+  // answer we let the star on the form toggle that answer's favorite
+  // directly; anything else is a misuse and we flash the ambiguity.
+  get _loneAnswer() {
+    const answers = this.args.question?.hasMany('answers').value() ?? [];
+    return answers.length === 1 ? answers[0] : null;
+  }
+
+  get loneAnswerFavorited() {
+    return this._loneAnswer?.favorite ?? false;
+  }
+
+  @action
+  toggleLoneAnswerFavorite() {
+    const answers = this.args.question?.hasMany('answers').value() ?? [];
+    if (answers.length === 0) {
+      this.flashMessages.warning(
+        'Add an answer first — favoriting lives on the answer, not the question.',
+      );
+      return;
+    }
+    if (answers.length > 1) {
+      this.flashMessages.warning(
+        'This question has multiple answers. Open the question and favorite a specific answer.',
+      );
+      return;
+    }
+    const answer = answers[0];
+    const previous = answer.favorite;
+    answer.favorite = !previous;
+    answer
+      .save()
+      .then(() => {
+        this.flashMessages.success(
+          previous
+            ? 'Unfavorited the lone answer.'
+            : 'Favorited the lone answer.',
+        );
+      })
+      .catch(() => {
+        answer.favorite = previous;
+        this.flashMessages.danger('Failed to update favorite.');
+      });
+  }
+
   @action async updateCompany(company) {
     this.selectedCompany = company;
     this.selectedJobPost = null;
