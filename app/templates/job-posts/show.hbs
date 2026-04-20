@@ -45,49 +45,54 @@
             {{/if}}
           </div>
         </div>
-        {{! Primary actions row — Run scrape / Copy Description / Edit.
-            Triage (Vetted Good / Vetted Bad) drops to its own row
-            underneath since it's a judgement call, not a state change. }}
-        <div class="flex flex-col items-stretch gap-2 sm:shrink-0 sm:items-end">
-          <div class="flex flex-wrap items-center gap-2 sm:justify-end">
-            {{#if this.model.link}}
-              <button
-                type="button"
-                class="btn small"
-                disabled={{this.scrapeSubmitting}}
-                {{on "click" this.runScrape}}
-              >
-                {{if this.scrapeSubmitting "Queuing…" "Run scrape"}}
-              </button>
-            {{/if}}
+        {{! All header actions — Run scrape / Copy / Edit / Vetted Good /
+            Vetted Bad — live on the right side in a single flex-wrap
+            row. On narrow viewports they wrap underneath each other;
+            on sm+ they stay pinned right. }}
+        <div
+          class="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end"
+        >
+          {{#if this.model.link}}
             <button
               type="button"
               class="btn small"
-              {{on "click" this.copyDescription}}
+              disabled={{this.scrapeSubmitting}}
+              {{on "click" this.runScrape}}
             >
-              {{this.copyButtonText}}
+              {{if this.scrapeSubmitting "Queuing…" "Run scrape"}}
             </button>
-            <LinkTo
-              class="btn small"
-              @route="job-posts.edit"
-              @model={{this.model}}
-            >Edit</LinkTo>
-          </div>
-          <div class="flex flex-wrap items-center gap-2 sm:justify-end">
-            <JobPosts::TriageActions @jobPost={{this.model}} />
-          </div>
+          {{/if}}
+          <button
+            type="button"
+            class="btn small"
+            {{on "click" this.copyDescription}}
+          >
+            {{this.copyButtonText}}
+          </button>
+          <LinkTo
+            class="btn small"
+            @route="job-posts.edit"
+            @model={{this.model}}
+          >Edit</LinkTo>
+          <JobPosts::TriageActions @jobPost={{this.model}} />
         </div>
       </div>
 
       <div>
-        {{! Animated expand/collapse via max-height transition. Tailwind
-            doesn't ship a line-clamp transition (the property isn't
-            animatable) — the max-height bounce reads as a smooth
-            unfold and settles at the content's natural height once
-            the transition finishes. }}
+        {{! Animated expand/collapse. line-clamp-4 gives a clean cut at
+            exactly 4 lines when collapsed; max-height on top provides
+            the smooth unfold when toggled. Tailwind can't animate
+            line-clamp directly (not an animatable property), which is
+            why max-height is the transition carrier. Both candidate
+            class strings appear literally in the if-helper arguments
+            so Tailwind JIT compiles them. }}
         <p
           class="text-sm text-gray-600 overflow-hidden transition-[max-height] duration-300 ease-out
-            {{if this.descriptionExpanded 'max-h-[60rem]' 'max-h-20'}}"
+            {{if
+              this.descriptionExpanded
+              'max-h-screen'
+              'max-h-24 line-clamp-4'
+            }}"
         >{{this.model.description}}</p>
         {{#if this.model.description}}
           <button
@@ -103,13 +108,13 @@
 
     <Panel::Card>
       <JobPosts::Tabs @jobPost={{this.model}} />
-      {{! Tab pane wrapper. min-h keeps the stage tall even when a tab
-          has very little content so the swoosh has somewhere to play
-          out; relative+overflow-hidden clips the out-of-bounds half of
-          the slide so the old and new panes actually appear to
-          translate across each other instead of bleeding into the
-          page layout. }}
-      <div role="tabpanel" class="mt-4 min-h-[18rem] relative overflow-hidden">
+      {{! LiquidOutlet's built-in LiquidContainer animates its height
+          from the outgoing tab's size to the incoming tab's size so
+          the pane grows/shrinks smoothly. The slide transition
+          registered in app/transitions.js then runs the incoming
+          content in from the side. No explicit min-height so the
+          container is always driven by actual content. }}
+      <div role="tabpanel" class="mt-4">
         <LiquidOutlet @class="tab-outlet" />
       </div>
     </Panel::Card>
