@@ -55,6 +55,12 @@ export default class SidebarComponent extends Component {
   }
 
   @action
+  goToReports() {
+    this.router.transitionTo('reports');
+    if (this.args.onClose) this.args.onClose();
+  }
+
+  @action
   async copyToClipboard(item) {
     try {
       await navigator.clipboard.writeText(item.value);

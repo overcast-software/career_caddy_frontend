@@ -1,13 +1,6 @@
 {{page-title "Sources"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
-    <LinkTo @route="reports.application-flow" class="nav-link">Application Flow</LinkTo>
-    <LinkTo
-      @route="reports.sources"
-      class="nav-link nav-link-active"
-    >Sources</LinkTo>
-    <LinkTo @route="reports.activity" class="nav-link">Activity</LinkTo>
-    <span class="nav-link-divider" aria-hidden="true">·</span>
     <button
       type="button"
       class="nav-link {{if this.isMine 'nav-link-active'}}"

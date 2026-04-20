@@ -1,0 +1,47 @@
+{{page-title "Reports"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav></:subnav>
+  <:main>
+    <div class="space-y-4">
+      <header class="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 class="text-xl font-semibold">Reports</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Pick a report to dig
+          in.</p>
+      </header>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <LinkTo
+          @route="reports.application-flow"
+          class="rounded-lg border border-gray-200 bg-white p-4 hover:border-accent-300 hover:bg-accent-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-accent-600 dark:hover:bg-accent-900/30"
+        >
+          <h2
+            class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+          >Application Flow</h2>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sankey of
+            your job posts through vetting, scoring, and application stages. See
+            where things stall.</p>
+        </LinkTo>
+        <LinkTo
+          @route="reports.sources"
+          class="rounded-lg border border-gray-200 bg-white p-4 hover:border-accent-300 hover:bg-accent-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-accent-600 dark:hover:bg-accent-900/30"
+        >
+          <h2
+            class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+          >Sources</h2>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Hostnames
+            stacked by outcome — which boards actually produce offers vs. noise.</p>
+        </LinkTo>
+        <LinkTo
+          @route="reports.activity"
+          class="rounded-lg border border-gray-200 bg-white p-4 hover:border-accent-300 hover:bg-accent-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-accent-600 dark:hover:bg-accent-900/30"
+        >
+          <h2
+            class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+          >Activity</h2>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Daily
+            applied-at calendar — are you keeping the habit?</p>
+        </LinkTo>
+      </div>
+    </div>
+  </:main>
+</RouteLayout>

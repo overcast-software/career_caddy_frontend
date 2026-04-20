@@ -133,27 +133,76 @@
       </li>
 
       <li>
-        <LinkTo
-          @route="reports.application-flow"
-          {{on "click" @onClose}}
-          class="sidebar-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="size-5 shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="1.5"
+        <details class="group [&_summary::-webkit-details-marker]:hidden">
+          {{! template-lint-disable no-invalid-interactive }}
+          <summary
+            class="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-800"
+            {{on "click" this.goToReports}}
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-            />
-          </svg>
-          Reports
-        </LinkTo>
+            <div class="flex items-center gap-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="size-5 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
+                />
+              </svg>
+              <span class="text-sm font-medium">Reports</span>
+            </div>
+            <span
+              class="shrink-0 transition duration-300 group-open:-rotate-180"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="size-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </span>
+          </summary>
+          <ul class="mt-1 space-y-1 pl-11">
+            <li>
+              <LinkTo
+                @route="reports.application-flow"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
+                Application Flow
+              </LinkTo>
+            </li>
+            <li>
+              <LinkTo
+                @route="reports.sources"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
+                Sources
+              </LinkTo>
+            </li>
+            <li>
+              <LinkTo
+                @route="reports.activity"
+                {{on "click" @onClose}}
+                class="sidebar-link block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
+                Activity
+              </LinkTo>
+            </li>
+          </ul>
+        </details>
       </li>
 
       <li>

@@ -15,11 +15,6 @@ const YEAR_GAP = 24; // vertical space between small-multiples
 const MONTH_LABEL_H = 18;
 const DOW_LABEL_W = 28;
 
-function parseISO(s) {
-  const [y, m, d] = s.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
 function weekOfYear(date) {
   // Sunday-based week index (0..53) relative to Jan 1 of the same year.
   const jan1 = new Date(date.getFullYear(), 0, 1);
@@ -47,15 +42,22 @@ export default class ReportsActivityCalendarComponent extends Component {
     return this.args.days ?? [];
   }
 
-  // Group days by year so each year renders as its own small-multiple row.
-  get groupedByYear() {
+  // Index server days by ISO string for O(1) lookup. Years each render
+  // a full Jan 1 → Dec 31 grid; days outside the returned window fall
+  // through to count=0 (blank cells).
+  get countByDate() {
     const map = new Map();
-    for (const d of this.days) {
-      const year = d.date.slice(0, 4);
-      if (!map.has(year)) map.set(year, []);
-      map.get(year).push(d);
-    }
-    return [...map.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+    for (const d of this.days) map.set(d.date, d.count);
+    return map;
+  }
+
+  // Every year touched by the returned window, expanded to full years
+  // so the small-multiple always shows Jan through Dec.
+  get years() {
+    if (!this.days.length) return [];
+    const seen = new Set();
+    for (const d of this.days) seen.add(Number(d.date.slice(0, 4)));
+    return [...seen].sort((a, b) => b - a);
   }
 
   get maxCount() {
@@ -64,12 +66,27 @@ export default class ReportsActivityCalendarComponent extends Component {
     return max || 1;
   }
 
+  _yearDays(year) {
+    const out = [];
+    const cursor = new Date(year, 0, 1);
+    while (cursor.getFullYear() === year) {
+      const iso = `${year}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
+      out.push({
+        date: iso,
+        day: new Date(cursor),
+        count: this.countByDate.get(iso) ?? 0,
+      });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return out;
+  }
+
   @action
   draw(el) {
     const svg = select(el);
     svg.selectAll('*').remove();
 
-    const years = this.groupedByYear;
+    const years = this.years;
     if (!years.length) return;
 
     const color = scaleSequential()
@@ -90,7 +107,8 @@ export default class ReportsActivityCalendarComponent extends Component {
     svg.attr('width', '100%');
     svg.style('max-width', `${width}px`);
 
-    years.forEach(([year, entries], i) => {
+    years.forEach((year, i) => {
+      const entries = this._yearDays(year);
       const g = svg
         .append('g')
         .attr('transform', `translate(0, ${i * (rowH + YEAR_GAP)})`);
@@ -104,16 +122,10 @@ export default class ReportsActivityCalendarComponent extends Component {
         .attr('fill', 'var(--text)')
         .text(year);
 
-      // Month labels
-      const months = new Map();
-      for (const entry of entries) {
-        const date = parseISO(entry.date);
-        const mi = date.getMonth();
-        if (!months.has(mi)) {
-          months.set(mi, weekOfYear(date));
-        }
-      }
-      for (const [mi, wk] of months) {
+      // Month labels — always all 12 now that we expand each year.
+      for (let mi = 0; mi < 12; mi++) {
+        const first = new Date(year, mi, 1);
+        const wk = weekOfYear(first);
         g.append('text')
           .attr('x', DOW_LABEL_W + wk * WEEK_W)
           .attr('y', MONTH_LABEL_H - 4)
@@ -133,11 +145,10 @@ export default class ReportsActivityCalendarComponent extends Component {
           .text(label);
       }
 
-      // Cells
+      // Cells (every day Jan 1 → Dec 31).
       for (const entry of entries) {
-        const date = parseISO(entry.date);
-        const wk = weekOfYear(date);
-        const dow = date.getDay();
+        const wk = weekOfYear(entry.day);
+        const dow = entry.day.getDay();
         g.append('rect')
           .attr('x', DOW_LABEL_W + wk * WEEK_W)
           .attr('y', MONTH_LABEL_H + dow * WEEK_W)
