@@ -10,6 +10,13 @@ import {
   NODE_DESCRIPTIONS,
   NODE_LINK_PARAMS,
 } from './colors';
+import {
+  DURATIONS,
+  STAGGER_STEP,
+  drawStroke,
+  fadeOut,
+  staggerByColumn,
+} from 'career-caddy-frontend/utils/chart-animations';
 
 const W = 720;
 const H = 460;
@@ -98,17 +105,23 @@ export default class ApplicationFlowSankeyComponent extends Component {
       .selectAll('path')
       .data(graph.links, linkKey)
       .join(
-        (enter) =>
-          enter
+        (enter) => {
+          const sel = enter
             .append('path')
             .attr('stroke', (d) => NODE_COLORS[d.target.id] || '#cbd5e1')
             .attr('stroke-opacity', 0.45)
             .attr('stroke-width', (d) => Math.max(1, d.width))
-            .attr('d', sankeyLinkHorizontal())
-            .attr('opacity', 0)
-            .call((s) =>
-              s.transition().duration(TRANSITION_MS).attr('opacity', 1),
-            ),
+            .attr('fill', 'none')
+            .attr('d', sankeyLinkHorizontal());
+          // Draw each link as the flow reaches it: delay by the source
+          // node's column so the sankey fills in left → right instead of
+          // all links materializing at once.
+          drawStroke(sel, {
+            duration: DURATIONS.slow,
+            delay: (d) => (d.source.depth || 0) * STAGGER_STEP,
+          });
+          return sel;
+        },
         (update) =>
           update.call((s) =>
             s
@@ -118,10 +131,7 @@ export default class ApplicationFlowSankeyComponent extends Component {
               .attr('stroke-width', (d) => Math.max(1, d.width))
               .attr('d', sankeyLinkHorizontal()),
           ),
-        (exit) =>
-          exit.call((s) =>
-            s.transition().duration(TRANSITION_MS).attr('opacity', 0).remove(),
-          ),
+        (exit) => fadeOut(exit),
       );
 
     const ng = nodeG
@@ -160,16 +170,14 @@ export default class ApplicationFlowSankeyComponent extends Component {
                 self._goToNode(d);
               }
             });
-          g.call((s) =>
-            s.transition().duration(TRANSITION_MS).attr('opacity', 1),
-          );
+          // Cascade nodes in left → right by sankey column (depth).
+          staggerByColumn(g, (d) => d.depth || 0, {
+            duration: DURATIONS.medium,
+          });
           return g;
         },
         (update) => update,
-        (exit) =>
-          exit.call((s) =>
-            s.transition().duration(TRANSITION_MS).attr('opacity', 0).remove(),
-          ),
+        (exit) => fadeOut(exit),
       );
 
     ng.select('rect')
