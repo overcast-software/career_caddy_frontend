@@ -1,7 +1,6 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
-import { tracked } from '@glimmer/tracking';
 
 export default class JobPostsListComponent extends Component {
   @service store;
@@ -10,29 +9,13 @@ export default class JobPostsListComponent extends Component {
   @service flashMessages;
   @service currentUser;
 
-  // Per-post phase so the row spinner can say "Scraping…" / "Scoring…".
-  // Null for that post = not busy. Tracked as a whole-map replacement so
-  // Glimmer re-renders when we set/clear a single entry.
-  @tracked _phases = new Map();
-
   get jobPosts() {
     return this.args.jobPosts ?? [];
   }
 
-  isBusy = (jobPost) => this._phases.has(jobPost.id);
-  busyLabel = (jobPost) => this._phases.get(jobPost.id) || null;
-
-  _setPhase(jobPost, phase) {
-    const next = new Map(this._phases);
-    if (phase) next.set(jobPost.id, phase);
-    else next.delete(jobPost.id);
-    this._phases = next;
-  }
-
   @action
   scrapeAndScore(jobPost) {
-    if (!jobPost?.link || this.isBusy(jobPost)) return;
-    this._setPhase(jobPost, 'Scraping…');
+    if (!jobPost?.link || jobPost.isWorking) return;
     this.spinner.begin({ label: `Scraping ${jobPost.title || 'post'}…` });
 
     const scrape = this.store.createRecord('scrape', {
@@ -61,12 +44,10 @@ export default class JobPostsListComponent extends Component {
       })
       .finally(() => {
         this.spinner.end();
-        this._setPhase(jobPost, null);
       });
   }
 
   _runScore(jobPost) {
-    this._setPhase(jobPost, 'Scoring…');
     this.spinner.begin({ label: `Scoring ${jobPost.title || 'post'}…` });
     const score = this.store.createRecord('score', {
       resume: null,
@@ -83,8 +64,6 @@ export default class JobPostsListComponent extends Component {
         });
       })
       .finally(() => {
-        // The outer .finally() closes out the scrape spinner; this one
-        // closes the score spinner we opened here.
         this.spinner.end();
       });
   }
