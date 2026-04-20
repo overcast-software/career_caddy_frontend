@@ -28,9 +28,12 @@ export default class JobPostsShowController extends Controller {
   runScrape() {
     if (this.scrapeSubmitting || !this.model.link) return;
     this.scrapeSubmitting = true;
+    // Async belongsTo — use .value() so we pass the loaded Company
+    // instance rather than the async proxy (rejected by Ember Data).
+    const company = this.model.belongsTo('company').value();
     const scrape = this.store.createRecord('scrape', {
       jobPost: this.model,
-      company: this.model.company,
+      company,
       url: this.model.link,
       status: 'hold',
     });

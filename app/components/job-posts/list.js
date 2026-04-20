@@ -18,9 +18,14 @@ export default class JobPostsListComponent extends Component {
     if (!jobPost?.link || jobPost.isWorking) return;
     this.spinner.begin({ label: `Scraping ${jobPost.title || 'post'}…` });
 
+    // Async belongsTo — read the already-loaded record via .value()
+    // so createRecord gets the Company instance, not the async proxy
+    // (Ember Data rejects the proxy with 'is not a record instantiated
+    // by @ember-data/store').
+    const company = jobPost.belongsTo('company').value();
     const scrape = this.store.createRecord('scrape', {
       jobPost,
-      company: jobPost.company,
+      company,
       url: jobPost.link,
       status: 'hold',
     });
