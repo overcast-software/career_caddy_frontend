@@ -22,7 +22,7 @@ export default class JobPostsIndexRoute extends Route {
     return this.infinity.model('job-post', {
       perPage: 20,
       startingPage: 1,
-      include: 'company',
+      include: 'company,scrapes,scores',
       sort: '-posted_date',
       ...(search ? { 'filter[query]': search } : {}),
       ...(hostname ? { 'filter[hostname]': hostname } : {}),
