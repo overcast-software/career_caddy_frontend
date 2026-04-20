@@ -2,6 +2,17 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { select } from 'd3-selection';
 import { scaleSequential } from 'd3-scale';
+import {
+  DURATIONS,
+  EASINGS,
+} from 'career-caddy-frontend/utils/chart-animations';
+
+// Calendar-specific timing: cells fade in week by week (left → right).
+// One step per week column is tiny on its own but sums to a smooth
+// wave across the full year.
+const CELL_STEP_MS = 14;
+const CELL_FADE_MS = DURATIONS.fast;
+const YEAR_GAP_MS = 180;
 
 // d3 calendar heatmap modeled on https://observablehq.com/@d3/calendar/2.
 // Renders one small-multiple per year: rows of week columns × 7 day rows,
@@ -107,11 +118,16 @@ export default class ReportsActivityCalendarComponent extends Component {
     svg.attr('width', '100%');
     svg.style('max-width', `${width}px`);
 
-    years.forEach((year, i) => {
+    years.forEach((year, yearIdx) => {
       const entries = this._yearDays(year);
       const g = svg
         .append('g')
-        .attr('transform', `translate(0, ${i * (rowH + YEAR_GAP)})`);
+        .attr('transform', `translate(0, ${yearIdx * (rowH + YEAR_GAP)})`);
+
+      // Each year starts a beat after the one above so the multi-year
+      // stack fills in top-down rather than every year's wave racing
+      // together.
+      const yearDelay = yearIdx * YEAR_GAP_MS;
 
       // Year label (top-left)
       g.append('text')
@@ -145,11 +161,14 @@ export default class ReportsActivityCalendarComponent extends Component {
           .text(label);
       }
 
-      // Cells (every day Jan 1 → Dec 31).
+      // Cells (every day Jan 1 → Dec 31). Each cell fades in with a
+      // delay keyed by its week column so the year fills in as a
+      // left-to-right wave.
       for (const entry of entries) {
         const wk = weekOfYear(entry.day);
         const dow = entry.day.getDay();
-        g.append('rect')
+        const rect = g
+          .append('rect')
           .attr('x', DOW_LABEL_W + wk * WEEK_W)
           .attr('y', MONTH_LABEL_H + dow * WEEK_W)
           .attr('width', CELL)
@@ -158,10 +177,18 @@ export default class ReportsActivityCalendarComponent extends Component {
           .attr('ry', 2)
           .attr('fill', color(entry.count))
           .attr('stroke', 'rgba(0,0,0,0.06)')
+          .attr('opacity', 0);
+        rect
           .append('title')
           .text(
             `${entry.date} — ${entry.count} application${entry.count === 1 ? '' : 's'}`,
           );
+        rect
+          .transition()
+          .delay(yearDelay + wk * CELL_STEP_MS)
+          .duration(CELL_FADE_MS)
+          .ease(EASINGS.flow)
+          .attr('opacity', 1);
       }
     });
   }
