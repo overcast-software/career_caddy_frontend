@@ -4,9 +4,18 @@ import { service } from '@ember/service';
 
 export default class ChatSidebarComponent extends Component {
   @service chat;
+  @service router;
+
+  // Suppress the drawer/sidebar panel on /caddy — the full-page route
+  // already renders <Chat::Panel> in its main area, and showing a
+  // second one as a sidebar (or mobile bottom sheet) produces a giant
+  // overlay covering the page.
+  get isOnCaddyRoute() {
+    return this.router.currentRouteName === 'caddy';
+  }
 
   get isOpen() {
-    return this.chat.sidebarOpen;
+    return this.chat.sidebarOpen && !this.isOnCaddyRoute;
   }
 
   @action
