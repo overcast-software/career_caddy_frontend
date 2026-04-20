@@ -47,6 +47,19 @@ export default class JobPostsListComponent extends Component {
       });
   }
 
+  @action
+  scoreWithCareerData(jobPost) {
+    if (!jobPost || jobPost.isWorking) return;
+    this._runScore(jobPost).catch((e) => {
+      this.spinner.end();
+      this.flashMessages.danger(
+        e?.errors?.[0]?.detail ||
+          e?.message ||
+          `Scoring failed for "${jobPost.title || 'post'}".`,
+      );
+    });
+  }
+
   _runScore(jobPost) {
     this.spinner.begin({ label: `Scoring ${jobPost.title || 'post'}…` });
     const score = this.store.createRecord('score', {
