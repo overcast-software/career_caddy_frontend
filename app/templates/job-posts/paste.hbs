@@ -6,10 +6,17 @@
   </:subnav>
   <:main>
     <Panel::Card>
-      <form class="builder-form" {{on "submit" this.submitPaste}}>
-        <div class="field">
-          <label class="field-label" for="paste-url">URL (optional)</label>
-          <p class="mt-1 mb-2 text-sm text-gray-600 dark:text-gray-400">
+      {{! Plain tailwind form. The old .builder-form grid assumed
+          label+input pairs; this template has a helper <p> between
+          them, which broke the grid placement (input ended up in
+          the max-content label column). }}
+      <form class="space-y-6" {{on "submit" this.submitPaste}}>
+        <div>
+          <label
+            for="paste-url"
+            class="block text-sm font-semibold text-gray-900 dark:text-gray-100"
+          >URL (optional)</label>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
             If you have the job posting URL and the site allows scraping, paste
             it here and we'll fetch it for you. Otherwise, paste the page
             content below.
@@ -17,6 +24,7 @@
           <input
             id="paste-url"
             type="url"
+            class="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             placeholder="https://..."
             value={{this.url}}
             disabled={{this.submitting}}
@@ -24,9 +32,12 @@
           />
         </div>
 
-        <div class="field">
-          <label class="field-label" for="paste-text">Job posting content</label>
-          <p class="mt-1 mb-2 text-sm text-gray-600 dark:text-gray-400">
+        <div>
+          <label
+            for="paste-text"
+            class="block text-sm font-semibold text-gray-900 dark:text-gray-100"
+          >Job posting content</label>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Open the job posting in another tab, select all (<kbd
               class="rounded bg-gray-200 px-1 py-0.5 font-mono text-xs dark:bg-gray-700"
             >Ctrl</kbd>+<kbd
@@ -42,7 +53,7 @@
           </p>
           <textarea
             id="paste-text"
-            class="w-full min-h-[20rem] font-mono text-sm"
+            class="mt-2 block w-full min-h-[20rem] rounded-md border border-gray-300 px-3 py-2 font-mono text-sm text-gray-900 shadow-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             placeholder="Paste the full text of a job posting here — I'll pull out the key fields."
             value={{this.text}}
             disabled={{this.submitting}}
@@ -50,7 +61,7 @@
           ></textarea>
         </div>
 
-        <div class="form-actions">
+        <div class="flex justify-end">
           <button
             type="submit"
             class="btn primary"
