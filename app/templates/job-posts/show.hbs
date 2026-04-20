@@ -73,7 +73,7 @@
     <Panel::Card>
       <JobPosts::Tabs @jobPost={{this.model}} />
       <div role="tabpanel" class="mt-4">
-        {{outlet}}
+        <LiquidOutlet @class="tab-outlet" />
       </div>
     </Panel::Card>
   </:main>
