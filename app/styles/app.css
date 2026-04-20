@@ -817,30 +817,38 @@ a.btn:active {
 .alert,
 .alert-box {
   opacity: 0;
-  height: 2lh;
-  width: 100%;
+  max-width: 28rem;
+  width: max-content;
+  min-width: 16rem;
   position: fixed;
-  top: 7lh;
+  top: 4.5rem;
+  left: 50%;
+  transform: translate(-50%, -0.5rem);
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius);
   background-color: var(--surface-alt);
-  bottom: 100px;
-  transition: all 1500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 15%);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 60;
+  pointer-events: auto;
 }
 
 .alert.active,
 .alert-box.active {
   opacity: 1;
-  bottom: 0;
-  z-index: 40;
+  transform: translate(-50%, 0);
 }
 
 .alert.active.exiting,
 .alert-box.active.exiting {
   opacity: 0;
-  bottom: 100px;
+  transform: translate(-50%, -0.5rem);
 }
 
 p.tee {
@@ -1932,21 +1940,12 @@ pre {
   z-index: 50;
 }
 
-/* Flash messages hang just under the sticky subnav so they appear near
- * the top of the main content area regardless of scroll position.
- * Previously .bar-cart was unstyled and sat in the flow between subnav
- * and .fairway — on long forms the flash rendered below the fold. */
+/* .bar-cart is the flash-messages container rendered inside RouteLayout.
+ * Visual positioning lives on .alert / .alert-box (fixed-positioned
+ * toasts near the top of the viewport) so the container itself takes
+ * no flow space. */
 .bar-cart {
-  position: sticky;
-  top: 3rem;
-  z-index: 40;
-  margin: 0 auto;
-  padding: 0 var(--space-6);
-  max-width: 1000px;
-}
-
-.bar-cart:empty {
-  display: none;
+  display: contents;
 }
 
 #subnav-portal .tee-box:not(:last-child) {
