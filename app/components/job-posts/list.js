@@ -10,27 +10,29 @@ export default class JobPostsListComponent extends Component {
   @service flashMessages;
   @service currentUser;
 
-  // Per-post submission flag so the "Scrape & Score" button disables itself
-  // while its chain is in flight. Keyed by jobPost id.
-  @tracked _busy = new Set();
+  // Per-post phase so the row spinner can say "Scraping…" / "Scoring…".
+  // Null for that post = not busy. Tracked as a whole-map replacement so
+  // Glimmer re-renders when we set/clear a single entry.
+  @tracked _phases = new Map();
 
   get jobPosts() {
     return this.args.jobPosts ?? [];
   }
 
-  isBusy = (jobPost) => this._busy.has(jobPost.id);
+  isBusy = (jobPost) => this._phases.has(jobPost.id);
+  busyLabel = (jobPost) => this._phases.get(jobPost.id) || null;
 
-  _setBusy(jobPost, on) {
-    const next = new Set(this._busy);
-    if (on) next.add(jobPost.id);
+  _setPhase(jobPost, phase) {
+    const next = new Map(this._phases);
+    if (phase) next.set(jobPost.id, phase);
     else next.delete(jobPost.id);
-    this._busy = next;
+    this._phases = next;
   }
 
   @action
   scrapeAndScore(jobPost) {
     if (!jobPost?.link || this.isBusy(jobPost)) return;
-    this._setBusy(jobPost, true);
+    this._setPhase(jobPost, 'Scraping…');
     this.spinner.begin({ label: `Scraping ${jobPost.title || 'post'}…` });
 
     const scrape = this.store.createRecord('scrape', {
@@ -59,23 +61,31 @@ export default class JobPostsListComponent extends Component {
       })
       .finally(() => {
         this.spinner.end();
-        this._setBusy(jobPost, false);
+        this._setPhase(jobPost, null);
       });
   }
 
   _runScore(jobPost) {
+    this._setPhase(jobPost, 'Scoring…');
     this.spinner.begin({ label: `Scoring ${jobPost.title || 'post'}…` });
     const score = this.store.createRecord('score', {
       resume: null,
       jobPost,
       user: this.currentUser.user,
     });
-    return score.save().then((savedScore) => {
-      if (this.pollable.isTerminal(savedScore)) return savedScore;
-      return this.pollable.poll(savedScore, {
-        successMessage: `Scored "${jobPost.title || 'post'}".`,
-        failedMessage: 'Scoring failed.',
+    return score
+      .save()
+      .then((savedScore) => {
+        if (this.pollable.isTerminal(savedScore)) return savedScore;
+        return this.pollable.poll(savedScore, {
+          successMessage: `Scored "${jobPost.title || 'post'}".`,
+          failedMessage: 'Scoring failed.',
+        });
+      })
+      .finally(() => {
+        // The outer .finally() closes out the scrape spinner; this one
+        // closes the score spinner we opened here.
+        this.spinner.end();
       });
-    });
   }
 }
