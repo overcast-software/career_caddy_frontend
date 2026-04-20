@@ -18,7 +18,10 @@ export default class ScrapesIndexRoute extends Route {
       perPage: 20,
       startingPage: 1,
       include: 'job-post,company',
-      sort: '-scraped_at',
+      // Newest first — including in-flight rows that haven't got a
+      // scraped_at yet (status=hold/pending). Scrape has no created_at
+      // column (see api views/scrapes.py); -id is the reliable proxy.
+      sort: '-id',
       ...(search ? { 'filter[query]': search } : {}),
     });
   }
