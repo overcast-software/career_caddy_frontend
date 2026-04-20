@@ -1,12 +1,12 @@
-{{page-title "Sources"}}
+{{page-title "Activity"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
     <LinkTo @route="reports.application-flow" class="nav-link">Application Flow</LinkTo>
+    <LinkTo @route="reports.sources" class="nav-link">Sources</LinkTo>
     <LinkTo
-      @route="reports.sources"
+      @route="reports.activity"
       class="nav-link nav-link-active"
-    >Sources</LinkTo>
-    <LinkTo @route="reports.activity" class="nav-link">Activity</LinkTo>
+    >Activity</LinkTo>
     <span class="nav-link-divider" aria-hidden="true">·</span>
     <button
       type="button"
@@ -24,35 +24,27 @@
   <:main>
     <div class="space-y-4">
       <header class="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 class="text-xl font-semibold">Sources</h1>
+        <h1 class="text-xl font-semibold">Activity</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          Outcome mix per job board — top 15 by volume ·
-          {{@model.total_job_posts}}
-          job posts
+          {{@model.total_applications}}
+          applications applied
+          {{#if @model.from}}
+            from
+            {{@model.from}}
+            to
+            {{@model.to}}
+          {{/if}}
         </p>
       </header>
-
-      <Reports::FilterBar
-        @filters={{this.filters}}
-        @scope={{this.scope}}
-        @isStaff={{this.isStaff}}
-        @onChange={{this.applyFilter}}
-      />
 
       {{#if this.isForbidden}}
         <p
           class="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/40 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 text-sm"
         >Global view is staff-only.</p>
       {{else if this.isFailed}}
-        <p class="text-sm text-gray-500">Could not load report.</p>
-      {{else if this.isEmpty}}
-        <p class="text-sm text-gray-500">No job posts tracked yet — once you add
-          a few, the source breakdown will appear here.</p>
+        <p class="text-sm text-gray-500">Could not load activity.</p>
       {{else}}
-        <Reports::SourcesStackedBar
-          @rows={{@model.rows}}
-          @bucketOrder={{@model.bucket_order}}
-        />
+        <Reports::ActivityCalendar @days={{@model.days}} />
       {{/if}}
     </div>
   </:main>
