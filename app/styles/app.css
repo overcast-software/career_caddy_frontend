@@ -880,6 +880,26 @@ p.tee {
   color: var(--warning);
 }
 
+/* Static inline warning panel — same token palette as the flash
+ * alert-warning variant but without the fixed-position plumbing.
+ * Use for form-level disclaimers and "heads up" notes that should
+ * respect the app's warning color treatment in light + dark themes
+ * (tokens already swap via [data-theme="dark"]). */
+.inline-warning {
+  background-color: var(--warning-surface);
+  border: 1px solid var(--warning-border);
+  color: var(--warning);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+
+.inline-warning a {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
 .alert.alert-secondary,
 .alert-box.alert-secondary {
   background-color: var(--surface);
