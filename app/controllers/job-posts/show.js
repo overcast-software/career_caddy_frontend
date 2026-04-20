@@ -12,6 +12,12 @@ export default class JobPostsShowController extends Controller {
 
   @tracked copyButtonText = 'Copy Description';
   @tracked scrapeSubmitting = false;
+  @tracked descriptionExpanded = false;
+
+  @action
+  toggleDescription() {
+    this.descriptionExpanded = !this.descriptionExpanded;
+  }
 
   @action
   async copyDescription() {

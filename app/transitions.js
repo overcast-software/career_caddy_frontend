@@ -14,7 +14,7 @@ const TAB_ORDER = [
 ];
 
 // Horizontal tab swoosh — tightened slightly from the 240ms first cut.
-const SLIDE_DURATION_MS = 200;
+const SLIDE_DURATION_MS = 500;
 
 // Initial-render animation: user refreshed or deep-linked into a tab,
 // so there's no sibling to slide from. Drop the panel in from above
