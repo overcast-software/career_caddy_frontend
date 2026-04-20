@@ -28,15 +28,6 @@ export default class MainApplicationComponent extends Component {
     this.router.off('routeDidChange', this, this._onRouteChange);
   }
 
-  get isChatOpenForLayout() {
-    // Ignore chat.sidebarOpen on /caddy — the route renders <Chat::Panel>
-    // in its main area; opening the sidebar drawer on top of it makes
-    // the grid reserve a 24rem column (desktop) or 80dvh bottom sheet
-    // (mobile) for a duplicate panel, which reads as a giant overlay.
-    if (this.router.currentRouteName === 'caddy') return false;
-    return this.chat.sidebarOpen;
-  }
-
   _onRouteChange(transition) {
     if (transition.from && window.innerWidth < 768) {
       this.sidebarOpen = false;
