@@ -18,10 +18,9 @@ export default class JobPostsListComponent extends Component {
     if (!jobPost?.link || jobPost.isWorking) return;
     this.spinner.begin({ label: `Scraping ${jobPost.title || 'post'}…` });
 
-    // Async belongsTo — read the already-loaded record via .value()
-    // so createRecord gets the Company instance, not the async proxy
-    // (Ember Data rejects the proxy with 'is not a record instantiated
-    // by @ember-data/store').
+    // Async belongsTo — read the loaded record via .value() so the
+    // Company instance is passed to createRecord, not the proxy
+    // (Ember Data rejects proxies: 'is not a record instantiated…').
     const company = jobPost.belongsTo('company').value();
     const scrape = this.store.createRecord('scrape', {
       jobPost,
@@ -32,23 +31,19 @@ export default class JobPostsListComponent extends Component {
 
     scrape
       .save()
-      .then((savedScrape) => {
-        if (this.pollable.isTerminal(savedScrape)) return savedScrape;
-        return this.pollable.poll(savedScrape, {
-          successMessage: null,
-          failedMessage: 'Scrape failed.',
-        });
-      })
+      .then((saved) => this._waitForTerminal(saved, 'Scrape'))
       .then(() => jobPost.reload().catch(() => {}))
       .then(() => this._runScore(jobPost))
       .catch((e) => {
+        // If the scrape fails we deliberately skip scoring — a score
+        // built off a stub description would be inaccurate. Surface
+        // the failure so the user knows not to trust stale scores.
+        this.spinner.end();
         this.flashMessages.danger(
-          e?.errors?.[0]?.detail ??
+          e?.errors?.[0]?.detail ||
+            e?.message ||
             `Scrape & Score failed for "${jobPost.title || 'post'}".`,
         );
-      })
-      .finally(() => {
-        this.spinner.end();
       });
   }
 
@@ -59,17 +54,37 @@ export default class JobPostsListComponent extends Component {
       jobPost,
       user: this.currentUser.user,
     });
-    return score
-      .save()
-      .then((savedScore) => {
-        if (this.pollable.isTerminal(savedScore)) return savedScore;
-        return this.pollable.poll(savedScore, {
-          successMessage: `Scored "${jobPost.title || 'post'}".`,
-          failedMessage: 'Scoring failed.',
-        });
-      })
-      .finally(() => {
-        this.spinner.end();
+    return score.save().then((saved) => this._waitForTerminal(saved, 'Score'));
+  }
+
+  /**
+   * Resolves when `record` reaches a non-failed terminal status.
+   * Rejects with an Error when it terminates as failed/error — the
+   * caller's .catch() is how we gate later chain steps (e.g. "don't
+   * score if the scrape failed").
+   *
+   * Relies on pollable.poll, which owns the spinner.end() call on
+   * terminal so we don't end it ourselves on the poll branch.
+   */
+  _waitForTerminal(record, label = 'Record') {
+    if (this.pollable.isTerminal(record)) {
+      this.spinner.end();
+      if (record.status === 'failed' || record.status === 'error') {
+        return Promise.reject(
+          new Error(`${label} ${record.status || 'failed'}.`),
+        );
+      }
+      return Promise.resolve(record);
+    }
+    return new Promise((resolve, reject) => {
+      this.pollable.poll(record, {
+        successMessage: null,
+        failedMessage: null,
+        onComplete: (rec) => resolve(rec),
+        onFailed: (rec) =>
+          reject(new Error(`${label} ${rec.status || 'failed'}.`)),
+        onError: (err) => reject(err),
       });
+    });
   }
 }
