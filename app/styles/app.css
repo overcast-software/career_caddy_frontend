@@ -1932,6 +1932,23 @@ pre {
   z-index: 50;
 }
 
+/* Flash messages hang just under the sticky subnav so they appear near
+ * the top of the main content area regardless of scroll position.
+ * Previously .bar-cart was unstyled and sat in the flow between subnav
+ * and .fairway — on long forms the flash rendered below the fold. */
+.bar-cart {
+  position: sticky;
+  top: 3rem;
+  z-index: 40;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  max-width: 1000px;
+}
+
+.bar-cart:empty {
+  display: none;
+}
+
 #subnav-portal .tee-box:not(:last-child) {
   display: none;
 }
