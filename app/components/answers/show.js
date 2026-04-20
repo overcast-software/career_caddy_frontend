@@ -13,16 +13,18 @@ export default class AnswersShowComponent extends Component {
   }
 
   get answerShowRoute() {
-    const route = this.router.currentRouteName;
-    // Top-level /answers page
-    if (route === 'answers.index' || route === 'answers.show') {
-      return 'answers.show';
-    }
-    const base = route
-      .replace(/\.index$/, '')
-      .replace(/\.answers\.show$/, '')
-      .replace(/\.answers$/, '');
-    return `${base}.answers.show`;
+    // Pick the right "show this answer" route based on where we're
+    // rendering from. Previously this stripped suffixes off the route
+    // name, which could produce nonsense like 'questions.answers.show'
+    // (no such route) when the component was still mounted during a
+    // liquid-fire transition on the top-level outlet. Safer to look
+    // for a known scope explicitly and fall back to the global
+    // /answers/:id view if we can't find one.
+    const route = this.router.currentRouteName || 'answers.show';
+    if (route.startsWith('answers.')) return 'answers.show';
+    const match = route.match(/^(.+\.questions\.show)(\..*)?$/);
+    if (match) return `${match[1]}.answers.show`;
+    return 'answers.show';
   }
 
   @action async copyToClipboard() {

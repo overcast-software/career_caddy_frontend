@@ -19,6 +19,14 @@ export default function () {
   // Generic fade for any liquid-if / liquid-bind tagged as default.
   this.transition(this.hasClass('liquid-default'), this.use('fade'));
 
+  // App-wide subnav crossfade — keyed on currentRouteName in
+  // <RouteLayout>. Heterogeneous subnavs (2 tabs → 5 tabs) crossfade
+  // cleanly without jarring reflow.
+  this.transition(
+    this.hasClass('subnav-swap'),
+    this.use('crossFade', { duration: 250 }),
+  );
+
   // Directional tab swipe. Forward (earlier → later) slides left,
   // backward (later → earlier) slides right via reverse(). One rule
   // per earlier tab covers every later sibling so we don't write 30
