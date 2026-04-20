@@ -1,13 +1,6 @@
 {{page-title "New Application"}}
-<RouteLayout @flashMessages={{this.flashMessages}}>
-  <:subnav>
-    new application
-  </:subnav>
-  <:main>
-    <JobApplications::Edit
-      @jobApplication={{this.model}}
-      @save={{this.save}}
-      @cancel={{this.cancel}}
-    />
-  </:main>
-</RouteLayout>
+<JobApplications::Edit
+  @jobApplication={{this.model}}
+  @save={{this.save}}
+  @cancel={{this.cancel}}
+/>

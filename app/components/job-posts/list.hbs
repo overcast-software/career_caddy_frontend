@@ -50,7 +50,7 @@
             <td class="px-4 py-3 text-gray-600">
               {{#if jobPost.topScore.score}}
                 <span class="font-medium text-accent-600">
-                  <LinkTo @route="scores.show" @model={{jobPost.topScore}}>
+                  <LinkTo @route="job-posts.show.scores" @model={{jobPost}}>
                     {{jobPost.topScore.score}}
                   </LinkTo>
                 </span>
