@@ -5,8 +5,9 @@
 
 <Questions::List
   @questions={{this.model}}
-  @showRoute="questions.show"
-  @editRoute="questions.edit"
-  @answerRoute="questions.show.answers.new"
+  @answersRoute="companies.show.questions.show.answers"
+  @showRoute="companies.show.questions.show"
+  @editRoute="companies.show.questions.edit"
+  @answerRoute="companies.show.questions.show.answers.new"
   @emptyMessage="No questions for this company."
 />

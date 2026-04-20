@@ -1,0 +1,11 @@
+{{page-title "Edit Question"}}
+
+<div class="mb-4">
+  <LinkTo
+    @route="companies.show.questions.show"
+    @model={{this.model}}
+    class="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
+  >&larr; Back to Question</LinkTo>
+</div>
+
+<Questions::Form @question={{this.model}} @onSave={{this.afterSave}} />

@@ -54,6 +54,7 @@ Router.map(function () {
         this.route('answers');
         this.route('questions', function () {
           this.route('new');
+          this.route('edit', { path: '/:question_id/edit' });
           this.route('show', { path: '/:question_id' }, function () {
             this.route('answers', function () {
               this.route('new');
@@ -104,6 +105,7 @@ Router.map(function () {
         });
         this.route('questions', function () {
           this.route('new');
+          this.route('edit', { path: '/:question_id/edit' });
           this.route('show', { path: '/:question_id' }, function () {
             this.route('answers', function () {
               this.route('new');
