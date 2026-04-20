@@ -104,9 +104,15 @@ export default class PollableService extends Service {
   }
 
   _flashLink(url, message, type = 'info') {
+    // Turn the first word of the message into the link back to the
+    // page the user was on when they started the poll. 'Score ready.'
+    // renders as <a>Score</a> ready. — a hyphen better than the old
+    // 'Score ready. Go back' phrasing.
+    const match = /^(\S+)(\s[\s\S]*)?$/.exec(message);
+    const [head, tail] = match ? [match[1], match[2] || ''] : [message, ''];
     this.flashMessages[type](
       htmlSafe(
-        `${message} <a href="${url}" class="underline font-medium">Go back</a>`,
+        `<a href="${url}" class="underline font-medium">${head}</a>${tail}`,
       ),
       { sticky: true },
     );
