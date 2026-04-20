@@ -13,37 +13,47 @@ const TAB_ORDER = [
   'job-posts.show.summaries',
 ];
 
-// Horizontal tab swoosh — tightened slightly from the 240ms first cut.
+// Including the loading substate so transitions through the skeleton
+// don't drop into liquid-fire's default/no-op path — we slide from
+// the same direction as a real tab swap.
+const SWOOSH_ROUTES = [...TAB_ORDER, 'job-posts.show.loading'];
+
+// Tab swoosh. Bumped from 240ms→500ms based on playtest feedback — the
+// move is wide enough on typical viewports that anything shorter reads
+// as an abrupt cut rather than motion.
 const SLIDE_DURATION_MS = 500;
 
-// Initial-render animation: user refreshed or deep-linked into a tab,
-// so there's no sibling to slide from. Drop the panel in from above
-// like a drawer so the distinction registers.
-const DRAWER_DURATION_MS = 220;
+// Initial cold boot / deep link into a tab. Keep it a plain fade so
+// there's no "drawer drops in after swoosh" artifact when a loading
+// substate intervenes between mount and content resolution.
+const COLD_BOOT_DURATION_MS = 220;
 
 export default function () {
   // Default fade for any liquid-if/liquid-bind that doesn't specify one.
   this.transition(this.hasClass('liquid-default'), this.use('fade'));
 
   // Cold boot / refresh directly at a tab URL: no previous sibling to
-  // slide from, so use a drawer drop instead of the horizontal swoosh.
+  // slide from. Plain fade — avoids the perceived "drawer fires after
+  // a swoosh" sequence when Ember briefly shows the loading substate
+  // before the target tab's model resolves.
   this.transition(
     this.hasClass('tab-outlet'),
-    this.toRoute(TAB_ORDER),
+    this.toRoute(SWOOSH_ROUTES),
     this.onInitialRender(),
-    this.use('toDown', { duration: DRAWER_DURATION_MS }),
+    this.use('fade', { duration: COLD_BOOT_DURATION_MS }),
   );
 
-  // Directional tab swoosh for in-app navigation: forward (earlier →
-  // later) slides left, back (later → earlier) slides right. One rule
-  // per earlier tab covering every later sibling; reverse() swaps
-  // direction when the user walks the same pair backwards.
+  // Directional tab swoosh: forward (earlier → later) slides left, back
+  // (later → earlier) slides right. One rule per earlier tab covering
+  // every later sibling plus the loading substate, so loading→scores
+  // slides in the same direction as the click that triggered the
+  // transition instead of falling through to a hard swap.
   for (let i = 0; i < TAB_ORDER.length - 1; i++) {
     const earlier = TAB_ORDER[i];
     const laterSiblings = TAB_ORDER.slice(i + 1);
     this.transition(
       this.hasClass('tab-outlet'),
-      this.fromRoute(earlier),
+      this.fromRoute([earlier, 'job-posts.show.loading']),
       this.toRoute(laterSiblings),
       this.use('toLeft', { duration: SLIDE_DURATION_MS }),
       this.reverse('toRight', { duration: SLIDE_DURATION_MS }),
