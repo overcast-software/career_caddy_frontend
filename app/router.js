@@ -253,6 +253,7 @@ Router.map(function () {
   this.route('reports', function () {
     this.route('application-flow');
     this.route('sources');
+    this.route('activity');
   });
   this.route('settings', function () {
     this.route('profile', function () {

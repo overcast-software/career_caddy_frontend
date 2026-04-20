@@ -1,0 +1,11 @@
+{{! template-lint-disable no-inline-styles }}
+<div
+  class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700"
+>
+  <svg
+    class="activity-calendar block w-full h-auto"
+    role="img"
+    aria-label="Daily application activity calendar"
+    {{on-render this.draw @days}}
+  ></svg>
+</div>
