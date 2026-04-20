@@ -6,13 +6,20 @@ import { select } from 'd3-selection';
 import 'd3-transition'; // side-effect: adds .transition() to d3-selection
 import { scaleLinear } from 'd3-scale';
 import { NODE_COLORS, NODE_LABELS, FALLBACK_COLOR } from './colors';
+import {
+  DURATIONS,
+  STAGGER_STEP,
+} from 'career-caddy-frontend/utils/chart-animations';
 
 const W = 720;
 const ROW_HEIGHT = 28;
 const ROW_GAP = 8;
 const MARGIN = { top: 16, right: 80, bottom: 36, left: 180 };
 const AXIS_TICKS = 5;
-const TRANSITION_MS = 400;
+// One row's bar fills over this long — segments inside split the
+// timeline by their share of row.total so the bar reads as a single
+// continuous wipe rather than a race between parallel segments.
+const BAR_FILL_MS = DURATIONS.medium;
 
 function labelFor(bucket) {
   return NODE_LABELS[bucket] || bucket;
@@ -111,14 +118,25 @@ export default class SourcesStackedBarComponent extends Component {
         (d) => `${d.hostname} — ${d.total} posts (click to view job posts)`,
       );
 
-    rowGroups.each(function (row) {
+    rowGroups.each(function (row, rowIdx) {
       let cursor = 0;
       const node = select(this);
+      const rowTotal = row.total || 1;
+      // Each row starts a beat after the one above it so the chart
+      // cascades top-to-bottom.
+      const rowDelay = rowIdx * STAGGER_STEP;
       for (const bucket of order) {
         const count = row.buckets?.[bucket] || 0;
         if (!count) continue;
         const width = x(count);
         if (width <= 0) continue;
+        // Sequential timing: each segment waits for the ones to its
+        // left to finish, then takes its proportional slice of the
+        // shared BAR_FILL_MS. This removes the gap the user saw where
+        // parallel animations had segment-1 mid-tween while segment-2
+        // was already anchored at cursor+seg1 starting from width 0.
+        const segDelay = rowDelay + (cursor / rowTotal) * BAR_FILL_MS;
+        const segDuration = (count / rowTotal) * BAR_FILL_MS;
         const seg = node
           .append('rect')
           .attr('x', x(cursor))
@@ -126,12 +144,16 @@ export default class SourcesStackedBarComponent extends Component {
           .attr('height', ROW_HEIGHT)
           .attr('fill', colorFor(bucket))
           .attr('width', 0);
-        seg.transition().duration(TRANSITION_MS).attr('width', width);
+        seg
+          .transition()
+          .delay(segDelay)
+          .duration(segDuration)
+          .attr('width', width);
         const pct = Math.round((count / row.total) * 100);
         seg.append('title').text(`${labelFor(bucket)} — ${count} (${pct}%)`);
         cursor += count;
       }
-      // Total label at end of row.
+      // Total label at end of row — fade in after the bar finishes.
       node
         .append('text')
         .attr('x', x(row.total) + 6)
@@ -139,7 +161,12 @@ export default class SourcesStackedBarComponent extends Component {
         .attr('dominant-baseline', 'middle')
         .attr('font-size', 12)
         .attr('class', 'fill-gray-500 dark:fill-gray-400')
-        .text(row.total);
+        .attr('opacity', 0)
+        .text(row.total)
+        .transition()
+        .delay(rowDelay + BAR_FILL_MS)
+        .duration(DURATIONS.fast)
+        .attr('opacity', 1);
     });
 
     // X-axis: tick marks + labels along the bottom so the horizontal

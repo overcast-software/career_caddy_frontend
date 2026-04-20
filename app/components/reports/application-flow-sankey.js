@@ -12,11 +12,18 @@ import {
 } from './colors';
 import {
   DURATIONS,
-  STAGGER_STEP,
   drawStroke,
   fadeOut,
-  staggerByColumn,
 } from 'career-caddy-frontend/utils/chart-animations';
+
+// Sankey animation beats — each column takes one beat to show its nodes,
+// then the next beat draws the links leaving it. Column N nodes appear at
+// `N * COLUMN_MS`, links from column N start at `N * COLUMN_MS + NODE_FADE_MS`.
+// This keeps a link's pen-tip visually "feeding into" its target node
+// instead of drawing across an empty area to an already-visible node.
+const NODE_FADE_MS = DURATIONS.fast;
+const LINK_DRAW_MS = DURATIONS.medium;
+const COLUMN_MS = NODE_FADE_MS + LINK_DRAW_MS;
 
 const W = 720;
 const H = 460;
@@ -113,12 +120,13 @@ export default class ApplicationFlowSankeyComponent extends Component {
             .attr('stroke-width', (d) => Math.max(1, d.width))
             .attr('fill', 'none')
             .attr('d', sankeyLinkHorizontal());
-          // Draw each link as the flow reaches it: delay by the source
-          // node's column so the sankey fills in left → right instead of
-          // all links materializing at once.
+          // Draw each link in its column's beat: wait for the source
+          // column's nodes to land, then fill the stroke over LINK_DRAW_MS.
+          // Link finishes exactly when the target column's nodes begin
+          // to appear — no visible gap between pen-tip and target rect.
           drawStroke(sel, {
-            duration: DURATIONS.slow,
-            delay: (d) => (d.source.depth || 0) * STAGGER_STEP,
+            duration: LINK_DRAW_MS,
+            delay: (d) => (d.source.depth || 0) * COLUMN_MS + NODE_FADE_MS,
           });
           return sel;
         },
@@ -140,23 +148,28 @@ export default class ApplicationFlowSankeyComponent extends Component {
       .join(
         (enter) => {
           const self = this;
-          const g = enter.append('g').attr('class', 'node').attr('opacity', 0);
-          // Seed every element at its final position up-front so the
-          // enter fade-in doesn't also animate (0, 0) → target, which
-          // read as labels sliding in from the top-left corner.
+          const g = enter.append('g').attr('class', 'node');
+          // Seed the rect collapsed to a zero-height line at its vertical
+          // center, then grow to full height during the column's beat.
+          // Looks like the hub is extruding into place rather than
+          // popping in — same principle applied to every column.
           g.append('rect')
             .attr('x', (d) => d.x0)
-            .attr('y', (d) => d.y0)
+            .attr('y', (d) => (d.y0 + d.y1) / 2)
             .attr('width', (d) => d.x1 - d.x0)
-            .attr('height', (d) => Math.max(1, d.y1 - d.y0));
+            .attr('height', 0);
+          // Labels already sit at their final positions but start hidden
+          // so they don't flash during the grow animation.
           g.append('text')
             .attr('class', 'value')
             .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
-            .attr('y', (d) => (d.y0 + d.y1) / 2 - 8);
+            .attr('y', (d) => (d.y0 + d.y1) / 2 - 8)
+            .attr('opacity', 0);
           g.append('text')
             .attr('class', 'name')
             .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
-            .attr('y', (d) => (d.y0 + d.y1) / 2 + 10);
+            .attr('y', (d) => (d.y0 + d.y1) / 2 + 10)
+            .attr('opacity', 0);
           g.append('title');
           g.attr('class', (d) =>
             NODE_LINK_PARAMS[d.id] ? 'node cursor-pointer' : 'node',
@@ -170,24 +183,57 @@ export default class ApplicationFlowSankeyComponent extends Component {
                 self._goToNode(d);
               }
             });
-          // Cascade nodes in left → right by sankey column (depth).
-          staggerByColumn(g, (d) => d.depth || 0, {
-            duration: DURATIONS.medium,
-          });
+
+          // Grow the rect top-and-bottom into its final height, synced
+          // to the column beat.
+          g.select('rect')
+            .transition()
+            .delay((d) => (d.depth || 0) * COLUMN_MS)
+            .duration(NODE_FADE_MS)
+            .attr('y', (d) => d.y0)
+            .attr('height', (d) => Math.max(1, d.y1 - d.y0));
+          // Labels fade in right after the rect lands so the text isn't
+          // peeking through mid-grow.
+          g.selectAll('text')
+            .transition()
+            .delay((d) => (d.depth || 0) * COLUMN_MS + NODE_FADE_MS)
+            .duration(DURATIONS.fast)
+            .attr('opacity', 1);
           return g;
         },
-        (update) => update,
+        (update) => {
+          // On data change (scope toggle, filter change) the nodes are
+          // already on-screen — slide them to their new positions over
+          // TRANSITION_MS. Don't run the grow-from-center animation
+          // again; these rects aren't new.
+          update
+            .select('rect')
+            .transition()
+            .duration(TRANSITION_MS)
+            .attr('x', (d) => d.x0)
+            .attr('y', (d) => d.y0)
+            .attr('height', (d) => Math.max(1, d.y1 - d.y0))
+            .attr('width', (d) => d.x1 - d.x0);
+          update
+            .select('text.value')
+            .transition()
+            .duration(TRANSITION_MS)
+            .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
+            .attr('y', (d) => (d.y0 + d.y1) / 2 - 8);
+          update
+            .select('text.name')
+            .transition()
+            .duration(TRANSITION_MS)
+            .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
+            .attr('y', (d) => (d.y0 + d.y1) / 2 + 10);
+          return update;
+        },
         (exit) => fadeOut(exit),
       );
 
-    ng.select('rect')
-      .attr('fill', (d) => NODE_COLORS[d.id] || '#64748b')
-      .transition()
-      .duration(TRANSITION_MS)
-      .attr('x', (d) => d.x0)
-      .attr('y', (d) => d.y0)
-      .attr('height', (d) => Math.max(1, d.y1 - d.y0))
-      .attr('width', (d) => d.x1 - d.x0);
+    // Attrs that aren't animated — safe to set instantly on merged
+    // selection (both enter + update) without interrupting transitions.
+    ng.select('rect').attr('fill', (d) => NODE_COLORS[d.id] || '#64748b');
 
     ng.select('text.value')
       .attr('text-anchor', (d) => (d.x0 < W / 2 ? 'start' : 'end'))
@@ -195,22 +241,14 @@ export default class ApplicationFlowSankeyComponent extends Component {
       .attr('class', 'value fill-gray-900 dark:fill-gray-100')
       .attr('font-size', 16)
       .attr('font-weight', 600)
-      .text((d) => d.value || 0)
-      .transition()
-      .duration(TRANSITION_MS)
-      .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
-      .attr('y', (d) => (d.y0 + d.y1) / 2 - 8);
+      .text((d) => d.value || 0);
 
     ng.select('text.name')
       .attr('text-anchor', (d) => (d.x0 < W / 2 ? 'start' : 'end'))
       .attr('dominant-baseline', 'middle')
       .attr('class', 'name fill-gray-500 dark:fill-gray-400')
       .attr('font-size', 11)
-      .text((d) => NODE_LABELS[d.id] || d.id)
-      .transition()
-      .duration(TRANSITION_MS)
-      .attr('x', (d) => (d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6))
-      .attr('y', (d) => (d.y0 + d.y1) / 2 + 10);
+      .text((d) => NODE_LABELS[d.id] || d.id);
 
     ng.select('title').text((d) => {
       const label = NODE_LABELS[d.id] || d.id;
