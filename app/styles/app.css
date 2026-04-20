@@ -1936,6 +1936,19 @@ pre {
   display: none;
 }
 
+#subnav-portal .tee-box:last-child {
+  animation: subnav-fade-in 220ms ease-out;
+}
+
+@keyframes subnav-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Subnav search input */
 .subnav-search-input {
   padding: var(--space-1) var(--space-3);

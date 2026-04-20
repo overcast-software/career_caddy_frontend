@@ -18,7 +18,7 @@ export default class ReportsApplicationFlowController extends Controller {
   @tracked from = '';
   @tracked to = '';
   @tracked user = '';
-  @tracked exclude_stubs = '';
+  @tracked exclude_stubs = '1';
 
   get isStaff() {
     return this.currentUser.user?.isStaff;
