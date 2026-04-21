@@ -53,6 +53,11 @@ export default class ChatPanelComponent extends Component {
   }
 
   @action
+  toggleSmartModel() {
+    this.chat.smartModel = !this.chat.smartModel;
+  }
+
+  @action
   closePanel() {
     this.chat.sidebarOpen = false;
   }
