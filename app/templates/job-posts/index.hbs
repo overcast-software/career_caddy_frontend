@@ -8,99 +8,71 @@
         @onSearchStart={{this.startSearching}}
         @placeholder="Search job posts..."
       />
+      <JobPosts::FiltersMenu
+        @filters={{this.filterState}}
+        @onChange={{this.applyFilters}}
+      />
       <LinkTo @route="job-posts.new" class="btn">+ New Job Post</LinkTo>
     </div>
   </:subnav>
   <:main>
-    {{#if (or this.hostname this.stub this.source this.scored this.bucket)}}
+    {{#if
+      (or
+        this.hostname
+        this.stub
+        this.source
+        this.scored
+        this.bucket
+        this.excludeVettedBad
+      )
+    }}
       <div class="mb-3 flex flex-wrap items-center gap-2 text-sm">
         <span class="text-gray-500 dark:text-gray-400">Filters:</span>
         {{#if this.hostname}}
-          <span
-            class="inline-flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 font-mono text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-100"
-          >
-            hostname:
-            {{this.hostname}}
-            <button
-              type="button"
-              class="ml-1 text-blue-700 hover:text-blue-900 dark:text-blue-200 dark:hover:text-white"
-              aria-label="Clear hostname filter"
-              {{on "click" this.clearHostname}}
-            >×</button>
-          </span>
+          <FilterPill
+            @prefix="hostname"
+            @label={{this.hostname}}
+            @onClear={{this.clearHostname}}
+            @clearAriaLabel="Clear hostname filter"
+          />
         {{/if}}
         {{#if this.stub}}
-          <span
-            class="inline-flex items-center gap-1 rounded bg-gray-200 px-2 py-0.5 font-mono text-xs text-gray-800 dark:bg-gray-700 dark:text-gray-100"
-            title="Stub = job post with a thin description (<60 words). Usually created from an email tracker link or a partial paste — scoring against a stub is unreliable."
-          >
-            {{#if (eq this.stub "true")}}stubs only{{else}}hide stubs{{/if}}
-            <button
-              type="button"
-              class="ml-1 text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
-              aria-label="Clear stub filter"
-              {{on "click" this.clearStub}}
-            >×</button>
-          </span>
+          <FilterPill
+            @label={{if (eq this.stub "true") "stubs only" "hide stubs"}}
+            @onClear={{this.clearStub}}
+            @clearAriaLabel="Clear stub filter"
+          />
         {{/if}}
         {{#if this.bucket}}
-          <span
-            class="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 font-mono text-xs text-amber-800 dark:bg-amber-900 dark:text-amber-100"
-          >
-            bucket:
-            {{this.bucket}}
-            <button
-              type="button"
-              class="ml-1 text-amber-700 hover:text-amber-900 dark:text-amber-200 dark:hover:text-white"
-              aria-label="Clear bucket filter"
-              {{on "click" this.clearBucket}}
-            >×</button>
-          </span>
+          <FilterPill
+            @prefix="bucket"
+            @label={{this.bucket}}
+            @onClear={{this.clearBucket}}
+            @clearAriaLabel="Clear bucket filter"
+          />
         {{/if}}
         {{#if this.scored}}
-          <span
-            class="inline-flex items-center gap-1 rounded bg-violet-100 px-2 py-0.5 font-mono text-xs text-violet-800 dark:bg-violet-900 dark:text-violet-100"
-          >
-            {{#if (eq this.scored "true")}}scored{{else}}unscored{{/if}}
-            <button
-              type="button"
-              class="ml-1 text-violet-700 hover:text-violet-900 dark:text-violet-200 dark:hover:text-white"
-              aria-label="Clear scored filter"
-              {{on "click" this.clearScored}}
-            >×</button>
-          </span>
+          <FilterPill
+            @label={{if (eq this.scored "true") "scored" "unscored"}}
+            @onClear={{this.clearScored}}
+            @clearAriaLabel="Clear scored filter"
+          />
         {{/if}}
         {{#if this.source}}
-          <span
-            class="inline-flex items-center gap-1 rounded bg-emerald-100 px-2 py-0.5 font-mono text-xs text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100"
-          >
-            source:
-            {{this.source}}
-            <button
-              type="button"
-              class="ml-1 text-emerald-700 hover:text-emerald-900 dark:text-emerald-200 dark:hover:text-white"
-              aria-label="Clear source filter"
-              {{on "click" this.clearSource}}
-            >×</button>
-          </span>
+          <FilterPill
+            @prefix="source"
+            @label={{this.source}}
+            @onClear={{this.clearSource}}
+            @clearAriaLabel="Clear source filter"
+          />
         {{/if}}
-        {{#unless this.stub}}
-          <button
-            type="button"
-            class="ml-auto text-xs text-gray-500 underline hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
-            title="Hide job posts with a thin description (<60 words). These are usually tracker-click or partial pastes — scoring is unreliable."
-            {{on "click" this.hideStubs}}
-          >Hide stubs</button>
-        {{/unless}}
-      </div>
-    {{else}}
-      <div class="mb-3 flex justify-end">
-        <button
-          type="button"
-          class="text-xs text-gray-500 underline hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
-          title="Hide job posts with a thin description (<60 words). These are usually tracker-click or partial pastes — scoring is unreliable."
-          {{on "click" this.hideStubs}}
-        >Hide stubs</button>
+        {{#if this.excludeVettedBad}}
+          <FilterPill
+            @label="hide vetted bad"
+            @onClear={{this.clearExcludeVettedBad}}
+            @clearAriaLabel="Clear vetted-bad filter"
+          />
+        {{/if}}
       </div>
     {{/if}}
     {{#if this.isSearching}}

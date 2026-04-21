@@ -4,7 +4,15 @@ import { action } from '@ember/object';
 import { service } from '@ember/service';
 
 export default class JobPostsIndexController extends Controller {
-  queryParams = ['search', 'hostname', 'stub', 'source', 'scored', 'bucket'];
+  queryParams = [
+    'search',
+    'hostname',
+    'stub',
+    'source',
+    'scored',
+    'bucket',
+    { excludeVettedBad: 'exclude_vetted_bad' },
+  ];
 
   @tracked search = '';
   @tracked hostname = '';
@@ -12,8 +20,26 @@ export default class JobPostsIndexController extends Controller {
   @tracked source = '';
   @tracked scored = '';
   @tracked bucket = '';
+  @tracked excludeVettedBad = '';
   @tracked isSearching = false;
   @service flashMessages;
+
+  get filterState() {
+    return {
+      hostname: this.hostname,
+      stub: this.stub,
+      source: this.source,
+      scored: this.scored,
+      bucket: this.bucket,
+      excludeVettedBad: this.excludeVettedBad,
+    };
+  }
+
+  @action applyFilters(patch) {
+    for (const [k, v] of Object.entries(patch)) {
+      if (k in this.filterState) this[k] = v ?? '';
+    }
+  }
 
   @action clearHostname() {
     this.hostname = '';
@@ -35,8 +61,8 @@ export default class JobPostsIndexController extends Controller {
     this.bucket = '';
   }
 
-  @action hideStubs() {
-    this.stub = 'false';
+  @action clearExcludeVettedBad() {
+    this.excludeVettedBad = '';
   }
 
   @action updateSearch(value) {

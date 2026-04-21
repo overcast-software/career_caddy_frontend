@@ -11,6 +11,7 @@ export default class JobPostsIndexRoute extends Route {
     source: { refreshModel: true },
     scored: { refreshModel: true },
     bucket: { refreshModel: true },
+    excludeVettedBad: { refreshModel: true, as: 'exclude_vetted_bad' },
   };
 
   setupController(controller, model) {
@@ -18,7 +19,7 @@ export default class JobPostsIndexRoute extends Route {
     controller.isSearching = false;
   }
 
-  model({ search, hostname, stub, source, scored, bucket }) {
+  model({ search, hostname, stub, source, scored, bucket, excludeVettedBad }) {
     return this.infinity.model('job-post', {
       perPage: 20,
       startingPage: 1,
@@ -30,6 +31,9 @@ export default class JobPostsIndexRoute extends Route {
       ...(source ? { 'filter[source]': source } : {}),
       ...(scored ? { 'filter[scored]': scored } : {}),
       ...(bucket ? { 'filter[bucket]': bucket } : {}),
+      ...(excludeVettedBad
+        ? { 'filter[exclude_vetted_bad]': excludeVettedBad }
+        : {}),
     });
   }
 }
