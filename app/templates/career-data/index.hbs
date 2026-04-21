@@ -11,9 +11,7 @@
   </:subnav>
   <:main>
     {{#if @model.data}}
-      <div class="markdown-content">
-        <MarkdownToHtml @markdown={{@model.data}} />
-      </div>
+      <CareerData::SectionedView @markdown={{@model.data}} />
     {{else}}
       <p class="text-gray-500 text-sm">No career data available.</p>
     {{/if}}
