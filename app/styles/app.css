@@ -949,6 +949,18 @@ p.tee {
   color: #fff;
 }
 
+/* a.btn.primary needs to override the generic a.btn color rule above,
+   which sets color: var(--muted) and wins on specificity otherwise.
+   Without this, <LinkTo class="btn primary"> renders with muted text
+   on the accent background — fails contrast on indigo/dark themes. */
+a.btn.primary,
+a.btn.primary:link,
+a.btn.primary:visited,
+a.btn.primary:hover,
+a.btn.primary:active {
+  color: #fff;
+}
+
 .btn.primary:hover {
   filter: brightness(0.95);
 }

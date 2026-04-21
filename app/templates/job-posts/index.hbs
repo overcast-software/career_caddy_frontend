@@ -32,6 +32,7 @@
         {{#if this.stub}}
           <span
             class="inline-flex items-center gap-1 rounded bg-gray-200 px-2 py-0.5 font-mono text-xs text-gray-800 dark:bg-gray-700 dark:text-gray-100"
+            title="Stub = job post with a thin description (<60 words). Usually created from an email tracker link or a partial paste — scoring against a stub is unreliable."
           >
             {{#if (eq this.stub "true")}}stubs only{{else}}hide stubs{{/if}}
             <button
@@ -87,6 +88,7 @@
           <button
             type="button"
             class="ml-auto text-xs text-gray-500 underline hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
+            title="Hide job posts with a thin description (<60 words). These are usually tracker-click or partial pastes — scoring is unreliable."
             {{on "click" this.hideStubs}}
           >Hide stubs</button>
         {{/unless}}
@@ -96,6 +98,7 @@
         <button
           type="button"
           class="text-xs text-gray-500 underline hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
+          title="Hide job posts with a thin description (<60 words). These are usually tracker-click or partial pastes — scoring is unreliable."
           {{on "click" this.hideStubs}}
         >Hide stubs</button>
       </div>
