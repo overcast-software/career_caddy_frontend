@@ -31,5 +31,11 @@
       {{on "input" this.updateNotes}}
     >{{this.notes}}</textarea>
   </label>
+  {{#if @resume.filePath}}
+    <p class="text-xs text-gray-400">
+      <span class="uppercase tracking-wide">Imported from:</span>
+      <span class="font-mono text-gray-300">{{@resume.filePath}}</span>
+    </p>
+  {{/if}}
 </div>
 {{yield}}
