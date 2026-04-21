@@ -25,6 +25,14 @@ export default class AnswersIndexController extends Controller {
     this.router.transitionTo('questions');
   }
 
+  @action removeAnswer(answer) {
+    // <Answers::Show> calls this after a successful DELETE. Matches the
+    // infinity-loader pattern already used in scores/index, companies/
+    // index, and job-applications/index — the InfinityModel exposes its
+    // backing array as .content.
+    this.model.content.removeObject(answer);
+  }
+
   @action async toggleFavorite(answer) {
     answer.favorite = !answer.favorite;
     try {

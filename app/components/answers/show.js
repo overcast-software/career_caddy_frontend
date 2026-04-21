@@ -41,35 +41,66 @@ export default class AnswersShowComponent extends Component {
 
   @action toggleFavorite() {
     const answer = this.args.answer;
-    answer.favorite = !answer.favorite;
-    answer.save().catch(() => {
-      answer.favorite = !answer.favorite;
-      this.flashMessages.danger('Failed to update favorite.');
-    });
+    const previous = answer.favorite;
+    answer.favorite = !previous;
+    answer
+      .save()
+      .then(() => {
+        this.flashMessages.success(
+          previous ? 'Unfavorited answer.' : 'Favorited answer.',
+        );
+      })
+      .catch(() => {
+        answer.favorite = previous;
+        this.flashMessages.danger('Failed to update favorite.');
+      });
   }
 
-  @action deleteAnswer() {
+  @action async deleteAnswer() {
     if (!confirm('Delete this answer?')) return;
     const answer = this.args.answer;
-    answer
-      .destroyRecord()
-      .then(() => {
+    // Warm the inverse relationship cache before destroy so Ember Data's
+    // internal cleanup can resolve the question identifier — otherwise
+    // destroyRecord's relationship-teardown path calls __peek on an
+    // already-evicted identifier and throws a TypeError after the
+    // server-side delete has already succeeded.
+    try {
+      await answer.question;
+    } catch {
+      /* ignore — if it's unresolvable we'll hit the catch below */
+    }
+    try {
+      await answer.destroyRecord();
+      this.flashMessages.success('Answer deleted.');
+      if (this.args.onDelete) {
+        this.args.onDelete(answer);
+      } else {
+        const route = this.router.currentRouteName;
+        if (route?.endsWith('.answers.show')) {
+          const parentRoute = route.replace('.answers.show', '.answers');
+          this.router.transitionTo(parentRoute);
+        }
+      }
+    } catch (error) {
+      // Two failure modes after the server-side DELETE succeeded (204):
+      //   1. Ember Data 5's relationship-teardown throws a __peek
+      //      TypeError.
+      //   2. DELETE returns 204 with empty body; the JSON:API parser
+      //      rejects with a SyntaxError on empty payload.
+      // Either presents to user as "delete failed" when the row is in
+      // fact gone. Real HTTP failures carry .status or .errors — use
+      // that as the signal to show danger.
+      const isRealHttpError =
+        error?.status ||
+        (Array.isArray(error?.errors) && error.errors.length > 0);
+      if (!isRealHttpError) {
         this.flashMessages.success('Answer deleted.');
-        if (this.args.onDelete) {
-          this.args.onDelete();
-        } else {
-          // Navigate to parent answers index if on a show route
-          const route = this.router.currentRouteName;
-          if (route?.endsWith('.answers.show')) {
-            const parentRoute = route.replace('.answers.show', '.answers');
-            this.router.transitionTo(parentRoute);
-          }
-        }
-      })
-      .catch((error) => {
-        if (error?.status !== 403) {
-          this.flashMessages.danger('Failed to delete answer.');
-        }
-      });
+        if (this.args.onDelete) this.args.onDelete(answer);
+        return;
+      }
+      if (error.status !== 403) {
+        this.flashMessages.danger('Failed to delete answer.');
+      }
+    }
   }
 }

@@ -111,25 +111,42 @@
     {{! Star toggles the favorite state of the question's lone answer.
         Only meaningful when the question has exactly one answer;
         clicking with 0 or >1 answers surfaces a flash error explaining
-        why — favoriting is a per-answer concept, not per-question. }}
-    {{#if @question.id}}
-      <div class="form-actions">
-        <button
-          type="button"
-          class="btn favorite {{if this.loneAnswerFavorited 'favorited'}}"
-          title="Favorite the lone answer"
-          {{on "click" this.toggleLoneAnswerFavorite}}
-        >{{if this.loneAnswerFavorited "★" "☆"}}</button>
-      </div>
-    {{/if}}
+        why — favoriting is a per-answer concept, not per-question.
 
-    <div class="form-actions">
-      <button type="submit" class="btn primary" disabled={{@question.isSaving}}>
-        Save
-      </button>
-      <button type="button" class="btn" {{on "click" this.cancel}}>
-        Cancel
-      </button>
+        Lives inside the same form-actions row as Save/Cancel/Delete so
+        it reads as part of the primary action strip, not a floating
+        orphan control above. Star sits at left, Delete at right. }}
+    <div class="form-actions justify-between items-center">
+      <div class="flex items-center gap-2">
+        {{#if @question.id}}
+          <button
+            type="button"
+            class="btn favorite {{if this.loneAnswerFavorited 'favorited'}}"
+            title="Favorite the lone answer"
+            aria-label="Favorite the lone answer"
+            {{on "click" this.toggleLoneAnswerFavorite}}
+          >{{if this.loneAnswerFavorited "★" "☆"}}</button>
+        {{/if}}
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          type="submit"
+          class="btn primary"
+          disabled={{@question.isSaving}}
+        >
+          Save
+        </button>
+        <button type="button" class="btn" {{on "click" this.cancel}}>
+          Cancel
+        </button>
+        {{#if @question.id}}
+          <button
+            type="button"
+            class="btn danger"
+            {{on "click" this.delete}}
+          >Delete</button>
+        {{/if}}
+      </div>
     </div>
   </form>
 </article>

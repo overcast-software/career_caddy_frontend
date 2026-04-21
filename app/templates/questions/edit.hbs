@@ -1,12 +1,6 @@
 {{page-title "Edit Question"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
-  <:subnav>
-    <LinkTo
-      class="btn"
-      @route="questions.show"
-      @model={{this.model}}
-    >View</LinkTo>
-  </:subnav>
+  <:subnav></:subnav>
   <:main>
     <Questions::Form @question={{this.model}} />
   </:main>

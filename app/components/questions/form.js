@@ -291,4 +291,32 @@ export default class QuestionsFormComponent extends Component {
       this.router.transitionTo('questions.index');
     }
   }
+
+  @action
+  async delete() {
+    const q = this.args.question;
+    if (!q?.id) return;
+    if (!window.confirm('Delete this question and all its answers?')) return;
+    try {
+      await q.destroyRecord();
+      this.flashMessages.success('Question deleted.');
+      this.router.transitionTo('questions.index');
+    } catch (error) {
+      // Same post-success cleanup-trail filter as <Answers::Show>:
+      // 204 empty-body parse / Ember Data relationship teardown both
+      // surface as TypeError/SyntaxError without HTTP shape, while the
+      // row is already gone server-side.
+      const isRealHttpError =
+        error?.status ||
+        (Array.isArray(error?.errors) && error.errors.length > 0);
+      if (!isRealHttpError) {
+        this.flashMessages.success('Question deleted.');
+        this.router.transitionTo('questions.index');
+        return;
+      }
+      if (error.status !== 403) {
+        this.flashMessages.danger('Failed to delete question.');
+      }
+    }
+  }
 }

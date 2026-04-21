@@ -47,21 +47,32 @@
     </div>
   {{/if}}
 
-  <div class="form-actions">
-    <Buttons::Favorite
-      @model={{@answer}}
-      @onToggle={{fn this.toggleFavorite @answer}}
-    />
-    {{yield to="actions"}}
-    <button
-      type="submit"
-      class="btn {{if this.isPolling 'primary opacity-60'}}"
-      disabled={{this.isPolling}}
-    >{{if
-        this.isPolling
-        "AI Generating…"
-        (if this.useAI "Ask AI" "Save")
-      }}</button>
-    <button type="button" class="btn" {{on "click" this.cancel}}>Cancel</button>
+  {{! Action row: favorite star on the left, primary actions on the
+      right ending with whatever the caller yields (Delete for the edit
+      route, nothing for new). Matches the Questions::Form convention. }}
+  <div class="form-actions justify-between items-center">
+    <div class="flex items-center gap-2">
+      <Buttons::Favorite
+        @model={{@answer}}
+        @onToggle={{fn this.toggleFavorite @answer}}
+      />
+    </div>
+    <div class="flex items-center gap-2">
+      <button
+        type="submit"
+        class="btn {{if this.isPolling 'primary opacity-60'}}"
+        disabled={{this.isPolling}}
+      >{{if
+          this.isPolling
+          "AI Generating…"
+          (if this.useAI "Ask AI" "Save")
+        }}</button>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" this.cancel}}
+      >Cancel</button>
+      {{yield to="actions"}}
+    </div>
   </div>
 </form>
