@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import { toCalendarString } from 'career-caddy-frontend/utils/tz';
 
 export default class CertificationsFormComponent extends Component {
   @tracked errorMessage = null;
@@ -9,14 +10,17 @@ export default class CertificationsFormComponent extends Component {
     return this.args.certification ?? this.args.model;
   }
 
+  // issueDate on the model is a calendar string "YYYY-MM-DD" (DateField).
+  // <input type="date"> accepts that string directly — no Date conversion.
   get formattedIssueDate() {
-    const d = this.certification?.issueDate;
-    return d ? new Date(d).toISOString().slice(0, 10) : '';
+    return toCalendarString(this.certification?.issueDate);
   }
 
   @action updateField(field, event) {
     if (field === 'issueDate') {
-      this.certification[field] = event.target.valueAsDate ?? null;
+      // event.target.value is already "YYYY-MM-DD"; bypass valueAsDate to
+      // skip the UTC-midnight Date conversion that PST-shifts.
+      this.certification[field] = event.target.value || null;
     } else {
       this.certification[field] = event.target.value;
     }

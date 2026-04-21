@@ -1,5 +1,6 @@
 import JSONAPISerializer from '@ember-data/serializer/json-api';
 import { singularize } from 'ember-inflector';
+import { toCalendarString } from 'career-caddy-frontend/utils/tz';
 
 const toSnakeCase = (s) =>
   s
@@ -35,10 +36,10 @@ export default class ApplicationSerializer extends JSONAPISerializer {
       const serializedKey = this.keyForAttribute(key);
       const val = attrs[serializedKey];
       if (val) {
-        attrs[serializedKey] =
-          typeof val === 'string'
-            ? val.slice(0, 10)
-            : new Date(val).toISOString().slice(0, 10);
+        // Never .toISOString() here — that UTC-shifts local-midnight Dates
+        // and drops PST dates to the previous day. toCalendarString reads
+        // the local date parts directly for Date inputs, or slices strings.
+        attrs[serializedKey] = toCalendarString(val);
       }
     }
   }

@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import { toCalendarString } from 'career-caddy-frontend/utils/tz';
 
 export default class ExperiencesEditorForm extends Component {
   @service store;
@@ -20,19 +21,19 @@ export default class ExperiencesEditorForm extends Component {
   }
 
   get formattedStartDate() {
-    const d = this.args.experience?.startDate;
-    return d ? new Date(d).toISOString().slice(0, 10) : '';
+    return toCalendarString(this.args.experience?.startDate);
   }
 
   get formattedEndDate() {
-    const d = this.args.experience?.endDate;
-    return d ? new Date(d).toISOString().slice(0, 10) : '';
+    return toCalendarString(this.args.experience?.endDate);
   }
 
   @action updateField(field, event) {
     if (field === 'startDate' || field === 'endDate') {
       if (field === 'endDate' && this.currentlyWorking) return;
-      this.args.experience[field] = event.target.valueAsDate ?? null;
+      // Keep as "YYYY-MM-DD" string; valueAsDate would coerce to UTC midnight
+      // and the serializer would then shift it back a day for PST users.
+      this.args.experience[field] = event.target.value || null;
     } else {
       this.args.experience[field] = event.target.value;
     }

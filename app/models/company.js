@@ -15,10 +15,16 @@ export default class CompanyModel extends Model {
     if (!posts) return [];
     const arr = [];
     for (const p of posts) arr.push(p);
+    // postedDate is a calendar string ("YYYY-MM-DD"); createdAt is an ISO
+    // instant. Both sort correctly as strings (ISO 8601 is lexicographic),
+    // and mixing them via `new Date(calendar_string)` would parse as UTC
+    // midnight and drift under PST — avoid Date construction entirely.
+    const key = (p) => p.postedDate || p.createdAt || '';
     return arr.sort((a, b) => {
-      const da = new Date(a.postedDate || a.createdAt || 0);
-      const db = new Date(b.postedDate || b.createdAt || 0);
-      return db - da;
+      const ka = key(a);
+      const kb = key(b);
+      if (ka === kb) return 0;
+      return ka < kb ? 1 : -1;
     });
   }
   @hasMany('scrape', { async: true, inverse: 'company' }) scrapes;
@@ -32,10 +38,14 @@ export default class CompanyModel extends Model {
     if (!apps) return [];
     const arr = [];
     for (const a of apps) arr.push(a);
+    // Both appliedAt and createdAt are ISO instants from the API. Lexical
+    // string compare = chronological (ISO 8601 property).
+    const key = (a) => a.appliedAt || a.createdAt || '';
     return arr.sort((a, b) => {
-      const da = new Date(a.appliedAt || a.createdAt || 0);
-      const db = new Date(b.appliedAt || b.createdAt || 0);
-      return db - da;
+      const ka = key(a);
+      const kb = key(b);
+      if (ka === kb) return 0;
+      return ka < kb ? 1 : -1;
     });
   }
   @hasMany('score', { async: true, inverse: 'company' }) scores;

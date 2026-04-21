@@ -1,34 +1,17 @@
 import Transform from '@ember-data/serializer/transform';
+import { toCalendarString } from 'career-caddy-frontend/utils/tz';
 
+// DateField on the backend is a calendar date — "YYYY-MM-DD" with no TZ.
+// Keep it that way end-to-end: the model attribute holds a plain string,
+// templates render it via {{format-date}}, forms bind it directly to
+// <input type="date"> which already speaks this format. No Date object
+// is ever constructed, so no browser-local midnight → UTC drift.
 export default class DateOnlyTransform extends Transform {
-  serialize(date) {
-    if (!date) return null;
-
-    // Ensure we have a Date object
-    if (!(date instanceof Date)) return null;
-
-    // Format as YYYY-MM-DD using local date parts
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
+  serialize(value) {
+    return toCalendarString(value) || null;
   }
 
   deserialize(value) {
-    if (!value) return null;
-
-    // If already a Date, return as-is
-    if (value instanceof Date) return value;
-
-    // Parse YYYY-MM-DD string and create local date
-    if (typeof value === 'string') {
-      const [year, month, day] = value.split('-').map(Number);
-      if (year && month && day) {
-        return new Date(year, month - 1, day);
-      }
-    }
-
-    return null;
+    return toCalendarString(value) || null;
   }
 }
