@@ -8,7 +8,7 @@
       <div
         class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
       >
-        <div class="min-w-0">
+        <div class="min-w-0 flex-1">
           <p class="text-xs text-gray-500">
             {{~#if this.model.company.name~}}
               {{this.model.company.name}}
@@ -49,9 +49,7 @@
             Vetted Bad — live on the right side in a single flex-wrap
             row. On narrow viewports they wrap underneath each other;
             on sm+ they stay pinned right. }}
-        <div
-          class="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end"
-        >
+        <div class="flex flex-wrap items-center gap-2 sm:justify-end">
           {{#if this.model.link}}
             <button
               type="button"
