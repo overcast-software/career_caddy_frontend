@@ -1,24 +1,22 @@
 {{#unless @noSubnav}}
-  {{#in-element this.subnavPortal insertBefore=null}}
-    <Menus::SubnavBar>
-      <:left>
-        <Breadcrumbs />
-      </:left>
-      <:center>
-        {{yield to="subnav"}}
-      </:center>
-      <:right>
-        {{#if this.spinner.isShowing}}
-          <div class="spinner-status">
-            <span class="spinner-dot"></span>
-            {{#if this.spinner.label}}
-              <span class="spinner-label">{{this.spinner.label}}</span>
-            {{/if}}
-          </div>
-        {{/if}}
-      </:right>
-    </Menus::SubnavBar>
-  {{/in-element}}
+  <Menus::SubnavBar>
+    <:left>
+      <Breadcrumbs />
+    </:left>
+    <:center>
+      {{yield to="subnav"}}
+    </:center>
+    <:right>
+      {{#if this.spinner.isShowing}}
+        <div class="spinner-status">
+          <span class="spinner-dot"></span>
+          {{#if this.spinner.label}}
+            <span class="spinner-label">{{this.spinner.label}}</span>
+          {{/if}}
+        </div>
+      {{/if}}
+    </:right>
+  </Menus::SubnavBar>
 {{/unless}}
 <BarCart @flashMessages={{@flashMessages}} />
 <div class="fairway {{@mainClass}}">

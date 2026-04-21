@@ -325,6 +325,19 @@ body {
   margin: 0;
 }
 
+/* In-page anchor jumps (<a href="#id">, scrollIntoView) should clear the
+   sticky subnav bar. The scroll container is .course-main (the app shell
+   sets html/body to 100vh + overflow:hidden and gives .course-main its
+   own overflow-y), so the padding must live on the actual scrolling
+   element. html gets the rule too as a harmless fallback for any future
+   layout where the window scrolls instead.
+   `--subnav-h` is written at runtime by Menus::SubnavBar via a
+   ResizeObserver; the fallback covers the initial paint before JS boots. */
+html,
+.course-main {
+  scroll-padding-top: var(--subnav-h, 4.5rem);
+}
+
 body {
   background-color: var(--page-bg);
   color: var(--text);
@@ -1962,12 +1975,6 @@ pre {
   min-width: 0;
 }
 
-#subnav-portal {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-
 /* .bar-cart is the flash-messages container rendered inside RouteLayout.
  * Visual positioning lives on .alert / .alert-box (fixed-positioned
  * toasts near the top of the viewport) so the container itself takes
@@ -1976,11 +1983,9 @@ pre {
   display: contents;
 }
 
-#subnav-portal .tee-box:not(:last-child) {
-  display: none;
-}
-
-#subnav-portal .tee-box:last-child {
+/* Subnav fade-in on route mount. Inline (non-portal) render means each
+ * route creates its own .tee-box; animation plays once per mount. */
+.tee-box {
   animation: subnav-fade-in 220ms ease-out;
 }
 

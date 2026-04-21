@@ -28,7 +28,6 @@
       <Sidebar @onClose={{this.close}} />
     </aside>
     <div class="course-main">
-      <div id="subnav-portal"></div>
       {{yield}}
     </div>
     {{#unless this.currentUser.isGuest}}
