@@ -2,7 +2,7 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
     <div class="flex items-center gap-3">
-      <CareerData::AnchorNav @sections={{this.sections}} />
+      <CareerData::AnchorNav @entries={{this.navEntries}} />
       <button
         type="button"
         class="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-white px-2.5 py-1 text-xs text-gray-700 shadow-sm transition hover:bg-accent-50 hover:text-accent-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-accent-900/30 dark:hover:text-accent-300"
@@ -47,8 +47,8 @@
     </div>
   </:subnav>
   <:main>
-    {{#if @model.data}}
-      <CareerData::SectionedView @markdown={{@model.data}} />
+    {{#if this.sections.length}}
+      <CareerData::SectionedView @sections={{this.sections}} />
     {{else}}
       <p class="text-gray-500 text-sm">No career data available.</p>
     {{/if}}

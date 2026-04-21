@@ -2,28 +2,31 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
-// Compact subnav widget: shows the section currently in view + prev/next
-// buttons that scrollIntoView the adjacent anchor. Sections come from the
-// controller (@sections: [{id, title}, ...]).
+// Compact subnav widget: shows the currently-scrolled sub-card's label +
+// prev/next buttons. Entries come from the controller as a flat list
+// (one per resume / Q&A / cover letter):
+//   [{ id: 'resume-39', label: 'Douglas Headley' },
+//    { id: 'qa-128',   label: 'Why do you want…' },
+//    { id: 'cl-77',    label: 'Cover · Acme' }, …]
 //
-// Tracking uses IntersectionObserver so we don't fight scroll events; the
-// section whose card is closest to the top of the viewport is "current."
+// IntersectionObserver tracks which anchor is closest to the top
+// (rootMargin offsets the trigger line for a comfortable reading feel).
 export default class CareerDataAnchorNavComponent extends Component {
   @tracked activeId = null;
   observer = null;
   visible = new Set();
 
-  get sections() {
-    return this.args.sections || [];
+  get entries() {
+    return this.args.entries || [];
   }
 
   get activeIndex() {
-    const i = this.sections.findIndex((s) => s.id === this.activeId);
+    const i = this.entries.findIndex((e) => e.id === this.activeId);
     return i < 0 ? 0 : i;
   }
 
-  get activeTitle() {
-    return this.sections[this.activeIndex]?.title || '';
+  get activeLabel() {
+    return this.entries[this.activeIndex]?.label || '';
   }
 
   get hasPrev() {
@@ -31,11 +34,10 @@ export default class CareerDataAnchorNavComponent extends Component {
   }
 
   get hasNext() {
-    return this.activeIndex < this.sections.length - 1;
+    return this.activeIndex < this.entries.length - 1;
   }
 
   @action setup() {
-    // Wait a tick for the cards to mount before wiring the observer.
     setTimeout(() => this._wireObserver(), 0);
   }
 
@@ -57,30 +59,24 @@ export default class CareerDataAnchorNavComponent extends Component {
     if (typeof IntersectionObserver === 'undefined') return;
     if (this.observer) this.observer.disconnect();
 
-    // rootMargin pulls the "trigger line" down from the top by ~1/3 of the
-    // viewport so the active label changes as the heading passes a
-    // comfortable reading line, not at the very top edge.
     this.observer = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
+      (obs) => {
+        for (const e of obs) {
           if (e.isIntersecting) this.visible.add(e.target.id);
           else this.visible.delete(e.target.id);
         }
-        // Pick the first section (in DOM order) that's currently visible.
-        // Falls back to the closest-above section when nothing is visible
-        // (rare — e.g. zoomed out).
-        const orderedIds = this.sections.map((s) => s.id);
+        const orderedIds = this.entries.map((e) => e.id);
         const firstVisible = orderedIds.find((id) => this.visible.has(id));
         if (firstVisible) this.activeId = firstVisible;
       },
       { rootMargin: '-30% 0px -50% 0px', threshold: 0 },
     );
-    for (const s of this.sections) {
-      const el = document.getElementById(s.id);
+    for (const e of this.entries) {
+      const el = document.getElementById(e.id);
       if (el) this.observer.observe(el);
     }
-    if (this.sections[0] && !this.activeId) {
-      this.activeId = this.sections[0].id;
+    if (this.entries[0] && !this.activeId) {
+      this.activeId = this.entries[0].id;
     }
   }
 
@@ -92,15 +88,11 @@ export default class CareerDataAnchorNavComponent extends Component {
 
   @action gotoPrev() {
     if (!this.hasPrev) return;
-    this._scrollTo(this.sections[this.activeIndex - 1].id);
+    this._scrollTo(this.entries[this.activeIndex - 1].id);
   }
 
   @action gotoNext() {
     if (!this.hasNext) return;
-    this._scrollTo(this.sections[this.activeIndex + 1].id);
-  }
-
-  @action gotoId(id) {
-    this._scrollTo(id);
+    this._scrollTo(this.entries[this.activeIndex + 1].id);
   }
 }

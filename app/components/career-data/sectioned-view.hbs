@@ -1,20 +1,21 @@
-{{! Stacked cards, one per ### heading. The jump nav lives in the subnav
-    (see CareerData::AnchorNav) so the page body stays uncluttered and the
-    same component can drive anchor navigation on other markdown pages. }}
-<div class="mx-auto max-w-3xl space-y-6 pb-12">
-  {{#each this.sections as |part|}}
-    <section
-      id={{part.id}}
-      class="markdown-content scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
-    >
-      <header
-        class="mb-4 flex items-baseline justify-between gap-3 border-b border-gray-100 pb-2 dark:border-gray-700"
-      >
-        <h3
-          class="text-sm font-semibold uppercase tracking-wide text-accent-700 dark:text-accent-300"
-        >{{part.title}}</h3>
-      </header>
-      <MarkdownToHtml @markdown={{part.body}} />
-    </section>
+{{! Structured render from the /career-data sections array. Top-level
+    groups (Resumes / Q&A / Cover Letters) are visual headers; sub-cards
+    carry the anchor ids so the subnav nav labels each resume /
+    question / cover letter individually. }}
+<div class="mx-auto max-w-3xl space-y-8 pb-12">
+  {{#each this.sections as |group|}}
+    <div>
+      <h3
+        class="mb-3 text-xs font-semibold uppercase tracking-wide text-accent-700 dark:text-accent-300"
+      >{{group.title}}</h3>
+
+      {{#if (eq group.type "resumes")}}
+        <CareerData::ResumeCards @items={{group.items}} />
+      {{else if (eq group.type "qas")}}
+        <CareerData::QaCards @items={{group.items}} />
+      {{else if (eq group.type "cover_letters")}}
+        <CareerData::CoverLetterCards @items={{group.items}} />
+      {{/if}}
+    </div>
   {{/each}}
 </div>
