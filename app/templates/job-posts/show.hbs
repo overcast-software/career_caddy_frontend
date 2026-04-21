@@ -30,7 +30,7 @@
           <div class="flex flex-wrap gap-3 text-xs text-gray-400 mt-0.5">
             {{#if (if this.model.postedDate true this.model.createdAt)}}
               <span>Posted:
-                {{moment-format
+                {{format-date
                   (if
                     this.model.postedDate
                     this.model.postedDate
@@ -41,7 +41,7 @@
             {{/if}}
             {{#if this.model.createdAt}}
               <span>Added:
-                {{moment-format this.model.createdAt "MMM D, YYYY"}}</span>
+                {{format-date this.model.createdAt "MMM D, YYYY"}}</span>
             {{/if}}
           </div>
         </div>
@@ -58,6 +58,18 @@
               {{on "click" this.runScrape}}
             >
               {{if this.scrapeSubmitting "Queuing…" "Run scrape"}}
+            </button>
+            <button
+              type="button"
+              class="btn small primary"
+              disabled={{or this.scrapeSubmitting this.scoreSubmitting}}
+              {{on "click" this.scrapeAndScore}}
+            >
+              {{if
+                this.scoreSubmitting
+                "Scoring…"
+                (if this.scrapeSubmitting "Scraping…" "Scrape & Score")
+              }}
             </button>
           {{/if}}
           <button

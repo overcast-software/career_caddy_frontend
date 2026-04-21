@@ -9,9 +9,11 @@ export default class JobPostsShowController extends Controller {
   @service router;
   @service spinner;
   @service pollable;
+  @service currentUser;
 
   @tracked copyButtonText = 'Copy Description';
   @tracked scrapeSubmitting = false;
+  @tracked scoreSubmitting = false;
   @tracked descriptionExpanded = false;
 
   @action
@@ -78,5 +80,96 @@ export default class JobPostsShowController extends Controller {
       .finally(() => {
         this.scrapeSubmitting = false;
       });
+  }
+
+  // Scrape, wait for the scrape to land, then score. Mirrors runScrape's
+  // "navigate on 200 POST" pattern at both hops: jp.show.scrapes when the
+  // scrape is created, jp.show.scores when the score is created. The user
+  // always sees the tab where the new row will appear, and polling owns
+  // the spinner until each phase terminates.
+  @action
+  scrapeAndScore() {
+    if (this.scrapeSubmitting || this.scoreSubmitting || !this.model.link) {
+      return;
+    }
+
+    this.scrapeSubmitting = true;
+    const company = this.model.belongsTo('company').value();
+    const scrape = this.store.createRecord('scrape', {
+      jobPost: this.model,
+      company,
+      url: this.model.link,
+      status: 'hold',
+    });
+
+    scrape
+      .save()
+      .then((saved) => {
+        this.flashMessages.success('Scrape queued — watching for completion.');
+        this.router.transitionTo('job-posts.show.scrapes', this.model);
+        this.scrapeSubmitting = false;
+        return this._waitForTerminal(saved, 'Scrape');
+      })
+      .then(() => this.model.reload().catch(() => {}))
+      .then(() => this._runScore())
+      .catch((e) => {
+        this.spinner.end();
+        this.scrapeSubmitting = false;
+        this.scoreSubmitting = false;
+        this.flashMessages.clearMessages();
+        this.flashMessages.danger(
+          e?.errors?.[0]?.detail || e?.message || 'Scrape & Score failed.',
+        );
+      });
+  }
+
+  _runScore() {
+    this.scoreSubmitting = true;
+    const score = this.store.createRecord('score', {
+      resume: null,
+      jobPost: this.model,
+      user: this.currentUser.user,
+    });
+    return score
+      .save()
+      .then((saved) => {
+        this.flashMessages.info('Scoring queued — watching for completion.');
+        this.router.transitionTo('job-posts.show.scores', this.model);
+        return this._waitForTerminal(saved, 'Score');
+      })
+      .then(() => {
+        this.flashMessages.clearMessages();
+        this.flashMessages.success('Score complete.');
+        this.scoreSubmitting = false;
+      })
+      .catch((e) => {
+        this.scoreSubmitting = false;
+        throw e;
+      });
+  }
+
+  // Resolves when `record` reaches a non-failed terminal. Rejects on
+  // failed/error so the chain's .catch() runs and the next phase is
+  // skipped. pollable.poll owns spinner.end on terminal.
+  _waitForTerminal(record, label) {
+    if (this.pollable.isTerminal(record)) {
+      if (record.status === 'failed' || record.status === 'error') {
+        return Promise.reject(
+          new Error(`${label} ${record.status || 'failed'}.`),
+        );
+      }
+      return Promise.resolve(record);
+    }
+    this.spinner.begin({ label: `${label}…` });
+    return new Promise((resolve, reject) => {
+      this.pollable.poll(record, {
+        successMessage: null,
+        failedMessage: null,
+        onComplete: (rec) => resolve(rec),
+        onFailed: (rec) =>
+          reject(new Error(`${label} ${rec.status || 'failed'}.`)),
+        onError: (err) => reject(err),
+      });
+    });
   }
 }
