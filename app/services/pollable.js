@@ -104,6 +104,13 @@ export default class PollableService extends Service {
   }
 
   _flashLink(url, message, type = 'info') {
+    // Callers pass an explicit null/empty message when they don't want a
+    // navigated-away flash (e.g. scrape+score chains that handle their
+    // own messaging via onComplete). Without this guard we'd render
+    // <a>null</a> with a sticky banner — which is exactly what users
+    // reported seeing after background scrape+score runs.
+    if (!message) return;
+
     // Turn the first word of the message into the link back to the
     // page the user was on when they started the poll. 'Score ready.'
     // renders as <a>Score</a> ready. — a hyphen better than the old
