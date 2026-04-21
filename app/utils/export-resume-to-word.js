@@ -19,7 +19,10 @@ export default async function exportResumeToWord(store, session, resumeId) {
   };
 
   const fetchMarkdown = async () => {
-    const mdResp = await fetch(`${exportUrl}?format=md`, {
+    // Dedicated /markdown/ route — NOT ?format=md on /export/, which DRF
+    // intercepts as a renderer-selection query param and 404s.
+    const mdUrl = `${base}markdown`;
+    const mdResp = await fetch(mdUrl, {
       method: 'GET',
       credentials: 'include',
       headers,
