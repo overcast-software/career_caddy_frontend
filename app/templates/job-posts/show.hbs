@@ -6,9 +6,9 @@
           flex-wrap so a long button row breaks cleanly rather than
           pushing the title column into a narrow vertical ribbon. }}
       <div
-        class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+        class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between"
       >
-        <div class="min-w-0 flex-1">
+        <div class="min-w-0 flex-1 basis-full sm:basis-auto">
           <p class="text-xs text-gray-500">
             {{~#if this.model.company.name~}}
               {{this.model.company.name}}
