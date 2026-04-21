@@ -1943,6 +1943,9 @@ pre {
   min-height: 3lh;
   padding: 0 var(--space-4);
   gap: var(--space-3);
+  /* Inline (non-portal) render: each route mounts its own .tee-box, so
+     the fade-in plays once per route rather than once at app boot. */
+  animation: subnav-fade-in 220ms ease-out;
 }
 
 .topbar-login {
@@ -1981,12 +1984,6 @@ pre {
  * no flow space. */
 .bar-cart {
   display: contents;
-}
-
-/* Subnav fade-in on route mount. Inline (non-portal) render means each
- * route creates its own .tee-box; animation plays once per mount. */
-.tee-box {
-  animation: subnav-fade-in 220ms ease-out;
 }
 
 @keyframes subnav-fade-in {
