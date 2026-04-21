@@ -38,6 +38,9 @@
         <p class="text-sm text-gray-500">Could not load activity.</p>
       {{else}}
         <Reports::ActivityCalendar @days={{@model.days}} />
+        {{#if @model.status_series}}
+          <Reports::ActivityStacked @series={{@model.status_series}} />
+        {{/if}}
       {{/if}}
     </div>
   </:main>

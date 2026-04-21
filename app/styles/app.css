@@ -73,6 +73,14 @@
   --tee-bg: rgb(var(--accent-200));
   --link: rgb(var(--accent-600));
   --page-bg: #eef2ff;
+  /* Activity calendar palette — GitHub-contribution ramp. 4 fill steps
+   * plus an empty state. Kept here (not inline in the d3 component) so
+   * light/dark modes can trivially swap the whole ramp. */
+  --activity-empty: #ebedf0;
+  --activity-1: #c6e48b;
+  --activity-2: #7bc96f;
+  --activity-3: #239a3b;
+  --activity-4: #196127;
 }
 
 [data-theme="dark"] {
@@ -92,6 +100,14 @@
   --warning-border: #78350f;
   --success: #4ade80;
   --success-surface: #052e16;
+  /* Dark calendar ramp mirrors GitHub's dark theme — empty cells read
+   * as a slightly elevated surface so the grid is visible but recedes;
+   * fill stops ramp cool→bright green so activity pops. */
+  --activity-empty: #334155;
+  --activity-1: #0e4429;
+  --activity-2: #006d32;
+  --activity-3: #26a641;
+  --activity-4: #39d353;
   --success-border: #14532d;
   --tee-bg: #334155;
   --link: rgb(var(--accent-300));

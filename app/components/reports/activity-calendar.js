@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { select } from 'd3-selection';
-import { scaleSequential } from 'd3-scale';
+import { scaleQuantize } from 'd3-scale';
 import {
   DURATIONS,
   EASINGS,
@@ -100,14 +100,19 @@ export default class ReportsActivityCalendarComponent extends Component {
     const years = this.years;
     if (!years.length) return;
 
-    const color = scaleSequential()
-      .domain([0, this.maxCount])
-      .interpolator((t) => {
-        // Soft emerald ramp; t=0 is a neutral empty cell.
-        if (t === 0) return 'var(--surface-alt)';
-        const lightness = 80 - 50 * t;
-        return `hsl(160, 60%, ${lightness}%)`;
-      });
+    // 4-step quantized ramp + explicit empty state. Pulls CSS variables
+    // so light/dark mode theme switching reflashes the grid without a
+    // rerender — the actual color values live in app.css (--activity-*).
+    const fillScale = scaleQuantize()
+      .domain([1, this.maxCount])
+      .range([
+        'var(--activity-1)',
+        'var(--activity-2)',
+        'var(--activity-3)',
+        'var(--activity-4)',
+      ]);
+    const color = (count) =>
+      count === 0 ? 'var(--activity-empty)' : fillScale(count);
 
     // Width: 54 weeks max per year.
     const width = DOW_LABEL_W + 54 * WEEK_W;
@@ -176,7 +181,6 @@ export default class ReportsActivityCalendarComponent extends Component {
           .attr('rx', 2)
           .attr('ry', 2)
           .attr('fill', color(entry.count))
-          .attr('stroke', 'rgba(0,0,0,0.06)')
           .attr('opacity', 0);
         rect
           .append('title')
