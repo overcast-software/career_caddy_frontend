@@ -3,6 +3,12 @@
   <:subnav>
     <LinkTo @route="job-posts" class="nav-link">Back to Job Posts</LinkTo>
     <LinkTo @route="job-posts.scrape" class="nav-link">Scrape a URL instead</LinkTo>
+    <button
+      type="button"
+      class="btn primary"
+      disabled={{this.submitting}}
+      {{on "click" this.submitPaste}}
+    >{{this.submitLabel}}</button>
   </:subnav>
   <:main>
     <Panel::Card>
@@ -67,6 +73,9 @@
               class="text-sm text-gray-500 dark:text-gray-400"
             >Parsing…</span>
           {{/if}}
+          {{! Subnav carries the primary submit so it stays visible
+              above the fold; this button is a secondary copy for
+              users who reach the bottom of the form. }}
           <button
             type="submit"
             class="btn primary"
