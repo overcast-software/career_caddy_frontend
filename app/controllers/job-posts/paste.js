@@ -40,7 +40,13 @@ export default class JobPostsPasteController extends Controller {
   @action
   submitPaste(event) {
     event?.preventDefault?.();
-    if (!this.canSubmit) return;
+    if (this.submitting) return;
+    if (!this.canSubmit) {
+      this.flashMessages.info(
+        'Paste a URL or job-posting text before submitting.',
+      );
+      return;
+    }
 
     const url = this.url.trim();
     if (url) {

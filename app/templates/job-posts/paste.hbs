@@ -61,11 +61,16 @@
           ></textarea>
         </div>
 
-        <div class="flex justify-end">
+        <div class="flex items-center justify-end gap-3">
+          {{#if this.submitting}}
+            <span
+              class="text-sm text-gray-500 dark:text-gray-400"
+            >Parsing…</span>
+          {{/if}}
           <button
             type="submit"
             class="btn primary"
-            disabled={{not this.canSubmit}}
+            disabled={{this.submitting}}
           >{{this.submitLabel}}</button>
         </div>
       </form>

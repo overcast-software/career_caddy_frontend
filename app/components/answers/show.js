@@ -12,6 +12,19 @@ export default class AnswersShowComponent extends Component {
     return this.args.showQuestion !== false;
   }
 
+  // Sync access to the question id — the async belongsTo proxy may not
+  // be resolved on first render, and passing an undefined id into a
+  // LinkTo triggers "You must provide param `question_id` to `generate`".
+  // belongsTo(...).id() reads the identifier directly from the relationship
+  // reference, no load needed.
+  get questionId() {
+    try {
+      return this.args.answer?.belongsTo?.('question')?.id?.() ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   get answerShowRoute() {
     // Pick the right "show this answer" route based on where we're
     // rendering from. Previously this stripped suffixes off the route
