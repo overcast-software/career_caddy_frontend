@@ -35,6 +35,12 @@ export default class ChatService extends Service {
   @tracked conversationId = null;
   @tracked sidebarOpen = false;
   @tracked currentPage = null;
+  // Toggle in the <Chat::Panel> header. When true, the next /chat
+  // request hints the server to route this turn through a stronger
+  // model (CHAT_SMART_MODEL, default anthropic:claude-sonnet-4-6).
+  // Session-only — not persisted across reloads so the extra spend
+  // can't silently stick.
+  @tracked smartModel = false;
   /** True when the chat has assistant content the user hasn't seen yet.
    *  Cleared when the sidebar opens; set on RUN_FINISHED when the sidebar
    *  is closed. Drives the attention cue on the chat button. */
@@ -113,6 +119,7 @@ export default class ChatService extends Service {
           conversation_id: this.conversationId,
           page_context: this.currentPage,
           onboarding: this.onboarding.snapshotForChat(),
+          smart: this.smartModel,
         }),
       });
 
