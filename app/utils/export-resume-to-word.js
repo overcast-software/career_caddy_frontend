@@ -1,19 +1,48 @@
 export default async function exportResumeToWord(store, session, resumeId) {
   const adapter = store.adapterFor('resume');
   const base = adapter.buildURL('resume', resumeId);
-  const url = `${base}export`;
+  const exportUrl = `${base}export`;
 
   const headers = {};
   if (session.authorizationHeader) {
     headers['Authorization'] = session.authorizationHeader;
   }
 
-  const resp = await fetch(url, {
-    method: 'GET',
-    credentials: 'include',
-    headers,
-  });
-  if (!resp.ok) throw new Error(`Export failed (${resp.status})`);
+  const trigger = (blob, filename) => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    link.remove();
+  };
+
+  const fetchMarkdown = async () => {
+    const mdResp = await fetch(`${exportUrl}?format=md`, {
+      method: 'GET',
+      credentials: 'include',
+      headers,
+    });
+    if (!mdResp.ok)
+      throw new Error(`Markdown fallback failed (${mdResp.status})`);
+    const blob = await mdResp.blob();
+    trigger(blob, `resume-${resumeId}.md`);
+    return 'md';
+  };
+
+  let resp;
+  try {
+    resp = await fetch(exportUrl, {
+      method: 'GET',
+      credentials: 'include',
+      headers,
+    });
+  } catch {
+    return fetchMarkdown();
+  }
+
+  if (!resp.ok) return fetchMarkdown();
 
   const ct = resp.headers.get('content-type') || '';
   if (
@@ -23,19 +52,9 @@ export default async function exportResumeToWord(store, session, resumeId) {
     ct.includes('application/octet-stream')
   ) {
     const blob = await resp.blob();
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `resume-${resumeId}.docx`;
-    document.body.appendChild(link);
-    link.click();
-    URL.revokeObjectURL(link.href);
-    link.remove();
-  } else {
-    try {
-      const data = await resp.json();
-      if (data?.url) window.location.assign(data.url);
-    } catch {
-      /* ignore */
-    }
+    trigger(blob, `resume-${resumeId}.docx`);
+    return 'docx';
   }
+
+  return fetchMarkdown();
 }
