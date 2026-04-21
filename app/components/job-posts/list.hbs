@@ -42,7 +42,11 @@
               {{~/if~}}
             </td>
             <td class="px-4 py-3 text-gray-600">
-              {{moment-format
+              {{! format-date routes calendar strings (postedDate) through
+                  TZ-free rendering and ISO instants (createdAt fallback)
+                  through Intl.DateTimeFormat locked to LOCAL_TZ (PST),
+                  so neither path depends on browser TZ. }}
+              {{format-date
                 (if jobPost.postedDate jobPost.postedDate jobPost.createdAt)
                 "MMM D, YYYY"
               }}
