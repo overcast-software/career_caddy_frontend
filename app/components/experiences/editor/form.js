@@ -4,6 +4,7 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { toCalendarString } from 'career-caddy-frontend/utils/tz';
 import move from 'ember-animated/motions/move';
+import opacity from 'ember-animated/motions/opacity';
 import { easeOut } from 'ember-animated/easings/cosine';
 
 export default class ExperiencesEditorForm extends Component {
@@ -47,6 +48,15 @@ export default class ExperiencesEditorForm extends Component {
     yield Promise.all(
       keptSprites.map((sprite) => move(sprite, { easing: easeOut })),
     );
+  }
+
+  *expandTransition({ insertedSprites, removedSprites }) {
+    yield Promise.all([
+      ...insertedSprites.map((s) =>
+        opacity(s, { from: 0, to: 1, duration: 180 }),
+      ),
+      ...removedSprites.map((s) => opacity(s, { to: 0, duration: 120 })),
+    ]);
   }
 
   @action setCompany(company) {

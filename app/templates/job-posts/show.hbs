@@ -118,14 +118,19 @@
 
     <Panel::Card>
       <JobPosts::Tabs @jobPost={{this.model}} />
-      {{! LiquidOutlet's built-in LiquidContainer animates its height
-          from the outgoing tab's size to the incoming tab's size so
-          the pane grows/shrinks smoothly. The slide transition
-          registered in app/transitions.js then runs the incoming
-          content in from the side. No explicit min-height so the
-          container is always driven by actual content. }}
-      <div role="tabpanel" class="mt-4">
-        <LiquidOutlet @class="tab-outlet" />
+      <div role="tabpanel" class="mt-4 relative overflow-hidden">
+        <AnimatedContainer class="w-full">
+          {{#animated-each
+            (array this.activeTabKey)
+            key="@identity"
+            use=this.tabTransition
+            duration=350
+          }}
+            <div class="w-full">
+              {{outlet}}
+            </div>
+          {{/animated-each}}
+        </AnimatedContainer>
       </div>
     </Panel::Card>
   </:main>
