@@ -29,10 +29,9 @@ export default class AnswersShowComponent extends Component {
     // Pick the right "show this answer" route based on where we're
     // rendering from. Previously this stripped suffixes off the route
     // name, which could produce nonsense like 'questions.answers.show'
-    // (no such route) when the component was still mounted during a
-    // liquid-fire transition on the top-level outlet. Safer to look
-    // for a known scope explicitly and fall back to the global
-    // /answers/:id view if we can't find one.
+    // (no such route) when the component was still mounted during an
+    // outlet transition. Safer to look for a known scope explicitly
+    // and fall back to the global /answers/:id view if we can't find one.
     const route = this.router.currentRouteName || 'answers.show';
     if (route.startsWith('answers.')) return 'answers.show';
     const match = route.match(/^(.+\.questions\.show)(\..*)?$/);

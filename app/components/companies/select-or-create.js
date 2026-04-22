@@ -6,23 +6,34 @@ export default class CompaniesSelectOrCreate extends Component {
   @service store;
   @service flashMessages;
   @tracked showCreate = false;
-  @tracked selectedCompany = null;
-  get companySelectFilter() {
-    return this.args.companies;
+  @tracked _selectedCompany = null;
+
+  constructor() {
+    super(...arguments);
+    if (!this.args.companies) {
+      this.store.findAll('company');
+    }
   }
+
+  get companies() {
+    return this.args.companies ?? this.store.peekAll('company');
+  }
+
+  get selectedCompany() {
+    return this.args.selected ?? this._selectedCompany;
+  }
+
   @tracked proposedCompanyName = null;
   @tracked labelText = 'Select a company (option to create if no results)';
 
   @action toggleCreateForm() {
     this.showCreate = !this.showCreate;
-    console.log(this.showCreate);
   }
 
   @action updateCompany(company) {
-    //do this in case someone uses clipboard and now keydown
-    this.proposedCompanyName = company.name;
-    // this is the regular behaviour
-    this.selectedCompany = company;
+    this.proposedCompanyName = company?.name;
+    this._selectedCompany = company;
+    this.args.onSelect?.(company);
   }
 
   @action companyFilter(company) {
@@ -30,7 +41,6 @@ export default class CompaniesSelectOrCreate extends Component {
   }
 
   @action selectInput(text, select) {
-    console.log(text);
     if (select.results.length === 0) {
       this.labelText = `Press Enter to create a company ${text}`;
       this.proposedCompanyName = text;
@@ -45,7 +55,8 @@ export default class CompaniesSelectOrCreate extends Component {
       try {
         await company.save();
         this.flashMessages.success(`Company created: ${company.name}.`);
-        this.selectedCompany = company;
+        this._selectedCompany = company;
+        this.args.onSelect?.(company);
       } catch (error) {
         if (error?.status !== 403) {
           this.flashMessages.danger('Failed to create company.');

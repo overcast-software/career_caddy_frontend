@@ -17,6 +17,28 @@
             class="ml-1 text-gray-400 text-xs"
           >{{@experience.company.name}}</span>
         {{/if}}
+        {{#if @chronologyWarning}}
+          <span
+            class="ml-2 inline-flex items-center gap-1 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400"
+            title="This experience is newer than the one above it. Resumes typically list experiences in reverse chronological order."
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-3"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.732 0 2.814-1.874 1.949-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.008v.008H12v-.008Z"
+              />
+            </svg>
+            out of order
+          </span>
+        {{/if}}
       </div>
       <svg
         aria-hidden="true"
@@ -58,134 +80,192 @@
     </button>
   </div>
 
-  {{#if this.isExpanded}}
-    <div class="px-2 pb-3">
-      {{#if this.errorMessage}}
-        <p class="text-xs text-red-400 mb-2">{{this.errorMessage}}</p>
-      {{/if}}
+  <AnimatedContainer>
+    {{#animated-if this.isExpanded use=this.expandTransition duration=180}}
+      <div class="px-2 pb-3">
+        {{#if this.errorMessage}}
+          <p class="text-xs text-red-400 mb-2">{{this.errorMessage}}</p>
+        {{/if}}
 
-      <div class="grid gap-3">
-        <label class="flex flex-col gap-1">
-          <span
-            class="text-xs text-gray-400 uppercase tracking-wide"
-          >Company</span>
-          <input
-            type="text"
-            value={{@experience.company.name}}
-            disabled
-            class="w-full rounded-md border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
-          />
-        </label>
-
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid gap-3">
           <label class="flex flex-col gap-1">
             <span
               class="text-xs text-gray-400 uppercase tracking-wide"
-            >Title</span>
-            <input
-              type="text"
-              value={{@experience.title}}
-              class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
-              {{on "input" (fn this.updateField "title")}}
+            >Company</span>
+            <Companies::SelectOrCreate
+              @selected={{this.currentCompany}}
+              @onSelect={{this.setCompany}}
             />
           </label>
-          <label class="flex flex-col gap-1">
-            <span
-              class="text-xs text-gray-400 uppercase tracking-wide"
-            >Location</span>
-            <input
-              type="text"
-              value={{@experience.location}}
-              class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
-              {{on "input" (fn this.updateField "location")}}
-            />
-          </label>
-        </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <label class="flex flex-col gap-1">
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Start
-              Date</span>
-            <input
-              type="date"
-              value={{this.formattedStartDate}}
-              class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
-              {{on "input" (fn this.updateField "startDate")}}
-            />
-          </label>
-          <div class="flex flex-col gap-1">
-            <label
-              for="exp-end-date"
-              class="text-xs text-gray-400 uppercase tracking-wide"
-            >End Date</label>
-            {{#if this.currentlyWorking}}
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex flex-col gap-1">
+              <span
+                class="text-xs text-gray-400 uppercase tracking-wide"
+              >Title</span>
               <input
-                id="exp-end-date"
                 type="text"
-                value="Present"
-                disabled
-                class="w-full rounded-md border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+                value={{@experience.title}}
+                class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+                {{on "input" (fn this.updateField "title")}}
               />
-            {{else}}
+            </label>
+            <label class="flex flex-col gap-1">
+              <span
+                class="text-xs text-gray-400 uppercase tracking-wide"
+              >Location</span>
               <input
-                id="exp-end-date"
-                type="date"
-                value={{this.formattedEndDate}}
-                class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
-                {{on "input" (fn this.updateField "endDate")}}
+                type="text"
+                value={{@experience.location}}
+                class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+                {{on "input" (fn this.updateField "location")}}
               />
-            {{/if}}
+            </label>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex flex-col gap-1">
+              <span class="text-xs text-gray-400 uppercase tracking-wide">Start
+                Date</span>
+              <input
+                type="date"
+                value={{this.formattedStartDate}}
+                class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+                {{on "input" (fn this.updateField "startDate")}}
+              />
+            </label>
+            <div class="flex flex-col gap-1">
+              <label
+                for="exp-end-date"
+                class="text-xs text-gray-400 uppercase tracking-wide"
+              >End Date</label>
+              {{#if this.currentlyWorking}}
+                <input
+                  id="exp-end-date"
+                  type="text"
+                  value="Present"
+                  disabled
+                  class="w-full rounded-md border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+                />
+              {{else}}
+                <input
+                  id="exp-end-date"
+                  type="date"
+                  value={{this.formattedEndDate}}
+                  class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+                  {{on "input" (fn this.updateField "endDate")}}
+                />
+              {{/if}}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 text-sm text-gray-300">
+            <input
+              id="exp-currently-working"
+              type="checkbox"
+              checked={{this.currentlyWorking}}
+              class="rounded border-gray-600 bg-gray-800 text-accent-500 focus:ring-accent-500"
+              {{on "change" this.toggleCurrentlyWorking}}
+            />
+            <label for="exp-currently-working">I currently work here</label>
+          </div>
+
+          <div>
+            <span
+              class="text-xs text-gray-400 uppercase tracking-wide"
+            >Descriptions</span>
+            <AnimatedContainer>
+              <ul class="mt-1 space-y-2">
+                {{#animated-each
+                  this.descriptions
+                  key="id"
+                  duration=220
+                  use=this.reorderTransition
+                  as |d index|
+                }}
+                  <li class="description-row flex items-start gap-2">
+                    <div class="flex flex-col pt-2">
+                      <button
+                        type="button"
+                        class="sortable-move-btn"
+                        title="Move up"
+                        aria-label="Move description up"
+                        disabled={{eq index 0}}
+                        {{on "click" (fn this.moveDescUp index)}}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="size-4"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="m4.5 15.75 7.5-7.5 7.5 7.5"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="sortable-move-btn"
+                        title="Move down"
+                        aria-label="Move description down"
+                        disabled={{eq index this.lastDescriptionIndex}}
+                        {{on "click" (fn this.moveDescDown index)}}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="size-4"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <Descriptions::Editor::Form
+                      @description={{d}}
+                      @onDelete={{fn this.removeDescription d}}
+                    />
+                  </li>
+                {{/animated-each}}
+              </ul>
+            </AnimatedContainer>
+            <button
+              type="button"
+              class="mt-2 rounded bg-accent-100 px-2 py-0.5 text-xs text-accent-800 hover:bg-accent-200"
+              {{on "click" this.addDescription}}
+            >+ Add description</button>
+          </div>
+
+          <div class="flex gap-2 pt-1">
+            <button
+              type="button"
+              class="rounded bg-accent-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-700"
+              {{on "click" this.save}}
+            >Save</button>
+            <button
+              type="button"
+              class="rounded bg-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-600"
+              {{on "click" this.cancel}}
+            >Cancel</button>
+            <button
+              type="button"
+              class="rounded bg-gray-700 px-3 py-1.5 text-xs text-red-400 hover:bg-red-900/30"
+              {{on "click" this.deleteExperience}}
+            >Delete</button>
           </div>
         </div>
-
-        <div class="flex items-center gap-2 text-sm text-gray-300">
-          <input
-            id="exp-currently-working"
-            type="checkbox"
-            checked={{this.currentlyWorking}}
-            class="rounded border-gray-600 bg-gray-800 text-accent-500 focus:ring-accent-500"
-            {{on "change" this.toggleCurrentlyWorking}}
-          />
-          <label for="exp-currently-working">I currently work here</label>
-        </div>
-
-        <div>
-          <span
-            class="text-xs text-gray-400 uppercase tracking-wide"
-          >Descriptions</span>
-          <ul class="mt-1 space-y-2">
-            {{#each @experience.descriptions as |d|}}
-              <Descriptions::Editor::Form
-                @description={{d}}
-                @onDelete={{fn this.removeDescription d}}
-              />
-            {{/each}}
-          </ul>
-          <button
-            type="button"
-            class="mt-2 rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600"
-            {{on "click" this.addDescription}}
-          >+ Add description</button>
-        </div>
-
-        <div class="flex gap-2 pt-1">
-          <button
-            type="button"
-            class="rounded bg-accent-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-700"
-            {{on "click" this.save}}
-          >Save</button>
-          <button
-            type="button"
-            class="rounded bg-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-600"
-            {{on "click" this.cancel}}
-          >Cancel</button>
-          <button
-            type="button"
-            class="rounded bg-gray-700 px-3 py-1.5 text-xs text-red-400 hover:bg-red-900/30"
-            {{on "click" this.deleteExperience}}
-          >Delete</button>
-        </div>
       </div>
-    </div>
-  {{/if}}
+    {{/animated-if}}
+  </AnimatedContainer>
 </div>

@@ -5,12 +5,17 @@ import { tracked } from '@glimmer/tracking';
 export default class CompaniesSelector extends Component {
   @service store;
   @service flashMessages;
-  @tracked selectedCompany;
+  @tracked _selectedCompany;
+
+  get selectedCompany() {
+    return this.args.selected ?? this._selectedCompany;
+  }
+
   @action updateCompany(company) {
     if (this.args.companyCallback) {
       this.args.companyCallback(company);
     }
-    this.selectedCompany = company;
+    this._selectedCompany = company;
   }
   get placeHolder() {
     return this.args.placeHolder || 'placeholder';

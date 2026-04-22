@@ -717,6 +717,29 @@ a {
   }
 }
 
+/* ===== REORDER BUTTONS (↑/↓ stacked per row) ===== */
+.sortable-move-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  color: var(--muted);
+  border-radius: 4px;
+  transition:
+    color 120ms ease,
+    background 120ms ease;
+}
+
+.sortable-move-btn:hover:not(:disabled) {
+  color: var(--text);
+  background: rgb(var(--accent-500) / 15%);
+}
+
+.sortable-move-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 /* ===== EXPERIENCE ===== */
 .section-title {
   margin: 0 0 var(--space-3);
