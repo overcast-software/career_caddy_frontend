@@ -3,7 +3,7 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 
-export default class JobPostsScrapeController extends Controller {
+export default class JobPostsNewScrapeController extends Controller {
   @service store;
   @service flashMessages;
   @service router;

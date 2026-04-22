@@ -45,16 +45,6 @@ export default class SidebarComponent extends Component {
   }
 
   @action
-  goToJobPosts() {
-    // Users expect clicking the Job Posts parent row to take them to
-    // the index — expanding alone felt like a wasted click (they had
-    // to click twice to see the list). The native <details> toggle
-    // still runs alongside this handler so the sub-tree expands too.
-    this.router.transitionTo('job-posts');
-    if (this.args.onClose) this.args.onClose();
-  }
-
-  @action
   goToReports() {
     this.router.transitionTo('reports');
     if (this.args.onClose) this.args.onClose();
