@@ -120,7 +120,10 @@
             >+ Add</button>
           </:actions>
           <:default>
-            <Experiences::List @experiences={{this.model.sortedExperiences}} />
+            <Experiences::List
+              @experiences={{this.model.sortedExperiences}}
+              @resume={{this.model}}
+            />
           </:default>
         </Builder::Section>
 

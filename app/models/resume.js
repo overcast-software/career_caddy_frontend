@@ -25,15 +25,14 @@ export default class ResumeModel extends Model {
   @hasMany('project', { async: true, inverse: 'resume' }) projects;
 
   get sortedExperiences() {
+    // Server returns experiences ordered by ResumeExperience.order. Preserve
+    // that order — it reflects either the import sequence or a drag-reorder
+    // the user has since applied.
     const exps = this.hasMany('experiences').value();
     if (!exps) return [];
     const arr = [];
     for (const e of exps) arr.push(e);
-    return arr.sort((a, b) => {
-      const da = new Date(a.startDate || 0);
-      const db = new Date(b.startDate || 0);
-      return db - da;
-    });
+    return arr;
   }
 
   get activeSummary() {

@@ -1,8 +1,68 @@
 {{#if this.experiences.length}}
-  {{#each this.experiences as |exp|}}
-    <Experiences::Editor::Form @experience={{exp}} />
-    {{yield}}
-  {{/each}}
+  <AnimatedContainer class="experiences-list">
+    {{#animated-each
+      this.experiences key="id" duration=220 use=this.reorderTransition
+      as |exp index|
+    }}
+      <div class="experience-row flex items-start gap-2">
+        <div class="flex flex-col pt-2">
+          <button
+            type="button"
+            class="sortable-move-btn"
+            title="Move up"
+            aria-label="Move experience up"
+            disabled={{eq index 0}}
+            {{on "click" (fn this.moveUp index)}}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-4"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m4.5 15.75 7.5-7.5 7.5 7.5"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="sortable-move-btn"
+            title="Move down"
+            aria-label="Move experience down"
+            disabled={{eq index this.lastIndex}}
+            {{on "click" (fn this.moveDown index)}}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-4"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m19.5 8.25-7.5 7.5-7.5-7.5"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="flex-1">
+          <Experiences::Editor::Form
+            @experience={{exp}}
+            @chronologyWarning={{get this.chronologyWarnings exp.id}}
+          />
+          {{yield}}
+        </div>
+      </div>
+    {{/animated-each}}
+  </AnimatedContainer>
 {{else}}
   <p class="text-sm text-gray-500">No experiences yet. Use "+ Add" to create
     one.</p>

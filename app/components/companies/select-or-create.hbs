@@ -2,12 +2,12 @@
   <div class="field companies-select-row">
     <div class="grow">
       <Companies::Selector
-        @companies={{@companies}}
+        @companies={{this.companies}}
+        @selected={{this.selectedCompany}}
         @onInput={{this.selectInput}}
-        @companyCallback={{this.companyFilter}}
+        @companyCallback={{this.updateCompany}}
         @onKeydown={{this.companyKeydown}}
         @labelText={{this.labelText}}
-        @onChange={{this.updateCompany}}
         as |company|
       >
         {{company.name}}
