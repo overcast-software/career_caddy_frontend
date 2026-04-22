@@ -1,0 +1,29 @@
+<form class="space-y-6" {{on "submit" this.submitHoldForm}}>
+  <div>
+    <label
+      for="scrape-url"
+      class="block text-sm font-semibold text-gray-900 dark:text-gray-100"
+    >URL</label>
+    <input
+      id="scrape-url"
+      type="url"
+      class="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+      placeholder="https://..."
+      value={{this.url}}
+      {{on "input" this.updateUrl}}
+    />
+  </div>
+
+  <div class="flex justify-end">
+    <button type="submit" class="btn primary">Submit and hold for external
+      service</button>
+  </div>
+
+  <p class="inline-warning">
+    <strong>Heads up:</strong>
+    admin runs a tool that fetches the requested URL and gives it to a browser
+    running on a spare desktop in his home. This is not a reliable process —
+    you're better off using the Paste tab above to feed the AI the page contents
+    directly.
+  </p>
+</form>

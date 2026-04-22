@@ -1,8 +1,7 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
 
-// Legacy URL. Redirect to the Paste tab under /job-posts/new.
-export default class JobPostsPasteRoute extends Route {
+export default class JobPostsNewIndexRoute extends Route {
   @service router;
 
   beforeModel() {

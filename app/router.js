@@ -120,7 +120,12 @@ Router.map(function () {
         this.route('summaries');
       },
     );
-    this.route('new');
+    this.route('new', function () {
+      this.route('manual');
+      this.route('scrape');
+      this.route('paste');
+    });
+    // Legacy URLs — redirect to the new landing's tabs.
     this.route('scrape');
     this.route('paste');
 

@@ -3,7 +3,7 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 
-export default class JobPostsPasteController extends Controller {
+export default class JobPostsNewPasteController extends Controller {
   @service api;
   @service session;
   @service store;
@@ -18,12 +18,11 @@ export default class JobPostsPasteController extends Controller {
 
   get canSubmit() {
     if (this.submitting) return false;
-    return this.url.trim().length > 0 || this.text.trim().length > 0;
+    return this.text.trim().length > 0;
   }
 
   get submitLabel() {
     if (this.submitting) return 'Parsing…';
-    if (this.url.trim().length > 0) return 'Scrape URL';
     return 'Create from paste';
   }
 
@@ -42,19 +41,7 @@ export default class JobPostsPasteController extends Controller {
     event?.preventDefault?.();
     if (this.submitting) return;
     if (!this.canSubmit) {
-      this.flashMessages.info(
-        'Paste a URL or job-posting text before submitting.',
-      );
-      return;
-    }
-
-    const url = this.url.trim();
-    if (url) {
-      const target = url;
-      this._reset();
-      this.router.transitionTo('job-posts.scrape', {
-        queryParams: { url: target },
-      });
+      this.flashMessages.info('Paste the job-posting text before submitting.');
       return;
     }
 
@@ -66,6 +53,10 @@ export default class JobPostsPasteController extends Controller {
         ? this.session.refresh().catch(() => {})
         : Promise.resolve();
 
+    const body = { text: this.text };
+    const link = this.url.trim();
+    if (link) body.link = link;
+
     refreshIfNeeded
       .then(() =>
         fetch(`${this.api.baseUrl}scrapes/from-text/`, {
@@ -74,7 +65,7 @@ export default class JobPostsPasteController extends Controller {
             ...this.api.headers(),
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ text: this.text }),
+          body: JSON.stringify(body),
         }),
       )
       .then((response) => {
