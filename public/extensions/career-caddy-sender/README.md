@@ -1,4 +1,4 @@
-# Career Caddy Sender — v0.2.5
+# Career Caddy Sender — v0.2.6
 
 A tiny browser extension: click the toolbar button on any job posting page and
 the page's URL + visible text land in Career Caddy's `/job-posts/new/paste`
@@ -6,6 +6,10 @@ form, ready for review.
 
 ## Version history
 
+- **0.2.6** — Tighter retry rhythm (100ms × 150 = 15s) and early-stop on
+  ACK from the app-route listener. Narrows the first-try race where
+  Ember hadn't finished mounting before the extension's initial
+  postMessage bursts.
 - **0.2.5** — Default origin flipped back to `https://careercaddy.online` for
   shipped builds. Still overridable per-browser via the popup origin field.
 - **0.2.4** — Default origin is now `http://localhost:4200` (dev). Override
