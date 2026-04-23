@@ -1,8 +1,23 @@
-# Career Caddy Sender
+# Career Caddy Sender — v0.2.0
 
 A tiny browser extension: click the toolbar button on any job posting page and
 the page's URL + visible text land in Career Caddy's `/job-posts/new/paste`
 form, ready for review.
+
+## Version history
+
+- **0.2.0** — Popup adds "Auto-submit without review" and "Also score against
+  career data" checkboxes. Selections are remembered per browser. Off by
+  default; check them to chain paste → submit → score in one click.
+- **0.1.0** — Initial release. Grab page, open the paste form, fill via
+  postMessage handshake.
+
+## Upgrading
+
+Re-download the zip, then:
+- **Firefox**: `about:debugging` → your Temporary Extension → **Remove** → re-load.
+- **Chrome**: `chrome://extensions` → find "Career Caddy Sender" → **Remove**,
+  unzip the new archive, **Load unpacked** pointing at the new folder.
 
 Same result as the in-app bookmarklet, but it also works on CSP-strict sites
 (LinkedIn, Greenhouse, GitHub) where `javascript:` bookmarklets are blocked.

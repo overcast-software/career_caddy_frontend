@@ -10,8 +10,14 @@ export default class JobPostsNewPasteController extends Controller {
   @service router;
   @service spinner;
   @service pollable;
+  @service currentUser;
   @service flashMessages;
 
+  queryParams = ['bookmarklet', 'auto', 'score'];
+
+  @tracked bookmarklet = null;
+  @tracked auto = null;
+  @tracked score = null;
   @tracked text = '';
   @tracked url = '';
   @tracked submitting = false;
@@ -32,7 +38,11 @@ export default class JobPostsNewPasteController extends Controller {
       } catch {
         /* ignore */
       }
-      this.flashMessages.info('Filled from bookmarklet — review and submit.');
+      if (this._shouldAutoSubmit()) {
+        this._maybeAutoSubmit();
+      } else {
+        this.flashMessages.info('Filled from bookmarklet — review and submit.');
+      }
     };
     window.addEventListener('message', handler);
     this._bookmarkletListener = handler;
@@ -54,7 +64,9 @@ export default class JobPostsNewPasteController extends Controller {
       if (typeof payload.url === 'string' && payload.url) {
         this.url = payload.url;
       }
-      this.flashMessages.info('Filled from bookmarklet — review and submit.');
+      if (!this._shouldAutoSubmit()) {
+        this.flashMessages.info('Filled from bookmarklet — review and submit.');
+      }
     } catch {
       /* malformed stash — drop it */
     }
@@ -63,6 +75,23 @@ export default class JobPostsNewPasteController extends Controller {
     } catch {
       /* ignore */
     }
+    if (this._shouldAutoSubmit()) {
+      this._maybeAutoSubmit();
+    }
+  }
+
+  _shouldAutoSubmit() {
+    // score=1 implies auto=1 — scoring without a post to score against
+    // makes no sense, so we always submit when the caller asked to score.
+    return this.auto === '1' || this.score === '1';
+  }
+
+  _maybeAutoSubmit() {
+    if (this.submitting) return;
+    if (!this.text || !this.text.trim()) return;
+    this.flashMessages.info('Auto-submitting pasted content…');
+    // Defer a tick so tracked props settle before the fetch kicks off
+    Promise.resolve().then(() => this.submitPaste());
   }
 
   @action
@@ -155,7 +184,8 @@ export default class JobPostsNewPasteController extends Controller {
               return;
             }
             const note = rec.latestStatusNote || '';
-            if (note.startsWith('duplicate:')) {
+            const isDuplicate = note.startsWith('duplicate:');
+            if (isDuplicate) {
               this.flashMessages.warning(
                 'You already have a job post for this link.',
                 { sticky: true },
@@ -168,7 +198,11 @@ export default class JobPostsNewPasteController extends Controller {
               this.flashMessages.success('Job post created.');
             }
             this._reset();
-            this.router.transitionTo('job-posts.show', jobPostId);
+            if (this.score === '1') {
+              this._chainScore(jobPostId, isDuplicate);
+            } else {
+              this.router.transitionTo('job-posts.show', jobPostId);
+            }
           },
           onFailed: () => {
             this.flashMessages.clearMessages();
@@ -188,6 +222,85 @@ export default class JobPostsNewPasteController extends Controller {
         this.flashMessages.clearMessages();
         this.flashMessages.danger(`Submit failed: ${err.message}`);
         this.submitting = false;
+      });
+  }
+
+  _chainScore(jobPostId, isDuplicate) {
+    // Land the user on the Scores tab even if something below fails —
+    // we never want the score chain to leave them stuck on /paste.
+    const fallbackTransition = () =>
+      this.router.transitionTo('job-posts.show.scores', jobPostId);
+
+    this.store
+      .findRecord('job-post', jobPostId, { include: 'scores', reload: true })
+      .then((jobPost) => {
+        const scores = jobPost.hasMany('scores').value() || [];
+        const existing = scores.find(
+          (s) => !s.belongsTo('resume').id() && s.status === 'completed',
+        );
+        if (isDuplicate && existing) {
+          this.flashMessages.success('Opening your existing score.');
+          return this.router.transitionTo(
+            'job-posts.show.scores.show',
+            jobPostId,
+            existing.id,
+          );
+        }
+        const newScore = this.store.createRecord('score', {
+          resume: null,
+          jobPost,
+          user: this.currentUser.user,
+        });
+        this.flashMessages.info('Scoring against your career data…');
+        this.spinner.begin({ label: 'Scoring…' });
+        newScore
+          .save()
+          .then((saved) => {
+            if (this.pollable.isTerminal(saved)) {
+              this.spinner.end();
+              this.router.transitionTo(
+                'job-posts.show.scores.show',
+                jobPostId,
+                saved.id,
+              );
+              return;
+            }
+            this.pollable.poll(saved, {
+              successMessage: 'Score ready.',
+              failedMessage: 'Scoring failed.',
+              onComplete: (scoreRec) => {
+                this.router.transitionTo(
+                  'job-posts.show.scores.show',
+                  jobPostId,
+                  scoreRec.id,
+                );
+              },
+              onFailed: () => {
+                this.flashMessages.danger('Scoring failed.');
+                fallbackTransition();
+              },
+              onError: () => {
+                this.flashMessages.danger(
+                  'Lost connection while waiting for score.',
+                );
+                fallbackTransition();
+              },
+            });
+          })
+          .catch((e) => {
+            this.spinner.end();
+            newScore.unloadRecord();
+            this.flashMessages.danger(
+              e?.errors?.[0]?.detail ?? 'Failed to create score.',
+            );
+            fallbackTransition();
+          });
+      })
+      .catch(() => {
+        this.flashMessages.danger(
+          'Could not load the job post to chain scoring.',
+        );
+        fallbackTransition();
       });
   }
 
