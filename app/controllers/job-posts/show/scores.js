@@ -40,10 +40,18 @@ export default class JobPostsShowScoresController extends Controller {
   }
 
   @action autoScoreIfRequested() {
-    console.log('[cc-scores] autoScoreIfRequested', {
+    console.log('[cc-scores] autoScoreIfRequested (deferring)', {
       auto: this.auto,
       handled: this._autoScoreHandled,
     });
+    // Runs from on-insert (render pass). flashMessages.info + store
+    // reads below would violate Ember's auto-tracking 'no writes during
+    // read-in-same-computation' rule. Defer to a microtask so render
+    // settles first.
+    Promise.resolve().then(() => this._runAutoScore());
+  }
+
+  _runAutoScore() {
     if (this.auto !== '1') return;
     if (this._autoScoreHandled) return;
     this._autoScoreHandled = true;
