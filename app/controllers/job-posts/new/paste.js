@@ -34,7 +34,19 @@ export default class JobPostsNewPasteController extends Controller {
     // Defer off the render pass — _drainPendingPaste can fire flash
     // messages and auto-submit, both of which read+write tracked state
     // that Ember's auto-tracking forbids during a render computation.
-    Promise.resolve().then(() => this._drainPendingPaste());
+    Promise.resolve().then(() => {
+      // Announce the auto-flow before any async work so the user sees
+      // feedback immediately on page-load from the extension. Without
+      // this, the first few hundred ms look like a blank paste form.
+      if (this._shouldAutoSubmit()) {
+        const chain = this.score === '1' ? 'submit + score' : 'submit';
+        this.flashMessages.info(
+          `Bookmarklet payload incoming — auto-${chain} engaged.`,
+          { sticky: true },
+        );
+      }
+      this._drainPendingPaste();
+    });
     if (this._bookmarkletListener) return;
     const handler = (event) => {
       const data = event.data;
