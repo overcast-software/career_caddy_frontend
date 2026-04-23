@@ -1,4 +1,8 @@
-<form class="space-y-6" {{on "submit" this.submitPaste}}>
+<form
+  class="space-y-6"
+  {{on-insert this.installBookmarkletListener}}
+  {{on "submit" this.submitPaste}}
+>
   <div>
     <label
       for="paste-url"
@@ -58,3 +62,60 @@
     >{{this.submitLabel}}</button>
   </div>
 </form>
+
+{{! template-lint-disable no-nested-interactive }}
+<details
+  class="mt-8 rounded-md border border-gray-200 p-4 dark:border-gray-700"
+>
+  <summary
+    class="cursor-pointer text-sm font-semibold text-gray-900 dark:text-gray-100"
+  >Install the bookmarklet</summary>
+  <div class="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+    <p>
+      Drag this link to your bookmarks bar. On any job posting page, click it —
+      the posting's URL and visible text are shipped to this form in a new tab.
+    </p>
+    <p>
+      <a
+        href="#"
+        {{on-insert this.setBookmarkletHref}}
+        class="inline-flex items-center rounded-md border border-accent-500 bg-accent-50 px-3 py-1.5 font-semibold text-accent-700 hover:bg-accent-100 dark:border-accent-400 dark:bg-accent-900/30 dark:text-accent-200 dark:hover:bg-accent-900/50"
+      >📎 Send to Career Caddy</a>
+    </p>
+    <p class="text-xs text-gray-500 dark:text-gray-500">
+      Allow popups for this domain. The bookmarklet opens a new tab and posts
+      the page text to it — nothing leaves your browser until you hit submit.
+    </p>
+  </div>
+</details>
+
+{{! template-lint-disable no-nested-interactive }}
+<details
+  class="mt-4 rounded-md border border-gray-200 p-4 dark:border-gray-700"
+>
+  <summary
+    class="cursor-pointer text-sm font-semibold text-gray-900 dark:text-gray-100"
+  >Install the browser extension</summary>
+  <div class="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+    <p>
+      Works on sites that block bookmarklets (LinkedIn, Greenhouse, GitHub).
+      Chrome / Firefox, load-unpacked; same payload as the bookmarklet.
+    </p>
+    <p>
+      <a
+        href="/extensions/career-caddy-sender.zip"
+        download
+        class="inline-flex items-center rounded-md border border-accent-500 bg-accent-50 px-3 py-1.5 font-semibold text-accent-700 hover:bg-accent-100 dark:border-accent-400 dark:bg-accent-900/30 dark:text-accent-200 dark:hover:bg-accent-900/50"
+      >⬇ Download career-caddy-sender.zip</a>
+    </p>
+    <p class="text-xs text-gray-500 dark:text-gray-500">
+      Firefox:
+      <code>about:debugging</code>
+      → This Firefox → Load Temporary Add-on → pick the
+      <code>.zip</code>
+      (resets on restart). Chrome: unzip, open
+      <code>chrome://extensions</code>, toggle Developer mode, Load unpacked,
+      select the folder.
+    </p>
+  </div>
+</details>

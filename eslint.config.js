@@ -10,7 +10,13 @@ const compat = new FlatCompat({ baseDirectory: __dirname });
 module.exports = [
   // Ignore block
   {
-    ignores: ['dist/**', 'tmp/**', 'coverage/**', 'node_modules/**'],
+    ignores: [
+      'dist/**',
+      'tmp/**',
+      'coverage/**',
+      'node_modules/**',
+      'public/extensions/**',
+    ],
   },
 
   // Base recommended

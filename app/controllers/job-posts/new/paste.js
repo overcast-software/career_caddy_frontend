@@ -16,6 +16,69 @@ export default class JobPostsNewPasteController extends Controller {
   @tracked url = '';
   @tracked submitting = false;
 
+  _bookmarkletListener = null;
+
+  @action
+  installBookmarkletListener() {
+    this._drainPendingPaste();
+    if (this._bookmarkletListener) return;
+    const handler = (event) => {
+      const data = event.data;
+      if (!data || data.type !== 'cc-bookmarklet') return;
+      if (typeof data.text === 'string') this.text = data.text;
+      if (typeof data.url === 'string') this.url = data.url;
+      try {
+        window.sessionStorage.removeItem('cc-pending-paste');
+      } catch {
+        /* ignore */
+      }
+      this.flashMessages.info('Filled from bookmarklet — review and submit.');
+    };
+    window.addEventListener('message', handler);
+    this._bookmarkletListener = handler;
+  }
+
+  _drainPendingPaste() {
+    let raw = null;
+    try {
+      raw = window.sessionStorage.getItem('cc-pending-paste');
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const payload = JSON.parse(raw);
+      if (typeof payload.text === 'string' && payload.text) {
+        this.text = payload.text;
+      }
+      if (typeof payload.url === 'string' && payload.url) {
+        this.url = payload.url;
+      }
+      this.flashMessages.info('Filled from bookmarklet — review and submit.');
+    } catch {
+      /* malformed stash — drop it */
+    }
+    try {
+      window.sessionStorage.removeItem('cc-pending-paste');
+    } catch {
+      /* ignore */
+    }
+  }
+
+  @action
+  teardownBookmarkletListener() {
+    if (!this._bookmarkletListener) return;
+    window.removeEventListener('message', this._bookmarkletListener);
+    this._bookmarkletListener = null;
+  }
+
+  @action
+  setBookmarkletHref(element) {
+    const origin = window.location.origin;
+    const src = `(function(){var O=${JSON.stringify(origin)};var p={type:'cc-bookmarklet',url:location.href,text:document.body.innerText};var w=window.open(O+'/job-posts/new/paste?bookmarklet=1','_blank');if(!w){alert('Popup blocked — allow popups for '+location.host);return;}var iv=setInterval(function(){try{w.postMessage(p,O);}catch(e){}},200);window.addEventListener('message',function h(e){if(e.origin===O&&e.data==='cc-bookmarklet-ack'){clearInterval(iv);window.removeEventListener('message',h);}});setTimeout(function(){clearInterval(iv);},10000);})();`;
+    element.setAttribute('href', `javascript:${encodeURIComponent(src)}`);
+  }
+
   get canSubmit() {
     if (this.submitting) return false;
     return this.text.trim().length > 0;
