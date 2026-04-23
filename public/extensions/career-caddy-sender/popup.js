@@ -7,6 +7,16 @@ const originInput = $('origin');
 const sendBtn = $('send');
 const autoSubmitBox = $('auto-submit');
 const autoScoreBox = $('auto-score');
+const versionEl = $('version');
+
+// Read the installed extension's version from its own manifest so the
+// user can visually confirm they're running the build they just loaded.
+try {
+  const mf = api.runtime.getManifest();
+  versionEl.textContent = `v${mf.version}`;
+} catch {
+  versionEl.textContent = '';
+}
 
 function setStatus(msg, isError = false) {
   statusEl.textContent = msg;

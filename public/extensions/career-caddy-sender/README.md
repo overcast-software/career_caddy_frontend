@@ -1,4 +1,4 @@
-# Career Caddy Sender — v0.2.1
+# Career Caddy Sender — v0.2.2
 
 A tiny browser extension: click the toolbar button on any job posting page and
 the page's URL + visible text land in Career Caddy's `/job-posts/new/paste`
@@ -6,6 +6,8 @@ form, ready for review.
 
 ## Version history
 
+- **0.2.2** — Popup shows the installed version in the top-right corner so
+  you can confirm at a glance which build is running.
 - **0.2.1** — Origin field now saves on every keystroke (not just on
   blur), so values persist if you click Send without tabbing out.
   Send button also defensively writes all settings before dispatching.
