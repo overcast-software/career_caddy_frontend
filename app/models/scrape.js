@@ -9,6 +9,7 @@ export default class ScrapeModel extends Model {
   @attr('date') scrapedAt;
   @attr('string') status;
   @attr('string') html;
+  @attr('string') latestStatusNote;
   @belongsTo('job-post', { async: true, inverse: 'scrapes' }) jobPost;
   @belongsTo('company', { async: true, inverse: 'scrapes' }) company;
   @hasMany('scrape', { async: true, inverse: 'sourceScrape' }) scrapes;
