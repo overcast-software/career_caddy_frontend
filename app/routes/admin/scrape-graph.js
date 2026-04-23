@@ -19,7 +19,7 @@ export default class AdminScrapeGraphRoute extends Route {
   }
 
   _fetch(path) {
-    return fetch(path, {
+    return fetch(this.api.url(path), {
       headers: this.api.headers(),
     }).then((r) =>
       r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
