@@ -138,21 +138,54 @@ sendBtn.addEventListener('click', async () => {
       text: payload.text,
     };
     let tries = 0;
+    // Retries every 100ms for 15s = 150 attempts. Ember can take 200–
+    // 500ms to mount the application route and install the message
+    // listener after the tab opens; messages posted before that are
+    // lost because window.postMessage doesn't queue. Finer ticks
+    // narrow the race window.
     const iv = setInterval(async () => {
       tries += 1;
       try {
-        await api.scripting.executeScript({
+        const results = await api.scripting.executeScript({
           target: { tabId: ccTab.id },
           args: [message, origin],
-          func: (m, o) => window.postMessage(m, o),
+          // Dispatch the payload AND install a temporary ack listener
+          // that flips a global flag when the app-route listener ACKs.
+          // Return that flag so the extension can stop retrying early.
+          func: (m, o) => {
+            window.postMessage(m, o);
+            if (window.__ccSenderAckSeen) return true;
+            if (!window.__ccSenderAckInstalled) {
+              window.__ccSenderAckInstalled = true;
+              window.addEventListener('message', (e) => {
+                if (e.data === 'cc-bookmarklet-ack') {
+                  window.__ccSenderAckSeen = true;
+                }
+              });
+            }
+            return false;
+          },
         });
+        const acked = results && results[0] && results[0].result === true;
+        if (acked) {
+          clearInterval(iv);
+          console.log('[cc-sender] ack received after', tries, 'tries');
+        }
       } catch {
-        /* page not ready yet */
+        /* tab not ready yet — keep retrying */
       }
-      if (tries > 50) clearInterval(iv);
-    }, 200);
+      if (tries > 150) {
+        clearInterval(iv);
+        console.log(
+          '[cc-sender] gave up after 150 tries (15s); app never acked',
+        );
+      }
+    }, 100);
 
-    setTimeout(() => window.close(), 300);
+    // Keep the popup open briefly so early retries have time to run
+    // from this extension context (some browsers suspend the popup
+    // when it loses focus — tabs.create moves focus immediately).
+    setTimeout(() => window.close(), 800);
   } catch (err) {
     setStatus(`Failed: ${err.message}`, true);
     sendBtn.disabled = false;
