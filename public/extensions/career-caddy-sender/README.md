@@ -24,15 +24,34 @@ Same result as the in-app bookmarklet, but it also works on CSP-strict sites
 
 ## Install — Firefox
 
+Two paths — pick based on whether you want the extension to survive a
+browser restart.
+
+### Temporary (works on regular Firefox)
+
 1. Open `about:debugging#/runtime/this-firefox`.
 2. Click **Load Temporary Add-on…**.
 3. Select `manifest.json` from the unzipped folder (or the `.zip` itself works).
 4. A grey puzzle-piece icon appears in the toolbar. Right-click it → **Pin to
    Toolbar** for easier access.
 
-Note: "temporary" means it's removed on Firefox restart. To persist, we'd need
-to sign the extension through addons.mozilla.org. Drop a note in the repo if
-that's worth doing.
+"Temporary" means it's removed on Firefox restart — you'd re-load each session.
+
+### Persistent via `.xpi` (Developer Edition / Nightly / ESR)
+
+Regular Firefox (Release/Beta) enforces signature verification and will reject
+unsigned add-ons no matter what. On **Developer Edition, Nightly, or ESR**:
+
+1. Open `about:config` and set `xpinstall.signatures.required` → `false`.
+2. Download the `.xpi` from the download button on the paste page (or directly
+   at `/extensions/career-caddy-sender.xpi`).
+3. Drag the `.xpi` onto a Firefox window (or `about:addons` → gear →
+   **Install Add-on From File**).
+4. Confirm the install prompt — the extension persists across restarts.
+
+If you want this on regular Firefox too, the path forward is signing through
+addons.mozilla.org (self-distributed `.xpi`). Drop a note in the repo if worth
+setting up.
 
 ## Install — Chrome / Chromium / Brave / Edge
 
