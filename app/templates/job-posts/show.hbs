@@ -59,18 +59,23 @@
             >
               {{if this.scrapeSubmitting "Queuing…" "Run scrape"}}
             </button>
-            <button
-              type="button"
-              class="btn small primary"
-              disabled={{or this.scrapeSubmitting this.scoreSubmitting}}
-              {{on "click" this.scrapeAndScore}}
-            >
-              {{if
-                this.scoreSubmitting
-                "Scoring…"
-                (if this.scrapeSubmitting "Scraping…" "Scrape & Score")
-              }}
-            </button>
+            {{! Only surface Scrape & Score on stubs — a full-description
+                post already has enough to score in isolation, and the
+                combined action rescrapes the whole page for no gain. }}
+            {{#if this.model.isStub}}
+              <button
+                type="button"
+                class="btn small primary"
+                disabled={{or this.scrapeSubmitting this.scoreSubmitting}}
+                {{on "click" this.scrapeAndScore}}
+              >
+                {{if
+                  this.scoreSubmitting
+                  "Scoring…"
+                  (if this.scrapeSubmitting "Scraping…" "Scrape & Score")
+                }}
+              </button>
+            {{/if}}
           {{/if}}
           <button
             type="button"

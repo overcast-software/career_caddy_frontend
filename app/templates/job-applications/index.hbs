@@ -43,7 +43,9 @@
                 >Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            <tbody
+              class="divide-y divide-gray-100 stagger-rows dark:divide-gray-700"
+            >
               {{#each this.model as |application|}}
                 <JobApplications::Compact
                   @jobApplication={{application}}
