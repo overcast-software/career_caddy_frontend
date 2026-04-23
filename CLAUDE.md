@@ -8,6 +8,12 @@ Frontend-specific guidance for Claude Code when working in `frontend/`.
 - Tailwind CSS (compiled on first start — slow initial load is normal)
 - `ember-cli-flash` for flash messages
 - Heroicons outline style for all icons
+- `ember-animated` for route/tab transitions. We no longer use
+  `liquid-fire` (removed 2026-04-22) — avoid reaching for it, and
+  don't re-introduce `liquid-outlet`, `liquid-if`, or `transitions.js`.
+  For list entry animations, add the existing `stagger-rows` CSS class
+  to the container (defined in `app/styles/app.css`), which handles
+  per-row fade-up via `nth-child` delays without any JS.
 
 ## Route + Template Pattern
 

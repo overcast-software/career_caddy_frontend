@@ -3,11 +3,14 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
+const TERMINAL = new Set(['completed', 'done', 'failed', 'error']);
+
 export default class QuestionsInlineAnswer extends Component {
   @service store;
   @service flashMessages;
   @service spinner;
   @service poller;
+  @service pollable;
   @service router;
 
   @tracked answerContent = '';
@@ -46,6 +49,17 @@ export default class QuestionsInlineAnswer extends Component {
         this.flashMessages.success(
           this.useAI ? 'Answer submitted to AI.' : 'Answer saved.',
         );
+        // When AI is generating, start polling so the saved record
+        // reloads as the backend transitions pending → completed.
+        // Without this, inline-answer users sat on the list with a
+        // stale pending answer until a manual refresh.
+        if (this.useAI && !TERMINAL.has(saved.status)) {
+          this.pollable.pollIfPending(saved, {
+            label: 'AI is generating your answer…',
+            successMessage: 'AI answer ready.',
+            failedMessage: 'AI answer generation failed.',
+          });
+        }
         if (this.args.onSave) {
           this.args.onSave(saved, question);
         } else {
