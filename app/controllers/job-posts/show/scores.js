@@ -12,9 +12,14 @@ export default class JobPostsShowScoresController extends Controller {
   @service spinner;
   @service flashMessages;
   @service currentUser;
+  @service router;
 
+  queryParams = ['auto'];
+
+  @tracked auto = null;
   @tracked selectedResume = CAREER_DATA_OPTION;
   @tracked instructions = '';
+  _autoScoreHandled = false;
 
   get resumes() {
     const all = this.store.peekAll('resume');
@@ -32,6 +37,45 @@ export default class JobPostsShowScoresController extends Controller {
 
   @action updateInstructions(event) {
     this.instructions = event.target.value;
+  }
+
+  @action autoScoreIfRequested() {
+    console.log('[cc-scores] autoScoreIfRequested', {
+      auto: this.auto,
+      handled: this._autoScoreHandled,
+    });
+    if (this.auto !== '1') return;
+    if (this._autoScoreHandled) return;
+    this._autoScoreHandled = true;
+
+    const jobPost = getOwner(this)
+      .lookup('route:job-posts.show')
+      .modelFor('job-posts.show');
+
+    // If a completed career-data score already exists, surface it —
+    // avoids a redundant LLM call when the user re-runs the chain.
+    const scores = jobPost.hasMany('scores').value() || [];
+    const existing = scores.find(
+      (s) => !s.belongsTo('resume').id() && s.status === 'completed',
+    );
+    if (existing) {
+      console.log('[cc-scores] existing career-data score found', {
+        scoreId: existing.id,
+      });
+      this.flashMessages.success(
+        `Opening your existing career-data score #${existing.id}.`,
+      );
+      this.router.replaceWith(
+        'job-posts.show.scores.show',
+        jobPost.id,
+        existing.id,
+      );
+      return;
+    }
+    console.log('[cc-scores] no existing career-data score; creating…');
+    // Reuse the existing scoreResume action so the UI is consistent with
+    // the manual Score-button path.
+    this.scoreResume();
   }
 
   @action async scoreResume() {

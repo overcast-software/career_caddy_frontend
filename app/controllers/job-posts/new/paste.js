@@ -26,6 +26,11 @@ export default class JobPostsNewPasteController extends Controller {
 
   @action
   installBookmarkletListener() {
+    console.log('[cc-paste] installBookmarkletListener fired', {
+      auto: this.auto,
+      score: this.score,
+      bookmarklet: this.bookmarklet,
+    });
     // Defer off the render pass — _drainPendingPaste can fire flash
     // messages and auto-submit, both of which read+write tracked state
     // that Ember's auto-tracking forbids during a render computation.
@@ -34,6 +39,10 @@ export default class JobPostsNewPasteController extends Controller {
     const handler = (event) => {
       const data = event.data;
       if (!data || data.type !== 'cc-bookmarklet') return;
+      console.log('[cc-paste] received cc-bookmarklet message', {
+        urlLen: (data.url || '').length,
+        textLen: (data.text || '').length,
+      });
       if (typeof data.text === 'string') this.text = data.text;
       if (typeof data.url === 'string') this.url = data.url;
       try {
@@ -42,6 +51,7 @@ export default class JobPostsNewPasteController extends Controller {
         /* ignore */
       }
       if (this._shouldAutoSubmit()) {
+        console.log('[cc-paste] auto-submit path engaged from message handler');
         this._maybeAutoSubmit();
       } else {
         this.flashMessages.info('Filled from bookmarklet — review and submit.');
@@ -56,11 +66,21 @@ export default class JobPostsNewPasteController extends Controller {
     try {
       raw = window.sessionStorage.getItem('cc-pending-paste');
     } catch {
+      console.log('[cc-paste] _drainPendingPaste: sessionStorage unavailable');
       return;
     }
-    if (!raw) return;
+    if (!raw) {
+      console.log(
+        '[cc-paste] _drainPendingPaste: no pending payload in storage',
+      );
+      return;
+    }
     try {
       const payload = JSON.parse(raw);
+      console.log('[cc-paste] _drainPendingPaste: drained payload', {
+        urlLen: (payload.url || '').length,
+        textLen: (payload.text || '').length,
+      });
       if (typeof payload.text === 'string' && payload.text) {
         this.text = payload.text;
       }
@@ -70,8 +90,8 @@ export default class JobPostsNewPasteController extends Controller {
       if (!this._shouldAutoSubmit()) {
         this.flashMessages.info('Filled from bookmarklet — review and submit.');
       }
-    } catch {
-      /* malformed stash — drop it */
+    } catch (e) {
+      console.log('[cc-paste] _drainPendingPaste: JSON.parse failed', e);
     }
     try {
       window.sessionStorage.removeItem('cc-pending-paste');
@@ -79,6 +99,7 @@ export default class JobPostsNewPasteController extends Controller {
       /* ignore */
     }
     if (this._shouldAutoSubmit()) {
+      console.log('[cc-paste] auto-submit path engaged from storage drain');
       this._maybeAutoSubmit();
     }
   }
@@ -90,11 +111,24 @@ export default class JobPostsNewPasteController extends Controller {
   }
 
   _maybeAutoSubmit() {
-    if (this.submitting) return;
-    if (!this.text || !this.text.trim()) return;
+    console.log('[cc-paste] _maybeAutoSubmit', {
+      submitting: this.submitting,
+      textLen: (this.text || '').length,
+    });
+    if (this.submitting) {
+      console.log('[cc-paste] _maybeAutoSubmit: already submitting, skip');
+      return;
+    }
+    if (!this.text || !this.text.trim()) {
+      console.log('[cc-paste] _maybeAutoSubmit: empty text, skip');
+      return;
+    }
     this.flashMessages.info('Auto-submitting pasted content…');
     // Defer a tick so tracked props settle before the fetch kicks off
-    Promise.resolve().then(() => this.submitPaste());
+    Promise.resolve().then(() => {
+      console.log('[cc-paste] _maybeAutoSubmit: invoking submitPaste()');
+      this.submitPaste();
+    });
   }
 
   @action
@@ -134,8 +168,19 @@ export default class JobPostsNewPasteController extends Controller {
   @action
   submitPaste(event) {
     event?.preventDefault?.();
-    if (this.submitting) return;
+    console.log('[cc-paste] submitPaste entered', {
+      submitting: this.submitting,
+      textLen: (this.text || '').length,
+      urlLen: (this.url || '').length,
+      auto: this.auto,
+      score: this.score,
+    });
+    if (this.submitting) {
+      console.log('[cc-paste] submitPaste: already submitting, early return');
+      return;
+    }
     if (!this.canSubmit) {
+      console.log('[cc-paste] submitPaste: canSubmit false, early return');
       this.flashMessages.info('Paste the job-posting text before submitting.');
       return;
     }
@@ -164,24 +209,42 @@ export default class JobPostsNewPasteController extends Controller {
         }),
       )
       .then((response) => {
+        console.log('[cc-paste] POST /scrapes/from-text/ response', {
+          status: response.status,
+          ok: response.ok,
+        });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.json();
       })
       .then((data) => {
         const scrapeId = data?.data?.id;
+        console.log('[cc-paste] scrape created', { scrapeId });
         if (!scrapeId) throw new Error('No scrape id in response');
         this.store.pushPayload('scrape', data);
         const scrape = this.store.peekRecord('scrape', scrapeId);
+        this.flashMessages.info(
+          `Scrape #${scrapeId} queued; polling for completion…`,
+        );
         this.spinner.begin({ label: 'Parsing…' });
         this.pollable.poll(scrape, {
           successMessage: 'Job post created.',
           failedMessage: 'Parse failed — try a cleaner copy of the page.',
           onComplete: (rec) => {
-            this.flashMessages.clearMessages();
             const jobPostId = rec.belongsTo('jobPost')?.id?.();
+            console.log('[cc-paste] poll onComplete', {
+              scrapeId: rec.id,
+              status: rec.status,
+              jobPostId,
+              latestStatusNote: rec.latestStatusNote,
+            });
+            this.flashMessages.clearMessages();
+            this.flashMessages.info(
+              `Scrape #${rec.id} completed; jobPost=${jobPostId ?? 'none'}.`,
+            );
             if (!jobPostId) {
               this.flashMessages.warning(
                 'Parse completed but no JobPost was created. Check the scrape.',
+                { sticky: true },
               );
               this.submitting = false;
               return;
@@ -202,28 +265,60 @@ export default class JobPostsNewPasteController extends Controller {
             }
             this._reset();
             if (this.score === '1') {
-              this._chainScore(jobPostId, isDuplicate);
+              console.log(
+                '[cc-paste] transitioning to job-posts.show.scores with auto=1',
+                { jobPostId },
+              );
+              this.flashMessages.info(
+                'Heading to scores — career-data scoring will start there.',
+              );
+              this.router.transitionTo('job-posts.show.scores', jobPostId, {
+                queryParams: { auto: '1' },
+              });
             } else {
+              console.log('[cc-paste] transitioning to job-posts.show', {
+                jobPostId,
+              });
+              this.flashMessages.info(
+                `Navigating to job post #${jobPostId}.`,
+              );
               this.router.transitionTo('job-posts.show', jobPostId);
             }
           },
-          onFailed: () => {
+          onFailed: (rec) => {
+            console.log('[cc-paste] poll onFailed', {
+              scrapeId: rec?.id,
+              status: rec?.status,
+              latestStatusNote: rec?.latestStatusNote,
+            });
             this.flashMessages.clearMessages();
+            const noteTail = rec?.latestStatusNote
+              ? ` (last note: ${rec.latestStatusNote})`
+              : '';
             this.flashMessages.danger(
-              'Parse failed — try a cleaner copy of the page.',
+              `Parse failed — try a cleaner copy of the page.${noteTail}`,
+              { sticky: true },
             );
             this.submitting = false;
           },
-          onError: () => {
+          onError: (err) => {
+            console.log('[cc-paste] poll onError', err);
             this.flashMessages.clearMessages();
-            this.flashMessages.danger('Lost connection while parsing.');
+            const detail = err?.message ? ` — ${err.message}` : '';
+            this.flashMessages.danger(
+              `Lost connection while parsing${detail}.`,
+              { sticky: true },
+            );
             this.submitting = false;
           },
         });
       })
       .catch((err) => {
+        console.log('[cc-paste] submitPaste catch', err);
         this.flashMessages.clearMessages();
-        this.flashMessages.danger(`Submit failed: ${err.message}`);
+        this.flashMessages.danger(`Submit failed: ${err.message}`, {
+          sticky: true,
+        });
         this.submitting = false;
       });
   }
@@ -234,15 +329,23 @@ export default class JobPostsNewPasteController extends Controller {
     const fallbackTransition = () =>
       this.router.transitionTo('job-posts.show.scores', jobPostId);
 
+    this.flashMessages.info(
+      `Loading job post #${jobPostId} with existing scores…`,
+    );
     this.store
       .findRecord('job-post', jobPostId, { include: 'scores', reload: true })
       .then((jobPost) => {
         const scores = jobPost.hasMany('scores').value() || [];
+        this.flashMessages.info(
+          `Found ${scores.length} existing score(s) on this post.`,
+        );
         const existing = scores.find(
           (s) => !s.belongsTo('resume').id() && s.status === 'completed',
         );
         if (isDuplicate && existing) {
-          this.flashMessages.success('Opening your existing score.');
+          this.flashMessages.success(
+            `Opening your existing score #${existing.id}.`,
+          );
           return this.router.transitionTo(
             'job-posts.show.scores.show',
             jobPostId,
@@ -259,6 +362,9 @@ export default class JobPostsNewPasteController extends Controller {
         newScore
           .save()
           .then((saved) => {
+            this.flashMessages.info(
+              `Score #${saved.id} created (status=${saved.status ?? 'unknown'}).`,
+            );
             if (this.pollable.isTerminal(saved)) {
               this.spinner.end();
               this.router.transitionTo(
@@ -272,6 +378,7 @@ export default class JobPostsNewPasteController extends Controller {
               successMessage: 'Score ready.',
               failedMessage: 'Scoring failed.',
               onComplete: (scoreRec) => {
+                this.flashMessages.success(`Score #${scoreRec.id} ready.`);
                 this.router.transitionTo(
                   'job-posts.show.scores.show',
                   jobPostId,
@@ -279,12 +386,14 @@ export default class JobPostsNewPasteController extends Controller {
                 );
               },
               onFailed: () => {
-                this.flashMessages.danger('Scoring failed.');
+                this.flashMessages.danger('Scoring failed.', { sticky: true });
                 fallbackTransition();
               },
-              onError: () => {
+              onError: (err) => {
+                const detail = err?.message ? ` — ${err.message}` : '';
                 this.flashMessages.danger(
-                  'Lost connection while waiting for score.',
+                  `Lost connection while waiting for score${detail}.`,
+                  { sticky: true },
                 );
                 fallbackTransition();
               },
@@ -295,13 +404,15 @@ export default class JobPostsNewPasteController extends Controller {
             newScore.unloadRecord();
             this.flashMessages.danger(
               e?.errors?.[0]?.detail ?? 'Failed to create score.',
+              { sticky: true },
             );
             fallbackTransition();
           });
       })
-      .catch(() => {
+      .catch((e) => {
         this.flashMessages.danger(
-          'Could not load the job post to chain scoring.',
+          `Could not load the job post to chain scoring${e?.message ? ` — ${e.message}` : ''}.`,
+          { sticky: true },
         );
         fallbackTransition();
       });

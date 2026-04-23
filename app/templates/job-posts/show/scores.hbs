@@ -1,4 +1,7 @@
-<div class="flex items-center gap-2 mb-4">
+<div
+  {{on-insert this.autoScoreIfRequested}}
+  class="flex items-center gap-2 mb-4"
+>
   <div class="flex-1 max-w-xs">
     <PowerSelect
       @options={{this.resumes}}
