@@ -21,6 +21,12 @@ export default class JobPostsNewPasteController extends Controller {
   @tracked text = '';
   @tracked url = '';
   @tracked submitting = false;
+  /**
+   * Set when the API returns 409 duplicate_job_post. Shape:
+   *   { id, title, companyName }
+   * Drives the "Open existing" / "Re-parse anyway" banner above the form.
+   */
+  @tracked duplicate = null;
 
   _bookmarkletListener = null;
 
@@ -152,7 +158,7 @@ export default class JobPostsNewPasteController extends Controller {
   }
 
   @action
-  submitPaste(event) {
+  submitPaste(event, { force = false } = {}) {
     event?.preventDefault?.();
     if (this.submitting) {
       return;
@@ -163,6 +169,7 @@ export default class JobPostsNewPasteController extends Controller {
     }
 
     this.submitting = true;
+    this.duplicate = null;
     this.flashMessages.info('Parsing the pasted content…');
 
     const refreshIfNeeded =
@@ -173,6 +180,7 @@ export default class JobPostsNewPasteController extends Controller {
     const body = { text: this.text };
     const link = this.url.trim();
     if (link) body.link = link;
+    if (force) body.force = true;
 
     refreshIfNeeded
       .then(() =>
@@ -186,10 +194,30 @@ export default class JobPostsNewPasteController extends Controller {
         }),
       )
       .then((response) => {
+        if (response.status === 409) {
+          // Bail before the agent call is dispatched. parse() the body
+          // so we can show the user which post they collided with.
+          return response.json().then((data) => {
+            const meta = data?.errors?.[0]?.meta ?? {};
+            this.duplicate = {
+              id: meta.job_post_id,
+              title: meta.title,
+              companyName: meta.company_name,
+            };
+            this.flashMessages.clearMessages();
+            this.flashMessages.warning(
+              `Already in your library — pick "Open existing" or "Re-parse anyway".`,
+              { sticky: true },
+            );
+            this.submitting = false;
+            return null;
+          });
+        }
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.json();
       })
       .then((data) => {
+        if (!data) return; // 409 short-circuit
         const scrapeId = data?.data?.id;
         if (!scrapeId) throw new Error('No scrape id in response');
         this.store.pushPayload('scrape', data);
@@ -372,5 +400,23 @@ export default class JobPostsNewPasteController extends Controller {
     this.text = '';
     this.url = '';
     this.submitting = false;
+    this.duplicate = null;
+  }
+
+  @action
+  openExistingDuplicate() {
+    if (!this.duplicate?.id) return;
+    const id = this.duplicate.id;
+    this._reset();
+    this.flashMessages.clearMessages();
+    this.router.transitionTo('job-posts.show', id);
+  }
+
+  @action
+  forceReparseDuplicate() {
+    if (!this.duplicate) return;
+    this.duplicate = null;
+    this.flashMessages.clearMessages();
+    this.submitPaste(undefined, { force: true });
   }
 }

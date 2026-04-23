@@ -1,3 +1,44 @@
+{{#if this.duplicate}}
+  <div
+    class="mb-6 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-100"
+    data-test-paste-duplicate
+  >
+    <p class="font-semibold">
+      A job post for this URL already exists.
+    </p>
+    {{#if this.duplicate.title}}
+      <p class="mt-1">
+        <span class="font-medium">{{this.duplicate.title}}</span>
+        {{#if this.duplicate.companyName}}
+          at
+          <span class="font-medium">{{this.duplicate.companyName}}</span>
+        {{/if}}
+        — re-parsing would overwrite the existing data and burn an LLM
+        call. Pick one:
+      </p>
+    {{else}}
+      <p class="mt-1">
+        Re-parsing would overwrite the existing data and burn an LLM call.
+        Pick one:
+      </p>
+    {{/if}}
+    <div class="mt-3 flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="btn primary"
+        data-test-paste-duplicate-open
+        {{on "click" this.openExistingDuplicate}}
+      >Open job post #{{this.duplicate.id}}</button>
+      <button
+        type="button"
+        class="btn"
+        data-test-paste-duplicate-force
+        {{on "click" this.forceReparseDuplicate}}
+      >Re-parse anyway</button>
+    </div>
+  </div>
+{{/if}}
+
 <form
   class="space-y-6"
   {{on-insert this.installBookmarkletListener}}
