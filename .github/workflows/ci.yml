@@ -8,8 +8,13 @@ on:
   pull_request: {}
 
 concurrency:
+  # On main we let older runs finish — when two PRs merge in close
+  # succession, the first merge's CI would otherwise be cancelled by
+  # the second, and "cancelled" emails show up looking like failures
+  # even though nothing's wrong. On feature branches and PRs, cancel
+  # older in-flight runs to save compute when the user pushes fixups.
   group: ci-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
 
 jobs:
   lint:
