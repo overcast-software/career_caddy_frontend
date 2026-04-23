@@ -179,6 +179,9 @@ Router.map(function () {
     this.route('edit', {
       path: '/:scrape_id/edit',
     });
+    this.route('graph', {
+      path: '/:scrape_id/graph',
+    });
   });
   this.route('users', function () {
     this.route('show', {
@@ -253,6 +256,7 @@ Router.map(function () {
       this.route('show', { path: '/:scrape_profile_id' });
     });
     this.route('ai-models');
+    this.route('scrape-graph');
   });
   this.route('career-data', function () {});
   this.route('reports', function () {

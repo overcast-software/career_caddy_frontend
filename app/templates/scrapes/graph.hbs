@@ -1,0 +1,79 @@
+{{page-title "Scrape graph trace"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="scrapes" class="nav-link">Scrapes</LinkTo>
+    <LinkTo
+      @route="scrapes.show"
+      @model={{this.model.scrapeId}}
+      class="nav-link"
+    >Detail</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="space-y-6">
+      <header>
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          Scrape #{{this.model.scrapeId}}
+          graph trace
+        </h1>
+        {{#if this.model.chain.length}}
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Chain (via
+            <code>source_scrape</code>):
+            {{#each this.model.chain as |link|}}
+              <LinkTo @route="scrapes.show" @model={{link.id}}>
+                #{{link.id}}
+                ({{link.source}})
+              </LinkTo>
+              {{#unless @last}}
+                →
+              {{/unless}}
+            {{/each}}
+          </p>
+        {{/if}}
+      </header>
+
+      <section
+        class="rounded-md border border-gray-200 p-4 dark:border-gray-700"
+      >
+        <h2 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
+          State diagram
+        </h2>
+        <ScrapeGraph::Mermaid @source={{this.model.mermaid}} />
+      </section>
+
+      <section
+        class="rounded-md border border-gray-200 p-4 dark:border-gray-700"
+      >
+        <h2 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
+          Transitions ({{this.model.trace.length}})
+        </h2>
+        {{#if this.model.trace.length}}
+          <ol
+            class="space-y-1 text-sm text-gray-700 dark:text-gray-300 font-mono"
+          >
+            {{#each this.model.trace as |row|}}
+              <li class="flex gap-3">
+                <span class="w-8 shrink-0 text-right text-gray-500">
+                  #{{row.scrape_id}}</span>
+                <span
+                  class="w-48 shrink-0 font-semibold"
+                >{{row.graph_node}}</span>
+                <span class="w-48 shrink-0 text-gray-500">→
+                  {{or row.graph_payload.routed_to "?"}}</span>
+                <span class="w-16 shrink-0 text-right text-gray-400">
+                  {{or row.graph_payload.duration_ms 0}}ms
+                </span>
+                {{#if row.note}}
+                  <span class="text-gray-500">{{row.note}}</span>
+                {{/if}}
+              </li>
+            {{/each}}
+          </ol>
+        {{else}}
+          <p class="text-sm text-gray-500">No graph transitions recorded for
+            this scrape — probably ran under legacy (non-graph) mode.</p>
+        {{/if}}
+      </section>
+    </div>
+  </:main>
+</RouteLayout>
