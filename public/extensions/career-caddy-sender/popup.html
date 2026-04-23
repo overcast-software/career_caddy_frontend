@@ -57,11 +57,44 @@
       .status.error {
         color: #b91c1c;
       }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #374151;
+      }
+      .toggle-row input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+      }
+      .version {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        font-size: 10px;
+        color: #9ca3af;
+        font-variant-numeric: tabular-nums;
+      }
     </style>
   </head>
   <body>
+    <span id="version" class="version"></span>
     <h1>Send this page to Career Caddy</h1>
     <button id="send">📎 Send to Paste form</button>
+    <div class="toggle-row">
+      <input id="auto-submit" type="checkbox" />
+      <label for="auto-submit" style="margin: 0"
+        >Auto-submit without review</label
+      >
+    </div>
+    <div class="toggle-row">
+      <input id="auto-score" type="checkbox" />
+      <label for="auto-score" style="margin: 0"
+        >Also score against career data</label
+      >
+    </div>
     <label for="origin">Career Caddy origin</label>
     <input id="origin" type="url" placeholder="https://careercaddy.online" />
     <div class="status" id="status"></div>

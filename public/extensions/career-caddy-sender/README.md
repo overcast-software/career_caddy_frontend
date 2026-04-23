@@ -1,13 +1,46 @@
-# Career Caddy Sender
+# Career Caddy Sender — v0.2.5
 
 A tiny browser extension: click the toolbar button on any job posting page and
 the page's URL + visible text land in Career Caddy's `/job-posts/new/paste`
 form, ready for review.
 
+## Version history
+
+- **0.2.5** — Default origin flipped back to `https://careercaddy.online` for
+  shipped builds. Still overridable per-browser via the popup origin field.
+- **0.2.4** — Default origin is now `http://localhost:4200` (dev). Override
+  to `https://careercaddy.online` in the popup's origin field when you're
+  ready to point it at prod.
+- **0.2.3** — Auto-submit and Also-score default to ON on fresh install.
+  Temporary add-ons lose storage on Firefox restart / uninstall; this keeps
+  reinstalls useful without needing to re-check the boxes each time.
+- **0.2.2** — Popup shows the installed version in the top-right corner so
+  you can confirm at a glance which build is running.
+- **0.2.1** — Origin field now saves on every keystroke (not just on
+  blur), so values persist if you click Send without tabbing out.
+  Send button also defensively writes all settings before dispatching.
+- **0.2.0** — Popup adds "Auto-submit without review" and "Also score against
+  career data" checkboxes. Selections are remembered per browser. Off by
+  default; check them to chain paste → submit → score in one click.
+- **0.1.0** — Initial release. Grab page, open the paste form, fill via
+  postMessage handshake.
+
+## Upgrading
+
+Re-download the zip, then:
+- **Firefox**: `about:debugging` → your Temporary Extension → **Remove** → re-load.
+- **Chrome**: `chrome://extensions` → find "Career Caddy Sender" → **Remove**,
+  unzip the new archive, **Load unpacked** pointing at the new folder.
+
 Same result as the in-app bookmarklet, but it also works on CSP-strict sites
 (LinkedIn, Greenhouse, GitHub) where `javascript:` bookmarklets are blocked.
 
 ## Install — Firefox
+
+Two paths — pick based on whether you want the extension to survive a
+browser restart.
+
+### Temporary (works on regular Firefox)
 
 1. Open `about:debugging#/runtime/this-firefox`.
 2. Click **Load Temporary Add-on…**.
@@ -15,9 +48,23 @@ Same result as the in-app bookmarklet, but it also works on CSP-strict sites
 4. A grey puzzle-piece icon appears in the toolbar. Right-click it → **Pin to
    Toolbar** for easier access.
 
-Note: "temporary" means it's removed on Firefox restart. To persist, we'd need
-to sign the extension through addons.mozilla.org. Drop a note in the repo if
-that's worth doing.
+"Temporary" means it's removed on Firefox restart — you'd re-load each session.
+
+### Persistent via `.xpi` (Developer Edition / Nightly / ESR)
+
+Regular Firefox (Release/Beta) enforces signature verification and will reject
+unsigned add-ons no matter what. On **Developer Edition, Nightly, or ESR**:
+
+1. Open `about:config` and set `xpinstall.signatures.required` → `false`.
+2. Download the `.xpi` from the download button on the paste page (or directly
+   at `/extensions/career-caddy-sender.xpi`).
+3. Drag the `.xpi` onto a Firefox window (or `about:addons` → gear →
+   **Install Add-on From File**).
+4. Confirm the install prompt — the extension persists across restarts.
+
+If you want this on regular Firefox too, the path forward is signing through
+addons.mozilla.org (self-distributed `.xpi`). Drop a note in the repo if worth
+setting up.
 
 ## Install — Chrome / Chromium / Brave / Edge
 
