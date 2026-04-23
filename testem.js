@@ -9,6 +9,9 @@ module.exports = {
   browser_args: {
     Firefox: {
       ci: ['-headless'],
+      // Run headless in dev too — a headed browser steals focus during
+      // `npm test`. Override with BROWSER_ARGS='' if you need a real window.
+      dev: ['-headless'],
     },
   },
 };

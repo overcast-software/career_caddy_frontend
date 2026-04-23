@@ -18,7 +18,14 @@ setupDeprecationWorkflow({
      *
      * And copy the handlers here
      */
-    /* example: */
-    { handler: 'silence' },
+    { handler: 'silence', matchId: 'importing-inject-from-ember-service' },
+    { handler: 'silence', matchId: 'deprecate-import-view-utils-from-ember' },
+    {
+      handler: 'silence',
+      matchId: 'deprecate-import--set-classic-decorator-from-ember',
+    },
+    { handler: 'silence', matchId: 'deprecate-import-testing-from-ember' },
+    { handler: 'silence', matchId: 'warp-drive.deprecate-tracking-package' },
+    { handler: 'silence', matchId: 'ember-data:deprecate-legacy-imports' },
   ],
 });

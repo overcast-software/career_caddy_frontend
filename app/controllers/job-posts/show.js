@@ -2,6 +2,28 @@ import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import move from 'ember-animated/motions/move';
+import { easeOut } from 'ember-animated/easings/cosine';
+
+// Left-to-right tab order on /job-posts/:id. Keep in sync with
+// components/job-posts/tabs.hbs — if the tab strip reorders, this must
+// too or the slide direction inverts for the affected pair.
+const TAB_ORDER = [
+  'job-posts.show.job-applications',
+  'job-posts.show.questions',
+  'job-posts.show.scores',
+  'job-posts.show.cover-letters',
+  'job-posts.show.scrapes',
+  'job-posts.show.summaries',
+];
+
+function tabPrefix(routeName) {
+  if (!routeName) return null;
+  return (
+    TAB_ORDER.find((r) => routeName === r || routeName.startsWith(r + '.')) ??
+    null
+  );
+}
 
 export default class JobPostsShowController extends Controller {
   @service store;
@@ -15,6 +37,54 @@ export default class JobPostsShowController extends Controller {
   @tracked scrapeSubmitting = false;
   @tracked scoreSubmitting = false;
   @tracked descriptionExpanded = false;
+  @tracked tabForward = true;
+  @tracked activeTabKey = null;
+
+  constructor() {
+    super(...arguments);
+    this.activeTabKey = tabPrefix(this.router.currentRouteName);
+    // ember-animated invokes the transition generator without a `this`
+    // binding (template `use=this.tabTransition` passes it unbound).
+    this.tabTransition = this.tabTransition.bind(this);
+    this._routeDidChange = () => {
+      // Normalize nested routes (e.g. job-applications.index) to their tab
+      // prefix so child routes still trigger the tab-slide.
+      const current = tabPrefix(this.router.currentRouteName);
+      if (!current || current === this.activeTabKey) return;
+      const fromIdx = TAB_ORDER.indexOf(this.activeTabKey);
+      const toIdx = TAB_ORDER.indexOf(current);
+      if (fromIdx !== -1 && toIdx !== -1) {
+        this.tabForward = toIdx > fromIdx;
+      }
+      this.activeTabKey = current;
+    };
+    this.router.on('routeDidChange', this._routeDidChange);
+  }
+
+  willDestroy() {
+    super.willDestroy(...arguments);
+    this.router.off('routeDidChange', this._routeDidChange);
+  }
+
+  // Directional slide between tabs. Forward (earlier → later) slides the
+  // new pane in from the right; backward slides in from the left.
+  *tabTransition({ insertedSprites, removedSprites }) {
+    const forward = this.tabForward;
+    const motions = [];
+    for (const sprite of removedSprites) {
+      const dx = forward
+        ? -sprite.initialBounds.width
+        : sprite.initialBounds.width;
+      sprite.endTranslatedBy(dx, 0);
+      motions.push(move(sprite, { easing: easeOut, duration: 350 }));
+    }
+    for (const sprite of insertedSprites) {
+      const dx = forward ? sprite.finalBounds.width : -sprite.finalBounds.width;
+      sprite.startTranslatedBy(dx, 0);
+      motions.push(move(sprite, { easing: easeOut, duration: 350 }));
+    }
+    yield Promise.all(motions);
+  }
 
   @action
   toggleDescription() {

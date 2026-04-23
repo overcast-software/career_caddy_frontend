@@ -59,18 +59,23 @@
             >
               {{if this.scrapeSubmitting "Queuing…" "Run scrape"}}
             </button>
-            <button
-              type="button"
-              class="btn small primary"
-              disabled={{or this.scrapeSubmitting this.scoreSubmitting}}
-              {{on "click" this.scrapeAndScore}}
-            >
-              {{if
-                this.scoreSubmitting
-                "Scoring…"
-                (if this.scrapeSubmitting "Scraping…" "Scrape & Score")
-              }}
-            </button>
+            {{! Only surface Scrape & Score on stubs — a full-description
+                post already has enough to score in isolation, and the
+                combined action rescrapes the whole page for no gain. }}
+            {{#if this.model.isStub}}
+              <button
+                type="button"
+                class="btn small primary"
+                disabled={{or this.scrapeSubmitting this.scoreSubmitting}}
+                {{on "click" this.scrapeAndScore}}
+              >
+                {{if
+                  this.scoreSubmitting
+                  "Scoring…"
+                  (if this.scrapeSubmitting "Scraping…" "Scrape & Score")
+                }}
+              </button>
+            {{/if}}
           {{/if}}
           <button
             type="button"
@@ -118,14 +123,19 @@
 
     <Panel::Card>
       <JobPosts::Tabs @jobPost={{this.model}} />
-      {{! LiquidOutlet's built-in LiquidContainer animates its height
-          from the outgoing tab's size to the incoming tab's size so
-          the pane grows/shrinks smoothly. The slide transition
-          registered in app/transitions.js then runs the incoming
-          content in from the side. No explicit min-height so the
-          container is always driven by actual content. }}
-      <div role="tabpanel" class="mt-4">
-        <LiquidOutlet @class="tab-outlet" />
+      <div role="tabpanel" class="mt-4 relative overflow-hidden">
+        <AnimatedContainer class="w-full">
+          {{#animated-each
+            (array this.activeTabKey)
+            key="@identity"
+            use=this.tabTransition
+            duration=350
+          }}
+            <div class="w-full">
+              {{outlet}}
+            </div>
+          {{/animated-each}}
+        </AnimatedContainer>
       </div>
     </Panel::Card>
   </:main>

@@ -24,6 +24,42 @@ export default class ApplicationRoute extends Route {
   @service session;
   @service store;
 
+  constructor() {
+    super(...arguments);
+    this._installBookmarkletStash();
+  }
+
+  _installBookmarkletStash() {
+    if (typeof window === 'undefined') return;
+    if (window.__ccBookmarkletStashInstalled) return;
+    window.__ccBookmarkletStashInstalled = true;
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data || data.type !== 'cc-bookmarklet') return;
+      try {
+        window.sessionStorage.setItem(
+          'cc-pending-paste',
+          JSON.stringify({
+            url: typeof data.url === 'string' ? data.url : '',
+            text: typeof data.text === 'string' ? data.text : '',
+            at: Date.now(),
+          }),
+        );
+      } catch {
+        /* sessionStorage blocked — nothing we can do */
+      }
+      try {
+        event.source?.postMessage('cc-bookmarklet-ack', event.origin || '*');
+      } catch {
+        /* best-effort ack */
+      }
+      const onPaste = this.router.currentRouteName === 'job-posts.new.paste';
+      if (!onPaste && this.session.isAuthenticated) {
+        this.router.transitionTo('job-posts.new.paste');
+      }
+    });
+  }
+
   async beforeModel(transition) {
     // Set up ESA's event handlers exactly once — calling setup() multiple times
     // registers duplicate listeners on the internal event emitter.

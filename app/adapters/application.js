@@ -20,6 +20,16 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
     return {};
   }
 
+  // Integration tests mount components without a routing microlib;
+  // transitionTo in that context throws on this._routerMicrolib. Swallow.
+  _safeTransitionTo(route) {
+    try {
+      this.router.transitionTo(route);
+    } catch {
+      // no router in integration test env
+    }
+  }
+
   async ajax(url, method, options = {}) {
     // No auth → no API call. Extract resource from the URL and redirect.
     if (!this.session.isAuthenticated) {
@@ -43,9 +53,9 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
         this.flashMessages.info(
           'Looking for your data? Sign in using the button in the top right.',
         );
-        this.router.transitionTo(docsRoute);
+        this._safeTransitionTo(docsRoute);
       } else {
-        this.router.transitionTo('login');
+        this._safeTransitionTo('login');
       }
       return { data: [] };
     }
@@ -73,7 +83,7 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
           }
         }
         await this.session.invalidate();
-        this.router.transitionTo('login');
+        this._safeTransitionTo('login');
       }
       if (error.status === 403) {
         this.flashMessages.warning(

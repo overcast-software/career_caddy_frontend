@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Career Caddy Sender</title>
+    <style>
+      body {
+        font: 13px system-ui, sans-serif;
+        width: 280px;
+        margin: 0;
+        padding: 14px;
+        color: #1f2937;
+      }
+      h1 {
+        font-size: 13px;
+        font-weight: 600;
+        margin: 0 0 8px;
+      }
+      button {
+        width: 100%;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid #4f46e5;
+        background: #eef2ff;
+        color: #4338ca;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #e0e7ff;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: wait;
+      }
+      label {
+        display: block;
+        font-size: 11px;
+        color: #6b7280;
+        margin-top: 10px;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 5px 7px;
+        font-size: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+      }
+      .status {
+        margin-top: 8px;
+        color: #6b7280;
+        min-height: 1.2em;
+        font-size: 12px;
+      }
+      .status.error {
+        color: #b91c1c;
+      }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #374151;
+      }
+      .toggle-row input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+      }
+      .version {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        font-size: 10px;
+        color: #9ca3af;
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <span id="version" class="version"></span>
+    <h1>Send this page to Career Caddy</h1>
+    <button id="send">📎 Send to Paste form</button>
+    <div class="toggle-row">
+      <input id="auto-submit" type="checkbox" />
+      <label for="auto-submit" style="margin: 0"
+        >Auto-submit without review</label
+      >
+    </div>
+    <div class="toggle-row">
+      <input id="auto-score" type="checkbox" />
+      <label for="auto-score" style="margin: 0"
+        >Also score against career data</label
+      >
+    </div>
+    <label for="origin">Career Caddy origin</label>
+    <input id="origin" type="url" placeholder="https://careercaddy.online" />
+    <div class="status" id="status"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>

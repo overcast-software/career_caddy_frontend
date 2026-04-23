@@ -120,7 +120,12 @@ Router.map(function () {
         this.route('summaries');
       },
     );
-    this.route('new');
+    this.route('new', function () {
+      this.route('manual');
+      this.route('scrape');
+      this.route('paste');
+    });
+    // Legacy URLs — redirect to the new landing's tabs.
     this.route('scrape');
     this.route('paste');
 
@@ -173,6 +178,9 @@ Router.map(function () {
 
     this.route('edit', {
       path: '/:scrape_id/edit',
+    });
+    this.route('graph', {
+      path: '/:scrape_id/graph',
     });
   });
   this.route('users', function () {
@@ -248,6 +256,7 @@ Router.map(function () {
       this.route('show', { path: '/:scrape_profile_id' });
     });
     this.route('ai-models');
+    this.route('scrape-graph');
   });
   this.route('career-data', function () {});
   this.route('reports', function () {

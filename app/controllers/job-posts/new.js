@@ -1,96 +1,97 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
-import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import move from 'ember-animated/motions/move';
+import opacity from 'ember-animated/motions/opacity';
+import { easeOut } from 'ember-animated/easings/cosine';
+
+// Left-to-right tab order on /job-posts/new. Keep aligned with the
+// tab strip in templates/job-posts/new.hbs — reorder one, reorder both
+// or the slide direction inverts.
+const TAB_ORDER = [
+  'job-posts.new.manual',
+  'job-posts.new.scrape',
+  'job-posts.new.paste',
+];
+
+const DESCRIPTORS = {
+  'job-posts.new.manual':
+    'Enter the details by hand when you already know the title, company, and description — fastest when the posting is in your head.',
+  'job-posts.new.scrape':
+    'Hand us a URL and a spare desktop somewhere on the network will open the page in a real browser and extract the posting. Flaky on sites that block bots.',
+  'job-posts.new.paste':
+    'Open the posting in another tab, select-all + copy, paste below. Works on LinkedIn and other scrape-resistant sites. Optionally include the URL so the post keeps a link.',
+};
+
+function tabPrefix(routeName) {
+  if (!routeName) return null;
+  return (
+    TAB_ORDER.find((r) => routeName === r || routeName.startsWith(r + '.')) ??
+    null
+  );
+}
+
 export default class JobPostsNewController extends Controller {
-  @service store;
-  @service flashMessages;
   @service router;
 
-  @tracked selectedCompany = null;
+  @tracked tabForward = true;
+  @tracked activeTabKey = null;
 
-  @action
-  async searchCompanies(term) {
-    const params = term ? { 'filter[query]': term } : {};
-    const results = await this.store.query('company', params);
-    return results.slice();
-  }
-
-  @action
-  updateField(field, event) {
-    this.model[field] = event.target.value;
-  }
-
-  @action updateCompany(company) {
-    this.model.company = company;
-    this.selectedCompany = company;
-  }
-
-  @action async submitDelete() {
-    try {
-      await this.model.destroyRecord();
-      this.flashMessages.success('Job post deleted.');
-    } catch (error) {
-      if (error?.status !== 403) {
-        this.flashMessages.danger('Failed to delete job post.');
+  constructor() {
+    super(...arguments);
+    this.activeTabKey =
+      tabPrefix(this.router.currentRouteName) ?? 'job-posts.new.paste';
+    this.tabTransition = this.tabTransition.bind(this);
+    this.descriptorTransition = this.descriptorTransition.bind(this);
+    this._routeDidChange = () => {
+      const current = tabPrefix(this.router.currentRouteName);
+      if (!current || current === this.activeTabKey) return;
+      const fromIdx = TAB_ORDER.indexOf(this.activeTabKey);
+      const toIdx = TAB_ORDER.indexOf(current);
+      if (fromIdx !== -1 && toIdx !== -1) {
+        this.tabForward = toIdx > fromIdx;
       }
-    }
+      this.activeTabKey = current;
+    };
+    this.router.on('routeDidChange', this._routeDidChange);
   }
 
-  @action async addCompanyToJobPost(companyName) {
-    const company = this.store.createRecord('company', { name: companyName });
-    try {
-      await company.save();
-      this.selectedCompany = company;
-      this.model.company = company;
-      this.flashMessages.success('Company created: ' + company.name + '.');
-    } catch (error) {
-      if (error?.status !== 403) {
-        this.flashMessages.danger('Failed to create company.');
-      }
-    }
+  willDestroy() {
+    super.willDestroy(...arguments);
+    this.router.off('routeDidChange', this._routeDidChange);
   }
 
-  @action async submitJobPost(event) {
-    event.preventDefault();
-    try {
-      const record = await this.model.save();
-      this.flashMessages.success('Job post saved.');
-      this.router.transitionTo('job-posts.show.job-applications', record);
-    } catch (error) {
-      if (error?.status !== 403) {
-        this.flashMessages.danger(
-          error?.errors?.[0]?.detail ?? 'Failed to save job post.',
-        );
-      }
-    }
+  get activeDescriptor() {
+    return {
+      key: this.activeTabKey,
+      text: DESCRIPTORS[this.activeTabKey] ?? '',
+    };
   }
 
-  @action async createAndApply(event) {
-    event.preventDefault();
-    try {
-      const record = await this.model.save();
-      this.router.transitionTo('job-posts.show.job-applications.new', record);
-    } catch (error) {
-      if (error?.status !== 403) {
-        this.flashMessages.danger(
-          error?.errors?.[0]?.detail ?? 'Failed to save job post.',
-        );
-      }
+  *tabTransition({ insertedSprites, removedSprites }) {
+    const forward = this.tabForward;
+    const motions = [];
+    for (const sprite of removedSprites) {
+      const dx = forward
+        ? -sprite.initialBounds.width
+        : sprite.initialBounds.width;
+      sprite.endTranslatedBy(dx, 0);
+      motions.push(move(sprite, { easing: easeOut, duration: 350 }));
     }
+    for (const sprite of insertedSprites) {
+      const dx = forward ? sprite.finalBounds.width : -sprite.finalBounds.width;
+      sprite.startTranslatedBy(dx, 0);
+      motions.push(move(sprite, { easing: easeOut, duration: 350 }));
+    }
+    yield Promise.all(motions);
   }
 
-  @action async createAndScore(event) {
-    event.preventDefault();
-    try {
-      const record = await this.model.save();
-      this.router.transitionTo('job-posts.show.scores', record);
-    } catch (error) {
-      if (error?.status !== 403) {
-        this.flashMessages.danger(
-          error?.errors?.[0]?.detail ?? 'Failed to save job post.',
-        );
-      }
-    }
+  *descriptorTransition({ insertedSprites, removedSprites }) {
+    yield Promise.all([
+      ...insertedSprites.map((s) =>
+        opacity(s, { from: 0, to: 1, duration: 220 }),
+      ),
+      ...removedSprites.map((s) => opacity(s, { to: 0, duration: 160 })),
+    ]);
   }
 }

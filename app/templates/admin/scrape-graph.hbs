@@ -1,0 +1,71 @@
+{{page-title "Scrape Graph"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="admin" class="nav-link">Admin</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="space-y-6">
+      <header class="flex items-center justify-between">
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          Scrape Graph
+        </h1>
+        <button type="button" class="btn" {{on "click" this.copyMermaid}}>📋
+          Copy mermaid source</button>
+      </header>
+
+      <p class="text-sm text-gray-600 dark:text-gray-400">
+        Live shape of the scrape-graph state machine. The same mermaid source is
+        served at
+        <code>/api/v1/admin/graph-mermaid/</code>
+        (append
+        <code>?as=text</code>
+        for plain-text). For per-scrape traces, open a scrape and click "Graph"
+        — or hit
+        <code>/scrapes/:id/graph</code>
+        directly.
+      </p>
+
+      <section
+        class="rounded-md border border-gray-200 p-4 dark:border-gray-700"
+      >
+        <h2 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
+          State diagram
+        </h2>
+        <ScrapeGraph::Force @structure={{this.model.structure}} />
+      </section>
+
+      <section
+        class="rounded-md border border-gray-200 p-4 dark:border-gray-700"
+      >
+        <h2 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
+          Edge traffic (last 7 days)
+        </h2>
+        {{#if this.model.aggregate.length}}
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="text-left text-xs uppercase text-gray-500">
+                <th class="pb-2 pr-4">From</th>
+                <th class="pb-2 pr-4">To</th>
+                <th class="pb-2 pr-4 text-right">Count</th>
+                <th class="pb-2 pr-4 text-right">Success rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each this.model.aggregate as |edge|}}
+                <tr class="border-t border-gray-200 dark:border-gray-700">
+                  <td class="py-1 pr-4 font-mono">{{edge.from}}</td>
+                  <td class="py-1 pr-4 font-mono">{{edge.to}}</td>
+                  <td class="py-1 pr-4 text-right">{{edge.count}}</td>
+                  <td class="py-1 pr-4 text-right">{{edge.success_rate}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{else}}
+          <p class="text-sm text-gray-500">No graph traffic yet — shadow mode
+            hasn't run any scrapes, or the feature flag is still off.</p>
+        {{/if}}
+      </section>
+    </div>
+  </:main>
+</RouteLayout>
