@@ -105,7 +105,6 @@ export default class ChatService extends Service {
     try {
       await this.session.ensureFreshToken(90);
 
-      console.log('[chat] sending page_context:', this.currentPage);
       const url = `${buildBaseUrl()}chat/`;
       const response = await fetch(url, {
         method: 'POST',

@@ -21,6 +21,11 @@
       class="btn"
       {{on "click" (fn this.parseScrape this.model)}}
     >Parse</button>
+    <LinkTo
+      @route="scrapes.graph"
+      @model={{this.model.id}}
+      class="btn"
+    >Graph</LinkTo>
   </:subnav>
   <:main>
     <Scrapes::Item @scrape={{this.model}} />

@@ -5,11 +5,13 @@ export default class AdminScrapeGraphRoute extends Route {
   @service api;
 
   async model() {
-    const [mermaid, aggregate] = await Promise.all([
+    const [structure, mermaid, aggregate] = await Promise.all([
+      this._fetch('/api/v1/admin/graph-structure/').catch(() => ({})),
       this._fetch('/api/v1/admin/graph-mermaid/').catch(() => ({})),
       this._fetch('/api/v1/admin/graph-aggregate/?since=7d').catch(() => ({})),
     ]);
     return {
+      structure: structure?.data || { nodes: [], edges: [] },
       mermaid: mermaid?.data?.mermaid || '',
       aggregate: aggregate?.data?.edges || [],
       meta: aggregate?.meta || {},

@@ -40,10 +40,6 @@ export default class JobPostsShowScoresController extends Controller {
   }
 
   @action autoScoreIfRequested() {
-    console.log('[cc-scores] autoScoreIfRequested (deferring)', {
-      auto: this.auto,
-      handled: this._autoScoreHandled,
-    });
     // Runs from on-insert (render pass). flashMessages.info + store
     // reads below would violate Ember's auto-tracking 'no writes during
     // read-in-same-computation' rule. Defer to a microtask so render
@@ -67,9 +63,6 @@ export default class JobPostsShowScoresController extends Controller {
       (s) => !s.belongsTo('resume').id() && s.status === 'completed',
     );
     if (existing) {
-      console.log('[cc-scores] existing career-data score found', {
-        scoreId: existing.id,
-      });
       this.flashMessages.success(
         `Opening your existing career-data score #${existing.id}.`,
       );
@@ -80,7 +73,6 @@ export default class JobPostsShowScoresController extends Controller {
       );
       return;
     }
-    console.log('[cc-scores] no existing career-data score; creating…');
     // Reuse the existing scoreResume action so the UI is consistent with
     // the manual Score-button path.
     this.scoreResume();
