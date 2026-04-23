@@ -116,12 +116,17 @@ export default class AnswersForm extends Component {
   }
 
   @action async toggleFavorite(answer) {
-    // Previously only toggled the local attr without persisting — the
-    // star flipped state visually and then reverted on reload. Persist
-    // immediately (with rollback on failure) so the button works as a
-    // user expects without requiring a subsequent form save.
+    // On /answers/new the record isn't persisted yet — calling .save()
+    // here would POST an empty/invalid answer (validation usually kicks
+    // it back), the catch branch rolled favorite to false, and the
+    // user's toggle never survived the form submit. On /answers/edit
+    // the record IS persisted, so the star should flip-and-save
+    // immediately for the "no-form-submit needed" feel.
     const previous = answer.favorite;
     answer.favorite = !previous;
+    if (answer.isNew) {
+      return;
+    }
     try {
       await answer.save();
     } catch (error) {

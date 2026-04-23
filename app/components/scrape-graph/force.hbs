@@ -1,0 +1,125 @@
+{{! template-lint-disable no-inline-styles }}
+<div class="cc-scrape-graph-force">
+  <div class="mb-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+    <div class="flex flex-wrap items-center gap-3">
+      <span
+        class="font-semibold text-gray-700 dark:text-gray-300"
+      >Groups:</span>
+      <span class="inline-flex items-center gap-1">
+        <span
+          class="inline-block size-3 rounded-full"
+          style="background:#dbeafe;border:1px solid #3b82f6"
+        ></span>
+        Scrape
+      </span>
+      <span class="inline-flex items-center gap-1">
+        <span
+          class="inline-block size-3 rounded-full"
+          style="background:#fee2e2;border:1px solid #ef4444"
+        ></span>
+        Obstacle
+      </span>
+      <span class="inline-flex items-center gap-1">
+        <span
+          class="inline-block size-3 rounded-full"
+          style="background:#dcfce7;border:1px solid #22c55e"
+        ></span>
+        Extract
+      </span>
+      <span class="inline-flex items-center gap-1">
+        <span
+          class="inline-block size-3 rounded-full"
+          style="background:#e5e7eb;border:1px solid #6b7280"
+        ></span>
+        Terminal
+      </span>
+    </div>
+
+    <div
+      class="flex flex-wrap items-center gap-3 border-l border-gray-200 pl-4 dark:border-gray-700"
+    >
+      <span class="font-semibold text-gray-700 dark:text-gray-300">Path:</span>
+      <span class="inline-flex items-center gap-1">
+        <span
+          class="inline-block size-3 rounded-full"
+          style="background:#3b82f6;border:1px solid #3b82f6"
+        ></span>
+        Visited node
+      </span>
+      <span class="inline-flex items-center gap-1">
+        <span
+          class="inline-block h-0 w-4"
+          style="border-top:3px solid #ea580c"
+        ></span>
+        Traversed edge
+      </span>
+      <span class="inline-flex items-center gap-1">
+        <span
+          class="inline-flex size-4 items-center justify-center rounded-full text-[10px] font-semibold text-white"
+          style="background:#ea580c"
+        >1</span>
+        Step order
+      </span>
+    </div>
+
+    <div
+      class="ml-auto flex items-center gap-1 border-l border-gray-200 pl-4 dark:border-gray-700"
+    >
+      <button
+        type="button"
+        class="rounded border border-gray-300 px-2 py-0.5 text-xs hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+        aria-label="Zoom out"
+        title="Zoom out"
+        {{on "click" this.zoomOut}}
+      >−</button>
+      <button
+        type="button"
+        class="rounded border border-gray-300 px-2 py-0.5 text-xs hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+        aria-label="Reset zoom"
+        title="Reset zoom"
+        {{on "click" this.zoomReset}}
+      >Reset</button>
+      <button
+        type="button"
+        class="rounded border border-gray-300 px-2 py-0.5 text-xs hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+        aria-label="Zoom in"
+        title="Zoom in"
+        {{on "click" this.zoomIn}}
+      >+</button>
+    </div>
+  </div>
+
+  <svg
+    class="w-full cc-scrape-graph-svg"
+    style="height: 560px"
+    {{on-insert this.render @structure}}
+  ></svg>
+
+  {{! Reserve space for the description card so hovering doesn't shift
+      the page. Min-height matches a 3-line card; the placeholder text
+      sits in the same slot when nothing is hovered. }}
+  <div class="mt-3 min-h-[5.5rem]">
+    {{#if this.hoveredNode}}
+      <div
+        class="rounded-md border border-gray-200 bg-white/70 p-3 text-sm dark:border-gray-700 dark:bg-gray-900/70"
+      >
+        <div class="mb-1 flex items-center gap-2">
+          <span
+            class="font-mono text-xs text-gray-500"
+          >{{this.hoveredNode.id}}</span>
+          <span
+            class="font-semibold text-gray-900 dark:text-gray-100"
+          >{{this.hoveredNode.label}}</span>
+        </div>
+        <p
+          class="text-gray-700 dark:text-gray-300"
+        >{{this.hoveredNode.description}}</p>
+      </div>
+    {{else}}
+      <p class="text-xs text-gray-500">
+        Hover a node for its description. Drag nodes to reposition. Mouse-wheel
+        or the buttons above to zoom; drag the background to pan.
+      </p>
+    {{/if}}
+  </div>
+</div>

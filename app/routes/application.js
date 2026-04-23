@@ -33,16 +33,9 @@ export default class ApplicationRoute extends Route {
     if (typeof window === 'undefined') return;
     if (window.__ccBookmarkletStashInstalled) return;
     window.__ccBookmarkletStashInstalled = true;
-    console.log('[cc-app] bookmarklet stash listener installed');
     window.addEventListener('message', (event) => {
       const data = event.data;
       if (!data || data.type !== 'cc-bookmarklet') return;
-      console.log('[cc-app] cc-bookmarklet message received', {
-        urlLen: (data.url || '').length,
-        textLen: (data.text || '').length,
-        currentRoute: this.router.currentRouteName,
-        authed: this.session.isAuthenticated,
-      });
       try {
         window.sessionStorage.setItem(
           'cc-pending-paste',
@@ -62,9 +55,6 @@ export default class ApplicationRoute extends Route {
       }
       const onPaste = this.router.currentRouteName === 'job-posts.new.paste';
       if (!onPaste && this.session.isAuthenticated) {
-        console.log(
-          '[cc-app] not on paste route, transitioning to job-posts.new.paste',
-        );
         this.router.transitionTo('job-posts.new.paste');
       }
     });
