@@ -147,16 +147,28 @@ export default class JobPostsNewPasteController extends Controller {
           onComplete: (rec) => {
             this.flashMessages.clearMessages();
             const jobPostId = rec.belongsTo('jobPost')?.id?.();
-            if (jobPostId) {
-              this.flashMessages.success('Job post created.');
-              this._reset();
-              this.router.transitionTo('job-posts.show', jobPostId);
-            } else {
+            if (!jobPostId) {
               this.flashMessages.warning(
                 'Parse completed but no JobPost was created. Check the scrape.',
               );
               this.submitting = false;
+              return;
             }
+            const note = rec.latestStatusNote || '';
+            if (note.startsWith('duplicate:')) {
+              this.flashMessages.warning(
+                'You already have a job post for this link.',
+                { sticky: true },
+              );
+            } else if (note.startsWith('updated_stub:')) {
+              this.flashMessages.success(
+                'Upgraded an existing stub with the pasted details.',
+              );
+            } else {
+              this.flashMessages.success('Job post created.');
+            }
+            this._reset();
+            this.router.transitionTo('job-posts.show', jobPostId);
           },
           onFailed: () => {
             this.flashMessages.clearMessages();
