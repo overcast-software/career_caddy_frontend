@@ -38,9 +38,13 @@ async function loadSaved() {
   }
 }
 
-originInput.addEventListener('change', () => {
+function saveOrigin() {
   api.storage.local.set({ ccOrigin: getOrigin() }).catch(() => {});
-});
+}
+// 'change' fires only on blur — catch keystrokes too so origin saves
+// without requiring the user to tab out before clicking Send.
+originInput.addEventListener('change', saveOrigin);
+originInput.addEventListener('input', saveOrigin);
 function syncAutoSubmitLock() {
   // Score implies submit — lock the submit box checked whenever score is on.
   if (autoScoreBox.checked) {
@@ -85,6 +89,17 @@ function buildTargetUrl(origin) {
 sendBtn.addEventListener('click', async () => {
   sendBtn.disabled = true;
   setStatus('Grabbing page…');
+  // Belt + suspenders: persist every setting on send in case change/input
+  // events didn't fire (some Firefox popup close races drop them).
+  try {
+    await api.storage.local.set({
+      ccOrigin: getOrigin(),
+      ccAutoSubmit: autoSubmitBox.checked,
+      ccAutoScore: autoScoreBox.checked,
+    });
+  } catch {
+    /* ignore — best effort */
+  }
   try {
     const origin = getOrigin();
     const [tab] = await api.tabs.query({ active: true, currentWindow: true });

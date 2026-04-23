@@ -1,4 +1,4 @@
-# Career Caddy Sender — v0.2.0
+# Career Caddy Sender — v0.2.1
 
 A tiny browser extension: click the toolbar button on any job posting page and
 the page's URL + visible text land in Career Caddy's `/job-posts/new/paste`
@@ -6,6 +6,9 @@ form, ready for review.
 
 ## Version history
 
+- **0.2.1** — Origin field now saves on every keystroke (not just on
+  blur), so values persist if you click Send without tabbing out.
+  Send button also defensively writes all settings before dispatching.
 - **0.2.0** — Popup adds "Auto-submit without review" and "Also score against
   career data" checkboxes. Selections are remembered per browser. Off by
   default; check them to chain paste → submit → score in one click.

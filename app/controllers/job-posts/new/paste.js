@@ -26,7 +26,10 @@ export default class JobPostsNewPasteController extends Controller {
 
   @action
   installBookmarkletListener() {
-    this._drainPendingPaste();
+    // Defer off the render pass — _drainPendingPaste can fire flash
+    // messages and auto-submit, both of which read+write tracked state
+    // that Ember's auto-tracking forbids during a render computation.
+    Promise.resolve().then(() => this._drainPendingPaste());
     if (this._bookmarkletListener) return;
     const handler = (event) => {
       const data = event.data;
