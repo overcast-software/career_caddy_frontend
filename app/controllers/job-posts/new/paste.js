@@ -279,9 +279,7 @@ export default class JobPostsNewPasteController extends Controller {
               console.log('[cc-paste] transitioning to job-posts.show', {
                 jobPostId,
               });
-              this.flashMessages.info(
-                `Navigating to job post #${jobPostId}.`,
-              );
+              this.flashMessages.info(`Navigating to job post #${jobPostId}.`);
               this.router.transitionTo('job-posts.show', jobPostId);
             }
           },

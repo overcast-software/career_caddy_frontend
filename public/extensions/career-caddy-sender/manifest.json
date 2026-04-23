@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Career Caddy Sender",
-  "version": "0.2.2",
+  "version": "0.2.5",
   "description": "Send the current page's text and URL to the Career Caddy paste form.",
   "permissions": ["activeTab", "scripting", "tabs"],
   "host_permissions": ["<all_urls>"],

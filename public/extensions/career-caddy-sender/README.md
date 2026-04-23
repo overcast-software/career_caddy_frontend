@@ -1,4 +1,4 @@
-# Career Caddy Sender — v0.2.2
+# Career Caddy Sender — v0.2.5
 
 A tiny browser extension: click the toolbar button on any job posting page and
 the page's URL + visible text land in Career Caddy's `/job-posts/new/paste`
@@ -6,6 +6,14 @@ form, ready for review.
 
 ## Version history
 
+- **0.2.5** — Default origin flipped back to `https://careercaddy.online` for
+  shipped builds. Still overridable per-browser via the popup origin field.
+- **0.2.4** — Default origin is now `http://localhost:4200` (dev). Override
+  to `https://careercaddy.online` in the popup's origin field when you're
+  ready to point it at prod.
+- **0.2.3** — Auto-submit and Also-score default to ON on fresh install.
+  Temporary add-ons lose storage on Firefox restart / uninstall; this keeps
+  reinstalls useful without needing to re-check the boxes each time.
 - **0.2.2** — Popup shows the installed version in the top-right corner so
   you can confirm at a glance which build is running.
 - **0.2.1** — Origin field now saves on every keystroke (not just on

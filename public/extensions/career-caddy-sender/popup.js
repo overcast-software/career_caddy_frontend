@@ -40,11 +40,19 @@ async function loadSaved() {
       'ccAutoScore',
     ]);
     originInput.value = saved.ccOrigin || DEFAULT_ORIGIN;
-    autoSubmitBox.checked = !!saved.ccAutoSubmit;
-    autoScoreBox.checked = !!saved.ccAutoScore;
+    // First-install defaults: both toggles ON. Extension uninstall /
+    // Firefox restart of a temp add-on wipes storage, so defaults need
+    // to match the common-case preference to keep reinstalls painless.
+    autoSubmitBox.checked =
+      saved.ccAutoSubmit === undefined ? true : !!saved.ccAutoSubmit;
+    autoScoreBox.checked =
+      saved.ccAutoScore === undefined ? true : !!saved.ccAutoScore;
     syncAutoSubmitLock();
   } catch {
     originInput.value = DEFAULT_ORIGIN;
+    autoSubmitBox.checked = true;
+    autoScoreBox.checked = true;
+    syncAutoSubmitLock();
   }
 }
 
