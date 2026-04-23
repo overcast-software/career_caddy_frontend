@@ -1,0 +1,15 @@
+{{! template-lint-disable no-inline-styles }}
+<div
+  class="scrape-graph-mermaid overflow-auto"
+  style="min-height: 12rem"
+  {{on-insert this.render @source}}
+>
+  {{#if this.error}}
+    <p class="text-sm text-red-600 dark:text-red-400">Failed to render diagram:
+      {{this.error}}</p>
+  {{else if (eq this.rendered "")}}
+    <p class="text-sm text-gray-500">No diagram available.</p>
+  {{else if (not this.rendered)}}
+    <p class="text-sm text-gray-500">Rendering…</p>
+  {{/if}}
+</div>
