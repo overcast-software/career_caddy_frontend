@@ -6,12 +6,12 @@ export default class ScrapesGraphRoute extends Route {
 
   async model({ scrape_id }) {
     const [trace, structure] = await Promise.all([
-      fetch(`/api/v1/scrapes/${scrape_id}/graph-trace/`, {
+      fetch(this.api.url(`/api/v1/scrapes/${scrape_id}/graph-trace/`), {
         headers: this.api.headers(),
       })
         .then((r) => (r.ok ? r.json() : { data: [], meta: { chain: [] } }))
         .catch(() => ({ data: [], meta: { chain: [] } })),
-      fetch('/api/v1/admin/graph-structure/', {
+      fetch(this.api.url('/api/v1/admin/graph-structure/'), {
         headers: this.api.headers(),
       })
         .then((r) => (r.ok ? r.json() : { data: { nodes: [], edges: [] } }))

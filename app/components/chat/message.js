@@ -32,6 +32,24 @@ const APP_ROUTES = new Set([
   'caddy',
 ]);
 
+// Strip scheme + hostname from hrefs the LLM hallucinated, e.g.
+// "example.com/job-posts/1" or "https://example.com/job-posts/1".
+// Returns a bare path ("/job-posts/1") when the URL resolves to a known
+// app route; returns null if the href looks legitimately external.
+export function sanitizeAppHref(href) {
+  if (typeof href !== 'string' || !href) return null;
+  if (href.startsWith('/')) return href;
+
+  const leadingRouteRe = new RegExp(
+    `^(?:https?:\\/\\/)?[^\\/]+\\/(${[...APP_ROUTES].join('|')})(\\/.*)?$`,
+  );
+  const match = href.match(leadingRouteRe);
+  if (match) {
+    return `/${match[1]}${match[2] ?? ''}`;
+  }
+  return null;
+}
+
 export default class ChatMessageComponent extends Component {
   @service chat;
   @service router;
@@ -85,9 +103,28 @@ export default class ChatMessageComponent extends Component {
           this.router.transitionTo(path);
           return;
         }
+        // Host is something like example.com but the PATH starts with an
+        // app route (e.g. https://example.com/job-posts/1). Strip the host
+        // and route internally.
+        const rewritten = sanitizeAppHref(href);
+        if (rewritten) {
+          event.preventDefault();
+          this.router.transitionTo(rewritten);
+          return;
+        }
       } catch {
         // invalid URL — fall through to default browser behavior
       }
+      return;
+    }
+
+    // Scheme-less but host-prefixed ("example.com/job-posts/1"). Browsers
+    // treat these as relative; intercept before navigation so we end up on
+    // the actual app route.
+    const rewritten = sanitizeAppHref(href);
+    if (rewritten) {
+      event.preventDefault();
+      this.router.transitionTo(rewritten);
       return;
     }
 
@@ -108,7 +145,13 @@ export default class ChatMessageComponent extends Component {
     if (!act || typeof act !== 'object') return;
 
     if (act.navigate && typeof act.navigate === 'string') {
-      this.router.transitionTo(act.navigate);
+      // Defend against example.com/job-posts/1-style hallucinations: if
+      // the agent prefixed a host, strip it. Bare paths pass through
+      // unchanged.
+      const target = act.navigate.startsWith('/')
+        ? act.navigate
+        : sanitizeAppHref(act.navigate) || act.navigate;
+      this.router.transitionTo(target);
       return;
     }
 
