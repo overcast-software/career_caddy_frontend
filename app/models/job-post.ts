@@ -10,6 +10,7 @@ export default class JobPostModel extends Model {
   @attr('date') postedDate;
   @attr('date') extractionDate;
   @attr('string') link;
+  @attr('number') duplicateOfId;
   @belongsTo('company', { async: true, inverse: 'jobPosts' }) company;
   @hasMany('score', { async: true, inverse: 'jobPost' }) scores;
   @hasMany('scrape', { async: true, inverse: 'jobPost' }) scrapes;
