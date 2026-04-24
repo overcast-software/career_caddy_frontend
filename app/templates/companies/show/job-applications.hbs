@@ -12,9 +12,6 @@
           >Job Post</th>
           <th
             class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-          >Company</th>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
           >Status</th>
           <th
             class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
@@ -26,7 +23,10 @@
       </thead>
       <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
         {{#each this.model as |jobApplication|}}
-          <JobApplications::Compact @jobApplication={{jobApplication}} />
+          <JobApplications::Compact
+            @jobApplication={{jobApplication}}
+            @showCompany={{false}}
+          />
         {{/each}}
       </tbody>
     </table>
