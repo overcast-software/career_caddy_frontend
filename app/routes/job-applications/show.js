@@ -9,7 +9,13 @@ export default class JobApplicationsShowRoute extends Route {
       this.flashMessages.warning('redirecting to new');
       this.router.transitionTo('job-application.new');
     }
-    return this.store.findRecord('job-application', application_id);
+    // include=application-statuses so <Applications::StatusLog> has rows to
+    // render. The serializer emits linkage data for the hasMany; without the
+    // include the sideload is empty and the history section shows
+    // "No history yet" even when the DB has entries.
+    return this.store.findRecord('job-application', application_id, {
+      include: 'application-statuses',
+    });
   }
 
   setupController(controller, model) {
