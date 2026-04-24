@@ -22,7 +22,21 @@ export default class JobPostModel extends Model {
   @attr('date') postedDate;
   @attr('date') extractionDate;
   @attr('string') link;
-  @attr('string') activeApplicationStatus;
+  // `triage` is sourced from JSON:API `meta.triage` on the server response,
+  // NOT from a column on the JobPost row. It carries the CALLING USER's
+  // latest triage state for this (shared) post: status + reason_code +
+  // free-text note. Different users will receive different `triage`
+  // objects for the same post. It lands here as an attr because the
+  // application serializer flattens resource-level `meta` into
+  // `attributes` (see app/serializers/application.js), which lets us read
+  // it off the record like any other field while keeping the server
+  // response honest about where the data lives.
+  //
+  // Shape: { status: string|null, reason_code: string|null, note: string|null }
+  //
+  // Do NOT PATCH this back to the server — the API ignores it on writes.
+  // Per-user triage mutations go through POST /job-posts/:id/triage/.
+  @attr() triage;
   @attr('string', { defaultValue: 'manual' }) source;
   @belongsTo('score', { async: true, inverse: null }) topScore;
   @belongsTo('company', { async: true, inverse: 'jobPosts' }) company;

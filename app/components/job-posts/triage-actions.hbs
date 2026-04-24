@@ -60,12 +60,10 @@
     </button>
   </div>
 {{else}}
-  <div class="flex flex-wrap items-center gap-2">
-    {{#if this.activeStatus}}
-      <span
-        class="inline-flex items-center rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-200"
-      >{{this.activeStatus}}</span>
-    {{/if}}
+  {{! `display: contents` so our children are direct flex items of the
+      parent — lets each button wrap individually instead of dragging
+      the whole group to a new line. }}
+  <div class="contents">
     <button
       type="button"
       class="px-2 py-1 text-xs rounded border
@@ -81,7 +79,8 @@
     </button>
     <button
       type="button"
-      class="px-2 py-1 text-xs rounded border
+      title={{this.vetBadTitle}}
+      class="max-w-xs truncate px-2 py-1 text-xs rounded border
         {{if
           this.isVettedBad
           'border-red-500 bg-red-50 text-red-700 dark:bg-red-900/40 dark:text-red-200'
@@ -90,7 +89,27 @@
       disabled={{this.submitting}}
       {{on "click" this.vetBad}}
     >
-      {{if this.isVettedBad "✗ Vetted Bad" "Vetted Bad"}}
+      {{this.vetBadLabel}}
     </button>
+    {{#if this.showReasonPicker}}
+      <div class="w-40 text-xs">
+        <PowerSelectWithCreate
+          @options={{this.reasonOptions}}
+          @searchField="label"
+          @searchEnabled={{true}}
+          @selected={{this.selectedReason}}
+          @placeholder="Why bad?"
+          @showCreateWhen={{this.showCreateWhen}}
+          @buildSuggestion={{this.buildOtherSuggestion}}
+          @onChange={{this.pickReason}}
+          @onCreate={{this.pickOther}}
+          @disabled={{this.submitting}}
+          @triggerClass="!py-0.5 !text-xs"
+          as |reason|
+        >
+          {{reason.label}}
+        </PowerSelectWithCreate>
+      </div>
+    {{/if}}
   </div>
 {{/if}}

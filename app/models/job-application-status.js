@@ -4,6 +4,7 @@ export default class JobApplicationStatusModel extends Model {
   @attr('string') status;
   @attr('string') statusType;
   @attr('string') note;
+  @attr('string') reasonCode;
   @attr() createdAt;
   @attr() loggedAt;
 

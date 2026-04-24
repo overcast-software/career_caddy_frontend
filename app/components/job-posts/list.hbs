@@ -72,10 +72,10 @@
               {{/if}}
             </td>
             <td class="px-4 py-3">
-              {{#if jobPost.activeApplicationStatus}}
+              {{#if jobPost.triage.status}}
                 <span
                   class="inline-flex items-center rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-200"
-                >{{jobPost.activeApplicationStatus}}</span>
+                >{{jobPost.triage.status}}</span>
               {{else}}
                 <span class="text-gray-300">—</span>
               {{/if}}

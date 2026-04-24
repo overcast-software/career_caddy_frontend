@@ -1,14 +1,15 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
     <div class="panel-card space-y-3 pb-4">
-      {{! Mobile: stack title/meta on top, actions below. Desktop (sm+):
-          side-by-side with actions pinned to the right. Actions
-          flex-wrap so a long button row breaks cleanly rather than
-          pushing the title column into a narrow vertical ribbon. }}
-      <div
-        class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between"
-      >
-        <div class="min-w-0 flex-1 basis-full sm:basis-auto">
+      {{! Title/meta row, then actions row below — full width on every
+          viewport. Earlier we pinned actions to the right of the title
+          (sm:justify-between), which with a short title left a big
+          empty gap and floated "Run scrape" far from the content. A
+          dedicated row keeps the action cluster close to what it acts
+          on, and long triage chips can wrap in place without dragging
+          the rest to a new line. }}
+      <div class="flex flex-col gap-3">
+        <div class="min-w-0">
           <p class="text-xs text-gray-500">
             {{~#if this.model.company.name~}}
               {{this.model.company.name}}
@@ -56,10 +57,9 @@
           <ApplyDestination @jobPost={{this.model}} />
         </div>
         {{! All header actions — Run scrape / Copy / Edit / Vetted Good /
-            Vetted Bad — live on the right side in a single flex-wrap
-            row. On narrow viewports they wrap underneath each other;
-            on sm+ they stay pinned right. }}
-        <div class="flex flex-wrap items-center gap-2 sm:justify-end">
+            Vetted Bad (+ reason picker) — flow in a single wrapping
+            row directly under the title, left-aligned. }}
+        <div class="flex flex-wrap items-center gap-2">
           {{#if this.model.link}}
             <button
               type="button"
