@@ -11,6 +11,9 @@ export default class JobPostModel extends Model {
   @attr('date') extractionDate;
   @attr('string') link;
   @attr('number') duplicateOfId;
+  @attr('string') applyUrl;
+  @attr('string') applyUrlStatus;
+  @attr('date') applyUrlResolvedAt;
   @belongsTo('company', { async: true, inverse: 'jobPosts' }) company;
   @hasMany('score', { async: true, inverse: 'jobPost' }) scores;
   @hasMany('scrape', { async: true, inverse: 'jobPost' }) scrapes;

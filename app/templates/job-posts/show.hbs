@@ -53,6 +53,7 @@
               Duplicate of #{{this.model.duplicateOfId}}
             </LinkTo>
           {{/if}}
+          <ApplyDestination @jobPost={{this.model}} />
         </div>
         {{! All header actions — Run scrape / Copy / Edit / Vetted Good /
             Vetted Bad — live on the right side in a single flex-wrap
