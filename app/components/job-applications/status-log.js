@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import { tracked, cached } from '@glimmer/tracking';
 import { action } from '@ember/object';
+import { reasonLabel } from 'career-caddy-frontend/utils/vetting-reasons';
 
 const MAIN_FLOW = [
   'Unvetted',
@@ -79,18 +80,32 @@ export default class JobApplicationsStatusLogComponent extends Component {
 
   get sortedStatuses() {
     const records = this._sortedRecords;
-    return records.map((s, i) => ({
-      record: s,
-      status: s.status,
-      // Prefer user-set loggedAt; fall back to DB createdAt
-      displayDate: s.loggedAt || s.createdAt,
-      isCurrent: i === records.length - 1,
-      dotClass: NOGO.has(s.status)
-        ? 'bg-red-400'
-        : s.status === 'Accepted'
-          ? 'bg-green-500'
-          : 'bg-accent-400',
-    }));
+    return records.map((s, i) => {
+      let statusLabel = s.status;
+      if (s.status === 'Vetted Bad' && s.reasonCode) {
+        const label = reasonLabel(s.reasonCode);
+        if (s.reasonCode === 'other') {
+          statusLabel = s.note
+            ? `Vetted Bad — Other: ${s.note}`
+            : 'Vetted Bad — Other';
+        } else if (label) {
+          statusLabel = `Vetted Bad — ${label}`;
+        }
+      }
+      return {
+        record: s,
+        status: s.status,
+        statusLabel,
+        // Prefer user-set loggedAt; fall back to DB createdAt
+        displayDate: s.loggedAt || s.createdAt,
+        isCurrent: i === records.length - 1,
+        dotClass: NOGO.has(s.status)
+          ? 'bg-red-400'
+          : s.status === 'Accepted'
+            ? 'bg-green-500'
+            : 'bg-accent-400',
+      };
+    });
   }
 
   // Statuses that will be auto-inserted before the selected one
