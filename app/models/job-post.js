@@ -22,6 +22,13 @@ export default class JobPostModel extends Model {
   @attr('date') postedDate;
   @attr('date') extractionDate;
   @attr('string') link;
+  @attr('number') duplicateOfId;
+  // Apply-destination resolver fields. Populated by the scrape-graph
+  // ResolveApplyUrl node via PATCH /scrapes/:id/apply-url/. See
+  // notes.org::*Apply-destination resolution.
+  @attr('string') applyUrl;
+  @attr('string') applyUrlStatus;
+  @attr('date') applyUrlResolvedAt;
   // `triage` is sourced from JSON:API `meta.triage` on the server response,
   // NOT from a column on the JobPost row. It carries the CALLING USER's
   // latest triage state for this (shared) post: status + reason_code +
