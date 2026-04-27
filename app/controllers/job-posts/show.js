@@ -143,8 +143,18 @@ export default class JobPostsShowController extends Controller {
           });
         }
       })
-      .catch(() => {
+      .catch((e) => {
         scrape.rollbackAttributes();
+        const dupeId = e?.errors?.[0]?.meta?.existing_job_post_id;
+        if (dupeId && String(dupeId) !== String(this.model.id)) {
+          this.flashMessages.info(`Already have this — opening #${dupeId}.`);
+          this.router.transitionTo('job-posts.show', dupeId);
+          return;
+        }
+        if (dupeId) {
+          this.flashMessages.info('This post already covers that URL.');
+          return;
+        }
         this.flashMessages.danger('Failed to queue scrape.');
       })
       .finally(() => {
@@ -187,6 +197,17 @@ export default class JobPostsShowController extends Controller {
         this.scrapeSubmitting = false;
         this.scoreSubmitting = false;
         this.flashMessages.clearMessages();
+        const dupeId = e?.errors?.[0]?.meta?.existing_job_post_id;
+        if (dupeId) {
+          if (scrape && !scrape.isDestroyed) scrape.rollbackAttributes();
+          if (String(dupeId) !== String(this.model.id)) {
+            this.flashMessages.info(`Already have this — opening #${dupeId}.`);
+            this.router.transitionTo('job-posts.show', dupeId);
+          } else {
+            this.flashMessages.info('This post already covers that URL.');
+          }
+          return;
+        }
         this.flashMessages.danger(
           e?.errors?.[0]?.detail || e?.message || 'Scrape & Score failed.',
         );

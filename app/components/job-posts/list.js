@@ -8,6 +8,7 @@ export default class JobPostsListComponent extends Component {
   @service spinner;
   @service flashMessages;
   @service currentUser;
+  @service router;
 
   get jobPosts() {
     return this.args.jobPosts ?? [];
@@ -35,6 +36,18 @@ export default class JobPostsListComponent extends Component {
       .then(() => jobPost.reload().catch(() => {}))
       .then(() => this._runScore(jobPost))
       .catch((e) => {
+        // 409 from POST /scrapes/ when the URL already maps to a JobPost.
+        // The api enforces dedup at the tool layer; we react by routing
+        // to the existing post rather than flashing an error. Roll back
+        // the orphaned in-flight scrape so it doesn't linger in the store.
+        const dupeId = e?.errors?.[0]?.meta?.existing_job_post_id;
+        if (dupeId) {
+          if (scrape && !scrape.isDestroyed) scrape.rollbackAttributes();
+          this.spinner.end();
+          this.flashMessages.info(`Already have this — opening #${dupeId}.`);
+          this.router.transitionTo('job-posts.show', dupeId);
+          return;
+        }
         // If the scrape fails we deliberately skip scoring — a score
         // built off a stub description would be inaccurate. Surface
         // the failure so the user knows not to trust stale scores.
