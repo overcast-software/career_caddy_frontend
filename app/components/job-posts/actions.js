@@ -76,15 +76,31 @@ export default class JobPostsActions extends Component {
   async createScrape() {
     const jobPost = this.args.jobPost;
     const url = jobPost.link ?? '';
-    const scrape = this.store.createRecord('scrape', { jobPost, url });
+    // Always queue as `hold`; the synchronous browser-MCP scrape path
+    // is gone and the hold-poller is the only supported scrape driver.
+    const scrape = this.store.createRecord('scrape', {
+      jobPost,
+      url,
+      status: 'hold',
+    });
     try {
       const saved = await this.spinner.wrap(scrape.save(), {
-        label: 'Creating scrape…',
+        label: 'Queuing scrape…',
       });
+      this.flashMessages.info(
+        'Scrape queued — the poller will pick it up shortly.',
+      );
       this.router.transitionTo('scrapes.show', saved.id);
-    } catch {
-      scrape.unloadRecord();
-      this.flashMessages.danger('Failed to create scrape.');
+    } catch (e) {
+      const dupeId = e?.errors?.[0]?.meta?.existing_job_post_id;
+      if (dupeId) {
+        scrape.rollbackAttributes();
+        this.flashMessages.info(`Already have this — opening #${dupeId}.`);
+        this.router.transitionTo('job-posts.show', dupeId);
+        return;
+      }
+      scrape.rollbackAttributes();
+      this.flashMessages.danger('Failed to queue scrape.');
     }
   }
 
