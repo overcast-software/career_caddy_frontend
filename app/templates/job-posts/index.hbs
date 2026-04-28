@@ -73,6 +73,13 @@
             @clearAriaLabel="Clear vetted-bad filter"
           />
         {{/if}}
+        {{#if (eq this.includeClosed "true")}}
+          <FilterPill
+            @label="closed posts shown"
+            @onClear={{this.clearIncludeClosed}}
+            @clearAriaLabel="Hide closed posts again"
+          />
+        {{/if}}
       </div>
     {{/if}}
     {{#if this.isSearching}}

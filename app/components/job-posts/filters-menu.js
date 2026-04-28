@@ -23,6 +23,7 @@ export default class JobPostsFiltersMenuComponent extends Component {
     if (f.source) n++;
     if (f.hostname) n++;
     if (f.bucket) n++;
+    if (f.includeClosed) n++;
     return n;
   }
 
@@ -37,6 +38,12 @@ export default class JobPostsFiltersMenuComponent extends Component {
   @action setExcludeVettedBad(event) {
     this.args.onChange?.({
       excludeVettedBad: event.target.checked ? 'true' : '',
+    });
+  }
+
+  @action setIncludeClosed(event) {
+    this.args.onChange?.({
+      includeClosed: event.target.checked ? 'true' : '',
     });
   }
 
@@ -60,6 +67,7 @@ export default class JobPostsFiltersMenuComponent extends Component {
       source: '',
       hostname: '',
       bucket: '',
+      includeClosed: '',
     });
   }
 }

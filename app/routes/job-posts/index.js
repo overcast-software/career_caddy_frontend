@@ -12,6 +12,7 @@ export default class JobPostsIndexRoute extends Route {
     scored: { refreshModel: true },
     bucket: { refreshModel: true },
     excludeVettedBad: { refreshModel: true, as: 'exclude_vetted_bad' },
+    includeClosed: { refreshModel: true, as: 'include_closed' },
   };
 
   setupController(controller, model) {
@@ -19,7 +20,16 @@ export default class JobPostsIndexRoute extends Route {
     controller.isSearching = false;
   }
 
-  model({ search, hostname, stub, source, scored, bucket, excludeVettedBad }) {
+  model({
+    search,
+    hostname,
+    stub,
+    source,
+    scored,
+    bucket,
+    excludeVettedBad,
+    includeClosed,
+  }) {
     return this.infinity.model('job-post', {
       perPage: 20,
       startingPage: 1,
@@ -34,6 +44,9 @@ export default class JobPostsIndexRoute extends Route {
       ...(excludeVettedBad
         ? { 'filter[exclude_vetted_bad]': excludeVettedBad }
         : {}),
+      // Default behavior: api hides closed posts. Pass include_closed=true
+      // (toggle in subnav) to show all.
+      ...(includeClosed === 'true' ? { include_closed: 'true' } : {}),
     });
   }
 }
