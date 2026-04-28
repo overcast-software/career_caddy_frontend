@@ -64,6 +64,20 @@
         <span>Hide <span class="font-medium">Vetted Bad</span></span>
       </label>
 
+      <label
+        class="mb-3 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
+      >
+        <input
+          type="checkbox"
+          class="rounded border-gray-300 dark:border-gray-600"
+          checked={{@filters.includeClosed}}
+          {{on "change" this.setIncludeClosed}}
+        />
+        <span>Show
+          <span class="font-medium">closed</span>
+          posts</span>
+      </label>
+
       <div class="mb-3">
         <div
           class="mb-1 text-xs font-medium text-gray-600 dark:text-gray-300"

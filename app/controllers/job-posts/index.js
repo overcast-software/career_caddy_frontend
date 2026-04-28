@@ -12,6 +12,7 @@ export default class JobPostsIndexController extends Controller {
     'scored',
     'bucket',
     { excludeVettedBad: 'exclude_vetted_bad' },
+    { includeClosed: 'include_closed' },
   ];
 
   @tracked search = '';
@@ -21,6 +22,7 @@ export default class JobPostsIndexController extends Controller {
   @tracked scored = '';
   @tracked bucket = '';
   @tracked excludeVettedBad = '';
+  @tracked includeClosed = '';
   @tracked isSearching = false;
   @service flashMessages;
 
@@ -32,6 +34,7 @@ export default class JobPostsIndexController extends Controller {
       scored: this.scored,
       bucket: this.bucket,
       excludeVettedBad: this.excludeVettedBad,
+      includeClosed: this.includeClosed,
     };
   }
 
@@ -63,6 +66,10 @@ export default class JobPostsIndexController extends Controller {
 
   @action clearExcludeVettedBad() {
     this.excludeVettedBad = '';
+  }
+
+  @action clearIncludeClosed() {
+    this.includeClosed = '';
   }
 
   @action updateSearch(value) {
