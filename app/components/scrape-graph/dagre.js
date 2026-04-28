@@ -126,10 +126,15 @@ export default class ScrapeGraphDagre extends Component {
     const NODE_W = 110;
     const NODE_H = 44;
     const g = new dagre.graphlib.Graph({ multigraph: false });
+    // Left-to-right reads better than top-to-bottom for this graph:
+    // the main chain (StartScrape → … → ResolveApplyUrl) is long and
+    // narrow, and short detours (the obstacle sub-graph, extract tier
+    // fan-out) drop as branches above/below the main horizontal axis
+    // rather than crowding the central vertical.
     g.setGraph({
-      rankdir: 'TB',
-      nodesep: 26,
-      ranksep: 56,
+      rankdir: 'LR',
+      nodesep: 22,
+      ranksep: 60,
       marginx: 20,
       marginy: 20,
     });
