@@ -4,7 +4,6 @@ import { tracked } from '@glimmer/tracking';
 import { select } from 'd3-selection';
 import { line as d3line, curveBasis } from 'd3-shape';
 import { scaleLinear } from 'd3-scale';
-import { zoom, zoomIdentity } from 'd3-zoom';
 import dagre from '@dagrejs/dagre';
 
 /**
@@ -31,8 +30,6 @@ export default class ScrapeGraphDagre extends Component {
   @tracked hoveredNode = null;
 
   _svg = null;
-  _svgSelection = null;
-  _zoomBehavior = null;
 
   _palette = {
     scrape: ['#dbeafe', '#3b82f6'],
@@ -90,26 +87,6 @@ export default class ScrapeGraphDagre extends Component {
   }
 
   @action
-  zoomIn() {
-    if (!this._svgSelection || !this._zoomBehavior) return;
-    this._svgSelection.transition().call(this._zoomBehavior.scaleBy, 1.3);
-  }
-
-  @action
-  zoomOut() {
-    if (!this._svgSelection || !this._zoomBehavior) return;
-    this._svgSelection.transition().call(this._zoomBehavior.scaleBy, 1 / 1.3);
-  }
-
-  @action
-  zoomReset() {
-    if (!this._svgSelection || !this._zoomBehavior) return;
-    this._svgSelection
-      .transition()
-      .call(this._zoomBehavior.transform, zoomIdentity);
-  }
-
-  @action
   render(element) {
     this._svg = element;
     const structure = this.args.structure;
@@ -126,10 +103,15 @@ export default class ScrapeGraphDagre extends Component {
     const NODE_W = 110;
     const NODE_H = 44;
     const g = new dagre.graphlib.Graph({ multigraph: false });
+    // Left-to-right reads better than top-to-bottom for this graph:
+    // the main chain (StartScrape → … → ResolveApplyUrl) is long and
+    // narrow, and short detours (the obstacle sub-graph, extract tier
+    // fan-out) drop as branches above/below the main horizontal axis
+    // rather than crowding the central vertical.
     g.setGraph({
-      rankdir: 'TB',
-      nodesep: 26,
-      ranksep: 56,
+      rankdir: 'LR',
+      nodesep: 22,
+      ranksep: 60,
       marginx: 20,
       marginy: 20,
     });
@@ -146,14 +128,23 @@ export default class ScrapeGraphDagre extends Component {
     dagre.layout(g);
     const { width: graphW, height: graphH } = g.graph();
 
+    // Render at natural pixel size so labels stay sharp; the wrapper
+    // div provides scroll on overflow rather than a zoom transform.
+    // Inline style is the belt-and-suspenders to the width/height
+    // attrs because some preflight stylesheets (Tailwind, normalize)
+    // give <svg> a `max-width: 100%` and `display: inline` default —
+    // the attrs would then be ignored and the natural dimensions
+    // shrink-to-fit the parent, killing the horizontal-scroll story.
     const svg = select(element)
-      .attr('viewBox', `0 0 ${graphW} ${graphH}`)
-      .attr('preserveAspectRatio', 'xMidYMid meet');
+      .attr('width', graphW)
+      .attr('height', graphH)
+      .style('width', `${graphW}px`)
+      .style('height', `${graphH}px`)
+      .style('display', 'block');
     svg.selectAll('*').remove();
-    this._svgSelection = svg;
 
     const defs = svg.append('defs');
-    const root = svg.append('g').attr('class', 'cc-zoom-root');
+    const root = svg.append('g');
 
     const arrow = (id, color) => {
       defs
@@ -359,18 +350,5 @@ export default class ScrapeGraphDagre extends Component {
       .text((d) => d.label);
 
     nodeSel.append('title').text((d) => `${d.label}\n\n${d.description || ''}`);
-
-    // ---- zoom / pan ----
-    this._zoomBehavior = zoom()
-      .scaleExtent([0.3, 4])
-      .filter((event) => {
-        if (event.type === 'wheel' || event.type === 'dblclick') return true;
-        if (event.type.startsWith('touch')) return true;
-        return event.target === element;
-      })
-      .on('zoom', (event) => {
-        root.attr('transform', event.transform);
-      });
-    svg.call(this._zoomBehavior);
   }
 }
