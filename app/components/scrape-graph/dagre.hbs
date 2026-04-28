@@ -1,5 +1,5 @@
 {{! template-lint-disable no-inline-styles }}
-<div class="cc-scrape-graph-force">
+<div class="cc-scrape-graph-dagre">
   <div class="mb-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
     <div class="flex flex-wrap items-center gap-3">
       <span
@@ -117,8 +117,10 @@
       </div>
     {{else}}
       <p class="text-xs text-gray-500">
-        Hover a node for its description. Drag nodes to reposition. Mouse-wheel
-        or the buttons above to zoom; drag the background to pan.
+        Hover a node for its description. Mouse-wheel or the buttons above to
+        zoom; drag the background to pan. When edge traffic data is supplied,
+        thickness scales with count and color shows success rate (red → amber →
+        green).
       </p>
     {{/if}}
   </div>

@@ -31,6 +31,7 @@
     "tailwind:watch": "npx tailwindcss -i ./tailwind-input.css -o ./public/assets/tailwind.css --watch"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^3.0.0",
     "autoprefixer": "^10.4.27",
     "d3-array": "^3.2.0",
     "d3-axis": "^3.0.0",

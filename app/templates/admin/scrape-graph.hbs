@@ -31,7 +31,10 @@
         <h2 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
           State diagram
         </h2>
-        <ScrapeGraph::Force @structure={{this.model.structure}} />
+        <ScrapeGraph::Dagre
+          @structure={{this.model.structure}}
+          @aggregate={{this.model.aggregate}}
+        />
       </section>
 
       <section

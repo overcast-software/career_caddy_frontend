@@ -2778,8 +2778,8 @@ pre {
   }
 }
 
-/* Scrape-graph force-directed view */
-.cc-scrape-graph-force .cc-node.cc-last circle {
+/* Scrape-graph dagre view — pulse the most-recent node's outline. */
+.cc-scrape-graph-dagre .cc-node.cc-last rect {
   animation: cc-graph-pulse 1.6s ease-in-out infinite;
 }
 @keyframes cc-graph-pulse {
