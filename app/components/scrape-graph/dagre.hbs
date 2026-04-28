@@ -62,38 +62,17 @@
       </span>
     </div>
 
-    <div
-      class="ml-auto flex items-center gap-1 border-l border-gray-200 pl-4 dark:border-gray-700"
-    >
-      <button
-        type="button"
-        class="rounded border border-gray-300 px-2 py-0.5 text-xs hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-        aria-label="Zoom out"
-        title="Zoom out"
-        {{on "click" this.zoomOut}}
-      >−</button>
-      <button
-        type="button"
-        class="rounded border border-gray-300 px-2 py-0.5 text-xs hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-        aria-label="Reset zoom"
-        title="Reset zoom"
-        {{on "click" this.zoomReset}}
-      >Reset</button>
-      <button
-        type="button"
-        class="rounded border border-gray-300 px-2 py-0.5 text-xs hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-        aria-label="Zoom in"
-        title="Zoom in"
-        {{on "click" this.zoomIn}}
-      >+</button>
-    </div>
   </div>
 
-  <svg
-    class="w-full cc-scrape-graph-svg"
-    style="height: 560px"
-    {{on-insert this.render @structure}}
-  ></svg>
+  {{! Native scroll instead of d3-zoom — the LR layout produces a long
+      horizontal strip that's awkward to navigate with zoom-and-pan
+      gestures. Browser scroll is more familiar and the SVG renders at
+      its natural pixel size so labels stay sharp at every spot. }}
+  <div
+    class="cc-scrape-graph-scroller max-h-[600px] overflow-auto rounded border border-gray-200 dark:border-gray-700"
+  >
+    <svg class="cc-scrape-graph-svg" {{on-insert this.render @structure}}></svg>
+  </div>
 
   {{! Reserve space for the description card so hovering doesn't shift
       the page. Min-height matches a 3-line card; the placeholder text
@@ -117,10 +96,9 @@
       </div>
     {{else}}
       <p class="text-xs text-gray-500">
-        Hover a node for its description. Mouse-wheel or the buttons above to
-        zoom; drag the background to pan. When edge traffic data is supplied,
-        thickness scales with count and color shows success rate (red → amber →
-        green).
+        Hover a node for its description. Scroll the diagram if it overflows.
+        When edge traffic data is supplied, thickness scales with count and
+        color shows success rate (red → amber → green).
       </p>
     {{/if}}
   </div>

@@ -2782,6 +2782,17 @@ pre {
 .cc-scrape-graph-dagre .cc-node.cc-last rect {
   animation: cc-graph-pulse 1.6s ease-in-out infinite;
 }
+/* Force the SVG to honor its natural width/height attrs so the
+   wrapper's overflow-auto can scroll. Tailwind's preflight + d3
+   default styles otherwise treat <svg> as inline + max-width:100%
+   and shrink-to-fit the parent, killing horizontal scroll. */
+.cc-scrape-graph-dagre .cc-scrape-graph-svg {
+  display: block;
+  max-width: none;
+}
+.cc-scrape-graph-dagre .cc-scrape-graph-scroller {
+  max-height: 600px;
+}
 @keyframes cc-graph-pulse {
   0%,
   100% {
