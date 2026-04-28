@@ -32,7 +32,10 @@ export default class JobPostModel extends Model {
   // 'open' / 'closed' / null. null = unknown — historical posts and
   // anything the extractor's text-signals didn't fire on. List view
   // hides 'closed' by default; jp.show surfaces a chip only on closed.
-  @attr('string') applicationStatus;
+  // Named `postingStatus` (not `applicationStatus`) to avoid
+  // collision with `JobApplication.status`, the user's per-application
+  // state (Applied / Interview Scheduled / ...).
+  @attr('string') postingStatus;
   // `triage` is sourced from JSON:API `meta.triage` on the server response,
   // NOT from a column on the JobPost row. It carries the CALLING USER's
   // latest triage state for this (shared) post: status + reason_code +
