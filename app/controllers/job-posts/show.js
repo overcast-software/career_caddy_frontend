@@ -145,14 +145,14 @@ export default class JobPostsShowController extends Controller {
       })
       .catch((e) => {
         scrape.rollbackAttributes();
+        // The api now skips dedupe whenever a job-post relationship is
+        // sent on the create — and runScrape always sends one — so a
+        // 409 can only fire if the URL maps to a *different* post. If
+        // that ever happens, route the user to that post.
         const dupeId = e?.errors?.[0]?.meta?.existing_job_post_id;
-        if (dupeId && String(dupeId) !== String(this.model.id)) {
+        if (dupeId) {
           this.flashMessages.info(`Already have this — opening #${dupeId}.`);
           this.router.transitionTo('job-posts.show', dupeId);
-          return;
-        }
-        if (dupeId) {
-          this.flashMessages.info('This post already covers that URL.');
           return;
         }
         this.flashMessages.danger('Failed to queue scrape.');
@@ -197,15 +197,14 @@ export default class JobPostsShowController extends Controller {
         this.scrapeSubmitting = false;
         this.scoreSubmitting = false;
         this.flashMessages.clearMessages();
+        // Same as runScrape: the api skips dedupe when a job-post
+        // relationship is sent (we always send one here), so a 409
+        // means the URL maps to a different post — route there.
         const dupeId = e?.errors?.[0]?.meta?.existing_job_post_id;
         if (dupeId) {
           if (scrape && !scrape.isDestroyed) scrape.rollbackAttributes();
-          if (String(dupeId) !== String(this.model.id)) {
-            this.flashMessages.info(`Already have this — opening #${dupeId}.`);
-            this.router.transitionTo('job-posts.show', dupeId);
-          } else {
-            this.flashMessages.info('This post already covers that URL.');
-          }
+          this.flashMessages.info(`Already have this — opening #${dupeId}.`);
+          this.router.transitionTo('job-posts.show', dupeId);
           return;
         }
         this.flashMessages.danger(
