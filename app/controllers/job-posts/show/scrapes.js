@@ -17,13 +17,17 @@ export default class JobPostsShowScrapesController extends Controller {
     const jobPost = getOwner(this)
       .lookup('route:job-posts.show')
       .modelFor('job-posts.show');
+    // Always queue as `hold`; the synchronous browser-MCP scrape path
+    // is gone and the hold-poller is the only supported scrape driver.
     const scrape = this.store.createRecord('scrape', {
       jobPost,
       url: jobPost.link ?? '',
+      status: 'hold',
     });
     try {
-      this.spinner.begin({ label: 'Creating scrape…' });
+      this.spinner.begin({ label: 'Queuing scrape…' });
       const saved = await scrape.save();
+      this.flashMessages.success('Scrape queued — watching for completion.');
       if (!this.pollable.isTerminal(saved)) {
         this.pollable.poll(saved, {
           successMessage: 'Scrape completed.',
@@ -38,10 +42,20 @@ export default class JobPostsShowScrapesController extends Controller {
       } else {
         this.spinner.end();
       }
-    } catch {
+    } catch (e) {
       this.spinner.end();
-      scrape.unloadRecord();
-      this.flashMessages.danger('Failed to create scrape.');
+      const dupeId = e?.errors?.[0]?.meta?.existing_job_post_id;
+      if (dupeId && String(dupeId) !== String(jobPost.id)) {
+        scrape.rollbackAttributes();
+        this.flashMessages.info(`Already have this — opening #${dupeId}.`);
+        // No router service here; let the user pick the link from the
+        // flash message. (This callsite is rare — the user is already
+        // on jp.show and the api now skips dedupe when relationship is
+        // sent, so this branch effectively only fires on contract drift.)
+        return;
+      }
+      scrape.rollbackAttributes();
+      this.flashMessages.danger('Failed to queue scrape.');
     }
   }
 }
