@@ -4,9 +4,11 @@
       <thead class="bg-gray-50 border-b border-gray-200">
         <tr>
           <th class="px-4 py-3 text-left font-semibold text-gray-600">Title</th>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Company</th>
+          {{#unless (eq @showCompany false)}}
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600"
+            >Company</th>
+          {{/unless}}
           <th
             class="px-4 py-3 text-left font-semibold text-gray-600"
           >Posted</th>
@@ -43,13 +45,15 @@
                 </LinkTo>
               {{/if}}
             </td>
-            <td class="px-4 py-3 text-gray-600">
-              {{~#if jobPost.company.name~}}
-                {{jobPost.company.name}}
-              {{~else~}}
-                <span class="italic text-amber-500">missing</span>
-              {{~/if~}}
-            </td>
+            {{#unless (eq @showCompany false)}}
+              <td class="px-4 py-3 text-gray-600">
+                {{~#if jobPost.company.name~}}
+                  {{jobPost.company.name}}
+                {{~else~}}
+                  <span class="italic text-amber-500">missing</span>
+                {{~/if~}}
+              </td>
+            {{/unless}}
             <td class="px-4 py-3 text-gray-600">
               {{! format-date routes calendar strings (postedDate) through
                   TZ-free rendering and ISO instants (createdAt fallback)

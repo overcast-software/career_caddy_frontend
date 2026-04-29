@@ -4,13 +4,15 @@
       {{this.jobPost.title}}
     </LinkTo>
   </td>
-  <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
-    {{~#if this.jobPost.company.name~}}
-      {{this.jobPost.company.name}}
-    {{~else~}}
-      <span class="italic text-amber-500 dark:text-amber-400">missing</span>
-    {{~/if~}}
-  </td>
+  {{#unless (eq @showCompany false)}}
+    <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+      {{~#if this.jobPost.company.name~}}
+        {{this.jobPost.company.name}}
+      {{~else~}}
+        <span class="italic text-amber-500 dark:text-amber-400">missing</span>
+      {{~/if~}}
+    </td>
+  {{/unless}}
   <td
     class="px-4 py-3 text-gray-600 dark:text-gray-300"
   >{{@jobApplication.status}}</td>
