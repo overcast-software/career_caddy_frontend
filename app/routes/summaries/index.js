@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import { infinityModel } from '../../utils/list-model';
 
 export default class SummariesIndexRoute extends Route {
   @service infinity;
@@ -16,7 +17,7 @@ export default class SummariesIndexRoute extends Route {
 
   model({ search }) {
     this.store.query('resume', { slim: 1 });
-    return this.infinity.model('summary', {
+    return infinityModel(this, 'summary', {
       perPage: 20,
       startingPage: 1,
       include: 'job-post',

@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import { infinityModel } from '../../utils/list-model';
 
 export default class CompaniesIndexRoute extends Route {
   @service infinity;
@@ -14,7 +15,7 @@ export default class CompaniesIndexRoute extends Route {
   }
 
   model({ search }) {
-    return this.infinity.model('company', {
+    return infinityModel(this, 'company', {
       perPage: 20,
       startingPage: 1,
       sort: 'name',

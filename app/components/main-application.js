@@ -29,7 +29,7 @@ export default class MainApplicationComponent extends Component {
   }
 
   _onRouteChange(transition) {
-    if (transition.from && window.innerWidth < 768) {
+    if (transition.from) {
       this.sidebarOpen = false;
       localStorage.setItem(SIDEBAR_KEY, 'false');
     }
@@ -54,10 +54,8 @@ export default class MainApplicationComponent extends Component {
 
   @action
   close() {
-    if (window.innerWidth < 768) {
-      this.sidebarOpen = false;
-      localStorage.setItem(SIDEBAR_KEY, 'false');
-    }
+    this.sidebarOpen = false;
+    localStorage.setItem(SIDEBAR_KEY, 'false');
   }
 
   @action

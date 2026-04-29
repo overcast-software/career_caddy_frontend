@@ -356,16 +356,13 @@ body {
   transition: grid-template-columns 0.25s ease;
 }
 
-.course--sidebar-open {
-  grid-template-columns: var(--oc-sidebar) 1fr 0;
-}
-
-.course--chat-open {
-  grid-template-columns: 0 1fr 24rem;
-}
-
+/* Both sidebar and chat render as fixed-position panels (slide-in
+   drawer + bottom sheet) regardless of viewport size. The grid keeps
+   their slots collapsed so route content always uses the full width. */
+.course--sidebar-open,
+.course--chat-open,
 .course--sidebar-open.course--chat-open {
-  grid-template-columns: var(--oc-sidebar) 1fr 24rem;
+  grid-template-columns: 0 1fr 0;
 }
 
 .course > header {
@@ -376,18 +373,10 @@ body {
   display: contents;
 }
 
+/* Persistent grid sidebar is always collapsed; the drawer handles all
+   viewports. Kept in DOM for component continuity but never shown. */
 .course-sidebar {
-  grid-area: sidebar;
-  overflow-y: auto;
-  border-right: 1px solid var(--border);
-}
-
-.course:not(.course--sidebar-open) .course-sidebar {
-  overflow: hidden;
-}
-
-.course:not(.course--chat-open) .course-chat {
-  overflow: hidden;
+  display: none;
 }
 
 .course-main {
@@ -397,12 +386,36 @@ body {
   position: relative;
 }
 
+/* Chat is a bottom-sheet panel at all viewport sizes — slides up from
+   the bottom, covers 80dvh, dimmed backdrop behind. Never claims a
+   grid column, so the route content keeps its full width whether chat
+   is open or closed. */
 .course-chat {
-  grid-area: chat;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 45dvh;
+  width: 100vw;
+  border-top: 1px solid var(--border);
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  box-shadow: 0 -12px 32px rgb(0 0 0 / 25%);
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
   overflow-y: auto;
-  border-left: 1px solid var(--border);
-  position: relative;
-  z-index: 50;
+  z-index: 60;
+}
+
+.course--chat-open .course-chat {
+  transform: translateY(0);
+}
+
+.chat-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 40%);
+  z-index: 55;
 }
 
 /* Full-page chat (/caddy): .caddy-fairway on .fairway via @mainClass.
@@ -417,70 +430,14 @@ body {
   flex-direction: column;
 }
 
-/* On mobile, the desktop sidebar is hidden; chat renders as a bottom
- * sheet over the page so it's obviously a panel, not fullscreen, and
- * the underlying page remains visible. */
-@media (width <= 767px) {
-  .course--sidebar-open {
-    grid-template-areas:
-      "header"
-      "main";
-    grid-template-columns: 1fr;
-  }
-
-  .course-sidebar {
-    display: none;
-  }
-
-  .course-chat {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 80dvh;
-    width: 100vw;
-    border-left: none;
-    border-top: 1px solid var(--border);
-    border-top-left-radius: 1rem;
-    border-top-right-radius: 1rem;
-    box-shadow: 0 -12px 32px rgb(0 0 0 / 25%);
-    transform: translateY(100%);
-    transition: transform 0.25s ease;
-    z-index: 60;
-  }
-
-  .course--chat-open .course-chat {
-    transform: translateY(0);
-  }
-
-  .chat-mobile-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgb(0 0 0 / 40%);
-    z-index: 55;
-  }
-}
-
-/* On desktop, the mobile overlay drawer is never shown; hide back-arrow in persistent sidebar */
-@media (width >= 768px) {
-  .mobile-overlay,
-  .mobile-drawer {
-    display: none;
-  }
-
-  .course-sidebar .sidebar-back-btn,
-  .course-sidebar .sidebar-nav-header {
-    display: none;
-  }
-}
-
 .mobile-overlay {
   position: fixed;
   inset: 0;
   background: rgb(0 0 0 / 0%);
-  /* Above .tee-box (50) so the subnav doesn't cover the drawer top
-     in narrow viewports. Mirrors .chat-mobile-backdrop's stacking. */
-  z-index: 55;
+  /* Above .site-header (70) so the dim covers the entire viewport when
+     the drawer is open. Mirrors the drawer being z:80 — they pair so
+     the user sees the entire sidebar top to bottom. */
+  z-index: 75;
   pointer-events: none;
   transition: background 0.25s ease;
 }
@@ -496,11 +453,11 @@ body {
   left: 0;
   height: 100dvh;
   width: min(320px, 75vw);
-  /* Above .tee-box (50) AND .mobile-overlay (55) so the drawer paints
-     fully on top of both — at z-index 50 the subnav (also 50, painted
-     later in DOM) covered the drawer's top section, hiding the
-     sidebar-nav-header / back button on mobile. */
-  z-index: 60;
+  /* Above .site-header (70) and .mobile-overlay (75) so the drawer
+     paints over the header — the user sees the entire sidebar top to
+     bottom. Close via the back-arrow in the drawer's own header or by
+     clicking the dimmed overlay. */
+  z-index: 80;
   overflow-y: auto;
   transform: translateX(-100%);
   transition: transform 0.25s ease;
@@ -1417,7 +1374,10 @@ a.landing-btn-primary:hover {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 20;
+  /* Above sidebar drawer (60) + overlay (55) so the chat-toggle button
+     stays reachable while the sidebar drawer is open. Hidden by JS when
+     chat itself is open (it would overlap the chat input). */
+  z-index: 70;
   border-top: 1px solid var(--border);
   padding: var(--space-2) var(--space-6);
   display: flex;
@@ -1444,15 +1404,11 @@ a.landing-btn-primary:hover {
   font-weight: 600;
 }
 
-/* On desktop with sidebars open, footer must not cover them */
-@media (width >= 768px) {
-  .course--sidebar-open .route-footer {
-    left: var(--oc-sidebar);
-  }
-
-  .course--chat-open .route-footer {
-    right: 24rem;
-  }
+/* When chat is open, the chat panel reaches the bottom — hide footer
+   so it doesn't overlap the chat input. The chat backdrop click closes
+   chat and re-shows the footer. */
+.course--chat-open .route-footer {
+  display: none;
 }
 
 /* Prevent login/hero pages from scrolling */
@@ -1929,7 +1885,10 @@ pre {
   padding: 10px 20px;
   background: var(--card);
   border-bottom: 1px solid var(--border);
-  z-index: 50;
+  /* Above chat (60), backdrop (55), drawer overlay (55) so the hamburger
+     toggle is always reachable — clicking it closes whichever overlay
+     is open and toggles the sidebar in one click. */
+  z-index: 70;
   min-height: 4lh;
 }
 
@@ -1972,9 +1931,6 @@ pre {
   min-height: 3lh;
   padding: 0 var(--space-4);
   gap: var(--space-3);
-  /* Inline (non-portal) render: each route mounts its own .tee-box, so
-     the fade-in plays once per route rather than once at app boot. */
-  animation: subnav-fade-in 220ms ease-out;
 }
 
 .topbar-login {
@@ -2021,6 +1977,26 @@ pre {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* On small screens the subnav can wrap to many lines (search input,
+   filter chips, primary action) and eat half the viewport before any
+   route content shows. Cap each section to a single row; let
+   .tee-center scroll horizontally when its content overflows. Avoid
+   clipping the .tee-box itself — popover menus (e.g. filters) anchor
+   to it and need to overflow downward into the page. */
+@media (width <= 767px) {
+  .tee-box {
+    min-height: 2.5lh;
+    grid-template-columns: auto auto auto;
+    gap: var(--space-2);
+  }
+
+  .tee-center {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
   }
 }
 

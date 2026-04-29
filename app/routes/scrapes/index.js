@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import { infinityModel } from '../../utils/list-model';
 
 export default class ScrapesIndexRoute extends Route {
   @service infinity;
@@ -14,7 +15,7 @@ export default class ScrapesIndexRoute extends Route {
   }
 
   model({ search }) {
-    return this.infinity.model('scrape', {
+    return infinityModel(this, 'scrape', {
       perPage: 20,
       startingPage: 1,
       include: 'job-post,company',
