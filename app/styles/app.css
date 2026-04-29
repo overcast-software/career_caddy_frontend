@@ -850,7 +850,9 @@ a.btn:active {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 60;
+  /* Above .site-header (70), .mobile-overlay (75), and the drawer (80)
+     so toast notifications are never occluded by the sticky header. */
+  z-index: 90;
   pointer-events: auto;
 }
 
