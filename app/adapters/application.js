@@ -117,6 +117,20 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
     return result;
   }
 
+  // Extend the default JSON:API buildQuery (which only emits `include`)
+  // so callers can pass sparse fieldsets through `adapterOptions.fields`:
+  //   findRecord('scrape', id, { adapterOptions: { fields: { scrape: 'url,status,...' } } })
+  buildQuery(snapshot) {
+    const query = super.buildQuery(snapshot);
+    const fields = snapshot?.adapterOptions?.fields;
+    if (fields) {
+      for (const [type, fieldList] of Object.entries(fields)) {
+        query[`fields[${type}]`] = fieldList;
+      }
+    }
+    return query;
+  }
+
   buildURL(...args) {
     let url = super.buildURL(...args);
     if (url.endsWith('/')) return url;

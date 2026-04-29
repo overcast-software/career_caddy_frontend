@@ -19,7 +19,13 @@ export default class ScrapesShowController extends Controller {
         this.flashMessages.success('Scrape completed.');
         await this.store.findRecord('scrape', rec.id, {
           reload: true,
-          include: 'company,job-post',
+          include: 'company,job-post,scrape-statuses',
+          adapterOptions: {
+            fields: {
+              scrape:
+                'url,source_link,status,scraped_at,parse_method,external_link,job_content,latest_status_note',
+            },
+          },
         });
       },
       onFailed: () => this.flashMessages.danger('Scrape failed.'),
