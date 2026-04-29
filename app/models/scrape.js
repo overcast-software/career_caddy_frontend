@@ -2,6 +2,7 @@ import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 
 export default class ScrapeModel extends Model {
   @attr('string') url;
+  @attr('string') sourceLink;
   @attr('string') cssSelectors;
   @attr('string') jobContent;
   @attr('string') externalLink;

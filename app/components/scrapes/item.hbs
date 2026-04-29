@@ -21,6 +21,21 @@
         </div>
       {{/if}}
 
+      {{#if (and @scrape.sourceLink (not-eq @scrape.sourceLink @scrape.url))}}
+        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+          <dt class="font-medium text-gray-900">Source Link</dt>
+          <dd class="text-gray-700 sm:col-span-2 break-all">
+            <a
+              href={{@scrape.sourceLink}}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:underline"
+              title="Original tracker URL — resolved to the URL above"
+            >{{@scrape.sourceLink}}</a>
+          </dd>
+        </div>
+      {{/if}}
+
       {{#if @scrape.company.name}}
         <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
           <dt class="font-medium text-gray-900">Company</dt>
