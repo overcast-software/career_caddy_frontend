@@ -23,6 +23,11 @@ export default class ScrapesIndexRoute extends Route {
       // scraped_at yet (status=hold/pending). Scrape has no created_at
       // column (see api views/scrapes.py); -id is the reliable proxy.
       sort: '-id',
+      // JSON:API sparse fieldsets — list rendering only needs these.
+      // Drops job_content, html, css_selectors, apply_candidates from
+      // every row; without this filter the response was multi-MB.
+      'fields[scrape]':
+        'url,status,scraped_at,parse_method,external_link,latest_status_note,apply_url,apply_url_status,source_link',
       ...(search ? { 'filter[query]': search } : {}),
     });
   }
