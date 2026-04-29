@@ -66,8 +66,10 @@ module('Integration | Component | main-application', function (hooks) {
       );
   });
 
-  test('desktop sidebar stays open when close is called', async function (assert) {
-    // On wide viewports (≥768px), close() is a no-op — sidebar stays open.
+  test('desktop sidebar closes when close is called', async function (assert) {
+    // Sidebar is now a slide-in drawer at every viewport size — close()
+    // closes it regardless of innerWidth. Use the drawer's back-btn
+    // (course-sidebar is display:none and not interactive).
     Object.defineProperty(window, 'innerWidth', {
       value: 1024,
       writable: true,
@@ -77,12 +79,12 @@ module('Integration | Component | main-application', function (hooks) {
     await render(hbs`<MainApplication />`);
     assert.dom('.course').hasClass('course--sidebar-open', 'starts open');
 
-    await click('.course-sidebar .sidebar-back-btn');
+    await click('.mobile-drawer .sidebar-back-btn');
     assert
       .dom('.course')
-      .hasClass(
+      .doesNotHaveClass(
         'course--sidebar-open',
-        'sidebar stays open on desktop when close is called',
+        'sidebar closes via back-arrow on desktop',
       );
 
     // Restore for other tests
