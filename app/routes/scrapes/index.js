@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import { action } from '@ember/object';
 import { infinityModel } from '../../utils/list-model';
 
 export default class ScrapesIndexRoute extends Route {
@@ -12,6 +13,20 @@ export default class ScrapesIndexRoute extends Route {
   setupController(controller, model) {
     super.setupController(controller, model);
     controller.isSearching = false;
+  }
+
+  // Suppress the loading substate when the transition is an in-route
+  // refresh (search debounce updating the `search` query param).
+  // scrapes/index-loading.hbs has no <:subnav> slot, so without this
+  // the search input is torn down on every keystroke — visible
+  // subnav flicker plus focus loss. Initial entry (transition.from
+  // is null or a different route) still shows the skeleton.
+  @action
+  loading(transition) {
+    if (transition.from && transition.from.name === this.routeName) {
+      return true;
+    }
+    return false;
   }
 
   model({ search }) {
