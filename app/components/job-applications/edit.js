@@ -67,6 +67,10 @@ export default class JobApplicationsEdit extends Component {
     this.jobApplication.resume = resume;
   }
 
+  @action updateJobPost(jobPost) {
+    this.jobApplication.jobPost = jobPost;
+  }
+
   @action updateField(field, event) {
     if (field === 'appliedAt') {
       this.jobApplication[field] = event.target.valueAsDate ?? null;

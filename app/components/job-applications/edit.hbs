@@ -8,12 +8,26 @@
   <form class="builder-form two-col" {{on "submit" this.saveApplication}}>
     <div class="field">
       <label class="field-label" for="ja-edit-job-post">Job Post</label>
-      <input
-        id="ja-edit-job-post"
-        type="text"
-        value={{@jobApplication.jobPost.title}}
-        disabled="true"
-      />
+      {{#if @jobPostOptions}}
+        <PowerSelect
+          @options={{@jobPostOptions}}
+          @selected={{@jobApplication.jobPost}}
+          @onChange={{this.updateJobPost}}
+          @searchEnabled={{true}}
+          @searchField="title"
+          @placeholder="Select a job post…"
+          as |jobPost|
+        >
+          {{jobPost.title}}
+        </PowerSelect>
+      {{else}}
+        <input
+          id="ja-edit-job-post"
+          type="text"
+          value={{@jobApplication.jobPost.title}}
+          disabled="true"
+        />
+      {{/if}}
     </div>
 
     <div class="field">

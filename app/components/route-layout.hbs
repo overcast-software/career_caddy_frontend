@@ -6,16 +6,7 @@
     <:center>
       {{yield to="subnav"}}
     </:center>
-    <:right>
-      {{#if this.spinner.isShowing}}
-        <div class="spinner-status">
-          <span class="spinner-dot"></span>
-          {{#if this.spinner.label}}
-            <span class="spinner-label">{{this.spinner.label}}</span>
-          {{/if}}
-        </div>
-      {{/if}}
-    </:right>
+    <:right></:right>
   </Menus::SubnavBar>
 {{/unless}}
 <BarCart @flashMessages={{@flashMessages}} />

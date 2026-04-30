@@ -26,7 +26,15 @@
     >Caddy</span></LinkTo>
 </div>
 
-<div class="flex items-center justify-end">
+<div class="flex items-center justify-end gap-2">
+  {{#if this.spinner.isShowing}}
+    <div class="spinner-status" data-test-spinner>
+      <span class="spinner-dot"></span>
+      {{#if this.spinner.label}}
+        <span class="spinner-label">{{this.spinner.label}}</span>
+      {{/if}}
+    </div>
+  {{/if}}
   {{#if this.session.isAuthenticated}}
     {{#if this.currentUser.user.username}}
       <span class="text-sm text-muted">{{this.currentUser.user.username}}</span>

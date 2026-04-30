@@ -284,7 +284,7 @@ export default class QuestionsFormComponent extends Component {
       );
     } else if (this.selectedCompany) {
       this.router.transitionTo(
-        'companies.show.answers',
+        'companies.show.questions',
         this.selectedCompany.id,
       );
     } else {
