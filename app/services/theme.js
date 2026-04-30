@@ -4,12 +4,16 @@ import { action } from '@ember/object';
 
 const PALETTES = ['indigo', 'blue', 'jade', 'rose', 'amber', 'violet'];
 const DEFAULT_PALETTE = 'indigo';
+const MODES = ['system', 'light', 'dark'];
 
 export default class ThemeService extends Service {
-  @tracked mode = 'light';
+  @tracked mode = 'system';
   @tracked palette = DEFAULT_PALETTE;
+  @tracked _systemPrefersDark = false;
+  _mediaQuery = null;
 
   get isDark() {
+    if (this.mode === 'system') return this._systemPrefersDark;
     return this.mode === 'dark';
   }
 
@@ -17,19 +21,47 @@ export default class ThemeService extends Service {
     return PALETTES;
   }
 
+  get modes() {
+    return MODES;
+  }
+
   constructor() {
     super(...arguments);
     this._migrateOldKey();
-    this.mode = localStorage.getItem('theme-mode') || 'light';
+    const saved = localStorage.getItem('theme-mode');
+    this.mode = MODES.includes(saved) ? saved : 'system';
     this.palette = localStorage.getItem('theme-palette') || DEFAULT_PALETTE;
+
+    this._mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    this._systemPrefersDark = this._mediaQuery.matches;
+    this._mediaQuery.addEventListener('change', this._onSystemChange);
+
+    this._apply();
+  }
+
+  willDestroy() {
+    super.willDestroy(...arguments);
+    if (this._mediaQuery) {
+      this._mediaQuery.removeEventListener('change', this._onSystemChange);
+    }
+  }
+
+  _onSystemChange = (event) => {
+    this._systemPrefersDark = event.matches;
+    if (this.mode === 'system') this._apply();
+  };
+
+  @action
+  setMode(mode) {
+    if (!MODES.includes(mode)) return;
+    this.mode = mode;
+    localStorage.setItem('theme-mode', this.mode);
     this._apply();
   }
 
   @action
   toggle() {
-    this.mode = this.mode === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('theme-mode', this.mode);
-    this._apply();
+    this.setMode(this.isDark ? 'light' : 'dark');
   }
 
   @action
@@ -42,7 +74,7 @@ export default class ThemeService extends Service {
 
   _apply() {
     const el = document.documentElement;
-    el.dataset.theme = this.mode === 'dark' ? 'dark' : '';
+    el.dataset.theme = this.isDark ? 'dark' : '';
     el.dataset.palette = this.palette === DEFAULT_PALETTE ? '' : this.palette;
   }
 

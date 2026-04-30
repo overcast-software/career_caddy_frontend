@@ -49,9 +49,10 @@ Router.map(function () {
       },
       function () {
         this.route('job-posts');
-        this.route('job-applications');
+        this.route('job-applications', function () {
+          this.route('new');
+        });
         this.route('scrapes');
-        this.route('answers');
         this.route('questions', function () {
           this.route('new');
           this.route('edit', { path: '/:question_id/edit' });

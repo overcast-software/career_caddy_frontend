@@ -13,29 +13,17 @@
         Choose your accent color and toggle dark mode.
       </p>
 
-      {{! ── Dark Mode Toggle ── }}
+      {{! ── Theme Mode ── }}
       <div
-        class="flex items-center justify-between py-3 mb-6 border-b border-gray-100 dark:border-gray-700"
+        class="flex flex-wrap items-center justify-between gap-3 py-3 mb-6 border-b border-gray-100 dark:border-gray-700"
       >
-        <div>
-          <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Dark
-            mode</p>
-          <p class="text-xs text-gray-400 dark:text-gray-500">Switch between
-            light and dark themes</p>
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-200">
+            Theme</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500">Follow your OS
+            preference, or pick light or dark</p>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked="{{this.theme.isDark}}"
-          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200
-            {{if this.theme.isDark 'bg-accent-500' 'bg-gray-200'}}"
-          {{on "click" this.theme.toggle}}
-        >
-          <span
-            class="pointer-events-none inline-block size-5 rounded-full bg-white shadow ring-0 transition-transform duration-200
-              {{if this.theme.isDark 'translate-x-5' 'translate-x-0'}}"
-          ></span>
-        </button>
+        <ThemeModeToggle />
       </div>
 
       {{! ── Palette Selection ── }}

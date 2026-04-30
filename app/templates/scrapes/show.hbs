@@ -9,18 +9,15 @@
     <button
       type="button"
       class="btn"
+      title="Re-fetch the URL and run the full pipeline again"
       {{on "click" (fn this.retryScrape this.model)}}
     >Retry</button>
     <button
       type="button"
       class="btn"
-      {{on "click" (fn this.queueScrape this.model)}}
-    >Queue</button>
-    <button
-      type="button"
-      class="btn"
+      title="Re-run extraction on the existing scrape content (no re-fetch)"
       {{on "click" (fn this.parseScrape this.model)}}
-    >Parse</button>
+    >Re-parse</button>
     <LinkTo
       @route="scrapes.graph"
       @model={{this.model.id}}

@@ -10,6 +10,7 @@ export default class TopBarComponent extends Component {
   @service currentUser;
   @service flashMessages;
   @service router;
+  @service spinner;
 
   @action toggle() {
     this.open = !this.open;

@@ -720,40 +720,7 @@
     </div>
   {{/if}}
 
-  <div class="px-4 py-4 border-t border-gray-100">
-    <label class="flex items-center justify-between cursor-pointer">
-      <span class="flex items-center gap-2 text-sm font-medium text-gray-600">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="size-4 shrink-0"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          stroke-width="1.5"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
-          />
-        </svg>
-        Dark mode
-      </span>
-      <span
-        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-          {{if this.theme.isDark 'bg-accent-500' 'bg-gray-200'}}"
-      >
-        <input
-          type="checkbox"
-          class="peer sr-only"
-          checked={{this.theme.isDark}}
-          {{on "change" this.theme.toggle}}
-        />
-        <span
-          class="inline-block size-4 rounded-full bg-white shadow transition-transform
-            {{if this.theme.isDark 'translate-x-6' 'translate-x-1'}}"
-        ></span>
-      </span>
-    </label>
+  <div class="px-4 py-4 border-t border-gray-100 flex justify-center">
+    <ThemeModeToggle />
   </div>
 </aside>
