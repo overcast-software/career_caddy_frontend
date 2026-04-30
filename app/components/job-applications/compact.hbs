@@ -13,9 +13,11 @@
       {{~/if~}}
     </td>
   {{/unless}}
-  <td
-    class="px-4 py-3 text-gray-600 dark:text-gray-300"
-  >{{@jobApplication.status}}</td>
+  <td class="px-4 py-3">
+    <span class={{job-application-status-class @jobApplication.status}}>
+      {{or @jobApplication.status "—"}}
+    </span>
+  </td>
   <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
     {{#if @jobApplication.appliedAt}}
       {{moment-format @jobApplication.appliedAt "MMM D, YYYY"}}
