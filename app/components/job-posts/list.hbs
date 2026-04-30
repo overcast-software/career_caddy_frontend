@@ -44,6 +44,19 @@
                   Duplicate of #{{jobPost.duplicateOfId}}
                 </LinkTo>
               {{/if}}
+              {{#if (eq jobPost.postingStatus "closed")}}
+                {{! api hides closed posts by default; this chip only
+                    shows up when the user has flipped on
+                    `include_closed=true` (FilterPill at the top of
+                    /job-posts/), so they need a clear at-a-glance
+                    signal for which rows are no-longer-accepting. }}
+                <span
+                  class="ml-2 inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/30"
+                  title="Posting is no longer accepting applications"
+                >
+                  Closed
+                </span>
+              {{/if}}
             </td>
             {{#unless (eq @showCompany false)}}
               <td class="px-4 py-3 text-gray-600">
