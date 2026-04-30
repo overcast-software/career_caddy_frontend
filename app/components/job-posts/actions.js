@@ -25,6 +25,15 @@ export default class JobPostsActions extends Component {
     return this.selectedResume?.id === '0';
   }
 
+  // Async hasMany — `{{get @jobPost.scrapes "0"}}` in the template returned
+  // an unresolved proxy with no .id, so LinkTo serialized to /scrapes/null.
+  get firstScrapeId() {
+    const scrapes = this.args.jobPost?.hasMany('scrapes').value();
+    if (!scrapes?.length) return null;
+    for (const s of scrapes) return s.id;
+    return null;
+  }
+
   @tracked coverLetterInProgress = false;
 
   @action updateResume(resume) {

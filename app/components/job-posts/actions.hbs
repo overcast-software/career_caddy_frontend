@@ -11,10 +11,10 @@
     </PowerSelect>
   </div>
   <div class="actions">
-    {{#if @jobPost.scrapes.length}}
+    {{#if this.firstScrapeId}}
       <LinkTo
         @route="scrapes.show"
-        @model={{get @jobPost.scrapes "0"}}
+        @model={{this.firstScrapeId}}
         class="btn small"
       >View Scrape</LinkTo>
     {{else}}

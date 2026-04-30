@@ -1881,10 +1881,9 @@ pre {
   position: sticky;
   top: 0;
   display: flex;
+  flex-direction: column;
   width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
+  padding: 10px 20px 4px;
   background: var(--card);
   border-bottom: 1px solid var(--border);
   /* Above chat (60), backdrop (55), drawer overlay (55) so the hamburger
@@ -1892,6 +1891,27 @@ pre {
      is open and toggles the sidebar in one click. */
   z-index: 70;
   min-height: 4lh;
+}
+
+.topbar-row {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Always rendered with reserved height so the topbar-row above keeps
+   the same vertical position whether or not the spinner is active. */
+.topbar-spinner-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-height: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
 }
 
 .loading-bar {

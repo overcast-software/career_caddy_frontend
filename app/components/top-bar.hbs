@@ -1,50 +1,9 @@
-<div class="flex items-center">
-  <button
-    class="topbar-hamburger p-2 rounded hover:bg-gray-100"
-    type="button"
-    {{on "click" @onToggle}}
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="size-5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      stroke-width="2"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M4 6h16M4 12h16M4 18h16"
-      />
-    </svg>
-  </button>
-</div>
-
-<div class="text-center">
-  <LinkTo @route="index" class="brand-title no-underline">Career<span
-    >Caddy</span></LinkTo>
-</div>
-
-<div class="flex items-center justify-end gap-2">
-  {{#if this.spinner.isShowing}}
-    <div class="spinner-status" data-test-spinner>
-      <span class="spinner-dot"></span>
-      {{#if this.spinner.label}}
-        <span class="spinner-label">{{this.spinner.label}}</span>
-      {{/if}}
-    </div>
-  {{/if}}
-  {{#if this.session.isAuthenticated}}
-    {{#if this.currentUser.user.username}}
-      <span class="text-sm text-muted">{{this.currentUser.user.username}}</span>
-    {{/if}}
+<div class="topbar-row">
+  <div class="flex items-center">
     <button
-      class="p-2 rounded hover:bg-gray-100"
+      class="topbar-hamburger p-2 rounded hover:bg-gray-100"
       type="button"
-      title="Logout"
-      {{on "click" this.invalidateSession}}
-      {{on "click" this.onClose}}
+      {{on "click" @onToggle}}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -57,16 +16,68 @@
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
-          d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M18 12H9m0 0l3-3m-3 3l3 3"
+          d="M4 6h16M4 12h16M4 18h16"
         />
       </svg>
     </button>
-  {{else}}
-    <LinkTo
-      @route="login"
-      {{on "click" this.onClose}}
-      class="topbar-login rounded px-3 py-1.5 text-sm font-semibold text-white no-underline"
-    >Login</LinkTo>
+  </div>
+
+  <div class="text-center">
+    <LinkTo @route="index" class="brand-title no-underline">Career<span
+      >Caddy</span></LinkTo>
+  </div>
+
+  <div class="flex items-center justify-end gap-2">
+    {{#if this.session.isAuthenticated}}
+      {{#if this.currentUser.user.username}}
+        <span
+          class="text-sm text-muted"
+        >{{this.currentUser.user.username}}</span>
+      {{/if}}
+      <button
+        class="p-2 rounded hover:bg-gray-100"
+        type="button"
+        title="Logout"
+        {{on "click" this.invalidateSession}}
+        {{on "click" this.onClose}}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="size-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M18 12H9m0 0l3-3m-3 3l3 3"
+          />
+        </svg>
+      </button>
+    {{else}}
+      <LinkTo
+        @route="login"
+        {{on "click" this.onClose}}
+        class="topbar-login rounded px-3 py-1.5 text-sm font-semibold text-white no-underline"
+      >Login</LinkTo>
+    {{/if}}
+  </div>
+</div>
+
+{{! Always rendered so the topbar-row above doesn't shift when the
+    spinner toggles. Only the inner content is conditional. }}
+<div
+  class="topbar-spinner-row"
+  data-test-spinner
+  aria-hidden={{unless this.spinner.isShowing "true"}}
+>
+  {{#if this.spinner.isShowing}}
+    <span class="spinner-dot"></span>
+    {{#if this.spinner.label}}
+      <span class="spinner-label">{{this.spinner.label}}</span>
+    {{/if}}
   {{/if}}
 </div>
 

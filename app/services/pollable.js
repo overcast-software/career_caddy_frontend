@@ -15,6 +15,12 @@ export default class PollableService extends Service {
   @tracked pendingIds = new Set();
 
   @action isPending(record) {
+    // Short-circuit on terminal status so a stale entry left over in
+    // pendingIds (or a record whose poll hasn't yet stopped) can't keep
+    // a completed/failed row spinning. Fixes "re-score with new data and
+    // both rows spin" — the old completed score never spins regardless of
+    // pendingIds bookkeeping.
+    if (!record || this.isTerminal(record)) return false;
     return this.pendingIds.has(record.id);
   }
 
@@ -117,11 +123,22 @@ export default class PollableService extends Service {
     // 'Score ready. Go back' phrasing.
     const match = /^(\S+)(\s[\s\S]*)?$/.exec(message);
     const [head, tail] = match ? [match[1], match[2] || ''] : [message, ''];
-    this.flashMessages[type](
-      htmlSafe(
-        `<a href="${url}" class="underline font-medium">${head}</a>${tail}`,
-      ),
-      { sticky: true },
-    );
+    // If the captured returnUrl never resolved to a real id (callers
+    // that transitionTo with an unsaved record can leave currentURL
+    // sitting on /scrapes/null etc.), drop the anchor — a broken link
+    // is worse than no link.
+    const linkable = url && !/\/(null|undefined)(\/|$|\?|#)/.test(url);
+    // The flash container (.alert) is display:flex; justify-content:center.
+    // A bare `<a>head</a> tail` puts two children in the flex box and the
+    // leading whitespace at the start of the anonymous text flex-item gets
+    // collapsed, rendering as "headtail". Wrapping the whole message in a
+    // single <span> gives the flex container one child and preserves the
+    // word break.
+    const inner = linkable
+      ? `<a href="${url}" class="underline font-medium">${head}</a>${tail}`
+      : `${head}${tail}`;
+    this.flashMessages[type](htmlSafe(`<span>${inner}</span>`), {
+      sticky: true,
+    });
   }
 }

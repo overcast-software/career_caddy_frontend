@@ -35,7 +35,13 @@
     </section>
     <div class="field">
       <div class="field-label">Status</div>
-      {{@jobApplication.status}}
+      {{#if @jobApplication.status}}
+        <span class={{job-application-status-class @jobApplication.status}}>
+          {{@jobApplication.status}}
+        </span>
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-600">—</span>
+      {{/if}}
     </div>
 
     <div class="field">
