@@ -141,6 +141,8 @@
       </Panel::Card>
     {{/if}}
 
+    <JobPosts::AliasesPanel @jobPost={{this.model}} />
+
     <Panel::Card>
       <JobPosts::Tabs @jobPost={{this.model}} />
       <div role="tabpanel" class="mt-4 relative overflow-hidden">

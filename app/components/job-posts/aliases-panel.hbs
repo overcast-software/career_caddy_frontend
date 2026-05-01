@@ -1,0 +1,44 @@
+{{! Surfaces the dedup'd URL set for a JobPost — canonical, apply
+    destination, and each scrape's url/sourceLink. Suppressed when the
+    JobPost has only one known URL (the title ↗ already covers that
+    case). The getter that produces @jobPost.urlAliases lives on the
+    job-post model so other callers can reuse it. }}
+{{#if (gt @jobPost.urlAliases.length 1)}}
+  <Panel::Card>
+    <div class="flex items-center justify-between">
+      <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+        Reachable via
+      </h2>
+      <span
+        class="text-xs text-gray-500"
+        title="All URLs we've seen for this posting (canonical, apply destination, email/tracker links, prior scrapes)"
+      >
+        {{@jobPost.urlAliases.length}}
+        URLs
+      </span>
+    </div>
+    <ul class="mt-3 space-y-2" data-test-aliases>
+      {{#each @jobPost.urlAliases as |alias|}}
+        <li
+          class="flex items-center gap-2 text-sm"
+          data-test-alias={{alias.url}}
+        >
+          <span
+            class="inline-flex shrink-0 items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700"
+          >
+            {{alias.label}}
+          </span>
+          <a
+            href={{alias.url}}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={{alias.url}}
+            class="text-accent-500 truncate hover:underline"
+          >
+            {{alias.hostname}}
+          </a>
+        </li>
+      {{/each}}
+    </ul>
+  </Panel::Card>
+{{/if}}

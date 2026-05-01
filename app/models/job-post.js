@@ -15,6 +15,13 @@ function _firstNonTerminal(records) {
   return null;
 }
 
+const HOST_RE = /^https?:\/\/([^/]+)/i;
+function _hostnameOf(u) {
+  if (!u) return '';
+  const m = HOST_RE.exec(u);
+  return m ? m[1] : u;
+}
+
 export default class JobPostModel extends Model {
   @attr('date') createdAt;
   @attr('string') description;
@@ -22,6 +29,7 @@ export default class JobPostModel extends Model {
   @attr('date') postedDate;
   @attr('date') extractionDate;
   @attr('string') link;
+  @attr('string') canonicalLink;
   @attr('number') duplicateOfId;
   // Apply-destination resolver fields. Populated by the scrape-graph
   // ResolveApplyUrl node via PATCH /scrapes/:id/apply-url/. See
@@ -79,6 +87,32 @@ export default class JobPostModel extends Model {
   // server state rather than only session-created records.
   get activeScrape() {
     return _firstNonTerminal(this.hasMany('scrapes').value());
+  }
+
+  // Distinct URLs that reach this posting: canonical, apply destination,
+  // plus each scrape's url + sourceLink (the tracker / aggregator URL the
+  // scrape was created from). Used by <JobPosts::AliasesPanel> on the
+  // show page so the user can see that an email-tracker URL, a Dice
+  // mirror, and the employer apply page all point at the same record.
+  get urlAliases() {
+    const seen = new Map();
+    const push = (url, label) => {
+      if (!url) return;
+      if (!seen.has(url)) {
+        seen.set(url, { url, label, hostname: _hostnameOf(url) });
+      }
+    };
+    push(this.link, 'Canonical');
+    if (this.canonicalLink && this.canonicalLink !== this.link) {
+      push(this.canonicalLink, 'Canonical');
+    }
+    if (this.applyUrlStatus === 'resolved') push(this.applyUrl, 'Apply');
+    const scrapes = this.hasMany('scrapes').value() || [];
+    for (const s of scrapes) {
+      push(s.url, 'Scraped');
+      push(s.sourceLink, 'Tracker');
+    }
+    return [...seen.values()];
   }
 
   get activeScore() {
