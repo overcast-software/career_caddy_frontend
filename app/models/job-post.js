@@ -102,9 +102,11 @@ export default class JobPostModel extends Model {
         seen.set(url, { url, label, hostname: _hostnameOf(url) });
       }
     };
-    push(this.link, 'Canonical');
     if (this.canonicalLink && this.canonicalLink !== this.link) {
+      push(this.link, 'Link');
       push(this.canonicalLink, 'Canonical');
+    } else {
+      push(this.link, 'Canonical');
     }
     if (this.applyUrlStatus === 'resolved') push(this.applyUrl, 'Apply');
     const scrapes = this.hasMany('scrapes').value() || [];
