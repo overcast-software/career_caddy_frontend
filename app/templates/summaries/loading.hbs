@@ -1,5 +1,9 @@
-<div class="loading-message">
-  <p>Processing summaries...</p>
-  <div class="spinner" aria-hidden="true">⟳</div>
-
-</div>
+{{page-title "Summaries"}}
+<RouteLayout>
+  <:subnav>
+    <SubnavSkeleton />
+  </:subnav>
+  <:main>
+    <LoadingSkeleton />
+  </:main>
+</RouteLayout>
