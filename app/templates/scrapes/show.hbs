@@ -1,30 +1,31 @@
 {{page-title "Scrape"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
-  <:subnav>
-    <LinkTo
-      @route="scrapes.edit"
-      @model={{this.model}}
-      class="btn"
-    >Edit</LinkTo>
-    <button
-      type="button"
-      class="btn"
-      title="Re-fetch the URL and run the full pipeline again"
-      {{on "click" (fn this.retryScrape this.model)}}
-    >Retry</button>
-    <button
-      type="button"
-      class="btn"
-      title="Re-run extraction on the existing scrape content (no re-fetch)"
-      {{on "click" (fn this.parseScrape this.model)}}
-    >Re-parse</button>
-    <LinkTo
-      @route="scrapes.graph"
-      @model={{this.model.id}}
-      class="btn"
-    >Graph</LinkTo>
-  </:subnav>
   <:main>
     <Scrapes::Item @scrape={{this.model}} />
+
+    <div class="form-actions mt-4">
+      <LinkTo
+        @route="scrapes.edit"
+        @model={{this.model}}
+        class="btn"
+      >Edit</LinkTo>
+      <button
+        type="button"
+        class="btn"
+        title="Re-fetch the URL and run the full pipeline again"
+        {{on "click" (fn this.retryScrape this.model)}}
+      >Retry</button>
+      <button
+        type="button"
+        class="btn"
+        title="Re-run extraction on the existing scrape content (no re-fetch)"
+        {{on "click" (fn this.parseScrape this.model)}}
+      >Re-parse</button>
+      <LinkTo
+        @route="scrapes.graph"
+        @model={{this.model.id}}
+        class="btn"
+      >Graph</LinkTo>
+    </div>
   </:main>
 </RouteLayout>

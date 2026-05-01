@@ -1,0 +1,12 @@
+<div class="flex justify-end mb-4">
+  <button type="button" class="btn" {{on "click" this.createScrape}}>New Scrape</button>
+</div>
+
+<Scrapes::List
+  @scrapes={{this.model}}
+  @isPending={{this.isPending}}
+  @showCompany={{false}}
+  @showJobPost={{false}}
+  @viewRoute="job-posts.show.scrapes.show"
+  @emptyMessage="No scrapes yet."
+/>

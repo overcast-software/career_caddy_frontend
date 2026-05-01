@@ -96,7 +96,7 @@
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-2">
                 <LinkTo
-                  @route="scrapes.show"
+                  @route={{or @viewRoute "scrapes.show"}}
                   @model={{scrape}}
                   class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
                 >View</LinkTo>

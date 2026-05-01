@@ -33,7 +33,7 @@ export default class JobPostsShowController extends Controller {
   @service pollable;
   @service currentUser;
 
-  @tracked copyButtonText = 'Copy Description';
+  @tracked copyButtonText = 'Copy';
   @tracked scrapeSubmitting = false;
   @tracked scoreSubmitting = false;
   @tracked descriptionExpanded = false;
@@ -96,77 +96,17 @@ export default class JobPostsShowController extends Controller {
     try {
       await navigator.clipboard.writeText(this.model.description);
       this.copyButtonText = 'Copied!';
-      setTimeout(() => (this.copyButtonText = 'Copy Description'), 2000);
+      setTimeout(() => (this.copyButtonText = 'Copy'), 2000);
     } catch {
       this.flashMessages.danger('Failed to copy.');
     }
   }
 
-  @action
-  runScrape() {
-    if (this.scrapeSubmitting || !this.model.link) return;
-    this.scrapeSubmitting = true;
-    // Async belongsTo — use .value() so we pass the loaded Company
-    // instance rather than the async proxy (rejected by Ember Data).
-    const company = this.model.belongsTo('company').value();
-    const scrape = this.store.createRecord('scrape', {
-      jobPost: this.model,
-      company,
-      url: this.model.link,
-      status: 'hold',
-    });
-    scrape
-      .save()
-      .then((saved) => {
-        this.flashMessages.success('Scrape queued — watching for completion.');
-        // Park the user on the scrapes tab so they see the new row (which
-        // the scrapes route fetches fresh) while the poller works.
-        this.router.transitionTo('job-posts.show.scrapes', this.model);
-        if (!this.pollable.isTerminal(saved)) {
-          this.spinner.begin({ label: 'Scraping…' });
-          this.pollable.poll(saved, {
-            successMessage: 'Scrape complete.',
-            failedMessage: 'Scrape failed.',
-            onComplete: () => {
-              this.flashMessages.clearMessages();
-              this.flashMessages.success('Scrape complete.');
-              // Refresh the jobPost so title/description/salary reflect
-              // the freshly-parsed values without a page reload.
-              this.model.reload().catch(() => {});
-            },
-            onFailed: () => {
-              this.flashMessages.clearMessages();
-              this.flashMessages.danger(
-                'Scrape failed — try Run scrape again or paste the page text.',
-              );
-            },
-          });
-        }
-      })
-      .catch((e) => {
-        scrape.rollbackAttributes();
-        // The api now skips dedupe whenever a job-post relationship is
-        // sent on the create — and runScrape always sends one — so a
-        // 409 can only fire if the URL maps to a *different* post. If
-        // that ever happens, route the user to that post.
-        const dupeId = e?.errors?.[0]?.meta?.existing_job_post_id;
-        if (dupeId) {
-          this.flashMessages.info(`Already have this — opening #${dupeId}.`);
-          this.router.transitionTo('job-posts.show', dupeId);
-          return;
-        }
-        this.flashMessages.danger('Failed to queue scrape.');
-      })
-      .finally(() => {
-        this.scrapeSubmitting = false;
-      });
-  }
-
-  // Scrape, wait for the scrape to land, then score. Mirrors runScrape's
-  // "navigate on 200 POST" pattern at both hops: jp.show.scrapes when the
-  // scrape is created, jp.show.scores when the score is created. The user
-  // always sees the tab where the new row will appear, and polling owns
-  // the spinner until each phase terminates.
+  // Scrape, wait for the scrape to land, then score. "Navigate on 200 POST"
+  // pattern at both hops: jp.show.scrapes when the scrape is created,
+  // jp.show.scores when the score is created. The user always sees the tab
+  // where the new row will appear, and polling owns the spinner until each
+  // phase terminates.
   @action
   scrapeAndScore() {
     if (this.scrapeSubmitting || this.scoreSubmitting || !this.model.link) {
@@ -197,9 +137,9 @@ export default class JobPostsShowController extends Controller {
         this.scrapeSubmitting = false;
         this.scoreSubmitting = false;
         this.flashMessages.clearMessages();
-        // Same as runScrape: the api skips dedupe when a job-post
-        // relationship is sent (we always send one here), so a 409
-        // means the URL maps to a different post — route there.
+        // The api skips dedupe when a job-post relationship is sent
+        // (we always send one here), so a 409 means the URL maps to a
+        // different post — route there.
         const dupeId = e?.errors?.[0]?.meta?.existing_job_post_id;
         if (dupeId) {
           if (scrape && !scrape.isDestroyed) scrape.rollbackAttributes();

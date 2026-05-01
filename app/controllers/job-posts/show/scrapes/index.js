@@ -3,7 +3,7 @@ import { service } from '@ember/service';
 import { getOwner } from '@ember/owner';
 import { action } from '@ember/object';
 
-export default class JobPostsShowScrapesController extends Controller {
+export default class JobPostsShowScrapesIndexController extends Controller {
   @service pollable;
   @service store;
   @service spinner;

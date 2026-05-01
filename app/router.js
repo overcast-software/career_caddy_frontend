@@ -117,7 +117,9 @@ Router.map(function () {
         });
         this.route('scores');
         this.route('cover-letters');
-        this.route('scrapes');
+        this.route('scrapes', function () {
+          this.route('show', { path: '/:scrape_id' });
+        });
         this.route('summaries');
       },
     );

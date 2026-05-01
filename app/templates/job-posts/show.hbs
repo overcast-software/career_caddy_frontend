@@ -28,7 +28,9 @@
               >↗</a>
             {{/if}}
           </h1>
-          <div class="flex flex-wrap gap-3 text-xs text-gray-400 mt-0.5">
+          <div
+            class="flex flex-wrap items-center gap-3 text-xs text-gray-400 mt-0.5"
+          >
             {{#if (if this.model.postedDate true this.model.createdAt)}}
               <span>Posted:
                 {{format-date
@@ -43,6 +45,15 @@
             {{#if this.model.createdAt}}
               <span>Added:
                 {{format-date this.model.createdAt "MMM D, YYYY"}}</span>
+            {{/if}}
+            {{#if this.model.source}}
+              <span
+                class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700"
+                title="How this job-post entered Career Caddy"
+              >
+                Source:
+                {{this.model.source}}
+              </span>
             {{/if}}
           </div>
           {{#if this.model.duplicateOfId}}
@@ -68,40 +79,23 @@
             Vetted Bad (+ reason picker) — flow in a single wrapping
             row directly under the title, left-aligned. }}
         <div class="flex flex-wrap items-center gap-2">
-          {{#if this.model.link}}
-            <button
-              type="button"
-              class="btn small"
-              disabled={{this.scrapeSubmitting}}
-              {{on "click" this.runScrape}}
-            >
-              {{if this.scrapeSubmitting "Queuing…" "Run scrape"}}
-            </button>
+          {{#if (and this.model.link this.model.isStub)}}
             {{! Only surface Scrape & Score on stubs — a full-description
                 post already has enough to score in isolation, and the
                 combined action rescrapes the whole page for no gain. }}
-            {{#if this.model.isStub}}
-              <button
-                type="button"
-                class="btn small primary"
-                disabled={{or this.scrapeSubmitting this.scoreSubmitting}}
-                {{on "click" this.scrapeAndScore}}
-              >
-                {{if
-                  this.scoreSubmitting
-                  "Scoring…"
-                  (if this.scrapeSubmitting "Scraping…" "Scrape & Score")
-                }}
-              </button>
-            {{/if}}
+            <button
+              type="button"
+              class="btn small primary"
+              disabled={{or this.scrapeSubmitting this.scoreSubmitting}}
+              {{on "click" this.scrapeAndScore}}
+            >
+              {{if
+                this.scoreSubmitting
+                "Scoring…"
+                (if this.scrapeSubmitting "Scraping…" "Scrape & Score")
+              }}
+            </button>
           {{/if}}
-          <button
-            type="button"
-            class="btn small"
-            {{on "click" this.copyDescription}}
-          >
-            {{this.copyButtonText}}
-          </button>
           <LinkTo
             class="btn small"
             @route="job-posts.edit"
@@ -128,13 +122,23 @@
             }}"
         >{{this.model.description}}</p>
         {{#if this.model.description}}
-          <button
-            type="button"
-            class="mt-1 text-xs font-medium text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300"
-            {{on "click" this.toggleDescription}}
-          >
-            {{if this.descriptionExpanded "Collapse" "Expand"}}
-          </button>
+          <div class="mt-1 flex items-center gap-4">
+            <button
+              type="button"
+              class="text-xs font-medium text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300"
+              {{on "click" this.toggleDescription}}
+            >
+              {{if this.descriptionExpanded "Collapse" "Expand"}}
+            </button>
+            <span class="text-xs text-gray-300 dark:text-gray-600">·</span>
+            <button
+              type="button"
+              class="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              {{on "click" this.copyDescription}}
+            >
+              {{this.copyButtonText}}
+            </button>
+          </div>
         {{/if}}
       </div>
     </div>

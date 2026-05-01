@@ -1,10 +1,5 @@
 {{page-title "Edit Scrape"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
-  <:subnav>
-    <LinkTo @route="scrapes.show" @model={{this.model}} class="btn">
-      View
-    </LinkTo>
-  </:subnav>
   <:main>
     <Scrapes::Form @scrape={{this.model}} />
   </:main>

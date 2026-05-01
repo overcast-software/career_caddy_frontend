@@ -43,6 +43,7 @@ export default class ScrapesFormComponent extends Component {
   @action
   async submitDelete(event) {
     event.preventDefault();
+    if (!confirm('Delete this scrape? This cannot be undone.')) return;
     try {
       await this.args.scrape.destroyRecord();
       this.flashMessages.success('Scrape deleted');
