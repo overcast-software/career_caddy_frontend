@@ -104,33 +104,15 @@
           <JobPosts::TriageActions @jobPost={{this.model}} />
         </div>
       </div>
+    </div>
 
-      <div>
-        {{! Animated expand/collapse. line-clamp-4 gives a clean cut at
-            exactly 4 lines when collapsed; max-height on top provides
-            the smooth unfold when toggled. Tailwind can't animate
-            line-clamp directly (not an animatable property), which is
-            why max-height is the transition carrier. Both candidate
-            class strings appear literally in the if-helper arguments
-            so Tailwind JIT compiles them. }}
-        <p
-          class="text-sm text-gray-600 overflow-hidden transition-[max-height] duration-300 ease-out
-            {{if
-              this.descriptionExpanded
-              'max-h-screen'
-              'max-h-24 line-clamp-4'
-            }}"
-        >{{this.model.description}}</p>
-        {{#if this.model.description}}
-          <div class="mt-1 flex items-center gap-4">
-            <button
-              type="button"
-              class="text-xs font-medium text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300"
-              {{on "click" this.toggleDescription}}
-            >
-              {{if this.descriptionExpanded "Collapse" "Expand"}}
-            </button>
-            <span class="text-xs text-gray-300 dark:text-gray-600">·</span>
+    {{#if this.model.description}}
+      <Panel::Card>
+        <div class="flex items-center justify-between">
+          <h2
+            class="text-base font-semibold text-gray-900 dark:text-gray-100"
+          >About the job</h2>
+          <div class="flex items-center gap-3">
             <button
               type="button"
               class="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -138,10 +120,26 @@
             >
               {{this.copyButtonText}}
             </button>
+            <button
+              type="button"
+              class="text-xs font-medium text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300"
+              {{on "click" this.toggleDescription}}
+            >
+              {{if this.descriptionExpanded "Collapse" "Expand"}}
+            </button>
           </div>
-        {{/if}}
-      </div>
-    </div>
+        </div>
+        {{! line-clamp-[8] caps collapsed height; expanded removes the
+            clamp entirely. whitespace-pre-line preserves paragraph
+            breaks from the source posting (without it, multi-paragraph
+            descriptions render as a single wall). max-w-prose keeps
+            measure readable on wide viewports. }}
+        <p
+          class="mt-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line break-words max-w-prose
+            {{unless this.descriptionExpanded 'line-clamp-[8]'}}"
+        >{{this.model.description}}</p>
+      </Panel::Card>
+    {{/if}}
 
     <Panel::Card>
       <JobPosts::Tabs @jobPost={{this.model}} />
