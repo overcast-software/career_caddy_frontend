@@ -1,0 +1,14 @@
+{{! Static placeholder for the subnav center slot during cold-load
+    substates. Index routes can't render their live subnav controls
+    while the controller is still being set up, but yielding nothing
+    collapses the bar and causes a layout jump when the real subnav
+    pops in after the model resolves. This skeleton holds the row at
+    the same height with neutral pulse blocks. }}
+<div class="controls" aria-hidden="true">
+  <div
+    class="h-9 w-64 max-w-full animate-pulse rounded bg-gray-200 dark:bg-gray-800"
+  ></div>
+  <div
+    class="h-9 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-800"
+  ></div>
+</div>

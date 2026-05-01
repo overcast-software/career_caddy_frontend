@@ -1,10 +1,13 @@
-{{! Rendered by Ember while job-posts.index's model hook is pending.
-    Keeps the page skeleton visible so clicking the nav link flips to
-    this page instantly instead of hanging on the previous route. The
-    subnav controls are omitted here — the controller isn't set up
-    during loading so they can't be live-bound yet. }}
+{{! Rendered by Ember while job-posts.index's model hook is pending on
+    a cold load (entry from another route or initial app boot). The
+    subnav skeleton holds the row height so the live subnav doesn't
+    pop in with a layout jump after the model resolves; the controller
+    isn't set up here, so live-bound search/filters can't render. }}
 {{page-title "Job Posts"}}
 <RouteLayout>
+  <:subnav>
+    <SubnavSkeleton />
+  </:subnav>
   <:main>
     <div class="space-y-3">
       {{#each (array 1 2 3 4 5 6 7 8)}}

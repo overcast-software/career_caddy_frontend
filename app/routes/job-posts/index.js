@@ -29,9 +29,9 @@ export default class JobPostsIndexRoute extends Route {
   @action
   loading(transition) {
     if (transition.from && transition.from.name === this.routeName) {
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   model({
