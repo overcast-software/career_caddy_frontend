@@ -104,6 +104,7 @@
                   <button
                     type="button"
                     class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                    title="Re-fetch the URL and run the full pipeline again (new browser capture + extract). Use this when the page itself changed or the prior capture was incomplete; use Re-parse on the detail view if only the extractor needs another pass."
                     {{on "click" (fn @onRetry scrape)}}
                   >Retry</button>
                 {{/if}}
