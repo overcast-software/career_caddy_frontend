@@ -8,9 +8,12 @@ export default class JobPostsShowJobApplicationsNewController extends Controller
 
   @action async save() {
     try {
-      const app = await this.model.save();
+      await this.model.save();
       this.flashMessages.success('Application saved.');
-      this.router.transitionTo('job-applications.show', app.id);
+      this.router.transitionTo(
+        'job-posts.show.job-applications.index',
+        this.model.get('jobPost.id'),
+      );
     } catch {
       this.flashMessages.danger('Failed to save application.');
     }

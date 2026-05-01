@@ -1,0 +1,36 @@
+{{page-title "Scrape"}}
+<div class="space-y-4">
+  <div>
+    <LinkTo
+      @route="job-posts.show.scrapes.index"
+      class="text-xs font-medium text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300"
+    >
+      ← Back to scrapes
+    </LinkTo>
+  </div>
+
+  <Scrapes::Item @scrape={{this.model}} />
+
+  <div class="form-actions mt-4">
+    <LinkTo @route="scrapes.edit" @model={{this.model}} class="btn">
+      Edit
+    </LinkTo>
+    <button
+      type="button"
+      class="btn"
+      title="Re-fetch the URL and run the full pipeline again"
+      {{on "click" (fn this.retryScrape this.model)}}
+    >Retry</button>
+    <button
+      type="button"
+      class="btn"
+      title="Re-run extraction on the existing scrape content (no re-fetch)"
+      {{on "click" (fn this.parseScrape this.model)}}
+    >Re-parse</button>
+    <LinkTo
+      @route="scrapes.graph"
+      @model={{this.model.id}}
+      class="btn"
+    >Graph</LinkTo>
+  </div>
+</div>

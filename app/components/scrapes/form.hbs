@@ -63,9 +63,13 @@
       {{/if}}
     {{else}}
       <button type="submit" class="btn primary">Save</button>
+      <LinkTo @route="scrapes.show" @model={{@scrape}} class="btn">
+        Cancel
+      </LinkTo>
       <button
         type="button"
-        class="btn danger"
+        class="btn danger ml-auto"
+        title="Permanently delete this scrape"
         {{on "click" this.submitDelete}}
       >Delete</button>
     {{/if}}

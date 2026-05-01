@@ -144,6 +144,15 @@
         </button>
       </div>
 
+      <textarea
+        rows="2"
+        aria-label="Note for this status"
+        placeholder="Add a note (optional)…"
+        class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent-400 resize-none"
+        value={{this.logNote}}
+        {{on "input" this.updateLogNote}}
+      ></textarea>
+
       {{#if this.impliedStatuses.length}}
         <p
           class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2.5 py-1.5"

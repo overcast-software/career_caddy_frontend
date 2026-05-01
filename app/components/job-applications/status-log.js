@@ -53,6 +53,7 @@ export default class JobApplicationsStatusLogComponent extends Component {
 
   // Log-status form
   @tracked selectedStatus = null;
+  @tracked logNote = '';
   @tracked isSaving = false;
 
   // Per-entry date/note editor
@@ -65,11 +66,14 @@ export default class JobApplicationsStatusLogComponent extends Component {
   }
 
   // Cached so both sortedStatuses and impliedStatuses share one computation.
+  // Use hasMany().value() (sync materialized view) so newly created records
+  // appear immediately — async proxy .toArray() doesn't refresh post-save.
   @cached
   get _sortedRecords() {
-    const rel = this.args.jobApplication?.applicationStatuses;
-    if (!rel) return [];
-    const statuses = (rel?.toArray?.() ?? Array.from(rel)).filter(Boolean);
+    const ja = this.args.jobApplication;
+    if (!ja) return [];
+    const records = ja.hasMany('applicationStatuses').value() ?? [];
+    const statuses = [...records].filter(Boolean);
     if (!statuses.length) return [];
     return statuses.sort((a, b) => {
       const da = new Date(a.loggedAt || a.createdAt || 0);
@@ -141,21 +145,32 @@ export default class JobApplicationsStatusLogComponent extends Component {
     this.selectedStatus = status;
   }
 
+  @action updateLogNote(event) {
+    this.logNote = event.target.value;
+  }
+
   @action async logStatus() {
     if (!this.selectedStatus) return;
     this.isSaving = true;
     const toLog = [...this.impliedStatuses, this.selectedStatus];
+    const note = (this.logNote || '').trim() || null;
     try {
-      for (const status of toLog) {
+      for (let i = 0; i < toLog.length; i++) {
+        const status = toLog[i];
+        // Note attaches only to the explicitly selected status (the last in
+        // the chain); implied gap-fillers stay note-less.
+        const isSelected = i === toLog.length - 1;
         await this.store
           .createRecord('job-application-status', {
             status,
+            note: isSelected ? note : null,
             application: this.args.jobApplication,
           })
           .save();
       }
       this.args.jobApplication.status = this.selectedStatus;
       this.selectedStatus = null;
+      this.logNote = '';
       this.flashMessages.success(
         toLog.length > 1
           ? `Logged ${toLog.length} statuses.`
