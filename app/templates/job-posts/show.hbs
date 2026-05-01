@@ -107,11 +107,8 @@
     </div>
 
     {{#if this.model.description}}
-      <Panel::Card>
-        <div class="flex items-center justify-between">
-          <h2
-            class="text-base font-semibold text-gray-900 dark:text-gray-100"
-          >About the job</h2>
+      <Panel::Card @title="About the job">
+        <:top>
           <div class="flex items-center gap-3">
             <button
               type="button"
@@ -128,14 +125,12 @@
               {{if this.descriptionExpanded "Collapse" "Expand"}}
             </button>
           </div>
-        </div>
-        {{! line-clamp-[8] caps collapsed height; expanded removes the
-            clamp entirely. whitespace-pre-line preserves paragraph
-            breaks from the source posting (without it, multi-paragraph
-            descriptions render as a single wall). max-w-prose keeps
-            measure readable on wide viewports. }}
+        </:top>
+        {{! whitespace-pre-line preserves paragraph breaks from the source
+            posting. line-clamp-[8] caps collapsed height. max-w-prose
+            keeps measure readable on wide viewports. }}
         <p
-          class="mt-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line break-words max-w-prose
+          class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line break-words max-w-prose
             {{unless this.descriptionExpanded 'line-clamp-[8]'}}"
         >{{this.model.description}}</p>
       </Panel::Card>
