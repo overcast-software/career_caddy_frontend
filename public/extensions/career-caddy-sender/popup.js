@@ -1,4 +1,4 @@
-const ORIGIN = 'https://careercaddy.online';
+const ORIGIN = 'https://api.careercaddy.online';
 const STORAGE_KEYS = ['ccApiKey', 'ccKeyId', 'ccUsername', 'ccAutoScore'];
 const THEME_KEYS = ['ccTheme', 'ccPalette'];
 const VALID_MODES = new Set(['system', 'light', 'dark']);

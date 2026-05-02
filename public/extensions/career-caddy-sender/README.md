@@ -1,4 +1,4 @@
-# Career Caddy Sender — v0.3.5
+# Career Caddy Sender — v0.3.6
 
 A browser extension that captures the active page's URL + visible text and
 POSTs it directly to your Career Caddy instance. The popup shows a one-time
@@ -28,6 +28,9 @@ fires the page off and an OS-level system notification announces the result.
 
 ## Version history
 
+- **0.3.6** — API calls now target `api.careercaddy.online` directly, bypassing the
+  frontend reverse-proxy. Fixes 405 Method Not Allowed on Connect when the frontend
+  domain's Caddy config does not forward POST requests to the API.
 - **0.3.5** — Press Enter in the username or password field to connect.
 - **0.3.4** — Re-import theme from the active Career Caddy tab on every
   popup open (was: only on Connect). Fixes existing installs that were
