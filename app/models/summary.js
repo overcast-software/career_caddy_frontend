@@ -2,6 +2,7 @@ import Model, { attr, belongsTo } from '@ember-data/model';
 
 export default class SummaryModel extends Model {
   @attr('string') content;
+  @attr('string') status;
   @attr('boolean') active;
   @attr('string') instructions;
   @belongsTo('user', { async: true, inverse: 'summaries' }) user;
