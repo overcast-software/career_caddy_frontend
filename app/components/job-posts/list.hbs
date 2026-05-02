@@ -72,10 +72,17 @@
                   TZ-free rendering and ISO instants (createdAt fallback)
                   through Intl.DateTimeFormat locked to LOCAL_TZ (PST),
                   so neither path depends on browser TZ. }}
-              {{format-date
-                (if jobPost.postedDate jobPost.postedDate jobPost.createdAt)
-                "MMM D, YYYY"
-              }}
+              <span
+                title={{concat
+                  "created: "
+                  (format-date jobPost.createdAt "MMM D, YYYY h:mm A")
+                }}
+              >
+                {{format-date
+                  (if jobPost.postedDate jobPost.postedDate jobPost.createdAt)
+                  "MMM D, YYYY"
+                }}
+              </span>
             </td>
             <td class="px-4 py-3 text-gray-600">
               {{#if jobPost.topScore.score}}
