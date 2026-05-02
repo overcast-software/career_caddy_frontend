@@ -126,13 +126,15 @@
             </button>
           </div>
         </:top>
-        {{! whitespace-pre-line preserves paragraph breaks from the source
-            posting. line-clamp-[8] caps collapsed height. max-w-prose
-            keeps measure readable on wide viewports. }}
-        <p
-          class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line break-words max-w-prose
-            {{unless this.descriptionExpanded 'line-clamp-[8]'}}"
-        >{{this.model.description}}</p>
+        <:default>
+          {{! whitespace-pre-line preserves paragraph breaks from the source
+              posting. line-clamp-[8] caps collapsed height. max-w-prose
+              keeps measure readable on wide viewports. }}
+          <p
+            class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line break-words max-w-prose
+              {{unless this.descriptionExpanded 'line-clamp-[8]'}}"
+          >{{this.model.description}}</p>
+        </:default>
       </Panel::Card>
     {{/if}}
 
