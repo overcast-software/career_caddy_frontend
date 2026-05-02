@@ -21,33 +21,7 @@
         {{#each @summaries as |summary|}}
           <tr class="hover:bg-gray-50">
             <td class="px-4 py-3 text-gray-900 max-w-md truncate">
-              {{#if (and @isPending (@isPending summary))}}
-                <span class="inline-flex items-center gap-1.5 text-gray-400">
-                  <svg
-                    class="animate-spin size-3.5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    ></path>
-                  </svg>
-                  Generating…
-                </span>
-              {{else}}
-                {{summary.content}}
-              {{/if}}
+              {{summary.content}}
             </td>
             <td class="px-4 py-3 text-gray-600">
               {{#if summary.resume.id}}
@@ -65,7 +39,10 @@
             </td>
             <td class="px-4 py-3 text-right">
               {{#if (and @isPending (@isPending summary))}}
-                {{! pending — no actions }}
+                <SpinnerInline
+                  @label="Generating…"
+                  @title="Generating — this page auto-refreshes when ready"
+                />
               {{else}}
                 <LinkTo
                   @route="summaries.show"

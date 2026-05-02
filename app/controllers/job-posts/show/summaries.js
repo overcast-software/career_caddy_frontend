@@ -3,7 +3,6 @@ import { service } from '@ember/service';
 import { getOwner } from '@ember/owner';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-import { TERMINAL } from 'career-caddy-frontend/services/pollable';
 
 const CAREER_DATA_OPTION = { id: '0', name: 'Career Data (internal)' };
 
@@ -42,18 +41,19 @@ export default class JobPostsShowSummariesController extends Controller {
     const summary = this.store.createRecord('summary', {
       jobPost,
       resume,
-      content: '',
       instructions: this.instructions,
     });
     try {
       this.spinner.begin({ label: 'Generating summary…' });
       const saved = await summary.save();
       this.instructions = '';
-      if (!saved.content) {
+      if (!this.pollable.isTerminal(saved)) {
         this.pollable.poll(saved, {
-          isTerminal: (rec) => !!rec.content || TERMINAL.has(rec.active),
           successMessage: 'Summary ready.',
           failedMessage: 'Summary generation failed.',
+          onComplete: () => this.flashMessages.success('Summary ready.'),
+          onFailed: () =>
+            this.flashMessages.danger('Summary generation failed.'),
           onError: () =>
             this.flashMessages.danger(
               'Lost connection while waiting for summary.',
