@@ -130,109 +130,14 @@
   </div>
 </details>
 
-{{! template-lint-disable no-nested-interactive }}
-<details
-  class="mt-4 rounded-md border border-gray-200 p-4 dark:border-gray-700"
->
-  <summary
-    class="cursor-pointer text-sm font-semibold text-gray-900 dark:text-gray-100"
-  >Install the browser extension</summary>
-  <div class="mt-3 space-y-3 text-sm text-gray-600 dark:text-gray-400">
-    <p>
-      Works on sites that block bookmarklets (LinkedIn, Greenhouse, GitHub).
-      Grabs page URL + visible text, fills this form in a new tab, and can
-      optionally auto-submit and chain a career-data score — all session-
-      authenticated, no API keys stored in the extension.
-    </p>
-    <p class="flex flex-wrap gap-2">
-      <a
-        href="/extensions/career-caddy-sender-0.2.6.zip"
-        download
-        class="inline-flex items-center rounded-md border border-accent-500 bg-accent-50 px-3 py-1.5 font-semibold text-accent-700 hover:bg-accent-100 dark:border-accent-400 dark:bg-accent-900/30 dark:text-accent-200 dark:hover:bg-accent-900/50"
-      >⬇ .zip v0.2.6 (Chrome / unpack)</a>
-      <a
-        href="/extensions/career-caddy-sender-0.2.6.xpi"
-        download
-        class="inline-flex items-center rounded-md border border-accent-500 bg-accent-50 px-3 py-1.5 font-semibold text-accent-700 hover:bg-accent-100 dark:border-accent-400 dark:bg-accent-900/30 dark:text-accent-200 dark:hover:bg-accent-900/50"
-      >🦊 .xpi v0.2.6 (Firefox drag-install)</a>
-    </p>
-    <p class="text-xs text-gray-500 dark:text-gray-500">
-      Filename and the popup's top-right badge both show the installed version
-      so you can confirm at a glance which build is loaded.
-    </p>
-
-    <div class="rounded border border-gray-200 p-3 dark:border-gray-700">
-      <p class="font-semibold text-gray-800 dark:text-gray-200">
-        Firefox — temporary install (recommended while we're iterating)
-      </p>
-      <ol class="mt-1 list-decimal space-y-0.5 pl-5 text-xs">
-        <li>Open
-          <code>about:debugging#/runtime/this-firefox</code></li>
-        <li>Click
-          <strong>Load Temporary Add-on…</strong>
-          and pick the downloaded
-          <code>.xpi</code>
-          (or
-          <code>.zip</code>)</li>
-        <li>Pin the new toolbar icon so the popup is easy to reach</li>
-      </ol>
-      <p
-        class="mt-2 rounded bg-amber-50 px-2 py-1 text-xs text-amber-900 dark:bg-amber-900/30 dark:text-amber-200"
-      >
-        <strong>Heads up:</strong>
-        a temporary add-on is removed whenever Firefox restarts, and its saved
-        origin / toggle state is cleared with it. Re-load on each session.
-        Checkboxes default to ON so this stays painless.
-      </p>
-    </div>
-
-    <div class="rounded border border-gray-200 p-3 dark:border-gray-700">
-      <p class="font-semibold text-gray-800 dark:text-gray-200">
-        Firefox — persistent install (Dev Edition / Nightly / ESR only)
-      </p>
-      <ol class="mt-1 list-decimal space-y-0.5 pl-5 text-xs">
-        <li>
-          <code>about:config</code>
-          → set
-          <code>xpinstall.signatures.required</code>
-          to
-          <code>false</code></li>
-        <li>
-          <code>about:addons</code>
-          → gear icon →
-          <strong>Install Add-on From File…</strong>
-          → pick the
-          <code>.xpi</code></li>
-      </ol>
-      <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">
-        Regular Firefox (Release/Beta) silently ignores the signatures pref and
-        will refuse the install outright — use the temporary path above, or
-        switch to Developer Edition.
-      </p>
-    </div>
-
-    <div class="rounded border border-gray-200 p-3 dark:border-gray-700">
-      <p class="font-semibold text-gray-800 dark:text-gray-200">
-        Chrome / Chromium / Brave / Edge
-      </p>
-      <ol class="mt-1 list-decimal space-y-0.5 pl-5 text-xs">
-        <li>Unzip the
-          <code>.zip</code></li>
-        <li>
-          <code>chrome://extensions</code>
-          → toggle
-          <strong>Developer mode</strong>
-          (top-right)</li>
-        <li>
-          <strong>Load unpacked</strong>
-          → select the unzipped folder</li>
-      </ol>
-      <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">
-        Survives restarts; Chrome will nag about developer-mode extensions —
-        click
-        <strong>Keep</strong>
-        on the first prompt.
-      </p>
-    </div>
-  </div>
-</details>
+<div class="mt-4 rounded-md border border-gray-200 p-4 dark:border-gray-700">
+  <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+    Browser extension
+  </p>
+  <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+    A signed
+    <em>Career Caddy Sender</em>
+    extension is on the way to the Chrome Web Store and Firefox Add-ons. Until
+    it's listed, the bookmarklet above covers the same workflow on most sites.
+  </p>
+</div>

@@ -4,100 +4,337 @@
     <meta charset="utf-8" />
     <title>Career Caddy Sender</title>
     <style>
+      :root {
+        --bg: #ffffff;
+        --bg-soft: #f8fafc;
+        --bg-input: #ffffff;
+        --border: #e5e7eb;
+        --border-strong: #d1d5db;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --text-faint: #94a3b8;
+        --divider: #f1f5f9;
+
+        --accent-50: #eef2ff;
+        --accent-100: #e0e7ff;
+        --accent-500: #6366f1;
+        --accent-600: #4f46e5;
+        --accent-700: #4338ca;
+        --accent-900: #312e81;
+
+        --error: #b91c1c;
+        --success: #047857;
+        --shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+      }
+
+      :root[data-theme='dark'] {
+        --bg: #0f172a;
+        --bg-soft: #1e293b;
+        --bg-input: #1e293b;
+        --border: #334155;
+        --border-strong: #475569;
+        --text: #f1f5f9;
+        --text-muted: #94a3b8;
+        --text-faint: #64748b;
+        --divider: #1e293b;
+        --accent-50: #1e1b4b;
+        --accent-100: #312e81;
+        --error: #f87171;
+        --success: #34d399;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      :root[data-palette='jade'] {
+        --accent-50: #ecfdf5;
+        --accent-100: #d1fae5;
+        --accent-500: #10b981;
+        --accent-600: #059669;
+        --accent-700: #047857;
+        --accent-900: #064e3b;
+      }
+      :root[data-palette='rose'] {
+        --accent-50: #fff1f2;
+        --accent-100: #ffe4e6;
+        --accent-500: #f43f5e;
+        --accent-600: #e11d48;
+        --accent-700: #be123c;
+        --accent-900: #881337;
+      }
+      :root[data-palette='amber'] {
+        --accent-50: #fffbeb;
+        --accent-100: #fef3c7;
+        --accent-500: #f59e0b;
+        --accent-600: #d97706;
+        --accent-700: #b45309;
+        --accent-900: #78350f;
+      }
+      :root[data-palette='violet'] {
+        --accent-50: #f5f3ff;
+        --accent-100: #ede9fe;
+        --accent-500: #8b5cf6;
+        --accent-600: #7c3aed;
+        --accent-700: #6d28d9;
+        --accent-900: #4c1d95;
+      }
+      :root[data-palette='blue'] {
+        --accent-50: #eff6ff;
+        --accent-100: #dbeafe;
+        --accent-500: #3b82f6;
+        --accent-600: #2563eb;
+        --accent-700: #1d4ed8;
+        --accent-900: #1e3a8a;
+      }
+      :root[data-theme='dark'][data-palette='jade'] {
+        --accent-50: #022c22;
+        --accent-100: #064e3b;
+      }
+      :root[data-theme='dark'][data-palette='rose'] {
+        --accent-50: #4c0519;
+        --accent-100: #881337;
+      }
+      :root[data-theme='dark'][data-palette='amber'] {
+        --accent-50: #451a03;
+        --accent-100: #78350f;
+      }
+      :root[data-theme='dark'][data-palette='violet'] {
+        --accent-50: #2e1065;
+        --accent-100: #4c1d95;
+      }
+      :root[data-theme='dark'][data-palette='blue'] {
+        --accent-50: #172554;
+        --accent-100: #1e3a8a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
       body {
-        font: 13px system-ui, sans-serif;
-        width: 280px;
+        font:
+          13px/1.45 system-ui,
+          -apple-system,
+          sans-serif;
+        width: 320px;
         margin: 0;
-        padding: 14px;
-        color: #1f2937;
+        padding: 16px;
+        color: var(--text);
+        background: var(--bg);
+        transition: background 0.15s ease;
       }
       h1 {
-        font-size: 13px;
-        font-weight: 600;
-        margin: 0 0 8px;
-      }
-      button {
-        width: 100%;
-        padding: 8px 12px;
         font-size: 14px;
         font-weight: 600;
-        border: 1px solid #4f46e5;
-        background: #eef2ff;
-        color: #4338ca;
-        border-radius: 6px;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #e0e7ff;
-      }
-      button:disabled {
-        opacity: 0.6;
-        cursor: wait;
+        margin: 0 0 14px;
+        letter-spacing: -0.01em;
       }
       label {
         display: block;
         font-size: 11px;
-        color: #6b7280;
-        margin-top: 10px;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-top: 12px;
+        margin-bottom: 4px;
+        letter-spacing: 0.02em;
       }
-      input {
+      input[type='text'],
+      input[type='email'],
+      input[type='password'] {
         width: 100%;
-        box-sizing: border-box;
-        padding: 5px 7px;
-        font-size: 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 4px;
+        padding: 7px 10px;
+        font-size: 13px;
+        color: var(--text);
+        background: var(--bg-input);
+        border: 1px solid var(--border-strong);
+        border-radius: 6px;
+        outline: none;
+        transition:
+          border-color 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      input:focus {
+        border-color: var(--accent-500);
+        box-shadow: 0 0 0 3px var(--accent-50);
+      }
+      button.primary {
+        width: 100%;
+        padding: 9px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: white;
+        background: var(--accent-600);
+        border: 1px solid var(--accent-700);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        box-shadow: var(--shadow);
+      }
+      button.primary:hover {
+        background: var(--accent-700);
+      }
+      button.primary:disabled {
+        opacity: 0.55;
+        cursor: wait;
       }
       .status {
-        margin-top: 8px;
-        color: #6b7280;
+        margin-top: 10px;
+        color: var(--text-muted);
         min-height: 1.2em;
         font-size: 12px;
       }
       .status.error {
-        color: #b91c1c;
+        color: var(--error);
+      }
+      .status.success {
+        color: var(--success);
       }
       .toggle-row {
         display: flex;
         align-items: center;
-        gap: 6px;
-        margin-top: 8px;
+        gap: 8px;
+        margin-top: 12px;
         font-size: 12px;
-        color: #374151;
+        color: var(--text-muted);
       }
-      .toggle-row input[type="checkbox"] {
-        width: auto;
+      .toggle-row input[type='checkbox'] {
+        width: 14px;
+        height: 14px;
         margin: 0;
+        accent-color: var(--accent-600);
+      }
+      .toggle-row label {
+        margin: 0;
+        font-size: 12px;
+        font-weight: normal;
+        color: var(--text);
+        cursor: pointer;
+      }
+      .helper {
+        margin-top: 14px;
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .helper em {
+        color: var(--text);
+        font-style: normal;
+        font-weight: 500;
       }
       .version {
         position: absolute;
-        top: 10px;
-        right: 14px;
+        top: 12px;
+        right: 16px;
         font-size: 10px;
-        color: #9ca3af;
+        color: var(--text-faint);
         font-variant-numeric: tabular-nums;
+      }
+      .footer {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid var(--divider);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .footer .who {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+      }
+      .linkbtn {
+        background: none;
+        border: none;
+        color: var(--accent-600);
+        font-size: 11px;
+        font-weight: 500;
+        padding: 0;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .linkbtn:hover {
+        color: var(--accent-700);
+      }
+      .iconbtn {
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        border-radius: 6px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.15s ease,
+          color 0.15s ease;
+      }
+      .iconbtn:hover {
+        background: var(--bg-soft);
+        color: var(--text);
+      }
+      .iconbtn svg {
+        width: 14px;
+        height: 14px;
+      }
+      .hidden {
+        display: none;
       }
     </style>
   </head>
   <body>
     <span id="version" class="version"></span>
-    <h1>Send this page to Career Caddy</h1>
-    <button id="send">📎 Send to Paste form</button>
-    <div class="toggle-row">
-      <input id="auto-submit" type="checkbox" />
-      <label for="auto-submit" style="margin: 0"
-        >Auto-submit without review</label
-      >
+
+    <div id="screen-connect">
+      <h1>Connect to Career Caddy</h1>
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        autocomplete="username"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" />
+      <div style="margin-top: 14px;">
+        <button id="connect" class="primary">Connect</button>
+      </div>
+      <div class="status" id="connect-status"></div>
+      <p class="helper">
+        We log in once to mint a dedicated API key, then discard your password.
+        The key is named <em>Career Caddy Sender</em> and is visible (and
+        revocable) under <em>Settings → API Keys</em>.
+      </p>
     </div>
-    <div class="toggle-row">
-      <input id="auto-score" type="checkbox" />
-      <label for="auto-score" style="margin: 0"
-        >Also score against career data</label
-      >
+
+    <div id="screen-connected" class="hidden">
+      <h1>Send this page to Career Caddy</h1>
+      <button id="send" class="primary">Send this page</button>
+      <div class="toggle-row">
+        <input id="auto-score" type="checkbox" />
+        <label for="auto-score">Also score against career data</label>
+      </div>
+      <div class="status" id="send-status"></div>
+      <div class="footer">
+        <button
+          id="theme-toggle"
+          class="iconbtn"
+          type="button"
+          title="Toggle theme"
+          aria-label="Toggle theme"
+        >
+          <!-- icon swapped at runtime -->
+        </button>
+        <span class="who" id="who"></span>
+        <button id="disconnect" class="linkbtn" type="button">Disconnect</button>
+      </div>
     </div>
-    <label for="origin">Career Caddy origin</label>
-    <input id="origin" type="url" placeholder="https://careercaddy.online" />
-    <div class="status" id="status"></div>
+
     <script src="popup.js"></script>
   </body>
 </html>

@@ -1,13 +1,27 @@
 {
   "manifest_version": 3,
   "name": "Career Caddy Sender",
-  "version": "0.2.6",
-  "description": "Send the current page's text and URL to the Career Caddy paste form.",
-  "permissions": ["activeTab", "scripting", "tabs"],
+  "version": "0.3.5",
+  "description": "Send a job posting directly to Career Caddy. Connect once with your account; the extension creates a dedicated, revocable API key and POSTs page content straight to the API.",
+  "permissions": ["activeTab", "scripting", "storage", "notifications", "alarms"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_title": "Send to Career Caddy",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
   },
   "browser_specific_settings": {
     "gecko": {
