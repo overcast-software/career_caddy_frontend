@@ -255,7 +255,7 @@ export default class JobPostsNewPasteController extends Controller {
                 'Upgraded an existing stub with the pasted details.',
               );
             } else {
-              this.flashMessages.success('Job post created.');
+              this.flashMessages.success('Job post created.', { sticky: true });
             }
             this._reset();
             if (this.score === '1') {
