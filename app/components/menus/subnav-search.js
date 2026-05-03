@@ -16,4 +16,11 @@ export default class MenusSubnavSearchComponent extends Component {
       this.args.onSearch(value);
     }, 300);
   }
+
+  @action
+  clear() {
+    clearTimeout(this.#debounceTimer);
+    this.inputValue = '';
+    this.args.onSearch('');
+  }
 }

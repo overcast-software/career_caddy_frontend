@@ -1,8 +1,18 @@
-<input
-  class="subnav-search-input"
-  type="search"
-  aria-label="search"
-  placeholder={{@placeholder}}
-  value={{this.inputValue}}
-  {{on "input" this.onInput}}
-/>
+<div class="subnav-search-wrap">
+  <input
+    class="subnav-search-input"
+    type="search"
+    aria-label="search"
+    placeholder={{@placeholder}}
+    value={{this.inputValue}}
+    {{on "input" this.onInput}}
+  />
+  {{#if this.inputValue}}
+    <button
+      type="button"
+      class="subnav-search-clear"
+      aria-label="Clear search"
+      {{on "click" this.clear}}
+    >×</button>
+  {{/if}}
+</div>
