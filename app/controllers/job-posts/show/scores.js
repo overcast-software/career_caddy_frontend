@@ -56,25 +56,25 @@ export default class JobPostsShowScoresController extends Controller {
       .lookup('route:job-posts.show')
       .modelFor('job-posts.show');
 
-    // If a completed career-data score already exists, surface it —
-    // avoids a redundant LLM call when the user re-runs the chain.
-    const scores = jobPost.hasMany('scores').value() || [];
-    const existing = scores.find(
-      (s) => !s.belongsTo('resume').id() && s.status === 'completed',
-    );
+    // Use the live store.query result (route model) — hasMany cache can be
+    // stale and would miss a score the server created during from-text ingest.
+    const scores = Array.from(this.model || []);
+    const existing = scores.find((s) => !s.belongsTo('resume').id());
     if (existing) {
-      this.flashMessages.success(
-        `Opening your existing career-data score #${existing.id}.`,
-      );
-      this.router.replaceWith(
-        'job-posts.show.scores.show',
-        jobPost.id,
-        existing.id,
-      );
+      if (existing.status === 'completed') {
+        this.flashMessages.success(
+          `Opening your existing career-data score #${existing.id}.`,
+        );
+        this.router.replaceWith(
+          'job-posts.show.scores.show',
+          jobPost.id,
+          existing.id,
+        );
+      }
+      // pending/failed: leave it in the list; the scores template shows it
       return;
     }
-    // Reuse the existing scoreResume action so the UI is consistent with
-    // the manual Score-button path.
+    // No score exists yet — create one (e.g. AI client was unavailable during ingest).
     this.scoreResume();
   }
 
