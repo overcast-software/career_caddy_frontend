@@ -83,10 +83,7 @@ export default class JobPostsShowScoresController extends Controller {
       .lookup('route:job-posts.show')
       .modelFor('job-posts.show');
     const resumeId = this.selectedResume?.id;
-    const resume =
-      resumeId && resumeId !== '0'
-        ? this.store.peekRecord('resume', resumeId)
-        : null;
+    const resume = resumeId && resumeId !== '0' ? this.selectedResume : null;
     const newScore = this.store.createRecord('score', {
       resume,
       jobPost,
