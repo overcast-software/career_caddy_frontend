@@ -106,6 +106,8 @@
       </div>
     </div>
 
+    <JobPosts::DuplicateCandidates @jobPost={{this.model}} />
+
     {{#if this.model.description}}
       <Panel::Card @title="About the job">
         <:top>
