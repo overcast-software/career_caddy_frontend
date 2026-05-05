@@ -115,7 +115,9 @@ Router.map(function () {
             });
           });
         });
-        this.route('scores');
+        this.route('scores', function () {
+          this.route('show', { path: '/:score_id' });
+        });
         this.route('cover-letters');
         this.route('scrapes', function () {
           this.route('show', { path: '/:scrape_id' });
@@ -219,6 +221,7 @@ Router.map(function () {
     this.route('scores');
     this.route('summaries');
     this.route('scrapes');
+    this.route('extension-privacy');
   });
   this.route('questions', function () {
     this.route('new');
