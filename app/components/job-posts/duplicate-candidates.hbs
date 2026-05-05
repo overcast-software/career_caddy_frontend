@@ -1,0 +1,68 @@
+{{! Banner above jp.show description that surfaces probable duplicates.
+    Renders only when the duplicate-candidates endpoint returned ≥ 1 row.
+    The list is read-only for now: clicking a candidate opens that jp.
+    Future: add 'Mark as duplicate' / 'Mark as different' actions
+    (POST /job-posts/:id/duplicate-decisions/). }}
+{{#if this.candidates.length}}
+  <div
+    class="rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
+    data-test-duplicate-banner
+  >
+    <div class="flex items-start gap-2">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        class="size-5 shrink-0 text-amber-600 dark:text-amber-300 mt-0.5"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+        />
+      </svg>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
+          {{if
+            (eq this.candidates.length 1)
+            "Possible duplicate"
+            (concat this.candidates.length " possible duplicates")
+          }}
+        </p>
+        <ul class="mt-1.5 space-y-1">
+          {{#each this.candidates as |c|}}
+            <li class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm">
+              <LinkTo
+                @route="job-posts.show"
+                @model={{c.id}}
+                class="text-accent-600 hover:underline dark:text-accent-400 truncate max-w-md"
+                data-test-duplicate-candidate={{c.id}}
+              >
+                #{{c.id}}
+                {{c.title}}
+              </LinkTo>
+              {{#if c.companyName}}
+                <span class="text-xs text-gray-500 dark:text-gray-400">
+                  ·
+                  {{c.companyName}}
+                </span>
+              {{/if}}
+              <span
+                class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset
+                  {{if
+                    (eq c.confidence 'high')
+                    'bg-amber-100 text-amber-800 ring-amber-200 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-400/30'
+                    'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
+                  }}"
+                title="{{c.signals}}"
+              >
+                {{c.confidence}}
+              </span>
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+  </div>
+{{/if}}
