@@ -2351,7 +2351,7 @@ pre {
    background-color/color use !important — vendor CSS (#fff) has equal specificity and
    may load after app.css depending on build order, so we must win explicitly. */
 .ember-power-select-trigger {
-  position: static;
+  position: relative;
   width: 100%;
   padding: var(--space-3) var(--space-4) !important;
   border: 1px solid var(--border) !important;
