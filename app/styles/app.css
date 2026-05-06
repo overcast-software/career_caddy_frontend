@@ -1133,9 +1133,10 @@ a.btn.primary:active {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgb(0 0 0 / 5%) 0%,
-    rgb(0 0 0 / 30%) 50%,
-    rgb(0 0 0 / 78%) 100%
+    rgb(0 0 0 / 30%) 0%,
+    rgb(0 0 0 / 0%) 35%,
+    rgb(0 0 0 / 0%) 65%,
+    rgb(0 0 0 / 35%) 100%
   );
   pointer-events: none;
 }
@@ -1143,9 +1144,14 @@ a.btn.primary:active {
 .landing-hero-content {
   position: relative;
   z-index: 1;
-  padding: 3rem 3.5rem;
+  margin: 2rem 2rem 2.5rem;
+  padding: 2rem 2.25rem;
   color: #fff;
-  max-width: 660px;
+  max-width: 580px;
+  background: rgb(0 0 0 / 60%);
+  border-radius: 16px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 40px rgb(0 0 0 / 35%);
 }
 
 .landing-hero-eyebrow {
