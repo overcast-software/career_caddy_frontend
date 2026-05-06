@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Career Caddy Sender",
   "version": "1.0.20",
-  "description": "Send a job posting directly to Career Caddy. Connect once with your account; the extension creates a dedicated, revocable API key and POSTs page content straight to the API.",
+  "description": "Send the active job posting to Career Caddy. Connect once; the extension mints a revocable API key and POSTs page text.",
   "permissions": ["activeTab", "scripting", "storage", "notifications", "alarms"],
   "host_permissions": [
     "https://api.careercaddy.online/*",
@@ -29,7 +29,14 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "career-caddy-sender@careercaddy.online",
-      "strict_min_version": "128.0"
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": [
+          "websiteContent",
+          "personallyIdentifyingInfo",
+          "authenticationInfo"
+        ]
+      }
     }
   }
 }
