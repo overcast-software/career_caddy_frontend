@@ -28,6 +28,9 @@ docker-compose.override.yml
 # Local Caddy configs
 infra/caddy/*.local.caddy
 public/assets/*
+# Extension build artifacts — kept local so prod deploy doesn't serve them
+# at careercaddy.online/extensions/* (Distribution policy: AMO-signed only).
+public/extensions/*.zip
 
 # Playwright
 node_modules/

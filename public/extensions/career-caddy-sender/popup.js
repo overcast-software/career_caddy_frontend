@@ -1,5 +1,7 @@
 const ORIGIN = 'https://api.careercaddy.online';
-const STORAGE_KEYS = ['ccApiKey', 'ccKeyId', 'ccUsername', 'ccAutoScore'];
+const FRONTEND_ORIGIN = 'https://careercaddy.online';
+const STORAGE_KEYS = ['ccApiKey', 'ccKeyId', 'ccUsername', 'ccAutoScore', 'ccPending'];
+const PENDING_MAX_AGE_MS = 30_000;
 const THEME_KEYS = ['ccTheme', 'ccPalette'];
 const VALID_MODES = new Set(['system', 'light', 'dark']);
 const VALID_PALETTES = new Set([
@@ -51,6 +53,8 @@ const $ = (id) => document.getElementById(id);
 
 const screenConnect = $('screen-connect');
 const screenConnected = $('screen-connected');
+const screenTracked = $('screen-tracked');
+const screenLoading = $('screen-loading');
 const versionEl = $('version');
 
 const usernameInput = $('username');
@@ -60,10 +64,26 @@ const connectStatus = $('connect-status');
 
 const sendBtn = $('send');
 const sendStatus = $('send-status');
+const resultLinkEl = $('result-link');
+const dismissBtn = $('dismiss');
 const autoScoreBox = $('auto-score');
+const autoScoreRow = $('auto-score-row');
+const postSendScoreBtn = $('post-send-score-btn');
+const postSendScoreStatus = $('post-send-score-status');
 const whoEl = $('who');
 const disconnectBtn = $('disconnect');
 const themeToggleBtn = $('theme-toggle');
+
+const trackedTitleEl = $('tracked-title');
+const trackedCompanyEl = $('tracked-company');
+const trackedScoreEl = $('tracked-score');
+const trackedOpenEl = $('tracked-open');
+const trackedScoreBtn = $('tracked-score-btn');
+const trackedScoreStatus = $('tracked-score-status');
+let trackedJobPostId = null;
+const whoTrackedEl = $('who-tracked');
+const disconnectTrackedBtn = $('disconnect-tracked');
+const themeToggleTrackedBtn = $('theme-toggle-tracked');
 
 const SUN_SVG =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
@@ -83,7 +103,9 @@ function applyTheme(mode, palette) {
   const dark = isDarkMode(mode);
   root.dataset.theme = dark ? 'dark' : '';
   root.dataset.palette = palette === 'indigo' ? '' : palette || '';
-  if (themeToggleBtn) themeToggleBtn.innerHTML = dark ? SUN_SVG : MOON_SVG;
+  const icon = dark ? SUN_SVG : MOON_SVG;
+  if (themeToggleBtn) themeToggleBtn.innerHTML = icon;
+  if (themeToggleTrackedBtn) themeToggleTrackedBtn.innerHTML = icon;
 }
 
 function loadTheme() {
@@ -99,40 +121,50 @@ function loadTheme() {
 
 prefersDark.addEventListener('change', () => loadTheme());
 
-if (themeToggleBtn) {
-  themeToggleBtn.addEventListener('click', async () => {
-    const { ccTheme = 'system', ccPalette = 'indigo' } =
-      await api.storage.local.get(THEME_KEYS);
-    const currentlyDark = isDarkMode(ccTheme);
-    const next = currentlyDark ? 'light' : 'dark';
-    await api.storage.local.set({ ccTheme: next });
-    applyTheme(next, ccPalette);
-  });
+async function toggleTheme() {
+  const { ccTheme = 'system', ccPalette = 'indigo' } =
+    await api.storage.local.get(THEME_KEYS);
+  const currentlyDark = isDarkMode(ccTheme);
+  const next = currentlyDark ? 'light' : 'dark';
+  await api.storage.local.set({ ccTheme: next });
+  applyTheme(next, ccPalette);
 }
 
-// On Connect, the user is logging into the CC site — best-effort import the
-// app's theme from the active tab's localStorage so the popup matches.
-async function importThemeFromActiveTab() {
+if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
+if (themeToggleTrackedBtn)
+  themeToggleTrackedBtn.addEventListener('click', toggleTheme);
+
+// Best-effort palette sync from any open CC tab. We deliberately do NOT
+// import light/dark mode — the popup's toggle is the source of truth for
+// mode so a site-side dark switch can't override the user's popup choice.
+async function importPaletteFromActiveTab() {
   try {
-    const [tab] = await api.tabs.query({ active: true, currentWindow: true });
-    if (!tab || !tab.url) return;
-    const host = new URL(tab.url).hostname.toLowerCase();
-    if (!SELF_HOSTS.has(host)) return;
+    const [active] = await api.tabs.query({ active: true, currentWindow: true });
+    let target = null;
+    if (active && active.url) {
+      const host = new URL(active.url).hostname.toLowerCase();
+      if (SELF_HOSTS.has(host)) target = active;
+    }
+    if (!target) {
+      const allTabs = await api.tabs.query({});
+      target = allTabs.find((t) => {
+        if (!t.url) return false;
+        try {
+          return SELF_HOSTS.has(new URL(t.url).hostname.toLowerCase());
+        } catch {
+          return false;
+        }
+      });
+    }
+    if (!target) return;
     const results = await api.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: () => ({
-        mode: localStorage.getItem('theme-mode'),
-        palette: localStorage.getItem('theme-palette'),
-      }),
+      target: { tabId: target.id },
+      func: () => ({ palette: localStorage.getItem('theme-palette') }),
     });
     const themeData = results && results[0] && results[0].result;
     if (!themeData) return;
-    const updates = {};
-    if (VALID_MODES.has(themeData.mode)) updates.ccTheme = themeData.mode;
-    if (VALID_PALETTES.has(themeData.palette))
-      updates.ccPalette = themeData.palette;
-    if (Object.keys(updates).length) {
-      await api.storage.local.set(updates);
+    if (VALID_PALETTES.has(themeData.palette)) {
+      await api.storage.local.set({ ccPalette: themeData.palette });
       await loadTheme();
     }
   } catch {
@@ -153,37 +185,230 @@ function setStatus(el, msg, kind = 'info') {
   if (kind === 'success') el.classList.add('success');
 }
 
-function showConnect() {
+function jobPostUrl(jobPostId, { withScores = false } = {}) {
+  if (!jobPostId) return null;
+  return withScores
+    ? `${FRONTEND_ORIGIN}/job-posts/${jobPostId}/scores`
+    : `${FRONTEND_ORIGIN}/job-posts/${jobPostId}`;
+}
+
+function hideResultLink() {
+  resultLinkEl.classList.add('hidden');
+  resultLinkEl.removeAttribute('href');
+  resultLinkEl.textContent = '';
+  if (dismissBtn) dismissBtn.classList.add('hidden');
+}
+
+function showResultLink(jobPostId, { withScores = false, label } = {}) {
+  const url = jobPostUrl(jobPostId, { withScores });
+  if (!url) return;
+  resultLinkEl.href = url;
+  resultLinkEl.textContent =
+    label || (withScores ? 'View score' : 'View job post');
+  resultLinkEl.classList.remove('hidden');
+  if (dismissBtn) dismissBtn.classList.remove('hidden');
+}
+
+function setSendingState(sending) {
+  if (sending) {
+    sendBtn.dataset.state = 'sending';
+    sendBtn.disabled = true;
+  } else {
+    delete sendBtn.dataset.state;
+    sendBtn.disabled = false;
+  }
+}
+
+function hideAllScreens() {
+  screenLoading.classList.add('hidden');
+  screenConnect.classList.add('hidden');
   screenConnected.classList.add('hidden');
+  screenTracked.classList.add('hidden');
+}
+
+function showLoading() {
+  hideAllScreens();
+  screenLoading.classList.remove('hidden');
+}
+
+function showConnect() {
+  hideAllScreens();
   screenConnect.classList.remove('hidden');
   passwordInput.value = '';
+  hideResultLink();
+  setSendingState(false);
   setStatus(connectStatus, '');
   setTimeout(() => usernameInput.focus(), 50);
 }
 
 function showConnected(name) {
-  screenConnect.classList.add('hidden');
+  hideAllScreens();
   screenConnected.classList.remove('hidden');
   whoEl.textContent = name || '';
+  hideResultLink();
+  setSendingState(false);
   setStatus(sendStatus, '');
+}
+
+function showTracked({ id, title, company, topScore, hasPendingScore }, name) {
+  hideAllScreens();
+  screenTracked.classList.remove('hidden');
+  trackedJobPostId = id;
+  trackedTitleEl.textContent = title || '(untitled job post)';
+  trackedCompanyEl.textContent = company || '';
+  const hasScore = topScore !== null && topScore !== undefined;
+  if (hasScore) {
+    trackedScoreEl.textContent = String(topScore);
+    trackedScoreEl.classList.remove('hidden');
+  } else {
+    trackedScoreEl.textContent = '';
+    trackedScoreEl.classList.add('hidden');
+  }
+  trackedOpenEl.href = `${FRONTEND_ORIGIN}/job-posts/${id}`;
+  // Score button: only offered when there's no top_score AND no scoring
+  // is in flight. A pending score blocks re-scoring; a completed top_score
+  // is already surfaced via the badge so the button has nothing to add.
+  if (hasPendingScore) {
+    trackedScoreBtn.classList.add('hidden');
+    setStatus(trackedScoreStatus, 'Scoring in progress…');
+  } else if (!hasScore) {
+    trackedScoreBtn.classList.remove('hidden');
+    trackedScoreBtn.disabled = false;
+    delete trackedScoreBtn.dataset.state;
+    trackedScoreBtn.querySelector('.btn-label').textContent = 'Score this post';
+    setStatus(trackedScoreStatus, '');
+  } else {
+    trackedScoreBtn.classList.add('hidden');
+    setStatus(trackedScoreStatus, '');
+  }
+  whoTrackedEl.textContent = name || '';
+}
+
+async function lookupExistingJobPost(tabUrl, apiKey) {
+  if (!tabUrl) return null;
+  const verdict = classifyUrl(tabUrl);
+  if (!verdict.ok) return null;
+  let resp;
+  try {
+    const url =
+      `${ORIGIN}/api/v1/job-posts/?filter%5Blink%5D=${encodeURIComponent(tabUrl)}` +
+      `&include=company,scores`;
+    resp = await fetch(url, {
+      headers: {
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
+  } catch {
+    return null;
+  }
+  if (!resp.ok) return null;
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    return null;
+  }
+  const item = body?.data?.[0];
+  if (!item) return null;
+  const attrs = item.attributes || {};
+  let company = null;
+  const companyRel = item.relationships?.company?.data;
+  if (companyRel && Array.isArray(body.included)) {
+    const inc = body.included.find(
+      (r) =>
+        r &&
+        (r.type === 'company' || r.type === 'companies') &&
+        String(r.id) === String(companyRel.id),
+    );
+    company = inc?.attributes?.name || null;
+  }
+  const topScore =
+    typeof attrs.top_score === 'number' ? attrs.top_score : null;
+  // If any score on this JobPost is still pending, don't offer to score
+  // again — even across users (mirrors the cross-user top_score behavior).
+  const hasPendingScore = Array.isArray(body.included)
+    ? body.included.some(
+        (r) =>
+          r &&
+          (r.type === 'score' || r.type === 'scores') &&
+          r.attributes?.status === 'pending',
+      )
+    : false;
+  return {
+    id: item.id,
+    title: attrs.title,
+    company,
+    topScore,
+    hasPendingScore,
+  };
+}
+
+// Show the skeleton while we figure out which final screen the user
+// should land on. Resolves to Tracked (if the active URL is already in
+// the library) or Connected (Send UI). On lookup failure / network
+// error the catch routes to Connected — no time-based fallback, since
+// flipping to Send before the lookup returns flashes the wrong UI.
+async function resolveOpenScreen(apiKey, name) {
+  try {
+    const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.url) {
+      showConnected(name);
+      return;
+    }
+    const { ccPending } = await api.storage.local.get(['ccPending']);
+    if (
+      ccPending &&
+      ccPending.url === tab.url &&
+      Date.now() - ccPending.startedAt < PENDING_MAX_AGE_MS
+    ) {
+      showSending(name);
+      return;
+    }
+    const found = await lookupExistingJobPost(tab.url, apiKey);
+    if (found) {
+      showTracked(found, name);
+    } else {
+      showConnected(name);
+    }
+  } catch {
+    showConnected(name);
+  }
+}
+
+function showSending(name) {
+  showConnected(name);
+  if (autoScoreRow) autoScoreRow.classList.add('hidden');
+  setSendingState(true);
+  setStatus(sendStatus, 'Send in progress — close and reopen for status.');
+  if (dismissBtn) dismissBtn.classList.remove('hidden');
 }
 
 function loadSaved() {
   return api.storage.local.get(STORAGE_KEYS).then((saved) => {
     autoScoreBox.checked =
       saved.ccAutoScore === undefined ? true : !!saved.ccAutoScore;
+    // Always prefill username — survives popup close during password
+    // copy-paste from a password manager.
+    usernameInput.value = saved.ccUsername || '';
     if (saved.ccApiKey && saved.ccKeyId) {
-      showConnected(saved.ccUsername);
-      usernameInput.value = saved.ccUsername || '';
+      // Show the skeleton while the popup-open lookup resolves; resolveOpenScreen
+      // swaps to either Tracked (URL already in library) or Connected (Send UI).
+      // Single network request, popup-open only — never on tab change.
+      showLoading();
+      resolveOpenScreen(saved.ccApiKey, saved.ccUsername);
     } else {
       showConnect();
     }
-    // Always best-effort re-sync theme from the active CC tab — covers users
-    // who installed/updated the extension after their first connect, plus
-    // picks up theme changes the user made in the app since last popup open.
-    importThemeFromActiveTab();
+    importPaletteFromActiveTab();
   });
 }
+
+usernameInput.addEventListener('input', () => {
+  api.storage.local
+    .set({ ccUsername: usernameInput.value })
+    .catch(() => {});
+});
 
 function persistAutoScore() {
   api.storage.local
@@ -311,11 +536,12 @@ connectBtn.addEventListener('click', async () => {
   connectBtn.disabled = false;
   setStatus(connectStatus, '');
   showConnected(username);
-  importThemeFromActiveTab();
+  importPaletteFromActiveTab();
 });
 
-disconnectBtn.addEventListener('click', async () => {
+async function handleDisconnect() {
   disconnectBtn.disabled = true;
+  disconnectTrackedBtn.disabled = true;
   setStatus(sendStatus, 'Disconnecting…');
   const saved = await api.storage.local.get(['ccApiKey', 'ccKeyId']);
   if (saved.ccApiKey && saved.ccKeyId) {
@@ -328,27 +554,55 @@ disconnectBtn.addEventListener('click', async () => {
       console.warn('[cc-sender] revoke best-effort failed', err);
     }
   }
-  await api.storage.local.remove(['ccApiKey', 'ccKeyId', 'ccUsername']);
+  await api.storage.local.remove([
+    'ccApiKey',
+    'ccKeyId',
+    'ccUsername',
+  ]);
   disconnectBtn.disabled = false;
+  disconnectTrackedBtn.disabled = false;
   showConnect();
-});
+}
+
+disconnectBtn.addEventListener('click', handleDisconnect);
+disconnectTrackedBtn.addEventListener('click', handleDisconnect);
 
 async function grabPayload(tabId) {
+  // allFrames so iframe-embedded ATS bodies (greenhouse boards, worksourcewa
+  // GetJob.aspx, lever overlays) get captured. results[0] is the top frame
+  // — its URL is the canonical link. Subframes append their text after a
+  // separator so the parse agent has a structural hint.
   const results = await api.scripting.executeScript({
-    target: { tabId },
-    func: () => ({ url: location.href, text: document.body.innerText }),
+    target: { tabId, allFrames: true },
+    func: () => ({
+      url: location.href,
+      text: document.body ? document.body.innerText : '',
+    }),
   });
-  return results && results[0] && results[0].result;
+  if (!results || !results.length) return null;
+  const top = results[0];
+  if (!top || !top.result) return null;
+  const allText = results
+    .map((r) => r && r.result && r.result.text)
+    .filter(Boolean)
+    .join('\n\n--- frame ---\n\n');
+  return { url: top.result.url, text: allText };
+}
+
+function clearPending() {
+  return api.storage.local.remove('ccPending').catch(() => {});
 }
 
 sendBtn.addEventListener('click', async () => {
-  sendBtn.disabled = true;
+  hideResultLink();
+  setSendingState(true);
+  if (autoScoreRow) autoScoreRow.classList.add('hidden');
   setStatus(sendStatus, 'Reading page…');
 
   const saved = await api.storage.local.get(['ccApiKey', 'ccKeyId']);
   if (!saved.ccApiKey) {
     setStatus(sendStatus, 'Not connected.', 'error');
-    sendBtn.disabled = false;
+    setSendingState(false);
     showConnect();
     return;
   }
@@ -361,9 +615,14 @@ sendBtn.addEventListener('click', async () => {
       const verdict = classifyUrl(tab.url);
       if (!verdict.ok) {
         setStatus(sendStatus, verdict.message, 'error');
-        sendBtn.disabled = false;
+        setSendingState(false);
         return;
       }
+      // Mark in-flight so a popup re-open during the fetch shows
+      // "Sending…" instead of a fresh Send button.
+      await api.storage.local.set({
+        ccPending: { url: tab.url, startedAt: Date.now() },
+      });
     }
     payload = await grabPayload(tab.id);
     if (!payload || !payload.text) {
@@ -371,11 +630,14 @@ sendBtn.addEventListener('click', async () => {
     }
   } catch (err) {
     setStatus(sendStatus, err.message, 'error');
-    sendBtn.disabled = false;
+    setSendingState(false);
+    await clearPending();
     return;
   }
 
   setStatus(sendStatus, 'Sending…');
+
+  const wantsScore = autoScoreBox.checked;
 
   let resp;
   try {
@@ -389,18 +651,21 @@ sendBtn.addEventListener('click', async () => {
         text: payload.text,
         link: payload.url,
         source: 'extension',
+        auto_score: wantsScore,
       }),
     });
   } catch (err) {
     setStatus(sendStatus, `Network error: ${err.message}`, 'error');
-    sendBtn.disabled = false;
+    setSendingState(false);
+    await clearPending();
     return;
   }
 
   if (resp.status === 401 || resp.status === 403) {
     setStatus(sendStatus, 'Session expired — reconnecting required.', 'error');
     await api.storage.local.remove(['ccApiKey', 'ccKeyId', 'ccUsername']);
-    sendBtn.disabled = false;
+    setSendingState(false);
+    await clearPending();
     showConnect();
     return;
   }
@@ -415,32 +680,76 @@ sendBtn.addEventListener('click', async () => {
   if (resp.status === 409) {
     const meta = body?.errors?.[0]?.meta || {};
     const title = meta.title || meta.company_name || payload.url;
-    api.notifications
-      .create({
-        type: 'basic',
-        iconUrl: api.runtime.getURL('icons/icon48.png'),
-        title: 'Career Caddy — already in your library',
-        message: title,
+    const existingJobPostId = meta.job_post_id;
+    if (existingJobPostId) {
+      // 409 = duplicate; existing post may have a prior score. Don't
+      // assume the user wants /scores — link to the post page itself.
+      showResultLink(existingJobPostId, { withScores: false });
+    }
+    api.runtime
+      .sendMessage({
+        type: 'cc-notify-existing',
+        title,
+        jobPostId: existingJobPostId,
+        frontendOrigin: FRONTEND_ORIGIN,
       })
       .catch(() => {});
     setStatus(sendStatus, 'Already in your library.', 'success');
-    setTimeout(() => window.close(), 1500);
+    setSendingState(false);
+    await clearPending();
     return;
   }
 
   if (!resp.ok) {
     const detail = body?.errors?.[0]?.detail || `HTTP ${resp.status}`;
     setStatus(sendStatus, `Error: ${detail}`, 'error');
-    sendBtn.disabled = false;
+    setSendingState(false);
+    await clearPending();
     return;
   }
 
   const scrapeId = body?.data?.id;
   if (!scrapeId) {
     setStatus(sendStatus, 'Sent, but no scrape id returned.', 'error');
-    sendBtn.disabled = false;
+    setSendingState(false);
+    await clearPending();
     return;
   }
+
+  // The from-text endpoint runs parse_scrape synchronously, so the scrape
+  // already has a job_post_id by the time the response returns. Surface
+  // the link immediately and fire the "added" OS notification now —
+  // don't wait for the bg poll. The bg path still polls for the score
+  // result when auto-score is on; that's the SECOND, score-aware
+  // notification.
+  const newJobPostId =
+    body?.data?.relationships?.['job-post']?.data?.id || null;
+  const includedJobPost = (body?.included || []).find(
+    (r) =>
+      r &&
+      (r.type === 'job-post' || r.type === 'job-posts') &&
+      String(r.id) === String(newJobPostId),
+  );
+  const newJobTitle =
+    includedJobPost?.attributes?.title || payload.url;
+  if (newJobPostId) {
+    showResultLink(newJobPostId, { withScores: wantsScore });
+  }
+
+  // Fire the immediate "Added ✓" / "Added ✓ — scoring…" notification
+  // from the popup so the user gets feedback even before the popup
+  // closes. The background polls for the SCORE completion afterwards
+  // (and skips its own redundant "Added" notification — see
+  // cc-notify-created handling in background.js).
+  api.runtime
+    .sendMessage({
+      type: 'cc-notify-created',
+      title: newJobTitle,
+      jobPostId: newJobPostId,
+      withScores: wantsScore,
+      frontendOrigin: FRONTEND_ORIGIN,
+    })
+    .catch(() => {});
 
   api.runtime
     .sendMessage({
@@ -449,15 +758,119 @@ sendBtn.addEventListener('click', async () => {
       origin: ORIGIN,
       apiKey: saved.ccApiKey,
       url: payload.url,
-      autoScore: autoScoreBox.checked,
+      autoScore: wantsScore,
+      frontendOrigin: FRONTEND_ORIGIN,
+      // Popup already fired the "added" notification; bg should only
+      // notify on the score-completion event (or terminal failure).
+      skipAddedNotification: true,
     })
     .catch((err) => {
       console.warn('[cc-sender] background handoff failed', err);
     });
 
-  setStatus(sendStatus, 'Sent ✓ — watch for a notification.', 'success');
-  setTimeout(() => window.close(), 1500);
+  const successCopy = wantsScore
+    ? 'Sent ✓ — scoring now.'
+    : 'Sent ✓ — watch for a notification.';
+  setStatus(sendStatus, successCopy, 'success');
+  setSendingState(false);
+  await clearPending();
+
+  sendBtn.classList.add('hidden');
+  if (dismissBtn) dismissBtn.classList.remove('hidden');
+  if (!wantsScore && newJobPostId && postSendScoreBtn) {
+    trackedJobPostId = newJobPostId;
+    postSendScoreBtn.classList.remove('hidden');
+  }
 });
+
+if (dismissBtn) dismissBtn.addEventListener('click', () => window.close());
+
+// "Score this post" — POST /api/v1/scores/ with the JobPost relationship
+// and surface a link to the score-detail page. No polling (per
+// direction); user can refresh /job-posts/:id/scores/:score_id later to
+// see the result. Shared between the tracked-panel button and the
+// post-send button on the connected screen.
+async function startScore(btn, statusEl) {
+  if (!trackedJobPostId) return;
+  const saved = await api.storage.local.get(['ccApiKey']);
+  if (!saved.ccApiKey) {
+    setStatus(statusEl, 'Not connected.', 'error');
+    return;
+  }
+  btn.disabled = true;
+  btn.dataset.state = 'sending';
+  setStatus(statusEl, 'Starting score…');
+  let resp;
+  try {
+    resp = await fetch(`${ORIGIN}/api/v1/scores/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${saved.ccApiKey}`,
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'score',
+          relationships: {
+            'job-post': {
+              data: { type: 'job-post', id: String(trackedJobPostId) },
+            },
+          },
+        },
+      }),
+    });
+  } catch (err) {
+    setStatus(statusEl, `Network error: ${err.message}`, 'error');
+    btn.disabled = false;
+    delete btn.dataset.state;
+    return;
+  }
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    body = null;
+  }
+  if (!resp.ok) {
+    const detail = body?.errors?.[0]?.detail || `HTTP ${resp.status}`;
+    setStatus(statusEl, detail, 'error');
+    btn.disabled = false;
+    delete btn.dataset.state;
+    return;
+  }
+  const scoreId = body?.data?.id;
+  btn.classList.add('hidden');
+  if (scoreId) {
+    const url = `${FRONTEND_ORIGIN}/job-posts/${trackedJobPostId}/scores/${scoreId}`;
+    statusEl.innerHTML = '';
+    const label = document.createElement('span');
+    label.textContent = 'Scoring started — ';
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'view progress';
+    link.className = 'result-link';
+    link.style.marginTop = '0';
+    statusEl.appendChild(label);
+    statusEl.appendChild(link);
+    statusEl.classList.add('success');
+  } else {
+    setStatus(statusEl, 'Scoring started.', 'success');
+  }
+}
+
+if (trackedScoreBtn) {
+  trackedScoreBtn.addEventListener('click', () =>
+    startScore(trackedScoreBtn, trackedScoreStatus),
+  );
+}
+if (postSendScoreBtn) {
+  postSendScoreBtn.addEventListener('click', () =>
+    startScore(postSendScoreBtn, postSendScoreStatus),
+  );
+}
 
 loadTheme();
 loadSaved();
