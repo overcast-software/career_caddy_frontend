@@ -1,0 +1,137 @@
+================================================================
+Career Caddy Sender — Chrome Web Store Privacy Practices answers
+================================================================
+
+------------------------------------------------------------
+Single purpose
+------------------------------------------------------------
+Career Caddy Sender has a single purpose: capture the active tab's
+job posting (URL, title, and full page text) and send it to the
+user's Career Caddy account at https://api.careercaddy.online when
+the user clicks the Send button in the popup. The extension does
+not perform any other function.
+
+
+------------------------------------------------------------
+activeTab — justification
+------------------------------------------------------------
+activeTab grants the temporary, gesture-bound host permission needed
+to read the active tab's URL and body text on the user's Send click.
+The user's click on the extension's toolbar action is the consent
+gesture; activeTab only takes effect for that tab and only while the
+gesture is active. The extension never reads page content at any
+other time.
+
+
+------------------------------------------------------------
+scripting — justification
+------------------------------------------------------------
+scripting is required to call chrome.scripting.executeScript on the
+user's Send click, in order to read the active tab's URL and
+document.body.innerText (and same-origin subframes via
+allFrames: true) so that the page text can be POSTed to the user's
+Career Caddy account. The injected function is bundled inside the
+extension (an inline `func` parameter, not a remote code string).
+The extension does not inject code at any time other than the user's
+explicit Send click.
+
+
+------------------------------------------------------------
+storage — justification
+------------------------------------------------------------
+storage (browser.storage.local) is required to persist:
+  1. the user's Career Caddy API key + key id (returned by the
+     Career Caddy API on Connect),
+  2. the user's username (for display in the popup),
+  3. the user's "Also score against career data" checkbox preference,
+  4. theme + palette preferences (light/dark mode + accent color),
+  5. an in-flight "Sending..." marker so that re-opening the popup
+     during a fetch shows the correct state.
+
+storage.session is also used by the service worker to remember
+notification click-targets and to track scrape/score polling state.
+All values are stored locally in the browser; nothing is synced to
+any remote server other than the user's own Career Caddy account.
+
+
+------------------------------------------------------------
+notifications — justification
+------------------------------------------------------------
+notifications is required to deliver OS-level feedback when the
+user's Send action terminates: "added" when the JobPost is created,
+"scored N" when an optional fit-score completes, "could not parse"
+on failure, and "session expired" if the API key has been revoked.
+Each notification carries a click-through link to the corresponding
+Career Caddy detail page. Notifications are only fired in response
+to a user-initiated Send click.
+
+
+------------------------------------------------------------
+alarms — justification
+------------------------------------------------------------
+alarms is required because the work triggered by Send outlasts the
+popup. After the user clicks Send, the popup may close before the
+API finishes parsing the submitted page. The MV3 service worker
+uses chrome.alarms.create to poll the user's Career Caddy
+/scrapes/<id>/ endpoint at 30-second intervals (capped at 20 polls)
+and to poll the optional /scores/<id>/ endpoint similarly, so that
+the result notification can fire whenever the work completes. alarms
+is the documented MV3 mechanism for scheduling work in a service
+worker that may go idle.
+
+
+------------------------------------------------------------
+host permission — justification
+------------------------------------------------------------
+host_permissions is intentionally narrow:
+
+  https://api.careercaddy.online/*
+  https://careercaddy.online/*
+
+This does NOT include <all_urls>. It is the minimum needed to
+operate:
+
+  1. api.careercaddy.online — required so the popup and the service
+     worker can fetch /api/v1/token/, /api/v1/api-keys/,
+     /api/v1/scrapes/, /api/v1/scores/, and /api/v1/job-posts/ on
+     the user's behalf.
+  2. careercaddy.online — required so the popup can read
+     theme-palette from a Career Caddy tab's localStorage (via a
+     small scripting.executeScript injection on a CC-origin tab)
+     so the popup's accent color matches the user's chosen palette
+     in the web app.
+
+The activeTab permission (separately declared) covers reading
+job-posting page content on the user's Send click. host_permissions
+does not need to enumerate job sites because the body-read happens
+under the user-gesture-bound activeTab grant, not host_permissions.
+
+
+------------------------------------------------------------
+Remote code
+------------------------------------------------------------
+No. The extension does not load or execute remote code. All
+JavaScript is bundled in the published .zip and runs in the popup
+or service worker. Network activity is limited to:
+
+  1. fetch() calls (JSON request/response) to the user's Career
+     Caddy account at https://api.careercaddy.online,
+  2. chrome.scripting.executeScript calls that inject an inline
+     `func` (bundled in popup.js, NOT a remote-code string) into
+     the active tab's frames on the user's Send click.
+
+No script tags, no eval(), no dynamic import, no remote-hosted
+code paths.
+
+
+------------------------------------------------------------
+Data usage certification
+------------------------------------------------------------
+[ Tick the box. ] The extension does not collect or use data for
+any purpose other than the single purpose stated above. Specifically:
+
+  - Data is NOT sold or transferred to third parties.
+  - Data is NOT used or transferred for purposes unrelated to the
+    extension's single purpose.
+  - Data is NOT used or transferred to determine creditworthiness
+    or for lending purposes.
