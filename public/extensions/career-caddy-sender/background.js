@@ -31,8 +31,40 @@ const SUCCESS_SCORE = new Set(['completed']);
 const api = typeof browser !== 'undefined' ? browser : chrome;
 const SCRAPE_PREFIX = 'cc-scrape-poll-';
 const SCORE_PREFIX = 'cc-score-poll-';
+const NOTIFY_LINKS_KEY = 'cc-notify-links';
 
-function notify(title, message) {
+// Notifications can survive the popup closing and even the service worker
+// going idle; the click-target URL has to be persisted, not held in memory.
+async function rememberNotificationLink(notificationId, url) {
+  if (!notificationId || !url) return;
+  try {
+    const stored = await api.storage.session.get(NOTIFY_LINKS_KEY);
+    const map = stored[NOTIFY_LINKS_KEY] || {};
+    map[notificationId] = url;
+    await api.storage.session.set({ [NOTIFY_LINKS_KEY]: map });
+  } catch (err) {
+    console.warn('[cc-sender bg] could not remember notify link', err);
+  }
+}
+
+async function consumeNotificationLink(notificationId) {
+  try {
+    const stored = await api.storage.session.get(NOTIFY_LINKS_KEY);
+    const map = stored[NOTIFY_LINKS_KEY] || {};
+    const url = map[notificationId];
+    if (url) {
+      delete map[notificationId];
+      await api.storage.session.set({ [NOTIFY_LINKS_KEY]: map });
+    }
+    return url || null;
+  } catch {
+    return null;
+  }
+}
+
+function notify(title, message, linkUrl) {
+  // chrome.notifications.create resolves with the assigned id; pass the id
+  // to rememberNotificationLink so onClicked can open the right page.
   return api.notifications
     .create({
       type: 'basic',
@@ -40,34 +72,82 @@ function notify(title, message) {
       title,
       message,
     })
+    .then((notificationId) => {
+      if (linkUrl) rememberNotificationLink(notificationId, linkUrl);
+      return notificationId;
+    })
     .catch((err) => {
       console.warn('[cc-sender bg] notification failed', err);
     });
 }
 
-api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  if (!msg || msg.type !== 'cc-scrape-queued') return false;
-  const ctx = {
-    scrapeId: String(msg.scrapeId),
-    origin: msg.origin,
-    apiKey: msg.apiKey,
-    url: msg.url,
-    autoScore: !!msg.autoScore,
-    pollCount: 0,
-  };
-  const key = `scrape-${ctx.scrapeId}`;
-  api.storage.session
-    .set({ [key]: ctx })
-    .then(() =>
-      api.alarms.create(`${SCRAPE_PREFIX}${ctx.scrapeId}`, {
-        periodInMinutes: POLL_INTERVAL_MIN,
-        when: Date.now() + 2000,
-      }),
-    )
-    .catch((err) => {
-      console.warn('[cc-sender bg] queue failed', err);
+api.notifications.onClicked.addListener((notificationId) => {
+  consumeNotificationLink(notificationId).then((url) => {
+    if (!url) return;
+    api.tabs.create({ url }).catch((err) => {
+      console.warn('[cc-sender bg] tabs.create failed', err);
     });
-  if (typeof sendResponse === 'function') sendResponse({ ok: true });
+    api.notifications.clear(notificationId).catch(() => {});
+  });
+});
+
+function jobPostUrl(frontendOrigin, jobPostId, withScores) {
+  if (!jobPostId || !frontendOrigin) return null;
+  return withScores
+    ? `${frontendOrigin}/job-posts/${jobPostId}/scores`
+    : `${frontendOrigin}/job-posts/${jobPostId}`;
+}
+
+api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  if (!msg) return false;
+  if (msg.type === 'cc-scrape-queued') {
+    const ctx = {
+      scrapeId: String(msg.scrapeId),
+      origin: msg.origin,
+      apiKey: msg.apiKey,
+      url: msg.url,
+      autoScore: !!msg.autoScore,
+      frontendOrigin: msg.frontendOrigin || 'https://careercaddy.online',
+      skipAddedNotification: !!msg.skipAddedNotification,
+      pollCount: 0,
+    };
+    const key = `scrape-${ctx.scrapeId}`;
+    api.storage.session
+      .set({ [key]: ctx })
+      .then(() =>
+        api.alarms.create(`${SCRAPE_PREFIX}${ctx.scrapeId}`, {
+          periodInMinutes: POLL_INTERVAL_MIN,
+          when: Date.now() + 2000,
+        }),
+      )
+      .catch((err) => {
+        console.warn('[cc-sender bg] queue failed', err);
+      });
+    if (typeof sendResponse === 'function') sendResponse({ ok: true });
+    return false;
+  }
+  if (msg.type === 'cc-notify-created') {
+    // Fired by the popup the moment from-text returns 202 with a
+    // job_post_id. Earlier than the bg scrape-poll path, so the user
+    // gets feedback even if the popup closes immediately.
+    const linkUrl = jobPostUrl(
+      msg.frontendOrigin,
+      msg.jobPostId,
+      !!msg.withScores,
+    );
+    const title = msg.withScores
+      ? 'Career Caddy — added ✓ — scoring…'
+      : 'Career Caddy — added ✓';
+    notify(title, msg.title || '', linkUrl);
+    if (typeof sendResponse === 'function') sendResponse({ ok: true });
+    return false;
+  }
+  if (msg.type === 'cc-notify-existing') {
+    const linkUrl = jobPostUrl(msg.frontendOrigin, msg.jobPostId, false);
+    notify('Career Caddy — already in your library', msg.title || '', linkUrl);
+    if (typeof sendResponse === 'function') sendResponse({ ok: true });
+    return false;
+  }
   return false;
 });
 
@@ -162,20 +242,28 @@ async function pollScrapeOnce(scrapeId) {
       return;
     }
 
+    const postUrl = jobPostUrl(
+      ctx.frontendOrigin,
+      jobPostId,
+      ctx.autoScore,
+    );
+
     // Scrape success path:
     //   - autoScore on  → kick off score POST + start scoreId poll loop;
     //                     the FINAL notification is the score result.
-    //   - autoScore off → fire "added ✓" now.
+    //   - autoScore off → fire "added ✓" now (unless popup already did).
     if (ctx.autoScore && jobPostId) {
       const ok = await beginScorePoll(ctx, jobPostId, jobTitle);
-      if (!ok) {
+      if (!ok && !ctx.skipAddedNotification) {
         // Score POST failed (e.g. no career data) — fall back to the
         // creation notification so the user still hears something.
-        notify('Career Caddy — added ✓', jobTitle);
+        notify('Career Caddy — added ✓', jobTitle, postUrl);
       }
       return;
     }
-    notify('Career Caddy — added ✓', jobTitle);
+    if (!ctx.skipAddedNotification) {
+      notify('Career Caddy — added ✓', jobTitle, postUrl);
+    }
     return;
   }
 
@@ -227,6 +315,8 @@ async function beginScorePoll(ctx, jobPostId, jobTitle) {
     apiKey: ctx.apiKey,
     url: ctx.url,
     jobTitle,
+    jobPostId: String(jobPostId),
+    frontendOrigin: ctx.frontendOrigin,
     pollCount: 0,
   };
   await api.storage.session.set({ [`score-${scoreId}`]: scoreCtx });
@@ -289,14 +379,18 @@ async function pollScoreOnce(scoreId) {
   if (status && TERMINAL_SCORE.has(status)) {
     await api.alarms.clear(`${SCORE_PREFIX}${scoreId}`);
     await api.storage.session.remove(key);
+    // Score-completion notifications always link to /scores when the
+    // user opted in (UX5) — that's where the meaningful detail lives.
+    const scoreUrl = jobPostUrl(ctx.frontendOrigin, ctx.jobPostId, true);
     if (SUCCESS_SCORE.has(status) && typeof value === 'number') {
-      notify(`Career Caddy — scored ${value} ✓`, ctx.jobTitle);
+      notify(`Career Caddy — scored ${value} ✓`, ctx.jobTitle, scoreUrl);
     } else if (SUCCESS_SCORE.has(status)) {
-      notify('Career Caddy — scored ✓', ctx.jobTitle);
+      notify('Career Caddy — scored ✓', ctx.jobTitle, scoreUrl);
     } else {
       notify(
         'Career Caddy — added ✓ (score failed)',
         ctx.jobTitle,
+        scoreUrl,
       );
     }
     return;

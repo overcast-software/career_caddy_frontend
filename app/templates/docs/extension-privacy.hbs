@@ -1,0 +1,191 @@
+{{page-title "Career Caddy Sender — Privacy Policy"}}
+<div class="container mx-auto max-w-3xl py-6 px-4 space-y-6">
+
+  <Panel::Card>
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">
+      Career Caddy Sender — Privacy Policy
+    </h1>
+    <p class="text-gray-500 text-sm">
+      This page describes what data the Career Caddy Sender browser extension
+      collects, when, and why. It is the privacy policy referenced from the
+      Chrome Web Store and Firefox Add-ons listings.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Summary</h2>
+    <p class="text-gray-600">
+      The extension only talks to one server: your Career Caddy account at
+      <code class="text-sm">careercaddy.online</code>. It never sends data to
+      third parties, never uses tracking pixels, and never reads page content
+      unless you click its toolbar button. Everything the extension does is
+      triggered by an explicit click — there is no background scanning of the
+      pages you visit.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">
+      Data we collect — and when
+    </h2>
+
+    <h3 class="text-lg font-semibold text-gray-800 mt-4 mb-2">
+      When you click the toolbar icon to open the popup
+    </h3>
+    <p class="text-gray-600 mb-3">
+      The extension reads
+      <strong>only the URL of the active tab</strong>
+      and asks your Career Caddy library whether that URL is already tracked.
+      This single request returns either "yes, here it is" with a link, or "no"
+      — at which point the popup shows the Send button. No page content is read
+      for this lookup. The request is triggered by your click on the toolbar
+      action; there is no polling, no tab change listener, and no background
+      scan of any kind.
+    </p>
+
+    <h3 class="text-lg font-semibold text-gray-800 mt-4 mb-2">
+      When you click "Send this page"
+    </h3>
+    <p class="text-gray-600 mb-3">
+      The extension reads the URL of the active tab and the page's text
+      (specifically
+      <code class="text-sm">document.body.innerText</code>), and POSTs both to
+      your Career Caddy account. The text is parsed into a
+      <strong>JobPost</strong>
+      record owned by your account.
+    </p>
+
+    <h3 class="text-lg font-semibold text-gray-800 mt-4 mb-2">
+      When you click "Connect"
+    </h3>
+    <p class="text-gray-600">
+      You enter your Career Caddy username and password. These are transmitted
+      to your account only to mint a dedicated, revocable API key. Your password
+      is
+      <strong>never stored</strong>
+      by the extension. The temporary access token returned by the login step is
+      discarded immediately after the API key is created. Only the API key
+      persists.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">
+      What is stored locally
+    </h2>
+    <p class="text-gray-600 mb-3">
+      The extension uses your browser's
+      <code class="text-sm">storage.local</code>
+      for the following items, all scoped to the extension itself:
+    </p>
+    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+      <li>The
+        <strong>API key</strong>
+        and key id — used to authenticate requests to your Career Caddy account.
+        Revocable from
+        <em>Settings → API Keys</em>
+        in Career Caddy, or by clicking
+        <em>Disconnect</em>
+        in the extension popup.</li>
+      <li>Your
+        <strong>username</strong>
+        — shown in the popup footer so you know which account is connected.</li>
+      <li>Your
+        <strong>theme and palette preferences</strong>
+        — so the popup matches the way you've configured Career Caddy.</li>
+      <li>Your
+        <strong>"Auto-score against career data"</strong>
+        preference — so the toggle remembers its state.</li>
+    </ul>
+    <p class="text-gray-600 mt-3">
+      Nothing in this list is transmitted to third parties.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">
+      What we do NOT do
+    </h2>
+    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+      <li>We do not read page content unless you click the Send button.</li>
+      <li>We do not scan the URLs of tabs you have not opened the popup on.</li>
+      <li>We do not track which sites you visit.</li>
+      <li>We do not sell or share data with anyone.</li>
+      <li>We do not use the data we receive for any purpose other than creating
+        and managing the JobPost records you have asked us to keep.</li>
+      <li>We do not include analytics, telemetry, or third-party scripts in the
+        extension.</li>
+    </ul>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Permissions</h2>
+    <p class="text-gray-600 mb-3">
+      The extension requests these permissions, and only uses them for the
+      purposes described:
+    </p>
+    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+      <li><strong>activeTab</strong>
+        and
+        <strong>scripting</strong>
+        — read the active tab's URL when you open the popup, and the page's text
+        when you click Send.</li>
+      <li><strong>storage</strong>
+        — persist the API key, username, and preferences described above.</li>
+      <li><strong>notifications</strong>
+        — show an OS notification when a Send completes (so you know the page
+        was added).</li>
+      <li><strong>alarms</strong>
+        — the background poll cadence used to wait for the parse and score
+        results before firing a notification.</li>
+      <li><strong>host_permissions: &lt;all_urls&gt;</strong>
+        — required for active-tab text capture to work on arbitrary careers,
+        ATS, and job-board domains. All
+        <em>network requests</em>
+        go to a single hardcoded origin (<code
+          class="text-sm"
+        >https://api.careercaddy.online</code>);
+        <code class="text-sm">&lt;all_urls&gt;</code>
+        is for reads, not network egress.</li>
+    </ul>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">
+      Retention and deletion
+    </h2>
+    <p class="text-gray-600">
+      Anything submitted via the extension lives in your Career Caddy account
+      just like data you create through the website. Retention and deletion
+      follow the same rules as the rest of your account — delete a JobPost from
+      Career Caddy and it is gone. Delete your account and all associated data
+      is removed.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Revocation</h2>
+    <p class="text-gray-600">
+      To stop the extension from accessing your account at any time, either
+      click
+      <em>Disconnect</em>
+      in the extension popup, or revoke the named key under
+      <em>Settings → API Keys</em>
+      in Career Caddy. Either action immediately invalidates the extension's
+      access; the next request will be rejected and the extension will prompt
+      you to reconnect.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Contact</h2>
+    <p class="text-gray-600">
+      Questions about this policy or the extension's behavior? Email
+      <a
+        class="text-accent-700 underline"
+        href="mailto:support@careercaddy.online"
+      >support@careercaddy.online</a>.
+    </p>
+  </Panel::Card>
+
+</div>

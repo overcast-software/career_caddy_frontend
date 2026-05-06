@@ -1,10 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Career Caddy Sender",
-  "version": "0.3.6",
+  "version": "1.0.20",
   "description": "Send a job posting directly to Career Caddy. Connect once with your account; the extension creates a dedicated, revocable API key and POSTs page content straight to the API.",
   "permissions": ["activeTab", "scripting", "storage", "notifications", "alarms"],
-  "host_permissions": ["<all_urls>"],
+  "host_permissions": [
+    "https://api.careercaddy.online/*",
+    "https://careercaddy.online/*"
+  ],
   "action": {
     "default_title": "Send to Career Caddy",
     "default_popup": "popup.html",
