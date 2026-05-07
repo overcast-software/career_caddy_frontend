@@ -32,9 +32,9 @@
       {{on "change" this.updateProfession}}
     >
       <option value="" selected={{not this.profession}}>—</option>
-      {{#each this.professionOptions as |option|}}
-        <option value={{option}} selected={{eq this.profession option}}>
-          {{option}}
+      {{#each this.professionOptions as |prof|}}
+        <option value={{prof}} selected={{eq this.profession prof}}>
+          {{prof}}
         </option>
       {{/each}}
     </select>
