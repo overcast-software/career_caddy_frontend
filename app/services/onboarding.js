@@ -10,6 +10,12 @@ const DEFAULT_ONBOARDING = {
   first_cover_letter: false,
 };
 
+// Subjective keys are user-claimed state nothing on the server can verify.
+// Only these are PATCH-able via /api/v1/onboarding/. Derived keys are
+// recomputed by /api/v1/onboarding/reconcile/ from real records — sending
+// them in a PATCH gets a 400.
+const SUBJECTIVE_KEYS = new Set(['wizard_enabled', 'resume_reviewed']);
+
 const CREATE_TYPE_TO_KEY = {
   resume: 'resume_imported',
   'job-post': 'first_job_post',
@@ -48,6 +54,7 @@ const CHECKLIST_ORDER = [
 
 export default class OnboardingService extends Service {
   @service currentUser;
+  @service store;
 
   get user() {
     return this.currentUser.user || null;
@@ -99,12 +106,14 @@ export default class OnboardingService extends Service {
     if (current[key] === true) return;
     current[key] = true;
     user.onboarding = current;
-    try {
-      await user.save();
-    } catch {
-      // Non-critical — reactive state is already flipped locally;
-      // next full user fetch will converge.
+    if (SUBJECTIVE_KEYS.has(key)) {
+      // Subjective keys are user-claimed state — persist via the strict
+      // /api/v1/onboarding/ endpoint backed by the OnboardingModel.
+      await this._saveSubjective({ [key]: true });
     }
+    // Derived keys (resume_imported, first_*, profile_basics) are recomputed
+    // by /api/v1/onboarding/reconcile/ on the next chat turn — skipping the
+    // server PATCH. Local cache flip already gives immediate UI feedback.
   }
 
   async disableWizard() {
@@ -113,10 +122,20 @@ export default class OnboardingService extends Service {
     const current = { ...(user.onboarding || {}) };
     current.wizard_enabled = false;
     user.onboarding = current;
+    await this._saveSubjective({ wizard_enabled: false });
+  }
+
+  async _saveSubjective(subjectivePatch) {
     try {
-      await user.save();
+      const record =
+        this.store.peekAll('onboarding').at(0) ||
+        (await this.store.queryRecord('onboarding', {}));
+      const subjective = { ...(record.subjective || {}), ...subjectivePatch };
+      record.subjective = subjective;
+      await record.save();
     } catch {
-      // Best-effort.
+      // Best-effort. Local user.onboarding is already updated for immediate
+      // UI; the next reconcile call rebuilds derived flags server-side.
     }
   }
 

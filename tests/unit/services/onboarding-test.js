@@ -10,16 +10,59 @@ function makeUser(overrides = {}) {
     lastName: overrides.lastName ?? 'Doe',
     email: overrides.email ?? 'jane@example.com',
     onboarding: overrides.onboarding ?? {},
-    _saved: 0,
-    async save() {
-      this._saved += 1;
-    },
   };
 }
 
 function stubCurrentUser(user) {
   return class CurrentUserStub extends Service {
     @tracked user = user;
+  };
+}
+
+// Mock the store so the onboarding service's queryRecord/save calls can
+// be observed without booting Ember Data adapters.
+function makeOnboardingRecord(overrides = {}) {
+  const record = {
+    id: '7',
+    derived: overrides.derived ?? {
+      profile_basics: false,
+      resume_imported: false,
+      first_job_post: false,
+      first_score: false,
+      first_cover_letter: false,
+    },
+    subjective: overrides.subjective ?? {
+      wizard_enabled: true,
+      resume_reviewed: false,
+    },
+    _saved: 0,
+    async save() {
+      this._saved += 1;
+    },
+  };
+  return record;
+}
+
+function stubStore(record) {
+  let queries = 0;
+  const peekResult = [];
+  return {
+    Service: class StoreStub extends Service {
+      _record = record;
+      peekAll(type) {
+        if (type !== 'onboarding') return [];
+        return peekResult;
+      }
+      async queryRecord(type) {
+        if (type !== 'onboarding') return null;
+        queries += 1;
+        peekResult.push(this._record);
+        return this._record;
+      }
+    },
+    get queries() {
+      return queries;
+    },
   };
 }
 
@@ -87,51 +130,94 @@ module('Unit | Service | onboarding', function (hooks) {
     assert.true(snapshot.wizard_enabled);
   });
 
-  test('markCompleted() flips the bit and saves', async function (assert) {
+  test('markCompleted() with subjective key saves the OnboardingModel', async function (assert) {
     const user = makeUser({ onboarding: { resume_imported: true } });
+    const record = makeOnboardingRecord();
+    const storeStub = stubStore(record);
     this.owner.register('service:current-user', stubCurrentUser(user));
+    this.owner.register('service:store', storeStub.Service);
+
     const service = this.owner.lookup('service:onboarding');
     await service.markCompleted('resume_reviewed');
+
     assert.true(user.onboarding.resume_reviewed);
-    assert.strictEqual(user._saved, 1);
+    assert.strictEqual(record._saved, 1, 'record.save() called once');
+    assert.true(record.subjective.resume_reviewed);
+  });
+
+  test('markCompleted() with derived key updates local cache only', async function (assert) {
+    // Derived keys (resume_imported, first_*) are recomputed by
+    // /api/v1/onboarding/reconcile/ — no client-side PATCH needed.
+    const user = makeUser();
+    const record = makeOnboardingRecord();
+    const storeStub = stubStore(record);
+    this.owner.register('service:current-user', stubCurrentUser(user));
+    this.owner.register('service:store', storeStub.Service);
+
+    const service = this.owner.lookup('service:onboarding');
+    await service.markCompleted('resume_imported');
+
+    assert.true(user.onboarding.resume_imported);
+    assert.strictEqual(record._saved, 0, 'derived keys never trigger save()');
   });
 
   test('markCompleted() is a no-op for already-completed keys', async function (assert) {
     const user = makeUser({
       onboarding: { wizard_enabled: true, resume_imported: true },
     });
+    const record = makeOnboardingRecord();
+    const storeStub = stubStore(record);
     this.owner.register('service:current-user', stubCurrentUser(user));
+    this.owner.register('service:store', storeStub.Service);
+
     const service = this.owner.lookup('service:onboarding');
     await service.markCompleted('resume_imported');
-    assert.strictEqual(user._saved, 0);
+    assert.strictEqual(record._saved, 0);
   });
 
   test('markCompleted() ignores unknown keys', async function (assert) {
     const user = makeUser();
+    const record = makeOnboardingRecord();
+    const storeStub = stubStore(record);
     this.owner.register('service:current-user', stubCurrentUser(user));
+    this.owner.register('service:store', storeStub.Service);
+
     const service = this.owner.lookup('service:onboarding');
     await service.markCompleted('bogus_key');
-    assert.strictEqual(user._saved, 0);
+    assert.strictEqual(record._saved, 0);
     assert.notOk(user.onboarding.bogus_key);
   });
 
-  test('noteRecordCreated() ticks the right onboarding key', async function (assert) {
+  test('noteRecordCreated() ticks the right derived onboarding key locally', async function (assert) {
     const user = makeUser();
+    const record = makeOnboardingRecord();
+    const storeStub = stubStore(record);
     this.owner.register('service:current-user', stubCurrentUser(user));
+    this.owner.register('service:store', storeStub.Service);
+
     const service = this.owner.lookup('service:onboarding');
     service.noteRecordCreated('resume');
     // markCompleted is async; wait a microtask
     await Promise.resolve();
     assert.true(user.onboarding.resume_imported);
+    assert.strictEqual(
+      record._saved,
+      0,
+      'noteRecordCreated only flips derived keys; reconcile syncs server',
+    );
   });
 
   test('noteRecordCreated() on unrelated model is a no-op', async function (assert) {
     const user = makeUser();
+    const record = makeOnboardingRecord();
+    const storeStub = stubStore(record);
     this.owner.register('service:current-user', stubCurrentUser(user));
+    this.owner.register('service:store', storeStub.Service);
+
     const service = this.owner.lookup('service:onboarding');
     service.noteRecordCreated('summary');
     await Promise.resolve();
-    assert.strictEqual(user._saved, 0);
+    assert.strictEqual(record._saved, 0);
   });
 
   test('noteProfileSaved() sets profile_basics only when all fields present', async function (assert) {
@@ -148,13 +234,19 @@ module('Unit | Service | onboarding', function (hooks) {
     assert.true(user.onboarding.profile_basics);
   });
 
-  test('disableWizard() writes wizard_enabled=false', async function (assert) {
+  test('disableWizard() saves the OnboardingModel with wizard_enabled=false', async function (assert) {
     const user = makeUser();
+    const record = makeOnboardingRecord();
+    const storeStub = stubStore(record);
     this.owner.register('service:current-user', stubCurrentUser(user));
+    this.owner.register('service:store', storeStub.Service);
+
     const service = this.owner.lookup('service:onboarding');
     await service.disableWizard();
+
     assert.false(user.onboarding.wizard_enabled);
-    assert.strictEqual(user._saved, 1);
+    assert.strictEqual(record._saved, 1);
+    assert.false(record.subjective.wizard_enabled);
   });
 
   test('chimeInOnPage excludes admin/docs/auth routes', function (assert) {
