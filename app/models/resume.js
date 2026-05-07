@@ -1,5 +1,16 @@
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 
+// Canonical section sequence — fallback when the API doesn't supply
+// effectiveSectionOrder (older payloads, slim responses, partial loads).
+const CANONICAL_SECTION_ORDER = [
+  'summary',
+  'skills',
+  'experience',
+  'projects',
+  'education',
+  'certifications',
+];
+
 export default class ResumeModel extends Model {
   @attr('string') content;
   @attr('string') filePath;
@@ -9,6 +20,8 @@ export default class ResumeModel extends Model {
   @attr('boolean') favorite;
   @attr('string') status;
   @attr('string') profession;
+  @attr('array') sectionOrder;
+  @attr('array') effectiveSectionOrder;
   @attr('number') jobApplicationCount;
   @attr('number') scoreCount;
   @attr('number') experienceCount;
@@ -43,5 +56,15 @@ export default class ResumeModel extends Model {
       if (s.active) return s;
     }
     return null;
+  }
+
+  get sectionRenderOrder() {
+    // Prefer the API-computed effectiveSectionOrder so the frontend
+    // never gets out of sync with archetype defaults defined server-side.
+    // Fall back to CANONICAL_SECTION_ORDER for slim responses or older
+    // payloads that don't include the attribute.
+    const fromApi = this.effectiveSectionOrder;
+    if (Array.isArray(fromApi) && fromApi.length > 0) return fromApi;
+    return CANONICAL_SECTION_ORDER;
   }
 }
