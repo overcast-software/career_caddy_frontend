@@ -10,6 +10,8 @@ export default class PublicRoutesService extends Service {
     'accept-invite',
     'signup',
     'about',
+    'get-started',
+    'extension',
     'not-found',
     'reports.application-flow',
   ]);
