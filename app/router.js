@@ -209,6 +209,8 @@ Router.map(function () {
     });
   });
   this.route('about');
+  this.route('get-started');
+  this.route('extension');
   this.route('docs', function () {
     this.route('career-data');
     this.route('job-posts');

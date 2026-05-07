@@ -35,29 +35,53 @@ export default class ApplicationRoute extends Route {
     window.__ccBookmarkletStashInstalled = true;
     window.addEventListener('message', (event) => {
       const data = event.data;
-      if (!data || data.type !== 'cc-bookmarklet') return;
-      try {
-        window.sessionStorage.setItem(
-          'cc-pending-paste',
-          JSON.stringify({
-            url: typeof data.url === 'string' ? data.url : '',
-            text: typeof data.text === 'string' ? data.text : '',
-            at: Date.now(),
-          }),
-        );
-      } catch {
-        /* sessionStorage blocked — nothing we can do */
-      }
-      try {
-        event.source?.postMessage('cc-bookmarklet-ack', event.origin || '*');
-      } catch {
-        /* best-effort ack */
-      }
-      const onPaste = this.router.currentRouteName === 'job-posts.new.paste';
-      if (!onPaste && this.session.isAuthenticated) {
-        this.router.transitionTo('job-posts.new.paste');
+      if (!data || typeof data !== 'object') return;
+      if (data.type === 'cc-bookmarklet') {
+        this._handleBookmarklet(event, data);
+      } else if (data.type === 'cc-extension-present') {
+        this._handleExtensionPresent(event);
       }
     });
+  }
+
+  _handleBookmarklet(event, data) {
+    try {
+      window.sessionStorage.setItem(
+        'cc-pending-paste',
+        JSON.stringify({
+          url: typeof data.url === 'string' ? data.url : '',
+          text: typeof data.text === 'string' ? data.text : '',
+          at: Date.now(),
+        }),
+      );
+    } catch {
+      /* sessionStorage blocked — nothing we can do */
+    }
+    try {
+      event.source?.postMessage('cc-bookmarklet-ack', event.origin || '*');
+    } catch {
+      /* best-effort ack */
+    }
+    const onPaste = this.router.currentRouteName === 'job-posts.new.paste';
+    if (!onPaste && this.session.isAuthenticated) {
+      this.router.transitionTo('job-posts.new.paste');
+    }
+  }
+
+  _handleExtensionPresent(event) {
+    try {
+      window.sessionStorage.setItem('cc:extension-present', 'true');
+    } catch {
+      /* sessionStorage blocked — nothing we can do */
+    }
+    try {
+      event.source?.postMessage(
+        'cc-extension-present-ack',
+        event.origin || '*',
+      );
+    } catch {
+      /* best-effort ack */
+    }
   }
 
   async beforeModel(transition) {

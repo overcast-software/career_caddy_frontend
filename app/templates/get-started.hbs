@@ -1,0 +1,88 @@
+{{page-title "Get Started — Career Caddy"}}
+<div class="container mx-auto max-w-3xl py-10 px-4 space-y-8">
+
+  <Panel::Card>
+    <div class="text-center space-y-4 py-6">
+      <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">
+        Career Caddy
+      </h1>
+      <p class="text-lg text-gray-600 max-w-xl mx-auto">
+        A pocket coach for your job search. Capture postings as you browse,
+        score them against your career data, and keep every application
+        organized.
+      </p>
+      <div class="pt-2">
+        <a
+          href="https://chromewebstore.google.com/detail/pjdajamkhjkemoaogohehcdpfkocofhd"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 rounded-md bg-jade-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-jade-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade-600"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="size-5 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
+            />
+          </svg>
+          Install the Chrome extension
+        </a>
+      </div>
+      <p class="text-sm text-gray-500">
+        Already signed up?
+        <LinkTo
+          @route="login"
+          class="text-jade-700 hover:text-jade-800 underline"
+        >
+          Sign in
+        </LinkTo>
+      </p>
+    </div>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">What it does</h2>
+    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+      <li>
+        <strong>Capture jobs in one click.</strong>
+        On any job posting, hit the toolbar button to send the page to your
+        Career Caddy library.
+      </li>
+      <li>
+        <strong>Score against your career data.</strong>
+        Career Caddy tells you how well your resume + experience match the
+        posting before you apply.
+      </li>
+      <li>
+        <strong>Track everything in one place.</strong>
+        Saved jobs, applications, cover letters, and questions all live under
+        your account.
+      </li>
+    </ul>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Privacy</h2>
+    <p class="text-gray-600">
+      The extension only talks to your Career Caddy account. It never sends data
+      to third parties and only reads page content when you click its toolbar
+      button.
+      <LinkTo
+        @route="docs.extension-privacy"
+        class="text-jade-700 hover:text-jade-800 underline"
+      >
+        Read the full privacy policy
+      </LinkTo>
+      .
+    </p>
+  </Panel::Card>
+
+</div>
