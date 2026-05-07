@@ -23,6 +23,27 @@
     </label>
   </div>
   <label class="flex flex-col gap-1">
+    <span
+      class="text-xs text-gray-400 uppercase tracking-wide"
+    >Profession</span>
+    <select
+      name="profession"
+      class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-200 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+      {{on "change" this.updateProfession}}
+    >
+      <option value="" selected={{not this.profession}}>—</option>
+      {{#each this.professionOptions as |option|}}
+        <option value={{option}} selected={{eq this.profession option}}>
+          {{option}}
+        </option>
+      {{/each}}
+    </select>
+    <span class="text-xs text-gray-500">
+      Drives audience-aware skill extraction during resume import. Leave blank
+      to use the generic prompt.
+    </span>
+  </label>
+  <label class="flex flex-col gap-1">
     <span class="text-xs text-gray-400 uppercase tracking-wide">Resume Notes</span>
     <textarea
       name="notes"

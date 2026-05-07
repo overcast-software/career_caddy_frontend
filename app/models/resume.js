@@ -8,6 +8,7 @@ export default class ResumeModel extends Model {
   @attr('string') notes;
   @attr('boolean') favorite;
   @attr('string') status;
+  @attr('string') profession;
   @attr('number') jobApplicationCount;
   @attr('number') scoreCount;
   @attr('number') experienceCount;
