@@ -39,6 +39,37 @@ class CurrentUserStub extends Service {
   }
 }
 
+// Login lands on /job-posts, whose route hits infinity.model('job-post', …).
+// Tests have no API; stub both store + infinity so the route resolves
+// synchronously to an empty list instead of 404ing back to /login.
+class StoreStub extends Service {
+  peekAll() {
+    return [];
+  }
+  async query() {
+    return [];
+  }
+  async queryRecord() {
+    return null;
+  }
+  async findAll() {
+    return [];
+  }
+  unloadAll() {}
+}
+
+class InfinityStub extends Service {
+  model() {
+    // <InfinityLoader> calls model.on('infinityModelLoaded', …);
+    // a bare [] crashes with "infinityModel.on is not a function".
+    const m = [];
+    m.on = () => m;
+    m.off = () => m;
+    m.reachedInfinity = true;
+    return m;
+  }
+}
+
 module('Acceptance | login flow', function (hooks) {
   setupApplicationTest(hooks);
 
@@ -50,6 +81,10 @@ module('Acceptance | login flow', function (hooks) {
     // Replace the StubCurrentUser from helpers with our session-aware stub.
     this.owner.unregister('service:current-user');
     this.owner.register('service:current-user', CurrentUserStub);
+    this.owner.unregister('service:store');
+    this.owner.register('service:store', StoreStub);
+    this.owner.unregister('service:infinity');
+    this.owner.register('service:infinity', InfinityStub);
   });
 
   hooks.afterEach(function () {
