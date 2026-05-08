@@ -41,7 +41,9 @@ export default class SessionService extends Service {
       .lookup('service:current-user')
       .load()
       .catch((err) => console.warn('Failed to load user after login:', err));
-    this.router.transitionTo('index');
+    // Job Posts is the dashboard — first thing users want to see post-login.
+    // The public landing (/) is a marketing surface for cold visitors.
+    this.router.transitionTo('job-posts.index');
   }
 
   handleInvalidation() {
