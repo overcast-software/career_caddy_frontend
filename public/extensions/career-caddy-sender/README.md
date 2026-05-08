@@ -28,6 +28,17 @@ fires the page off and an OS-level system notification announces the result.
 
 ## Version history
 
+- **1.1.0** — SSO via SPA session. The popup no longer takes a username
+  and password — first run was the only screen using them, and it was a
+  second sign-in for users already authenticated to the SPA. Instead the
+  popup reads `ember_simple_auth-session` from the active
+  careercaddy.online tab's `localStorage`, refreshes the JWT if needed,
+  and mints the API key from there. If you're not signed in to the SPA,
+  the popup links you to `careercaddy.online/login` — sign in there,
+  reopen the popup, you're connected. Minor bump because the connect
+  flow visibly changed: no more username/password fields. Same
+  `Career Caddy Sender — YYYY-MM-DD` API key naming convention; revoke
+  under Settings → API Keys as before.
 - **0.3.6** — API calls now target `api.careercaddy.online` directly, bypassing the
   frontend reverse-proxy. Fixes 405 Method Not Allowed on Connect when the frontend
   domain's Caddy config does not forward POST requests to the API.
