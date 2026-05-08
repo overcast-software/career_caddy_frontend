@@ -31,7 +31,10 @@ class JobPostStub {
   }
 
   belongsTo() {
-    return { value: () => null };
+    // The route's setupController calls `model.belongsTo('company').id()`
+    // (method, not property) to flash a warning when company is missing.
+    // Stub both shapes — id() and value() — so any consumer wins.
+    return { value: () => null, id: () => null };
   }
 
   hasMany() {
