@@ -1,12 +1,6 @@
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 import { TERMINAL } from 'career-caddy-frontend/services/pollable';
 
-// Keep in sync with STUB_MIN_WORDS in
-// api/job_hunting/lib/services/application_flow.py. A post is a "stub"
-// when its description is too thin to be useful — typically email-pipeline
-// junk that never got an enriched scrape.
-export const STUB_MIN_WORDS = 60;
-
 function _firstNonTerminal(records) {
   if (!records) return null;
   for (const r of records) {
@@ -44,6 +38,14 @@ export default class JobPostModel extends Model {
   // collision with `JobApplication.status`, the user's per-application
   // state (Applied / Interview Scheduled / ...).
   @attr('string') postingStatus;
+  // Explicit "needs (re-)scraping" flag. Three sources flip to false:
+  // cc_auto email-stub creation, the user clicking "Mark incomplete"
+  // on this page, and the scrape-graph's CompletenessReviewer
+  // rejecting the persisted output. One source flips back to true:
+  // a successful scrape attach via parse_scrape. The extension popup
+  // branches on this — complete=true posts get an Open link only;
+  // complete=false posts get a Send button.
+  @attr('boolean', { defaultValue: true }) complete;
   // `triage` is sourced from JSON:API `meta.triage` on the server response,
   // NOT from a column on the JobPost row. It carries the CALLING USER's
   // latest triage state for this (shared) post: status + reason_code +
@@ -74,10 +76,14 @@ export default class JobPostModel extends Model {
     return !this.description?.trim();
   }
 
+  // Reads the explicit `complete` flag from the api. Replaces the old
+  // word-count heuristic — the api now drives this signal via cc_auto
+  // email-stub creation, the user's "Mark incomplete" button, and the
+  // CompletenessReviewer's verdict on each scrape attach. Kept as
+  // `isStub` rather than `isIncomplete` so existing template consumers
+  // don't need to change.
   get isStub() {
-    const desc = (this.description || '').trim();
-    if (!desc) return true;
-    return desc.split(/\s+/).length < STUB_MIN_WORDS;
+    return !this.complete;
   }
 
   // Active work derived from scrapes / scores relationships — any record
