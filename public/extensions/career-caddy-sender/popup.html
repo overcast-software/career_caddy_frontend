@@ -410,24 +410,19 @@
 
     <div id="screen-connect">
       <h1>Connect to Career Caddy</h1>
-      <label for="username">Username</label>
-      <input
-        id="username"
-        type="text"
-        autocomplete="username"
-        autocapitalize="off"
-        spellcheck="false"
-      />
-      <label for="password">Password</label>
-      <input id="password" type="password" autocomplete="current-password" />
-      <div style="margin-top: 14px;">
-        <button id="connect" class="primary">Connect</button>
-      </div>
+      <p class="helper" style="margin-top: 0; margin-bottom: 14px;">
+        Sign in to <em>careercaddy.online</em> in this browser. The extension
+        reads your active session and mints a dedicated API key — no password
+        needed here.
+      </p>
+      <button id="open-signin" class="primary" type="button">
+        Sign in to Career Caddy
+      </button>
       <div class="status" id="connect-status"></div>
       <p class="helper">
-        We log in once to mint a dedicated API key, then discard your password.
-        The key is named <em>Career Caddy Sender</em> and is visible (and
-        revocable) under <em>Settings → API Keys</em>.
+        Already signed in? Reopen this popup — the extension will detect your
+        session automatically. The key is named <em>Career Caddy Sender</em>
+        and is visible (and revocable) under <em>Settings → API Keys</em>.
       </p>
     </div>
 

@@ -57,9 +57,7 @@ const screenTracked = $('screen-tracked');
 const screenLoading = $('screen-loading');
 const versionEl = $('version');
 
-const usernameInput = $('username');
-const passwordInput = $('password');
-const connectBtn = $('connect');
+const openSigninBtn = $('open-signin');
 const connectStatus = $('connect-status');
 
 const sendBtn = $('send');
@@ -231,14 +229,12 @@ function showLoading() {
   screenLoading.classList.remove('hidden');
 }
 
-function showConnect() {
+function showConnect(message = '') {
   hideAllScreens();
   screenConnect.classList.remove('hidden');
-  passwordInput.value = '';
   hideResultLink();
   setSendingState(false);
-  setStatus(connectStatus, '');
-  setTimeout(() => usernameInput.focus(), 50);
+  setStatus(connectStatus, message);
 }
 
 function showConnected(name) {
@@ -385,12 +381,9 @@ function showSending(name) {
 }
 
 function loadSaved() {
-  return api.storage.local.get(STORAGE_KEYS).then((saved) => {
+  return api.storage.local.get(STORAGE_KEYS).then(async (saved) => {
     autoScoreBox.checked =
       saved.ccAutoScore === undefined ? true : !!saved.ccAutoScore;
-    // Always prefill username — survives popup close during password
-    // copy-paste from a password manager.
-    usernameInput.value = saved.ccUsername || '';
     if (saved.ccApiKey && saved.ccKeyId) {
       // Show the skeleton while the popup-open lookup resolves; resolveOpenScreen
       // swaps to either Tracked (URL already in library) or Connected (Send UI).
@@ -398,83 +391,115 @@ function loadSaved() {
       showLoading();
       resolveOpenScreen(saved.ccApiKey, saved.ccUsername);
     } else {
-      showConnect();
+      // No stored key — try SPA-session SSO before falling back to the
+      // Connect screen. Reads the active careercaddy.online tab's
+      // ember-simple-auth session and mints an API key from the JWT.
+      showLoading();
+      const ssoResult = await attemptSsoFromActiveTab();
+      if (ssoResult.ok) {
+        await api.storage.local.set({
+          ccApiKey: ssoResult.apiKey,
+          ccKeyId: ssoResult.keyId,
+          ccUsername: ssoResult.username,
+        });
+        resolveOpenScreen(ssoResult.apiKey, ssoResult.username);
+      } else {
+        showConnect(ssoResult.message || '');
+      }
     }
     importPaletteFromActiveTab();
   });
 }
 
-usernameInput.addEventListener('input', () => {
-  api.storage.local
-    .set({ ccUsername: usernameInput.value })
-    .catch(() => {});
-});
-
-function persistAutoScore() {
-  api.storage.local
-    .set({ ccAutoScore: autoScoreBox.checked })
-    .catch(() => {});
-}
-
-autoScoreBox.addEventListener('change', persistAutoScore);
-
-function submitOnEnter(e) {
-  if (e.key === 'Enter' && !connectBtn.disabled) {
-    e.preventDefault();
-    connectBtn.click();
-  }
-}
-usernameInput.addEventListener('keydown', submitOnEnter);
-passwordInput.addEventListener('keydown', submitOnEnter);
-
-connectBtn.addEventListener('click', async () => {
-  const username = (usernameInput.value || '').trim();
-  const password = passwordInput.value;
-
-  if (!username || !password) {
-    setStatus(connectStatus, 'Username and password are required.', 'error');
-    return;
-  }
-
-  connectBtn.disabled = true;
-  setStatus(connectStatus, 'Authenticating…');
-
-  let access;
+// Walk every open tab for a careercaddy.online session in localStorage.
+// ESA stores the JWT under `ember_simple_auth-session` with shape:
+//   {"authenticated":{"authenticator":"authenticator:jwt","access":"...","refresh":"..."}}
+// We mint an API key from the access token (refreshing first if it's
+// expired), then store the key. No popup login form needed.
+async function attemptSsoFromActiveTab() {
+  let session;
   try {
-    const resp = await fetch(`${ORIGIN}/api/v1/token/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    if (resp.status === 401 || resp.status === 400) {
-      setStatus(connectStatus, 'Invalid username or password.', 'error');
-      connectBtn.disabled = false;
-      return;
-    }
-    if (!resp.ok) {
-      setStatus(connectStatus, `Login failed (${resp.status}).`, 'error');
-      connectBtn.disabled = false;
-      return;
-    }
-    const body = await resp.json();
-    access = body.access;
-    if (!access) throw new Error('No access token in response');
+    session = await readSpaSession();
   } catch (err) {
-    setStatus(
-      connectStatus,
-      `Cannot reach Career Caddy: ${err.message}`,
-      'error',
-    );
-    connectBtn.disabled = false;
-    return;
+    console.warn('[cc-sender] SSO read failed', err);
+    return { ok: false, message: '' };
+  }
+  if (!session) {
+    return {
+      ok: false,
+      message: '',
+    };
   }
 
-  setStatus(connectStatus, 'Creating API key…');
+  // Refresh proactively — the access token cached in localStorage may
+  // have expired since the SPA tab last refreshed. The refresh endpoint
+  // is idempotent and cheap.
+  let access = session.access;
+  if (session.refresh) {
+    try {
+      const fresh = await fetch(`${ORIGIN}/api/v1/token/refresh/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: session.refresh }),
+      });
+      if (fresh.ok) {
+        const body = await fresh.json();
+        if (body?.access) access = body.access;
+      }
+    } catch {
+      // Use the stored access; api-key POST below will surface auth issues.
+    }
+  }
+  if (!access) return { ok: false, message: '' };
 
+  const minted = await mintApiKey(access);
+  if (!minted.ok) return { ok: false, message: minted.message };
+
+  return {
+    ok: true,
+    apiKey: minted.apiKey,
+    keyId: minted.keyId,
+    username: session.username || '',
+  };
+}
+
+async function readSpaSession() {
+  const allTabs = await api.tabs.query({});
+  const spaTab = allTabs.find((t) => {
+    if (!t.url) return false;
+    try {
+      return SELF_HOSTS.has(new URL(t.url).hostname.toLowerCase());
+    } catch {
+      return false;
+    }
+  });
+  if (!spaTab) return null;
+  const results = await api.scripting.executeScript({
+    target: { tabId: spaTab.id },
+    func: () => {
+      const raw = window.localStorage.getItem('ember_simple_auth-session');
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        const authed = parsed?.authenticated || {};
+        return {
+          access: authed.access || null,
+          refresh: authed.refresh || null,
+          username: parsed?.username || null,
+        };
+      } catch {
+        return null;
+      }
+    },
+  });
+  return (results && results[0] && results[0].result) || null;
+}
+
+async function mintApiKey(access) {
   const today = new Date().toISOString().slice(0, 10);
-  let keyData;
+  let resp;
   try {
-    const resp = await fetch(`${ORIGIN}/api/v1/api-keys/`, {
+    resp = await fetch(`${ORIGIN}/api/v1/api-keys/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/vnd.api+json',
@@ -491,52 +516,49 @@ connectBtn.addEventListener('click', async () => {
         },
       }),
     });
-    if (!resp.ok) {
-      const txt = await resp.text();
-      console.error('[cc-sender] api-key create failed', resp.status, txt);
-      setStatus(
-        connectStatus,
-        `Could not create API key (${resp.status}).`,
-        'error',
-      );
-      connectBtn.disabled = false;
-      return;
-    }
-    keyData = await resp.json();
   } catch (err) {
-    setStatus(
-      connectStatus,
-      `Could not create API key: ${err.message}`,
-      'error',
-    );
-    connectBtn.disabled = false;
-    return;
+    return { ok: false, message: `Could not reach Career Caddy: ${err.message}` };
   }
-
-  const attrs = keyData?.data?.attributes || {};
-  const keyId = keyData?.data?.id;
+  if (resp.status === 401 || resp.status === 403) {
+    return {
+      ok: false,
+      message: 'Your session expired — sign in to Career Caddy again.',
+    };
+  }
+  if (!resp.ok) {
+    const txt = await resp.text();
+    console.error('[cc-sender] api-key create failed', resp.status, txt);
+    return { ok: false, message: `Could not create API key (${resp.status}).` };
+  }
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    return { ok: false, message: 'API key response was malformed.' };
+  }
+  const attrs = body?.data?.attributes || {};
+  const keyId = body?.data?.id;
   const apiKey = attrs.key;
   if (!apiKey || !keyId) {
-    setStatus(
-      connectStatus,
-      'API key response was malformed. Try again.',
-      'error',
-    );
-    connectBtn.disabled = false;
-    return;
+    return { ok: false, message: 'API key response was malformed.' };
   }
+  return { ok: true, apiKey, keyId };
+}
 
-  await api.storage.local.set({
-    ccApiKey: apiKey,
-    ccKeyId: keyId,
-    ccUsername: username,
-  });
+function persistAutoScore() {
+  api.storage.local
+    .set({ ccAutoScore: autoScoreBox.checked })
+    .catch(() => {});
+}
 
-  passwordInput.value = '';
-  connectBtn.disabled = false;
-  setStatus(connectStatus, '');
-  showConnected(username);
-  importPaletteFromActiveTab();
+autoScoreBox.addEventListener('change', persistAutoScore);
+
+// "Sign in to Career Caddy" — opens the SPA's login route in a new tab.
+// After the user signs in there, reopening the popup picks up the
+// session via `attemptSsoFromActiveTab` and connects automatically.
+openSigninBtn.addEventListener('click', () => {
+  api.tabs.create({ url: `${FRONTEND_ORIGIN}/login` });
+  window.close();
 });
 
 async function handleDisconnect() {
