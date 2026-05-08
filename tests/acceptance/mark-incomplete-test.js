@@ -48,9 +48,17 @@ class CurrentUserStub extends Service {
     isStaff: false,
     isGuest: false,
   };
+  // Application route's beforeModel calls these — leaving them off
+  // bombs the route lifecycle before the JP show template renders.
+  // Mirrors the wizard test stub.
+  @tracked onboarding = null;
+  @tracked extensionPresent = false;
   isGuest = false;
   load() {
     return this.user;
+  }
+  async loadOnboarding() {
+    return null;
   }
 }
 
