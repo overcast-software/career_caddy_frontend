@@ -59,7 +59,7 @@ module('Acceptance | login flow', function (hooks) {
 
   // ── Navigation ────────────────────────────────────────────────────────────
 
-  test('login redirects to index after authenticating', async function (assert) {
+  test('login redirects to /job-posts after authenticating', async function (assert) {
     await visit('/login');
     assert.strictEqual(currentURL(), '/login', 'starts on login page');
 
@@ -69,7 +69,11 @@ module('Acceptance | login flow', function (hooks) {
       exp: 9999999999,
     });
 
-    assert.strictEqual(currentURL(), '/', 'redirected to index after login');
+    assert.strictEqual(
+      currentURL(),
+      '/job-posts',
+      'redirected to job-posts (dashboard) after login',
+    );
   });
 
   // ── Username display ──────────────────────────────────────────────────────
