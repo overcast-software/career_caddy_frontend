@@ -6,7 +6,6 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
   @service session;
   @service flashMessages;
   @service router;
-  @service onboarding;
 
   get host() {
     return config.APP.API_HOST || undefined;
@@ -93,28 +92,6 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
       }
       throw error;
     }
-  }
-
-  async createRecord(store, type, snapshot) {
-    const result = await super.createRecord(store, type, snapshot);
-    try {
-      this.onboarding?.noteRecordCreated(type.modelName);
-    } catch {
-      // Onboarding telemetry is best-effort — never block a save.
-    }
-    return result;
-  }
-
-  async updateRecord(store, type, snapshot) {
-    const result = await super.updateRecord(store, type, snapshot);
-    if (type.modelName === 'user') {
-      try {
-        this.onboarding?.noteProfileSaved();
-      } catch {
-        // best-effort
-      }
-    }
-    return result;
   }
 
   // Extend the default JSON:API buildQuery (which only emits `include`)

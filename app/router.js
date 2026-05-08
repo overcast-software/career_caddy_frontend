@@ -282,6 +282,12 @@ Router.map(function () {
   });
   this.route('favorites');
   this.route('caddy');
+  this.route('wizard', function () {
+    this.route('profession');
+    this.route('resume');
+    this.route('review');
+    this.route('score');
+  });
 
   if (macroCondition(dependencySatisfies('@careercaddy/site-chrome', '*'))) {
     this.mount('@careercaddy/site-chrome', { as: 'site-chrome', path: '/' });

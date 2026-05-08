@@ -1,0 +1,26 @@
+<ol class="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-6">
+  {{#each this.steps as |step|}}
+    <li class="flex items-center gap-2">
+      {{#if step.isCurrent}}
+        <span
+          class="flex size-7 items-center justify-center rounded-full bg-jade-600 text-white font-semibold"
+        >{{step.number}}</span>
+        <span class="font-semibold text-gray-800">{{step.label}}</span>
+      {{else if step.isComplete}}
+        <span
+          class="flex size-7 items-center justify-center rounded-full bg-jade-100 text-jade-700 font-semibold"
+          title="completed"
+        >&check;</span>
+        <span class="text-gray-700">{{step.label}}</span>
+      {{else}}
+        <span
+          class="flex size-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 font-semibold"
+        >{{step.number}}</span>
+        <span>{{step.label}}</span>
+      {{/if}}
+      {{#unless step.isLast}}
+        <span class="mx-1 text-gray-300">/</span>
+      {{/unless}}
+    </li>
+  {{/each}}
+</ol>

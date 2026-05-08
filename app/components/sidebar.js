@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
+import { getProfession } from 'career-caddy-frontend/utils/wizard-storage';
 
 export default class SidebarComponent extends Component {
   @service currentUser;
@@ -9,6 +10,15 @@ export default class SidebarComponent extends Component {
   @service router;
   @service theme;
   @tracked copiedField = null;
+
+  get wizardActive() {
+    const onboarding = this.currentUser.onboarding;
+    if (!onboarding) return false;
+    return onboarding.isWizardActive({
+      isStaff: Boolean(this.currentUser.user?.isStaff),
+      profession: getProfession(),
+    });
+  }
 
   get sidebarExtensions() {
     const authed = !this.currentUser.isGuest;

@@ -1,0 +1,92 @@
+{{page-title "Review your resume — Career Caddy"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:main>
+    <div class="container mx-auto max-w-3xl py-8 px-4">
+      <Wizard::Stepper @currentStep="review" />
+
+      <Panel::Card>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-2">
+          Make sure we got the basics right
+        </h1>
+        <p class="text-gray-600 mb-6">
+          Skim the extracted resume below. If anything's wrong you can edit it
+          inline at any time —
+          <LinkTo @route="resumes" class="underline text-jade-700">
+            your resumes
+          </LinkTo>
+          — but this confirmation just tells the agent it's good enough to score
+          against.
+        </p>
+
+        {{#if (eq @model.length 0)}}
+          <p class="text-gray-500 italic mb-6">
+            No resume found. Step back and import one first.
+          </p>
+        {{else if (eq @model.length 1)}}
+          <div class="rounded-md border border-gray-200 p-4 mb-6">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-lg font-semibold text-gray-800">
+                {{or
+                  (get @model "0.name")
+                  (get @model "0.title")
+                  "(untitled resume)"
+                }}
+              </h2>
+              <LinkTo
+                @route="resumes.edit"
+                @model={{get @model "0.id"}}
+                class="btn small"
+              >Edit</LinkTo>
+            </div>
+            <div class="resume-preview">
+              <Resumes::Item @resume={{get @model "0"}} />
+            </div>
+          </div>
+        {{else}}
+          <ul class="space-y-2 mb-6">
+            {{#each @model as |resume|}}
+              <li
+                class="flex items-center justify-between rounded-md border border-gray-200 p-3"
+              >
+                <div>
+                  <p class="font-medium text-gray-800">
+                    {{or resume.name resume.title "(untitled resume)"}}
+                  </p>
+                  {{#if resume.profession}}
+                    <p class="text-xs text-gray-500">{{resume.profession}}</p>
+                  {{/if}}
+                </div>
+                <div class="flex gap-2">
+                  <LinkTo
+                    @route="resumes.show"
+                    @model={{resume.id}}
+                    class="btn small"
+                  >Open</LinkTo>
+                  <LinkTo
+                    @route="resumes.edit"
+                    @model={{resume.id}}
+                    class="btn small"
+                  >Edit</LinkTo>
+                </div>
+              </li>
+            {{/each}}
+          </ul>
+        {{/if}}
+
+        <div class="flex justify-between gap-3 pt-2">
+          <LinkTo @route="wizard.resume" class="btn small">
+            Back
+          </LinkTo>
+          <button
+            type="button"
+            disabled={{this.saving}}
+            class="btn primary"
+            {{on "click" this.confirm}}
+          >
+            {{if this.saving "Saving…" "Looks good"}}
+          </button>
+        </div>
+      </Panel::Card>
+    </div>
+  </:main>
+</RouteLayout>
