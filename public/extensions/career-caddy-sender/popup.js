@@ -331,12 +331,18 @@ async function lookupExistingJobPost(tabUrl, apiKey) {
           r.attributes?.status === 'pending',
       )
     : false;
+  // `complete` defaults to true so an older API that doesn't ship the
+  // field doesn't surprise users with the "completing existing post"
+  // caption. The newer api is authoritative — when false, the popup
+  // surfaces Send instead of Open so the user can refresh the JP.
+  const complete = attrs.complete === false ? false : true;
   return {
     id: item.id,
     title: attrs.title,
     company,
     topScore,
     hasPendingScore,
+    complete,
   };
 }
 
@@ -362,8 +368,22 @@ async function resolveOpenScreen(apiKey, name) {
       return;
     }
     const found = await lookupExistingJobPost(tab.url, apiKey);
-    if (found) {
+    if (found && found.complete) {
+      // Already in the library and flagged complete — Open the JP, no
+      // re-scrape needed. (User can flip "Mark incomplete" on the JP
+      // detail page if the scrape was wrong.)
       showTracked(found, name);
+    } else if (found && !found.complete) {
+      // Exists but flagged !complete — cc_auto stub, user-flagged, or
+      // the CompletenessReviewer rejected an earlier scrape. Send is
+      // enabled; the from-text endpoint's dedup bypass lets the new
+      // text through and parse_scrape upgrades the JP in place.
+      showConnected(name);
+      const titleHint = found.title || found.id;
+      setStatus(
+        sendStatus,
+        `Completing existing post: ${titleHint}`,
+      );
     } else {
       showConnected(name);
     }
