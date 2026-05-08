@@ -370,6 +370,31 @@
       </li>
 
       {{#unless this.currentUser.isGuest}}
+        {{#if this.wizardActive}}
+          <li>
+            <LinkTo
+              @route="wizard"
+              {{on "click" @onClose}}
+              class="sidebar-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-jade-700 bg-jade-50 hover:bg-jade-100"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="size-5 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Zm8.25-1.654L17.625 15.75l-.438-1.5a2.25 2.25 0 0 0-1.547-1.547L14.25 12.25l1.39-.438a2.25 2.25 0 0 0 1.546-1.547l.438-1.5.438 1.5a2.25 2.25 0 0 0 1.547 1.547L21 12.25l-1.39.438a2.25 2.25 0 0 0-1.547 1.547Z"
+                />
+              </svg>
+              Setup wizard
+            </LinkTo>
+          </li>
+        {{/if}}
         <li>
           <LinkTo
             @route="caddy"

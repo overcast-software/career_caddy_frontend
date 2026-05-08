@@ -28,7 +28,7 @@ export default class ChatService extends Service {
   @service session;
   @service store;
   @service poller;
-  @service onboarding;
+  @service currentUser;
 
   @tracked messages = [];
   @tracked isStreaming = false;
@@ -86,6 +86,15 @@ export default class ChatService extends Service {
     });
   }
 
+  /** Flat snapshot of the user's onboarding state for chat context.
+   * Null when onboarding hasn't been loaded (no wizard signals
+   * present this session). */
+  _onboardingSnapshot() {
+    const o = this.currentUser.onboarding;
+    if (!o) return null;
+    return { ...(o.derived || {}), ...(o.subjective || {}) };
+  }
+
   async sendMessage(text) {
     if (!text.trim() || this.isStreaming) return;
 
@@ -117,7 +126,7 @@ export default class ChatService extends Service {
           history: this._buildHistory(),
           conversation_id: this.conversationId,
           page_context: this.currentPage,
-          onboarding: this.onboarding.snapshotForChat(),
+          onboarding: this._onboardingSnapshot(),
           smart: this.smartModel,
         }),
       });

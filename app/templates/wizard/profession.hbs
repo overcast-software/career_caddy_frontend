@@ -1,0 +1,50 @@
+{{page-title "Pick a profession — Career Caddy"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:main>
+    <div class="container mx-auto max-w-2xl py-8 px-4">
+      <Wizard::Stepper @currentStep="profession" />
+
+      <Panel::Card>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-2">
+          What kind of work are you targeting?
+        </h1>
+        <p class="text-gray-600 mb-6">
+          We use this to bias resume extraction toward categories that actually
+          apply to your field — a PM's "Stakeholder Management" should not be
+          coerced into "Tool/Platform". You can change it later per-resume.
+        </p>
+
+        <form class="builder-form" {{on "submit" this.next}}>
+          <div class="field field-full">
+            <label
+              class="field-label"
+              for="wizard-profession"
+            >Profession</label>
+            <select
+              id="wizard-profession"
+              name="profession"
+              {{on "change" this.updateProfession}}
+            >
+              <option value="" selected={{not this.profession}}>—</option>
+              {{#each this.professionOptions as |prof|}}
+                <option value={{prof}} selected={{eq this.profession prof}}>
+                  {{prof}}
+                </option>
+              {{/each}}
+            </select>
+          </div>
+
+          <div class="controls">
+            <button
+              type="submit"
+              disabled={{not this.profession}}
+              class="btn primary"
+            >
+              Continue
+            </button>
+          </div>
+        </form>
+      </Panel::Card>
+    </div>
+  </:main>
+</RouteLayout>

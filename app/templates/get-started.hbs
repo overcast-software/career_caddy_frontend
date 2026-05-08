@@ -12,39 +12,62 @@
         organized.
       </p>
       <div class="pt-2">
-        <a
-          href="https://chromewebstore.google.com/detail/pjdajamkhjkemoaogohehcdpfkocofhd"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 rounded-md bg-jade-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-jade-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade-600"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="size-5 shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            aria-hidden="true"
+        {{#if this.installLink.available}}
+          <a
+            href={{this.installLink.url}}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-md bg-jade-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-jade-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade-600"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
-            />
-          </svg>
-          Install the Chrome extension
-        </a>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-5 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
+              />
+            </svg>
+            {{this.installLink.label}}
+          </a>
+        {{else}}
+          <div
+            class="rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+          >
+            <p class="font-semibold mb-1">{{this.installLink.label}}</p>
+            <p>
+              For now, install on Chrome (also works on Edge, Brave, and Opera).
+              The extension asks you to sign in with your Career Caddy
+              credentials the first time you click its icon.
+            </p>
+            <a
+              href={{this.installLink.url}}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-2 inline-block underline text-jade-700 hover:text-jade-800"
+            >
+              View the Chrome listing
+            </a>
+          </div>
+        {{/if}}
       </div>
-      <p class="text-sm text-gray-500">
-        Already signed up?
-        <LinkTo
-          @route="login"
-          class="text-jade-700 hover:text-jade-800 underline"
-        >
-          Sign in
-        </LinkTo>
-      </p>
+      {{#unless this.isAuthenticated}}
+        <p class="text-sm text-gray-500">
+          Already signed up?
+          <LinkTo
+            @route="login"
+            class="text-jade-700 hover:text-jade-800 underline"
+          >
+            Sign in
+          </LinkTo>
+        </p>
+      {{/unless}}
     </div>
   </Panel::Card>
 

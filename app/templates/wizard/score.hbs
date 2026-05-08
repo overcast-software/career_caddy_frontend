@@ -1,0 +1,69 @@
+{{page-title "Sample score — Career Caddy"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:main>
+    <div class="container mx-auto max-w-2xl py-8 px-4">
+      <Wizard::Stepper @currentStep="score" />
+
+      <Panel::Card>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-2">
+          Try a sample score
+        </h1>
+
+        {{#if this.extensionPresent}}
+          <p class="text-gray-600 mb-6">
+            Open any job posting in another tab and click the
+            <em>Career Caddy Sender</em>
+            extension icon — it'll capture the page and bring you back here with
+            a fresh post ready to score.
+          </p>
+          <div class="space-y-3">
+            <LinkTo @route="job-posts.new" class="btn">
+              Or add one manually
+            </LinkTo>
+          </div>
+        {{else}}
+          <p class="text-gray-600 mb-4">
+            The fastest path is the
+            <em>Career Caddy Sender</em>
+            Chrome extension — one click on any job posting captures the page
+            and ships it here. We'll open the store in a new tab and finish your
+            setup so the dashboard is ready when you come back.
+          </p>
+          <div class="mb-2">
+            <button
+              type="button"
+              class="btn primary"
+              {{on "click" this.installAndFinish}}
+            >
+              Install the extension
+            </button>
+          </div>
+          <p class="text-xs text-gray-500 mb-4">
+            Already installed? Click the extension's icon and sign in with your
+            Career Caddy credentials — it'll announce itself here once it's
+            signed in.
+          </p>
+          <div class="border-t border-gray-200 pt-4">
+            <p class="text-sm text-gray-600 mb-2">
+              Or add a job post manually:
+            </p>
+            <LinkTo @route="job-posts.new" class="btn">
+              Add a job post
+            </LinkTo>
+          </div>
+        {{/if}}
+
+        <div class="mt-6 flex justify-between">
+          <LinkTo @route="wizard.review" class="btn small">
+            Back
+          </LinkTo>
+          <button
+            type="button"
+            class="btn small"
+            {{on "click" this.skip}}
+          >Finish setup without scoring</button>
+        </div>
+      </Panel::Card>
+    </div>
+  </:main>
+</RouteLayout>

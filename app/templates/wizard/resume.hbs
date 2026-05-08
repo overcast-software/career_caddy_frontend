@@ -1,0 +1,80 @@
+{{page-title "Import your resume — Career Caddy"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:main>
+    <div class="container mx-auto max-w-2xl py-8 px-4">
+      <Wizard::Stepper @currentStep="resume" />
+
+      <Panel::Card>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-2">
+          Bring in a resume
+        </h1>
+        {{#if this.profession}}
+          <p class="text-gray-600 mb-6">
+            We'll use your
+            <strong>{{this.profession}}</strong>
+            profession to bias skill extraction. Upload or paste your resume —
+            anything we miss you can fix on the next step.
+          </p>
+        {{else}}
+          <p class="text-gray-600 mb-6">
+            Upload or paste your resume. Anything we miss you can fix on the
+            next step.
+          </p>
+        {{/if}}
+
+        {{#if this.pendingResume}}
+          <div class="rounded-md bg-jade-50 border border-jade-200 p-4 mb-4">
+            <p class="text-sm text-jade-800 font-medium">
+              Still parsing
+              {{or
+                this.pendingResume.name
+                this.pendingResume.title
+                "your resume"
+              }}
+              — leave this page, the parse continues in the background. Come
+              back here to advance once it lands.
+            </p>
+          </div>
+        {{else if this.resumeImported}}
+          <div class="rounded-md bg-jade-50 border border-jade-200 p-4 mb-4">
+            <p class="text-sm text-jade-800 font-medium">
+              You already have a resume on file. Continue to review, or upload a
+              new one below.
+            </p>
+          </div>
+          <div class="flex justify-end mb-6">
+            <LinkTo @route="wizard.review" class="btn primary">
+              Continue to review
+            </LinkTo>
+          </div>
+          <details
+            class="mt-8 rounded-md border border-gray-200 p-4 dark:border-gray-700"
+          >
+            <summary
+              class="cursor-pointer text-sm font-semibold text-gray-900 dark:text-gray-100"
+            >
+              Upload a different resume
+            </summary>
+            <div class="mt-3">
+              <UploadForm
+                @onUpload={{this.ingestResume}}
+                @disabled={{this.uploadDisabled}}
+              />
+            </div>
+          </details>
+        {{else}}
+          <UploadForm
+            @onUpload={{this.ingestResume}}
+            @disabled={{this.uploadDisabled}}
+          />
+        {{/if}}
+
+        <div class="mt-6">
+          <LinkTo @route="wizard.profession" class="btn small">
+            Back to profession
+          </LinkTo>
+        </div>
+      </Panel::Card>
+    </div>
+  </:main>
+</RouteLayout>

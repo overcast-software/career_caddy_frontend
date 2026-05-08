@@ -74,6 +74,10 @@ export default class ApplicationRoute extends Route {
     } catch {
       /* sessionStorage blocked — nothing we can do */
     }
+    // Flip the tracked mirror so templates reading
+    // currentUser.extensionPresent re-render now that the extension
+    // has announced itself.
+    this.currentUser.extensionPresent = true;
     try {
       event.source?.postMessage(
         'cc-extension-present-ack',
@@ -124,6 +128,13 @@ export default class ApplicationRoute extends Route {
       this.store.unloadAll();
       this._redirectUnauthenticated(routeName);
       return;
+    }
+
+    // Load the onboarding singleton once per session — gated by the
+    // null check, so navigating between routes is a no-op. Reset on
+    // logout via currentUser.load(), so the next sign-in re-fetches.
+    if (!this.currentUser.onboarding) {
+      await this.currentUser.loadOnboarding();
     }
 
     if (this.currentUser.isGuest) {
