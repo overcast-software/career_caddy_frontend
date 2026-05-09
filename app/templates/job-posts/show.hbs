@@ -101,17 +101,6 @@
             @route="job-posts.edit"
             @model={{this.model}}
           >Edit</LinkTo>
-          {{#if this.model.complete}}
-            {{! "Mark incomplete" reopens the post for a fresh scrape
-                via the extension. Hidden when already incomplete —
-                the button is the off-switch, not a toggle. }}
-            <button
-              type="button"
-              class="btn small"
-              data-test-mark-incomplete
-              {{on "click" this.markIncomplete}}
-            >Mark incomplete</button>
-          {{/if}}
           <JobPosts::TriageActions @jobPost={{this.model}} />
         </div>
       </div>

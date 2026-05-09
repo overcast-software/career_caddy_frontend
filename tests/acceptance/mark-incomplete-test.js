@@ -97,7 +97,7 @@ class StoreStub extends Service {
   unloadAll() {}
 }
 
-module('Acceptance | Mark incomplete on JP show', function (hooks) {
+module('Acceptance | Mark incomplete on JP edit', function (hooks) {
   setupApplicationTest(hooks);
 
   hooks.beforeEach(function () {
@@ -126,7 +126,7 @@ module('Acceptance | Mark incomplete on JP show', function (hooks) {
     await authenticateSession({ access_token: 'x.eyJ1c2VyX2lkIjoiMSJ9.x' });
     this.store.put(new JobPostStub({ id: '42', complete: true }));
 
-    await visit('/job-posts/42');
+    await visit('/job-posts/42/edit');
     assert.dom('[data-test-mark-incomplete]').hasText('Mark incomplete');
   });
 
@@ -134,7 +134,7 @@ module('Acceptance | Mark incomplete on JP show', function (hooks) {
     await authenticateSession({ access_token: 'x.eyJ1c2VyX2lkIjoiMSJ9.x' });
     this.store.put(new JobPostStub({ id: '43', complete: false }));
 
-    await visit('/job-posts/43');
+    await visit('/job-posts/43/edit');
     assert.dom('[data-test-mark-incomplete]').doesNotExist();
   });
 
@@ -143,7 +143,7 @@ module('Acceptance | Mark incomplete on JP show', function (hooks) {
     const jp = new JobPostStub({ id: '44', complete: true });
     this.store.put(jp);
 
-    await visit('/job-posts/44');
+    await visit('/job-posts/44/edit');
     await click('[data-test-mark-incomplete]');
 
     assert.false(jp.complete, 'complete flipped to false');
