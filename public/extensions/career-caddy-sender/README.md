@@ -1,4 +1,4 @@
-# Career Caddy Sender — v0.3.6
+# Career Caddy Sender — v1.1.1
 
 A browser extension that captures the active page's URL + visible text and
 POSTs it directly to your Career Caddy instance. The popup shows a one-time
@@ -28,6 +28,17 @@ fires the page off and an OS-level system notification announces the result.
 
 ## Version history
 
+- **1.1.1** — Resend-to-complete UX for incomplete posts. When the active
+  page maps to an existing JobPost flagged `complete=false` (cc_auto
+  email-stub, user-flagged "Mark incomplete", or CompletenessReviewer
+  rejection), the popup now swaps the heading to **Complete this post**,
+  shows a tagged banner with the existing post's title + company, and
+  relabels the action button to **Resend to complete**. Replaces the
+  subtle "Completing existing post: …" status caption that landed in the
+  earlier 1.1.0 build (commit d2ea3da) without a version bump — installs
+  carrying that pre-bump 1.1.0 should reload to pick up the explicit UX.
+  No api or auth changes; same `/scrapes/from-text/` POST, same trust
+  ladder behavior.
 - **1.1.0** — SSO via SPA session. The popup no longer takes a username
   and password — first run was the only screen using them, and it was a
   second sign-in for users already authenticated to the SPA. Instead the

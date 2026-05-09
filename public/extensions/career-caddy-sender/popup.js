@@ -237,13 +237,40 @@ function showConnect(message = '') {
   setStatus(connectStatus, message);
 }
 
-function showConnected(name) {
+function showConnected(name, incompleteTarget = null) {
   hideAllScreens();
   screenConnected.classList.remove('hidden');
   whoEl.textContent = name || '';
   hideResultLink();
   setSendingState(false);
   setStatus(sendStatus, '');
+
+  // Resend mode: an existing JobPost was found at this URL but is
+  // flagged incomplete (cc_auto email-stub, user-flagged, or the
+  // CompletenessReviewer rejected an earlier scrape). Swap heading
+  // and button label so the user sees they're refreshing an existing
+  // post — not creating a new one.
+  const headingEl = document.getElementById('connected-heading');
+  const bannerEl = document.getElementById('incomplete-banner');
+  const bannerTitleEl = document.getElementById('incomplete-banner-title');
+  const bannerCompanyEl = document.getElementById('incomplete-banner-company');
+  const sendLabelEl = sendBtn.querySelector('.btn-label');
+  if (incompleteTarget) {
+    if (headingEl) headingEl.textContent = 'Complete this post';
+    if (bannerEl) bannerEl.classList.remove('hidden');
+    if (bannerTitleEl) {
+      bannerTitleEl.textContent =
+        incompleteTarget.title || '(untitled job post)';
+    }
+    if (bannerCompanyEl) {
+      bannerCompanyEl.textContent = incompleteTarget.company || '';
+    }
+    if (sendLabelEl) sendLabelEl.textContent = 'Resend to complete';
+  } else {
+    if (headingEl) headingEl.textContent = 'Send this page to Career Caddy';
+    if (bannerEl) bannerEl.classList.add('hidden');
+    if (sendLabelEl) sendLabelEl.textContent = 'Send this page';
+  }
 }
 
 function showTracked({ id, title, company, topScore, hasPendingScore }, name) {
@@ -377,13 +404,10 @@ async function resolveOpenScreen(apiKey, name) {
       // Exists but flagged !complete — cc_auto stub, user-flagged, or
       // the CompletenessReviewer rejected an earlier scrape. Send is
       // enabled; the from-text endpoint's dedup bypass lets the new
-      // text through and parse_scrape upgrades the JP in place.
-      showConnected(name);
-      const titleHint = found.title || found.id;
-      setStatus(
-        sendStatus,
-        `Completing existing post: ${titleHint}`,
-      );
+      // text through and parse_scrape upgrades the JP in place. Pass
+      // the found post into showConnected so the screen renders the
+      // resend variant (banner + Resend label).
+      showConnected(name, found);
     } else {
       showConnected(name);
     }

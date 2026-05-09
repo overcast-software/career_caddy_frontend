@@ -396,6 +396,34 @@
         text-decoration: none;
         display: block;
       }
+
+      .incomplete-banner {
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        background: var(--accent-50);
+        border: 1px solid var(--accent-100);
+        border-left: 3px solid var(--accent-500);
+        border-radius: 6px;
+      }
+      .incomplete-banner-tag {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--accent-700);
+        margin-bottom: 4px;
+      }
+      .incomplete-banner-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.35;
+      }
+      .incomplete-banner-company {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
     </style>
   </head>
   <body>
@@ -427,7 +455,12 @@
     </div>
 
     <div id="screen-connected" class="hidden">
-      <h1>Send this page to Career Caddy</h1>
+      <h1 id="connected-heading">Send this page to Career Caddy</h1>
+      <div id="incomplete-banner" class="incomplete-banner hidden">
+        <div class="incomplete-banner-tag">Existing post · incomplete</div>
+        <div class="incomplete-banner-title" id="incomplete-banner-title"></div>
+        <div class="incomplete-banner-company" id="incomplete-banner-company"></div>
+      </div>
       <button id="send" class="primary">
         <span class="btn-label">Send this page</span>
         <span class="spinner" aria-hidden="true"></span>

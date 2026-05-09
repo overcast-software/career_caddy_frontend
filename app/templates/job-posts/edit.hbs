@@ -1,7 +1,15 @@
 {{page-title "Edit Job Post"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
-    <div class="mb-4 flex justify-end">
+    <div class="mb-4 flex flex-wrap items-center justify-end gap-2">
+      {{#if this.model.complete}}
+        <button
+          type="button"
+          class="px-2 py-1 text-xs rounded border border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-600 dark:text-amber-200 dark:hover:bg-amber-900/40"
+          data-test-mark-incomplete
+          {{on "click" this.markIncomplete}}
+        >Mark incomplete</button>
+      {{/if}}
       <JobPosts::TriageActions @jobPost={{this.model}} />
     </div>
     <JobPosts::Form @jobPost={{this.model}} />
