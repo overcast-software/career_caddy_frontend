@@ -2,6 +2,19 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
     <div class="mb-4 flex flex-wrap items-center justify-end gap-2">
+      {{#if this.currentUser.user.isStaff}}
+        <button
+          type="button"
+          class="px-2 py-1 text-xs rounded border border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-200 dark:hover:bg-purple-900/40 disabled:opacity-50"
+          disabled={{this.resolveAndDedupeSubmitting}}
+          data-test-resolve-and-dedupe
+          {{on "click" this.resolveAndDedupe}}
+        >{{if
+            this.resolveAndDedupeSubmitting
+            "Resolving…"
+            "Resolve & dedupe (staff)"
+          }}</button>
+      {{/if}}
       {{#if this.model.complete}}
         <button
           type="button"
