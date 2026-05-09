@@ -19,34 +19,22 @@ export default class JobPostsDuplicateCandidatesComponent extends Component {
     this.fetchCandidates();
   }
 
-  // Note: navigating jp.show → jp.show with a different id reuses this
-  // component instance (same template invocation), so the constructor
-  // doesn't re-fire and the banner shows stale candidates from the
-  // previous jp until next route entry. Acceptable for a first cut.
-  // Follow-up: install @ember/render-modifiers and add
-  // {{did-update this.fetchCandidates @jobPost.id}} in the template.
-
   fetchCandidates() {
     const jp = this.args.jobPost;
     if (!jp || !jp.id) return;
-    const adapter = this.store.adapterFor('job-post');
-    const url = adapter.buildURL('job-post', jp.id) + 'duplicate-candidates/';
-    adapter
-      .ajax(url, 'GET')
-      .then((payload) => {
-        this.candidates = (payload?.data || []).map((row) => ({
+    this.store
+      .query('job-post-duplicate-candidate', { jobPostId: jp.id })
+      .then((results) => {
+        this.candidates = results.map((row) => ({
           id: row.id,
-          title: row.attributes?.title || '(untitled)',
-          companyName: row.attributes?.company_name,
-          confidence: row.attributes?.confidence,
-          signals: (row.attributes?.match_signals || []).map(
-            (s) => SIGNAL_LABELS[s] || s,
-          ),
+          title: row.title || '(untitled)',
+          companyName: row.companyName,
+          confidence: row.confidence,
+          signals: (row.matchSignals || []).map((s) => SIGNAL_LABELS[s] || s),
         }));
         this.loaded = true;
       })
       .catch(() => {
-        // Silent — banner just stays hidden.
         this.loaded = true;
       });
   }

@@ -76,6 +76,15 @@ class StoreStub extends Service {
   async findRecord(_type, id) {
     return this.records.get(String(id));
   }
+  // Breadcrumbs (rendered by RouteLayout) calls peekRecord to label crumbs
+  // from in-memory records. Returning the same map satisfies it without
+  // needing to register types.
+  peekRecord(_type, id) {
+    return this.records.get(String(id)) || null;
+  }
+  async query() {
+    return [];
+  }
   async queryRecord() {
     return null;
   }
@@ -118,7 +127,7 @@ module('Acceptance | Mark incomplete on JP show', function (hooks) {
     this.store.put(new JobPostStub({ id: '42', complete: true }));
 
     await visit('/job-posts/42');
-    assert.dom('button').includesText('Mark incomplete');
+    assert.dom('[data-test-mark-incomplete]').hasText('Mark incomplete');
   });
 
   test('Mark incomplete button hidden when complete=false', async function (assert) {
@@ -126,7 +135,7 @@ module('Acceptance | Mark incomplete on JP show', function (hooks) {
     this.store.put(new JobPostStub({ id: '43', complete: false }));
 
     await visit('/job-posts/43');
-    assert.dom('button:not([disabled])').doesNotIncludeText('Mark incomplete');
+    assert.dom('[data-test-mark-incomplete]').doesNotExist();
   });
 
   test('clicking Mark incomplete flips the flag and saves', async function (assert) {
@@ -135,11 +144,7 @@ module('Acceptance | Mark incomplete on JP show', function (hooks) {
     this.store.put(jp);
 
     await visit('/job-posts/44');
-    const btn = [...document.querySelectorAll('button')].find((b) =>
-      b.textContent.includes('Mark incomplete'),
-    );
-    assert.ok(btn, 'precondition: button exists');
-    await click(btn);
+    await click('[data-test-mark-incomplete]');
 
     assert.false(jp.complete, 'complete flipped to false');
     assert.true(jp._saved, 'save() was called');
