@@ -122,22 +122,11 @@ export default class JobPostsFormComponent extends Component {
   @action
   reextractFromPaste() {
     if (!this.canReextract) return;
-    const adapter = this.store.adapterFor('job-post');
-    const id = this.args.jobPost.id;
-    const url = adapter.buildURL('job-post', id) + 'reextract/';
     this.reextracting = true;
     this.flashMessages.info('Queued re-extraction — watching for completion.');
-    adapter
-      .ajax(url, 'POST', { data: { text: this.pasteText } })
-      .then((payload) => {
-        // The endpoint returns the just-created Scrape (status: pending).
-        // Push it into the store, then poll until terminal — onComplete
-        // refreshes the JobPost so form fields update in place.
-        this.store.pushPayload('scrape', payload);
-        const scrapeId = payload?.data?.id;
-        const scrape = scrapeId
-          ? this.store.peekRecord('scrape', scrapeId)
-          : null;
+    this.args.jobPost
+      .reextract({ text: this.pasteText })
+      .then((scrape) => {
         if (!scrape || this.pollable.isTerminal(scrape)) {
           this.flashMessages.clearMessages();
           this.flashMessages.success('Re-extract complete.');

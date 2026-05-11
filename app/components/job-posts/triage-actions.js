@@ -8,7 +8,6 @@ import {
 } from 'career-caddy-frontend/utils/vetting-reasons';
 
 export default class JobPostsTriageActionsComponent extends Component {
-  @service store;
   @service flashMessages;
   @tracked submitting = false;
 
@@ -86,14 +85,10 @@ export default class JobPostsTriageActionsComponent extends Component {
   @action
   vet(status, extra = {}) {
     if (this.submitting) return;
-    const adapter = this.store.adapterFor('job-post');
-    const id = this.args.jobPost.id;
-    const url = adapter.buildURL('job-post', id) + 'triage/';
     this.submitting = true;
-    adapter
-      .ajax(url, 'POST', { data: { status, ...extra } })
-      .then((payload) => {
-        this.store.pushPayload('job-post', payload);
+    this.args.jobPost
+      .submitTriage({ status, ...extra })
+      .then(() => {
         this.flashMessages.success(`Marked ${status}.`);
       })
       .catch((error) => {

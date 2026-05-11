@@ -89,8 +89,8 @@ module('Unit | Model | job post', function (hooks) {
       const store = this.owner.lookup('service:store');
       const adapter = store.adapterFor('job-post');
       this.ajaxCalls = [];
-      adapter.ajax = (url, method) => {
-        this.ajaxCalls.push({ url, method });
+      adapter.ajax = (url, method, options) => {
+        this.ajaxCalls.push({ url, method, options });
         return Promise.resolve({ data: null });
       };
     });
@@ -123,6 +123,46 @@ module('Unit | Model | job post', function (hooks) {
         this.ajaxCalls[0].url.endsWith('/job-posts/78/nuclear/'),
         `URL ${this.ajaxCalls[0].url} ends with the verb path`,
       );
+    });
+
+    test('submitTriage(payload) POSTs payload as body to /job-posts/:id/triage/', async function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: { type: 'job-post', id: '79', attributes: {} },
+      });
+      const jp = store.peekRecord('job-post', '79');
+      await jp.submitTriage({
+        status: 'Vetted Bad',
+        reason_code: 'duplicate',
+      });
+      assert.strictEqual(this.ajaxCalls.length, 1);
+      assert.strictEqual(this.ajaxCalls[0].method, 'POST');
+      assert.true(
+        this.ajaxCalls[0].url.endsWith('/job-posts/79/triage/'),
+        `URL ${this.ajaxCalls[0].url} ends with the verb path`,
+      );
+      assert.deepEqual(this.ajaxCalls[0].options?.data, {
+        status: 'Vetted Bad',
+        reason_code: 'duplicate',
+      });
+    });
+
+    test('reextract({text}) POSTs text as body to /job-posts/:id/reextract/', async function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: { type: 'job-post', id: '80', attributes: {} },
+      });
+      const jp = store.peekRecord('job-post', '80');
+      await jp.reextract({ text: 'pasted job description' });
+      assert.strictEqual(this.ajaxCalls.length, 1);
+      assert.strictEqual(this.ajaxCalls[0].method, 'POST');
+      assert.true(
+        this.ajaxCalls[0].url.endsWith('/job-posts/80/reextract/'),
+        `URL ${this.ajaxCalls[0].url} ends with the verb path`,
+      );
+      assert.deepEqual(this.ajaxCalls[0].options?.data, {
+        text: 'pasted job description',
+      });
     });
   });
 });
