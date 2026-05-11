@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import { reportFetch } from 'career-caddy-frontend/utils/report-fetch';
 
 export default class ReportsApplicationFlowRoute extends Route {
   @service api;
@@ -14,28 +15,29 @@ export default class ReportsApplicationFlowRoute extends Route {
   };
 
   async model(params) {
-    const qs = new URLSearchParams();
-    qs.set('scope', params.scope || 'mine');
-    if (params.source) qs.set('source', params.source);
-    if (params.from) qs.set('from', params.from);
-    if (params.to) qs.set('to', params.to);
-    if (params.user) qs.set('user', params.user);
-    if (params.exclude_stubs) qs.set('exclude_stubs', '1');
-    const response = await fetch(
-      `${this.api.baseUrl}reports/application-flow/?${qs.toString()}`,
-      { headers: this.api.headers() },
+    const scope = params.scope || 'mine';
+    const { data, error } = await reportFetch(
+      this.api,
+      'reports/application-flow',
+      {
+        scope,
+        source: params.source,
+        from: params.from,
+        to: params.to,
+        user: params.user,
+        exclude_stubs: params.exclude_stubs ? '1' : null,
+      },
     );
-    if (!response.ok) {
+    if (error) {
       return {
         nodes: [],
         links: [],
         total_job_posts: 0,
         total_applications: 0,
-        scope: params.scope || 'mine',
-        error: response.status === 403 ? 'forbidden' : 'failed',
+        scope,
+        error,
       };
     }
-    const payload = await response.json();
-    return payload?.data?.attributes || {};
+    return data?.attributes || {};
   }
 }

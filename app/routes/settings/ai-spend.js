@@ -1,21 +1,18 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import { reportFetch } from 'career-caddy-frontend/utils/report-fetch';
 
 export default class SettingsAiSpendRoute extends Route {
   @service api;
 
   async model() {
-    const params = new URLSearchParams({
-      period: 'daily',
-      group_by: 'agent_name',
-      days: '30',
-    });
-    const response = await fetch(
-      `${this.api.baseUrl}ai-usages/summary/?${params}`,
-      { headers: this.api.headers() },
+    const { data, meta, error } = await reportFetch(
+      this.api,
+      'ai-usages/summary',
+      { period: 'daily', group_by: 'agent_name', days: '30' },
     );
-    if (!response.ok) return null;
-    return response.json();
+    if (error) return null;
+    return { data, meta };
   }
 
   setupController(controller, model) {

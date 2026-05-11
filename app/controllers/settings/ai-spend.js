@@ -2,6 +2,7 @@ import Controller from '@ember/controller';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import { reportFetch } from 'career-caddy-frontend/utils/report-fetch';
 
 export default class SettingsAiSpendController extends Controller {
   @service api;
@@ -75,23 +76,22 @@ export default class SettingsAiSpendController extends Controller {
     }
     this.isLoading = true;
     try {
-      const params = new URLSearchParams({
-        period: this.period,
-        group_by: this.groupBy,
-        days: this.days.toString(),
-      });
-      if (this.isStaff && this.selectedUserId) {
-        params.set('user_id', this.selectedUserId);
-      }
-      const response = await fetch(
-        `${this.api.baseUrl}ai-usages/summary/?${params}`,
-        { headers: this.api.headers() },
+      const { data, meta, error } = await reportFetch(
+        this.api,
+        'ai-usages/summary',
+        {
+          period: this.period,
+          group_by: this.groupBy,
+          days: this.days.toString(),
+          user_id:
+            this.isStaff && this.selectedUserId ? this.selectedUserId : null,
+        },
       );
-      if (!response.ok) {
+      if (error) {
         this.flashMessages.danger('Failed to load AI spend data.');
         return;
       }
-      this.model = await response.json();
+      this.model = { data, meta };
     } catch {
       this.flashMessages.danger('Failed to load AI spend data.');
     } finally {

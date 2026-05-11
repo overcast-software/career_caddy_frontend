@@ -49,6 +49,11 @@ export default class ReportsFilterBarComponent extends Component {
   async loadOptions() {
     if (this.optionsLoaded) return;
     try {
+      // KEEP raw fetch: /reports/filter-options/ returns a flat
+      // {sources, users} object, not the {data, meta} envelope
+      // reportFetch unwraps. cache: 'no-store' also matters here —
+      // the dropdown options change as the user files new posts.
+      // Migrate when the api response is reshaped to {data: {...}}.
       const resp = await fetch(`${this.api.baseUrl}reports/filter-options/`, {
         headers: this.api.headers(),
         cache: 'no-store',
