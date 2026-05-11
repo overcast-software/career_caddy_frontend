@@ -1,4 +1,8 @@
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
+import {
+  apiAction,
+  collectionAction,
+} from 'career-caddy-frontend/utils/api-action';
 
 export default class ScrapeModel extends Model {
   @attr('string') url;
@@ -17,4 +21,20 @@ export default class ScrapeModel extends Model {
   @hasMany('scrape', { async: true, inverse: 'sourceScrape' }) scrapes;
   @belongsTo('scrape', { async: true, inverse: 'scrapes' }) sourceScrape;
   @hasMany('scrape-status', { async: true, inverse: 'scrape' }) scrapeStatuses;
+
+  parse() {
+    return apiAction(this, { method: 'POST', path: 'parse' });
+  }
+
+  redo() {
+    return apiAction(this, { method: 'POST', path: 'redo' });
+  }
+
+  static fromText(store, payload) {
+    return collectionAction(store, 'scrape', {
+      method: 'POST',
+      path: 'from-text',
+      data: payload,
+    });
+  }
 }

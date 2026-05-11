@@ -2,10 +2,9 @@ import Controller from '@ember/controller';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
+import ScrapeModel from 'career-caddy-frontend/models/scrape';
 
 export default class JobPostsNewPasteController extends Controller {
-  @service api;
-  @service session;
   @service store;
   @service router;
   @service spinner;
@@ -172,58 +171,15 @@ export default class JobPostsNewPasteController extends Controller {
     this.duplicate = null;
     this.flashMessages.info('Parsing the pasted content…');
 
-    const refreshIfNeeded =
-      !this.session.accessToken && this.session.refreshToken
-        ? this.session.refresh().catch(() => {})
-        : Promise.resolve();
-
     const body = { text: this.text };
     const link = this.url.trim();
     if (link) body.link = link;
     if (force) body.force = true;
 
-    refreshIfNeeded
-      .then(() =>
-        fetch(`${this.api.baseUrl}scrapes/from-text/`, {
-          method: 'POST',
-          headers: {
-            ...this.api.headers(),
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        }),
-      )
-      .then((response) => {
-        if (response.status === 409) {
-          // Bail before the agent call is dispatched. parse() the body
-          // so we can show the user which post they collided with.
-          return response.json().then((data) => {
-            const meta = data?.errors?.[0]?.meta ?? {};
-            this.duplicate = {
-              id: meta.job_post_id,
-              title: meta.title,
-              companyName: meta.company_name,
-            };
-            this.flashMessages.clearMessages();
-            this.flashMessages.warning(
-              `Already in your library — pick "Open existing" or "Re-parse anyway".`,
-              { sticky: true },
-            );
-            this.submitting = false;
-            return null;
-          });
-        }
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
-      .then((data) => {
-        if (!data) return; // 409 short-circuit
-        const scrapeId = data?.data?.id;
-        if (!scrapeId) throw new Error('No scrape id in response');
-        this.store.pushPayload('scrape', data);
-        const scrape = this.store.peekRecord('scrape', scrapeId);
+    ScrapeModel.fromText(this.store, body)
+      .then((scrape) => {
         this.flashMessages.info(
-          `Scrape #${scrapeId} queued; polling for completion…`,
+          `Scrape #${scrape.id} queued; polling for completion…`,
         );
         this.spinner.begin({ label: 'Parsing…' });
         this.pollable.poll(scrape, {
@@ -293,6 +249,22 @@ export default class JobPostsNewPasteController extends Controller {
         });
       })
       .catch((err) => {
+        const dupe = err?.errors?.find((e) => e?.code === 'duplicate_job_post');
+        if (dupe) {
+          const meta = dupe.meta ?? {};
+          this.duplicate = {
+            id: meta.job_post_id,
+            title: meta.title,
+            companyName: meta.company_name,
+          };
+          this.flashMessages.clearMessages();
+          this.flashMessages.warning(
+            `Already in your library — pick "Open existing" or "Re-parse anyway".`,
+            { sticky: true },
+          );
+          this.submitting = false;
+          return;
+        }
         this.flashMessages.clearMessages();
         this.flashMessages.danger(`Submit failed: ${err.message}`, {
           sticky: true,
