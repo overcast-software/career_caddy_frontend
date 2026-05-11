@@ -72,6 +72,7 @@ export default class AcceptInviteController extends Controller {
     }
 
     try {
+      // KEEP raw fetch: pre-auth invitation redemption.
       const url = `${buildBaseUrl()}accept-invite/`;
       const response = await fetch(url, {
         method: 'POST',

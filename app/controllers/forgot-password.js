@@ -28,6 +28,8 @@ export default class ForgotPasswordController extends Controller {
     }
 
     try {
+      // KEEP raw fetch: pre-auth — the user is unauthenticated by
+      // definition. Application adapter would redirect to /login.
       const url = `${buildBaseUrl()}password-reset/`;
       const response = await fetch(url, {
         method: 'POST',
