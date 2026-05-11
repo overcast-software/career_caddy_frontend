@@ -36,6 +36,9 @@ export default class LoginController extends Controller {
 
   @action async tryDemo() {
     try {
+      // KEEP raw fetch: pre-auth bootstrap — no JWT yet, so
+      // the application adapter's auth + 401-refresh chain
+      // doesn't apply (and would short-circuit to the docs route).
       const host = config.APP.API_HOST || '';
       const response = await fetch(`${host}/api/v1/guest-session/`);
       if (!response.ok) {

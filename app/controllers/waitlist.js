@@ -28,6 +28,7 @@ export default class WaitlistController extends Controller {
     }
 
     try {
+      // KEEP raw fetch: pre-auth waitlist signup.
       const url = `${buildBaseUrl()}waitlist/`;
       const response = await fetch(url, {
         method: 'POST',

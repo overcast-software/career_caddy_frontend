@@ -82,6 +82,7 @@ export default class SignupController extends Controller {
     }
 
     try {
+      // KEEP raw fetch: pre-auth account creation.
       const url = `${buildBaseUrl()}auth/register/`;
       const response = await fetch(url, {
         method: 'POST',
@@ -128,6 +129,7 @@ export default class SignupController extends Controller {
     }
 
     try {
+      // KEEP raw fetch: pre-auth waitlist signup.
       const url = `${buildBaseUrl()}waitlist/`;
       const response = await fetch(url, {
         method: 'POST',

@@ -13,6 +13,9 @@ export default class SettingsDataController extends Controller {
   async exportData() {
     this.isExporting = true;
     try {
+      // KEEP raw fetch: xlsx file download, not JSON:API. The
+      // response is a binary Blob handed to the browser as a
+      // download — no model + adapter path applies.
       const response = await fetch(`${this.api.baseUrl}career-data/export/`, {
         headers: this.api.headers(),
       });
@@ -45,6 +48,9 @@ export default class SettingsDataController extends Controller {
     formData.append('file', file);
 
     try {
+      // KEEP raw fetch: multipart upload of an xlsx file. Not
+      // JSON:API; the adapter path would need a FormData escape
+      // hatch we don't otherwise need.
       const response = await fetch(`${this.api.baseUrl}career-data/import/`, {
         method: 'POST',
         headers: this.api.headers(),
