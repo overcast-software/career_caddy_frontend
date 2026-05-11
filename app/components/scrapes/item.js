@@ -17,6 +17,7 @@ export default class ScrapesItemComponent extends Component {
   @service currentUser;
   @service session;
   @service api;
+  @service store;
 
   scrapeSteps = [
     'Hold',
@@ -51,24 +52,12 @@ export default class ScrapesItemComponent extends Component {
     const id = this.args.scrape?.id;
     if (!id) return;
     try {
-      // Use absolute API URL — in prod the frontend and API are on
-      // different origins, and a relative /api/v1/... resolves to the
-      // frontend origin which serves index.html as SPA fallback.
-      const listUrl = `${this.api.baseUrl}scrapes/${id}/screenshots/`;
-      const resp = await fetch(listUrl, {
-        headers: this.api.headers(),
-        // Poller writes screenshots mid-lifecycle; without no-store the
-        // browser can 304 back to an earlier empty-list response.
-        cache: 'no-store',
-      });
-      if (resp.ok) {
-        const json = await resp.json();
-        this.screenshots = (json.data || []).map((s) => ({
-          filename: s.filename,
-          url: `${this.api.baseUrl}scrapes/${id}/screenshots/${s.filename}`,
-          revealed: false,
-        }));
-      }
+      const result = await this.store.query('screenshot', { scrape_id: id });
+      this.screenshots = (result.toArray?.() ?? []).map((s) => ({
+        filename: s.filename,
+        url: `${this.api.baseUrl}scrapes/${id}/screenshots/${s.filename}`,
+        revealed: false,
+      }));
     } catch {
       // Screenshots are optional debug info
     }
@@ -85,6 +74,9 @@ export default class ScrapesItemComponent extends Component {
 
     let blobUrl = shot.blobUrl;
     if (!blobUrl) {
+      // KEEP raw fetch: per-file binary PNG download. JSON:API
+      // doesn't apply to a binary response, and adapter.ajax assumes
+      // a JSON body. Mirrors the cover-letter export pattern.
       const resp = await fetch(shot.url, {
         headers: this.api.headers(),
       });
