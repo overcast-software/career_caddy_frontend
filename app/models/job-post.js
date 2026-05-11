@@ -1,4 +1,5 @@
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
+import { apiAction } from 'career-caddy-frontend/utils/api-action';
 import { TERMINAL } from 'career-caddy-frontend/services/pollable';
 
 function _firstNonTerminal(records) {
@@ -144,5 +145,13 @@ export default class JobPostModel extends Model {
   get hasAnyScore() {
     const scores = this.hasMany('scores').value();
     return (scores?.length || 0) > 0;
+  }
+
+  resolveAndDedupe() {
+    return apiAction(this, { method: 'POST', path: 'resolve-and-dedupe' });
+  }
+
+  nuclearDelete() {
+    return apiAction(this, { method: 'DELETE', path: 'nuclear' });
   }
 }
