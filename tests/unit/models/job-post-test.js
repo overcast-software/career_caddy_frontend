@@ -83,4 +83,46 @@ module('Unit | Model | job post', function (hooks) {
       ]);
     });
   });
+
+  module('apiAction verbs', function (hooks) {
+    hooks.beforeEach(function () {
+      const store = this.owner.lookup('service:store');
+      const adapter = store.adapterFor('job-post');
+      this.ajaxCalls = [];
+      adapter.ajax = (url, method) => {
+        this.ajaxCalls.push({ url, method });
+        return Promise.resolve({ data: null });
+      };
+    });
+
+    test('resolveAndDedupe() POSTs to /job-posts/:id/resolve-and-dedupe/', async function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: { type: 'job-post', id: '77', attributes: {} },
+      });
+      const jp = store.peekRecord('job-post', '77');
+      await jp.resolveAndDedupe();
+      assert.strictEqual(this.ajaxCalls.length, 1);
+      assert.strictEqual(this.ajaxCalls[0].method, 'POST');
+      assert.true(
+        this.ajaxCalls[0].url.endsWith('/job-posts/77/resolve-and-dedupe/'),
+        `URL ${this.ajaxCalls[0].url} ends with the verb path`,
+      );
+    });
+
+    test('nuclearDelete() DELETEs to /job-posts/:id/nuclear/', async function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: { type: 'job-post', id: '78', attributes: {} },
+      });
+      const jp = store.peekRecord('job-post', '78');
+      await jp.nuclearDelete();
+      assert.strictEqual(this.ajaxCalls.length, 1);
+      assert.strictEqual(this.ajaxCalls[0].method, 'DELETE');
+      assert.true(
+        this.ajaxCalls[0].url.endsWith('/job-posts/78/nuclear/'),
+        `URL ${this.ajaxCalls[0].url} ends with the verb path`,
+      );
+    });
+  });
 });

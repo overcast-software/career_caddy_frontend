@@ -191,9 +191,8 @@ export default class JobPostsFormComponent extends Component {
   nuclearDelete() {
     this.showDeleteConfirm = false;
     const jobPost = this.args.jobPost;
-    this.store
-      .adapterFor('job-post')
-      .nuclearDelete(jobPost)
+    jobPost
+      .nuclearDelete()
       .then(() => {
         // deleteRecord() before unloadRecord() so any live tracked
         // arrays (ember-infinity's array on jp.index, peekAll

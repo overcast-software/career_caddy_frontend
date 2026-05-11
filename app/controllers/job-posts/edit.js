@@ -33,9 +33,8 @@ export default class JobPostsEditController extends Controller {
       return;
     }
     this.resolveAndDedupeSubmitting = true;
-    this.store
-      .adapterFor('job-post')
-      .resolveAndDedupe(this.model)
+    this.model
+      .resolveAndDedupe()
       .then(() => {
         this.flashMessages.success(
           'Resolve & dedupe queued — watch the Scrapes panel for results.',
