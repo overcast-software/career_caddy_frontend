@@ -154,4 +154,16 @@ export default class JobPostModel extends Model {
   nuclearDelete() {
     return apiAction(this, { method: 'DELETE', path: 'nuclear' });
   }
+
+  submitTriage(payload) {
+    return apiAction(this, { method: 'POST', path: 'triage', data: payload });
+  }
+
+  reextract(payload) {
+    return apiAction(this, {
+      method: 'POST',
+      path: 'reextract',
+      data: payload,
+    });
+  }
 }
