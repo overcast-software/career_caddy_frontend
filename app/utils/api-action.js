@@ -13,20 +13,16 @@ import { recordIdentifierFor } from '@ember-data/store';
 //     return apiAction(this, { method: 'POST', path: 'resolve-and-dedupe' });
 //   }
 //
-// For verbs whose response shape isn't JSON:API (e.g. /graph-trace
-// returns a flat list), pass `raw: true` to bypass normalization and
-// get the parsed JSON body back unchanged.
-export async function apiAction(
-  record,
-  { method, path, data, raw = false } = {},
-) {
+// Reads of a sub-collection (e.g. graph-trace) belong in a model +
+// adapter with `urlForQuery`, not here — apiAction is for *verbs*.
+export async function apiAction(record, { method, path, data } = {}) {
   const store = record.store;
   const identifier = recordIdentifierFor(record);
   const modelName = identifier.type;
   const adapter = store.adapterFor(modelName);
   const url = adapter.buildURL(modelName, identifier.id) + path + '/';
   const payload = await adapter.ajax(url, method, data ? { data } : undefined);
-  if (raw || !payload || typeof payload !== 'object' || payload.data == null) {
+  if (!payload || typeof payload !== 'object' || payload.data == null) {
     return payload;
   }
   const responseType =
@@ -61,12 +57,12 @@ export async function apiAction(
 export async function collectionAction(
   store,
   modelName,
-  { method, path, data, raw = false } = {},
+  { method, path, data } = {},
 ) {
   const adapter = store.adapterFor(modelName);
   const url = adapter.buildURL(modelName) + path + '/';
   const payload = await adapter.ajax(url, method, data ? { data } : undefined);
-  if (raw || !payload || typeof payload !== 'object' || payload.data == null) {
+  if (!payload || typeof payload !== 'object' || payload.data == null) {
     return payload;
   }
   const responseType =
