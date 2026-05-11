@@ -7,7 +7,6 @@ export default class ScrapesIndexController extends Controller {
   queryParams = ['search'];
 
   @service flashMessages;
-  @service store;
   @service spinner;
   @tracked search = '';
   @tracked isSearching = false;
@@ -24,10 +23,7 @@ export default class ScrapesIndexController extends Controller {
   async retryScrape(scrape) {
     this.spinner.begin({ label: 'Retrying scrape...' });
     try {
-      const adapter = this.store.adapterFor('scrape');
-      const base = adapter.buildURL('scrape', scrape.id).replace(/\/+$/, '');
-      const url = `${base}/redo/`;
-      await adapter.ajax(url, 'POST');
+      await scrape.redo();
       this.flashMessages.success('Scrape retry initiated');
       await scrape.reload();
     } catch (error) {

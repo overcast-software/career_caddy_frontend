@@ -47,3 +47,43 @@ export async function apiAction(
   if (!responseId) return payload;
   return store.peekRecord(responseType, responseId);
 }
+
+// Collection-level counterpart: POST /api/v1/<resource>/<path>/ (no :id).
+// Same response handling as apiAction — JSON:API single resources are
+// auto-pushed and the live record is returned; arrays / non-resource
+// shapes come back raw. Use from a model static:
+//
+//   static fromText(store, payload) {
+//     return collectionAction(store, 'scrape', {
+//       method: 'POST', path: 'from-text', data: payload,
+//     });
+//   }
+export async function collectionAction(
+  store,
+  modelName,
+  { method, path, data, raw = false } = {},
+) {
+  const adapter = store.adapterFor(modelName);
+  const url = adapter.buildURL(modelName) + path + '/';
+  const payload = await adapter.ajax(url, method, data ? { data } : undefined);
+  if (raw || !payload || typeof payload !== 'object' || payload.data == null) {
+    return payload;
+  }
+  const responseType =
+    (Array.isArray(payload.data)
+      ? payload.data[0]?.type
+      : payload.data?.type) || modelName;
+  const modelClass = store.modelFor(responseType);
+  const serializer = store.serializerFor(responseType);
+  const normalized = serializer.normalizeResponse(
+    store,
+    modelClass,
+    payload,
+    null,
+    method === 'DELETE' ? 'deleteRecord' : 'updateRecord',
+  );
+  store.push(normalized);
+  const responseId = Array.isArray(payload.data) ? null : payload.data?.id;
+  if (!responseId) return payload;
+  return store.peekRecord(responseType, responseId);
+}

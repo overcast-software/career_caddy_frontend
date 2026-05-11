@@ -46,9 +46,7 @@ export default class ScrapesShowController extends Controller {
   @action
   async parseScrape(scrape) {
     try {
-      const adapter = this.store.adapterFor('scrape');
-      const base = adapter.buildURL('scrape', scrape.id).replace(/\/+$/, '');
-      await adapter.ajax(`${base}/parse/`, 'POST');
+      await scrape.parse();
       await scrape.reload();
       this.startPollingIfPending();
     } catch (error) {
@@ -60,9 +58,7 @@ export default class ScrapesShowController extends Controller {
   async retryScrape(scrape) {
     this.spinner.begin({ label: 'Retrying scrape...' });
     try {
-      const adapter = this.store.adapterFor('scrape');
-      const base = adapter.buildURL('scrape', scrape.id).replace(/\/+$/, '');
-      await adapter.ajax(`${base}/redo/`, 'POST');
+      await scrape.redo();
 
       this.flashMessages.success('Scrape retry initiated successfully');
 
