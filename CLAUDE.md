@@ -83,10 +83,66 @@ Do **not** bind inputs directly to model attributes.
 
 ## Models (Ember Data)
 
-All 21 models live in `frontend/app/models/`. They communicate via JSON:API.
+All models live in `frontend/app/models/`. They communicate via JSON:API.
 
 The application adapter (in `frontend/app/adapters/application.js`) injects JWT auth
 headers and handles `401 → token refresh → retry` automatically.
+
+### Four canonical patterns for non-CRUD API access
+
+Every HTTP call from the frontend should fall into one of these four
+buckets. Drop into raw `fetch()` only for file download/upload or
+pre-auth flows — and leave a `KEEP raw fetch: <why>` comment when
+you do.
+
+1. **Verbs on a resource** — `POST /resources/:id/<verb>/`.
+   Use [`apiAction(this, { method, path, data })`][api-action] from a
+   model method. Auto-pushes JSON:API responses, so the resolved
+   value is the live store-backed record.
+   Examples: `JobPost#resolveAndDedupe`, `JobPost#nuclearDelete`,
+   `JobPost#submitTriage`, `JobPost#reextract`, `Scrape#parse`,
+   `Scrape#redo`, `Resume#reorderExperiences`,
+   `Experience#reorderDescriptions`.
+
+2. **Collection verbs** — `POST /resources/<verb>/` (no `:id`).
+   Use [`collectionAction(store, modelName, { method, path, data })`][api-action]
+   from a model **static** method. Same auto-push semantics.
+   Example: `Scrape.fromText`.
+
+3. **Sub-collection reads** — `GET /parents/:id/<children>/`.
+   Custom adapter with `urlForQuery`; route uses `store.query`.
+   The api endpoint must return JSON:API resource objects (a
+   compound document with `included` for related resources is the
+   norm). Read `result.meta` directly off the query result for any
+   denormalized metadata.
+   Examples: `app/adapters/job-post-duplicate-candidate.js`,
+   `app/adapters/scrape-status.js` (graph-trace),
+   `app/adapters/screenshot.js`.
+
+4. **Reports / non-resource GETs** — denormalized aggregates that
+   don't fit an Ember Data model class.
+   Use [`reportFetch(api, path, params)`][report-fetch]. Returns a
+   uniform `{ data, meta, error }` envelope where `error` is
+   `null | 'forbidden' | 'failed'` (403 distinguished).
+   Examples: routes under `app/routes/reports/`, `app/routes/admin/`,
+   `app/routes/settings/ai-spend.js`.
+
+### Patterns that intentionally stay on raw fetch
+
+- **File download / multipart upload** — binary blob responses or
+  `FormData` bodies don't fit JSON:API or Ember Data. Use
+  [`downloadResource({adapter, session, modelName, id, path, filename})`][download]
+  for downloads with the docx-blob / S3-`{url}` dual-shape pattern;
+  use raw fetch for everything else with a `KEEP raw fetch:` note.
+  Examples: `app/controllers/settings/data.js` (xlsx export/import),
+  per-file screenshot binary in `app/components/scrapes/item.js`.
+- **Pre-auth flows** — login, signup, forgot-password, accept-invite,
+  waitlist, guest-session. Raw fetch — the application adapter would
+  short-circuit unauthenticated requests through the docs route.
+
+[api-action]: app/utils/api-action.js
+[report-fetch]: app/utils/report-fetch.js
+[download]: app/utils/download.js
 
 ## Docs Routes
 
