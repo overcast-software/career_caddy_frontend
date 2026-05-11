@@ -190,19 +190,22 @@ export default class JobPostsFormComponent extends Component {
   @action
   nuclearDelete() {
     this.showDeleteConfirm = false;
-    const adapter = this.store.adapterFor('job-post');
-    const id = this.args.jobPost.id;
-    const url = adapter.buildURL('job-post', id) + 'nuclear/';
-    adapter
-      .ajax(url, 'DELETE')
+    const jobPost = this.args.jobPost;
+    this.store
+      .adapterFor('job-post')
+      .nuclearDelete(jobPost)
       .then(() => {
-        this.store.unloadAll('score');
-        this.store.unloadAll('question');
-        this.store.unloadAll('scrape');
-        this.store.unloadAll('cover-letter');
-        this.store.unloadAll('job-application');
-        this.store.unloadAll('summary');
-        this.args.jobPost.unloadRecord();
+        // deleteRecord() before unloadRecord() so any live tracked
+        // arrays (ember-infinity's array on jp.index, peekAll
+        // consumers) drop their reference. Without it, the cached
+        // InfinityModel on jp.index re-renders this row after we
+        // navigate back and reading any relationship throws
+        // "this.store is undefined" / "_graph" — record proxy
+        // detached but still in the array. Server-side cascade
+        // already removed every child relation, so we don't need
+        // the unloadAll() storm that nuked sibling posts' children.
+        jobPost.deleteRecord();
+        jobPost.unloadRecord();
         this.flashMessages.success('Job post and all children deleted.');
         this.router.transitionTo('job-posts.index');
       })
