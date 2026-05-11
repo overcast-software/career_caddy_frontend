@@ -6,7 +6,6 @@ import move from 'ember-animated/motions/move';
 import { easeOut } from 'ember-animated/easings/cosine';
 
 export default class ExperiencesListComponent extends Component {
-  @service api;
   @service flashMessages;
 
   @tracked _localOrder = null;
@@ -66,20 +65,8 @@ export default class ExperiencesListComponent extends Component {
     const resume = this.args.resume;
     if (!resume) return;
     const ids = list.map((e) => Number(e.id)).filter(Number.isFinite);
-    fetch(`${this.api.baseUrl}resumes/${resume.id}/reorder-experiences/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/vnd.api+json',
-        Accept: 'application/vnd.api+json',
-        ...this.api.headers(),
-      },
-      body: JSON.stringify({ experience_ids: ids }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Reorder failed (${res.status})`);
-      })
-      .catch((e) => {
-        this.flashMessages.danger(e?.message ?? 'Reorder failed');
-      });
+    resume.reorderExperiences(ids).catch((e) => {
+      this.flashMessages.danger(e?.message ?? 'Reorder failed');
+    });
   }
 }

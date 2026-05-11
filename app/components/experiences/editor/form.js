@@ -9,7 +9,6 @@ import { easeOut } from 'ember-animated/easings/cosine';
 
 export default class ExperiencesEditorForm extends Component {
   @service store;
-  @service api;
   @service flashMessages;
 
   @tracked errorMessage = null;
@@ -181,20 +180,8 @@ export default class ExperiencesEditorForm extends Component {
       .map((d) => Number(d.id))
       .filter(Number.isFinite);
     if (ids.length === 0) return;
-    fetch(`${this.api.baseUrl}experiences/${exp.id}/reorder-descriptions/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/vnd.api+json',
-        Accept: 'application/vnd.api+json',
-        ...this.api.headers(),
-      },
-      body: JSON.stringify({ description_ids: ids }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Reorder failed (${res.status})`);
-      })
-      .catch((e) => {
-        this.errorMessage = e?.message ?? 'Reorder failed';
-      });
+    exp.reorderDescriptions(ids).catch((e) => {
+      this.errorMessage = e?.message ?? 'Reorder failed';
+    });
   }
 }

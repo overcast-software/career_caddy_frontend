@@ -71,4 +71,34 @@ module('Unit | Model | resume', function (hooks) {
       assert.deepEqual(model.sectionRenderOrder, order);
     });
   });
+
+  module('apiAction verbs', function (hooks) {
+    hooks.beforeEach(function () {
+      const store = this.owner.lookup('service:store');
+      const adapter = store.adapterFor('resume');
+      this.ajaxCalls = [];
+      adapter.ajax = (url, method, options) => {
+        this.ajaxCalls.push({ url, method, options });
+        return Promise.resolve({ data: null });
+      };
+    });
+
+    test('reorderExperiences(ids) POSTs experience_ids body to /resumes/:id/reorder-experiences/', async function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: { type: 'resume', id: '600', attributes: {} },
+      });
+      const resume = store.peekRecord('resume', '600');
+      await resume.reorderExperiences([3, 1, 2]);
+      assert.strictEqual(this.ajaxCalls.length, 1);
+      assert.strictEqual(this.ajaxCalls[0].method, 'POST');
+      assert.true(
+        this.ajaxCalls[0].url.endsWith('/resumes/600/reorder-experiences/'),
+        `URL ${this.ajaxCalls[0].url} ends with the verb path`,
+      );
+      assert.deepEqual(this.ajaxCalls[0].options?.data, {
+        experience_ids: [3, 1, 2],
+      });
+    });
+  });
 });

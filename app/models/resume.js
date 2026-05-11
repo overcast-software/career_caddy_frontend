@@ -1,4 +1,5 @@
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
+import { apiAction } from 'career-caddy-frontend/utils/api-action';
 
 // Canonical section sequence — fallback when the API doesn't supply
 // effectiveSectionOrder (older payloads, slim responses, partial loads).
@@ -66,5 +67,13 @@ export default class ResumeModel extends Model {
     const fromApi = this.effectiveSectionOrder;
     if (Array.isArray(fromApi) && fromApi.length > 0) return fromApi;
     return CANONICAL_SECTION_ORDER;
+  }
+
+  reorderExperiences(experienceIds) {
+    return apiAction(this, {
+      method: 'POST',
+      path: 'reorder-experiences',
+      data: { experience_ids: experienceIds },
+    });
   }
 }
