@@ -9,7 +9,9 @@ export default class JobPostsShowQuestionsShowController extends Controller {
     const route = this.router.currentRouteName;
     return (
       route === 'job-posts.show.questions.show' ||
-      route === 'job-posts.show.questions.show.index'
+      route === 'job-posts.show.questions.show.index' ||
+      route === 'job-posts.show.questions.show.answers' ||
+      route === 'job-posts.show.questions.show.answers.index'
     );
   }
 
