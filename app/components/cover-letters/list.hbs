@@ -62,14 +62,19 @@
                   @title="Generating — this page auto-refreshes when ready"
                 />
               {{else}}
-                <ResourceLink
-                  @flatRoute="cover-letters.show"
-                  @nestedRoute="job-posts.show.cover-letters.show"
-                  @parentScope="job-posts.show"
-                  @parent={{@jobPost}}
-                  @record={{coverLetter}}
-                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                >View</ResourceLink>
+                {{#if coverLetter.jobPost.id}}
+                  <LinkTo
+                    @route="job-posts.show.cover-letters.show"
+                    @models={{array coverLetter.jobPost coverLetter}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >View</LinkTo>
+                {{else}}
+                  <LinkTo
+                    @route="cover-letters.show"
+                    @model={{coverLetter}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >View</LinkTo>
+                {{/if}}
               {{/if}}
             </td>
           </tr>

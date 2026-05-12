@@ -1,11 +1,15 @@
 <Panel::Card>
   <div class="summary-header">
-    {{#if @summary.jobPost}}
+    <ParentReference
+      @parent={{@summary.jobPost}}
+      @parentScope="job-posts.show"
+      as |jp|
+    >
       <span class="muted">Job:</span>
-      <LinkTo @route="job-posts.show" @model={{@summary.jobPost}}>
-        {{@summary.jobPost.title}}
+      <LinkTo @route="job-posts.show" @model={{jp}}>
+        {{jp.title}}
       </LinkTo>
-    {{/if}}
+    </ParentReference>
 
     {{#if @summary.resume}}
       <span class="muted">Resume:</span>

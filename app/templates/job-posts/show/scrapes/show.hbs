@@ -1,13 +1,10 @@
 {{page-title "Scrape"}}
 <div class="space-y-4">
-  <div>
-    <LinkTo
-      @route="job-posts.show.scrapes.index"
-      class="text-xs font-medium text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300"
-    >
-      ← Back to scrapes
-    </LinkTo>
-  </div>
+  <LinkTo
+    @route="job-posts.show.scrapes"
+    @model={{this.jobPost}}
+    class="mb-4 inline-block text-sm text-blue-600 hover:underline"
+  >← Scrapes</LinkTo>
 
   <Scrapes::Item @scrape={{this.model}} />
 

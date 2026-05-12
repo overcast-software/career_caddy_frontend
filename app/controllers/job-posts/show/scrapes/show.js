@@ -1,5 +1,6 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
+import { getOwner } from '@ember/owner';
 import { action } from '@ember/object';
 
 export default class JobPostsShowScrapesShowController extends Controller {
@@ -8,6 +9,12 @@ export default class JobPostsShowScrapesShowController extends Controller {
   @service spinner;
   @service flashMessages;
   @service router;
+
+  get jobPost() {
+    return getOwner(this)
+      .lookup('route:job-posts.show')
+      .modelFor('job-posts.show');
+  }
 
   @action
   async parseScrape(scrape) {
