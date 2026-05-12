@@ -28,7 +28,7 @@ module('Integration | Component | cover-letters/item', function (hooks) {
     assert
       .dom('article.panel-card')
       .hasText(
-        'Cover Letter for jobPost title at company Name Export to DOCX cover letter content',
+        'Cover Letter for jobPost title at company Name ★ edit Export to DOCX cover letter content',
       );
 
     // We don't use yield

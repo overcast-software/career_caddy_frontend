@@ -21,6 +21,12 @@ export default class JobPostsShowScoresController extends Controller {
   @tracked instructions = '';
   _autoScoreHandled = false;
 
+  get jobPost() {
+    return getOwner(this)
+      .lookup('route:job-posts.show')
+      .modelFor('job-posts.show');
+  }
+
   get resumes() {
     const all = this.store.peekAll('resume');
     if (!all?.length) return [CAREER_DATA_OPTION];

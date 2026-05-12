@@ -23,6 +23,21 @@ export default class CoverLettersItemComponent extends Component {
   }
 
   @action
+  async toggleFavorite() {
+    const cl = this.args.coverLetter;
+    cl.favorite = !cl.favorite;
+    try {
+      await cl.save();
+      this.store.peekRecord('career-data', '1')?.markDirty();
+      const status = cl.favorite ? 'added to' : 'removed from';
+      this.flashMessages.success(`Cover letter ${status} favorites`);
+    } catch {
+      cl.favorite = !cl.favorite;
+      this.flashMessages.danger('Failed to update favorite status');
+    }
+  }
+
+  @action
   async exportToDocx() {
     if (this.isExporting) {
       this.flashMessages.warning('Export already in progress.');
