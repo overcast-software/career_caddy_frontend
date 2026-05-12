@@ -118,7 +118,9 @@ Router.map(function () {
         this.route('scores', function () {
           this.route('show', { path: '/:score_id' });
         });
-        this.route('cover-letters');
+        this.route('cover-letters', function () {
+          this.route('show', { path: '/:cover_letter_id' });
+        });
         this.route('scrapes', function () {
           this.route('show', { path: '/:scrape_id' });
         });

@@ -24,8 +24,8 @@
               <td class="px-4 py-3 text-gray-600">
                 {{#if coverLetter.jobPost.id}}
                   <LinkTo
-                    @route="job-posts.show"
-                    @model={{coverLetter.jobPost}}
+                    @route="job-posts.show.cover-letters.show"
+                    @models={{array coverLetter.jobPost coverLetter}}
                   >{{coverLetter.jobPost.title}}</LinkTo>
                 {{else}}
                   <span class="text-gray-400">&mdash;</span>
@@ -62,11 +62,14 @@
                   @title="Generating — this page auto-refreshes when ready"
                 />
               {{else}}
-                <LinkTo
-                  @route="cover-letters.show"
-                  @model={{coverLetter}}
+                <ResourceLink
+                  @flatRoute="cover-letters.show"
+                  @nestedRoute="job-posts.show.cover-letters.show"
+                  @parentScope="job-posts.show"
+                  @parent={{@jobPost}}
+                  @record={{coverLetter}}
                   class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                >View</LinkTo>
+                >View</ResourceLink>
               {{/if}}
             </td>
           </tr>

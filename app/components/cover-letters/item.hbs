@@ -1,11 +1,28 @@
 <article class="panel-card">
-  <h3 class="panel-title">Cover Letter for
-    {{@coverLetter.jobPost.title}}
-    at
-    {{@coverLetter.jobPost.company.name}}</h3>
-  <div class="panel-actions">
+  <h3 class="panel-title">
+    Cover Letter
+    <ParentReference
+      @parent={{@coverLetter.jobPost}}
+      @parentScope="job-posts.show"
+      as |jp|
+    >
+      for
+      <LinkTo @route="job-posts.show" @model={{jp}}>{{jp.title}}</LinkTo>
+      at
+      {{jp.company.name}}
+    </ParentReference>
+  </h3>
+  <div class="panel-actions gap-2">
+    <Buttons::Favorite
+      @model={{@coverLetter}}
+      @onToggle={{this.toggleFavorite}}
+    />
+    <LinkTo class="btn" @route="cover-letters.edit" @model={{@coverLetter}}>
+      edit
+    </LinkTo>
     <button
       type="button"
+      class="btn"
       {{on "click" this.exportToDocx}}
       disabled={{this.isExporting}}
     >

@@ -1,41 +1,52 @@
-<div
-  {{on-insert this.autoScoreIfRequested}}
-  class="flex items-center gap-2 mb-4"
->
-  <div class="flex-1">
-    <PowerSelect
-      @options={{this.resumes}}
-      @selected={{this.selectedResume}}
-      @onChange={{this.selectResume}}
-      @placeholder="Select resume…"
-      as |resume|
-    >{{or resume.name resume.title}}</PowerSelect>
-  </div>
-  <button
-    type="button"
-    class="btn shrink-0"
-    {{on "click" this.scoreResume}}
-  >Score</button>
-</div>
-<div class="mb-4">
-  <textarea
-    id="score-instructions"
-    class="w-full bg-accent-50 text-gray-900 dark:bg-accent-900/20 dark:text-gray-100"
-    rows="3"
-    placeholder="Instructions for AI (optional)..."
-    {{on "input" this.updateInstructions}}
-  >{{this.instructions}}</textarea>
-</div>
+{{#if (in-route-scope "job-posts.show.scores.show")}}
+  <LinkTo
+    @route="job-posts.show.scores"
+    @model={{this.jobPost}}
+    class="mb-4 inline-block text-sm text-blue-600 hover:underline"
+  >← Scores</LinkTo>
+{{else}}
+  <section class="panel-card mb-6" {{on-insert this.autoScoreIfRequested}}>
+    <h2 class="panel-title">New score</h2>
+    <div class="panel-body">
+      <div class="flex items-center gap-2">
+        <div class="flex-1">
+          <PowerSelect
+            @options={{this.resumes}}
+            @selected={{this.selectedResume}}
+            @onChange={{this.selectResume}}
+            @placeholder="Select resume…"
+            as |resume|
+          >{{or resume.name resume.title}}</PowerSelect>
+        </div>
+        <button
+          type="button"
+          class="btn shrink-0"
+          {{on "click" this.scoreResume}}
+        >Score</button>
+      </div>
+      <textarea
+        id="score-instructions"
+        class="w-full bg-accent-50 text-gray-900 dark:bg-accent-900/20 dark:text-gray-100"
+        rows="3"
+        placeholder="Instructions for AI (optional)..."
+        {{on "input" this.updateInstructions}}
+      >{{this.instructions}}</textarea>
+    </div>
+  </section>
 
-<Scores::List
-  @scores={{this.model}}
-  @isPending={{this.isPending}}
-  @showJobPost={{false}}
-  @showStatus={{false}}
-  @showCreated={{false}}
-  @showExplanation={{true}}
-  @showActions={{false}}
-  @emptyMessage="No scores yet."
-/>
+  <section class="mb-6">
+    <h2 class="panel-title">Scores</h2>
+    <Scores::List
+      @scores={{this.model}}
+      @isPending={{this.isPending}}
+      @showJobPost={{false}}
+      @showStatus={{false}}
+      @showCreated={{false}}
+      @showExplanation={{true}}
+      @showActions={{false}}
+      @emptyMessage="No scores yet."
+    />
+  </section>
+{{/if}}
 
 {{outlet}}

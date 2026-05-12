@@ -1,7 +1,7 @@
 import Controller from '@ember/controller';
 import { service } from '@ember/service';
 
-export default class CoverLettersShowController extends Controller {
+export default class JobPostsShowCoverLettersShowController extends Controller {
   @service pollable;
   @service flashMessages;
 

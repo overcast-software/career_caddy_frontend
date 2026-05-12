@@ -1,28 +1,37 @@
-<div class="flex items-center gap-2 mb-4">
-  <div class="flex-1 max-w-xs">
-    <PowerSelect
-      @options={{this.resumes}}
-      @selected={{this.selectedResume}}
-      @onChange={{this.selectResume}}
-      @placeholder="Select resume…"
-      as |resume|
-    >{{or resume.name resume.title}}</PowerSelect>
+<section class="panel-card mb-6">
+  <h2 class="panel-title">New summary</h2>
+  <div class="panel-body">
+    <div class="flex items-center gap-2">
+      <div class="flex-1 max-w-xs">
+        <PowerSelect
+          @options={{this.resumes}}
+          @selected={{this.selectedResume}}
+          @onChange={{this.selectResume}}
+          @placeholder="Select resume…"
+          as |resume|
+        >{{or resume.name resume.title}}</PowerSelect>
+      </div>
+      <button
+        type="button"
+        class="btn shrink-0"
+        {{on "click" this.createSummary}}
+      >Create</button>
+    </div>
+    <textarea
+      id="summary-instructions"
+      class="w-full bg-accent-50 text-gray-900 dark:bg-accent-900/20 dark:text-gray-100"
+      rows="3"
+      placeholder="Instructions for AI (optional)..."
+      {{on "input" this.updateInstructions}}
+    >{{this.instructions}}</textarea>
   </div>
-  <button type="button" class="btn shrink-0" {{on "click" this.createSummary}}>+
-    New Summary</button>
-</div>
-<div class="mb-4">
-  <textarea
-    id="summary-instructions"
-    class="w-full bg-accent-50 text-gray-900 dark:bg-accent-900/20 dark:text-gray-100"
-    rows="3"
-    placeholder="Instructions for AI (optional)..."
-    {{on "input" this.updateInstructions}}
-  >{{this.instructions}}</textarea>
-</div>
+</section>
 
-<Summaries::List
-  @summaries={{this.model}}
-  @isPending={{this.isPending}}
-  @emptyMessage="No summaries for this job post."
-/>
+<section class="mb-6">
+  <h2 class="panel-title">Summaries</h2>
+  <Summaries::List
+    @summaries={{this.model}}
+    @isPending={{this.isPending}}
+    @emptyMessage="No summaries for this job post."
+  />
+</section>

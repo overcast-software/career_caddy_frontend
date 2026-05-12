@@ -15,6 +15,12 @@ export default class JobPostsShowCoverLettersController extends Controller {
   @tracked selectedResume = CAREER_DATA_OPTION;
   @tracked instructions = '';
 
+  get jobPost() {
+    return getOwner(this)
+      .lookup('route:job-posts.show')
+      .modelFor('job-posts.show');
+  }
+
   get resumes() {
     const all = this.store.peekAll('resume');
     if (!all?.length) return [CAREER_DATA_OPTION];
