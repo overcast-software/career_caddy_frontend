@@ -1,0 +1,92 @@
+{{page-title "Application"}}
+<LinkTo
+  @route="job-posts.show.job-applications"
+  @model={{this.jobPost}}
+  class="mb-4 inline-block text-sm text-blue-600 hover:underline"
+>← Applications</LinkTo>
+
+<div class="space-y-4">
+  <article class="panel-card space-y-6">
+    <h3 class="panel-title">
+      Application
+      <ParentReference
+        @parent={{this.model.jobPost}}
+        @parentScope="job-posts.show"
+        as |jp|
+      >
+        for
+        <LinkTo @route="job-posts.show" @model={{jp}}>{{jp.title}}</LinkTo>
+        at
+        {{#if this.model.company.name}}
+          {{this.model.company.name}}
+        {{else}}
+          <span class="italic text-amber-500">company missing</span>
+        {{/if}}
+      </ParentReference>
+    </h3>
+    <div class="panel-actions gap-2">
+      <LinkTo
+        @route="job-applications.edit"
+        @model={{this.model.id}}
+        class="btn"
+      >Edit</LinkTo>
+      <button
+        type="button"
+        class="btn"
+        {{on "click" this.destroyRecord}}
+      >Destroy</button>
+    </div>
+    <div class="panel-body">
+      <StatusSteps
+        @steps={{this.statusSteps}}
+        @current={{this.model.status}}
+        @failedStates={{this.failedStates}}
+      />
+
+      <div class="flow-root">
+        <dl class="stagger-rows -my-3 divide-y divide-gray-200 text-sm">
+          <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <dt class="font-medium text-gray-900">Resume</dt>
+            <dd class="text-gray-700 sm:col-span-2">{{#if
+                this.model.resume
+              }}{{this.model.resume.name}}{{else}}N/A{{/if}}</dd>
+          </div>
+          <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <dt class="font-medium text-gray-900">Day applied</dt>
+            <dd class="text-gray-700 sm:col-span-2">{{format-date
+                this.model.appliedAt
+              }}</dd>
+          </div>
+          <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <dt class="font-medium text-gray-900">Status</dt>
+            <dd class="text-gray-700 sm:col-span-2">{{this.model.status}}</dd>
+          </div>
+          {{#if this.model.trackingUrl}}
+            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+              <dt class="font-medium text-gray-900">Link</dt>
+              <dd class="text-gray-700 sm:col-span-2">
+                <a
+                  href={{this.model.trackingUrl}}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="hover:underline break-all"
+                >{{this.model.trackingUrl}}</a>
+              </dd>
+            </div>
+          {{/if}}
+          {{#if this.model.notes}}
+            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+              <dt class="font-medium text-gray-900">Notes</dt>
+              <dd class="text-gray-700 sm:col-span-2">{{this.model.notes}}</dd>
+            </div>
+          {{/if}}
+        </dl>
+      </div>
+    </div>
+  </article>
+
+  <div class="panel-card">
+    <JobApplications::StatusLog @jobApplication={{this.model}} />
+  </div>
+</div>
+{{outlet}}

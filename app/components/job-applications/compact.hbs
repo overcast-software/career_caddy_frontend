@@ -1,8 +1,13 @@
 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
   <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
-    <LinkTo @route="job-applications.show" @model={{@jobApplication.id}}>
-      {{this.jobPost.title}}
-    </LinkTo>
+    {{#if this.jobPost.id}}
+      <LinkTo
+        @route="job-posts.show.job-applications.show"
+        @models={{array this.jobPost @jobApplication}}
+      >{{this.jobPost.title}}</LinkTo>
+    {{else}}
+      <span class="text-gray-400">&mdash;</span>
+    {{/if}}
   </td>
   {{#unless (eq @showCompany false)}}
     <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
@@ -37,11 +42,19 @@
           class="px-2 py-1 text-xs rounded border border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/30"
         >Finish</LinkTo>
       {{else}}
-        <LinkTo
-          @route="job-applications.show"
-          @model={{@jobApplication.id}}
-          class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-        >View</LinkTo>
+        {{#if this.jobPost.id}}
+          <LinkTo
+            @route="job-posts.show.job-applications.show"
+            @models={{array this.jobPost @jobApplication}}
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >View</LinkTo>
+        {{else}}
+          <LinkTo
+            @route="job-applications.show"
+            @model={{@jobApplication}}
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >View</LinkTo>
+        {{/if}}
         <LinkTo
           @route="job-applications.edit"
           @model={{@jobApplication.id}}

@@ -31,8 +31,8 @@
                 <dt class="font-medium text-gray-900">Job Post</dt>
                 <dd class="text-gray-700 sm:col-span-2">
                   <LinkTo
-                    @route="job-posts.show"
-                    @model={{summary.jobPost}}
+                    @route="job-posts.show.summaries.show"
+                    @models={{array summary.jobPost summary}}
                     class="text-blue-600 hover:underline"
                   >{{summary.jobPost.title}}</LinkTo>
                 </dd>

@@ -6,6 +6,9 @@
           <th
             class="px-4 py-3 text-left font-semibold text-gray-600"
           >Summary</th>
+          {{#unless (eq @showJobPost false)}}
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
+          {{/unless}}
           <th
             class="px-4 py-3 text-left font-semibold text-gray-600"
           >Resume</th>
@@ -23,6 +26,18 @@
             <td class="px-4 py-3 text-gray-900 max-w-md truncate">
               {{summary.content}}
             </td>
+            {{#unless (eq @showJobPost false)}}
+              <td class="px-4 py-3 text-gray-600">
+                {{#if summary.jobPost.id}}
+                  <LinkTo
+                    @route="job-posts.show.summaries.show"
+                    @models={{array summary.jobPost summary}}
+                  >{{summary.jobPost.title}}</LinkTo>
+                {{else}}
+                  <span class="text-gray-400">&mdash;</span>
+                {{/if}}
+              </td>
+            {{/unless}}
             <td class="px-4 py-3 text-gray-600">
               {{#if summary.resume.id}}
                 {{or summary.resume.name summary.resume.title}}
@@ -44,11 +59,19 @@
                   @title="Generating — this page auto-refreshes when ready"
                 />
               {{else}}
-                <LinkTo
-                  @route="summaries.show"
-                  @model={{summary}}
-                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                >View</LinkTo>
+                {{#if summary.jobPost.id}}
+                  <LinkTo
+                    @route="job-posts.show.summaries.show"
+                    @models={{array summary.jobPost summary}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >View</LinkTo>
+                {{else}}
+                  <LinkTo
+                    @route="summaries.show"
+                    @model={{summary}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >View</LinkTo>
+                {{/if}}
               {{/if}}
             </td>
           </tr>

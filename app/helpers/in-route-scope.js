@@ -2,8 +2,8 @@ import Helper from '@ember/component/helper';
 import { service } from '@ember/service';
 
 // True when the current route name matches the given scope or is nested
-// under it. Backbone for <ResourceLink> + <ParentReference> — both decide
-// behavior based on "are we already inside the parent's route?"
+// under it. Used by <ParentReference> and by parent templates that need
+// to collapse their form+list when a child detail route is active.
 export default class InRouteScopeHelper extends Helper {
   @service router;
 

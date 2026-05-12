@@ -7,22 +7,22 @@ module('Integration | Component | scores/item', function (hooks) {
   setupRenderingTest(hooks);
 
   test('it renders', async function (assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
+    this.score = {
+      score: 87,
+      resume: { id: '1', name: 'resume Name' },
+      jobPost: {
+        id: '1',
+        title: 'jobPost title',
+        company: { name: 'company Name' },
+      },
+    };
 
-    await render(hbs`<Scores::Item />`);
+    await render(hbs`<Scores::Item @score={{this.score}} />`);
 
+    assert.dom('article.panel-card').exists();
     assert.dom().includesText('Score');
     assert.dom().includesText('Resume');
-    assert.dom().includesText('Job Post');
-
-    // Template block usage:
-    await render(hbs`
-      <Scores::Item>
-        template block text
-      </Scores::Item>
-    `);
-
-    assert.ok(this.element, 'component renders in block mode');
+    assert.dom().includesText('jobPost title');
+    assert.dom().includesText('company Name');
   });
 });

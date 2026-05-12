@@ -1,28 +1,28 @@
-<div class="rounded border border-gray-200 bg-white">
-  <div class="flow-root p-4">
+<article class="panel-card">
+  <h3 class="panel-title">
+    Score
+    <ParentReference
+      @parent={{@score.jobPost}}
+      @parentScope="job-posts.show"
+      as |jp|
+    >
+      for
+      <LinkTo @route="job-posts.show" @model={{jp}}>{{jp.title}}</LinkTo>
+      at
+      {{jp.company.name}}
+    </ParentReference>
+  </h3>
+  {{#if @onDelete}}
+    <div class="panel-actions gap-2">
+      <button
+        type="button"
+        class="px-2 py-1 text-xs rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+        {{on "click" @onDelete}}
+      >Delete Score</button>
+    </div>
+  {{/if}}
+  <div class="panel-body">
     <dl class="stagger-rows -my-3 divide-y divide-gray-200 text-sm">
-      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-        <dt class="font-medium text-gray-900">Job Post</dt>
-        <dd class="text-gray-700 sm:col-span-2">
-          <LinkTo
-            @route="job-posts.show"
-            @model={{@score.jobPost}}
-            class="text-blue-600 hover:underline"
-          >{{@score.jobPost.title}}</LinkTo>
-        </dd>
-      </div>
-
-      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-        <dt class="font-medium text-gray-900">Company</dt>
-        <dd class="text-gray-700 sm:col-span-2">
-          <LinkTo
-            @route="companies.show"
-            @model={{@score.jobPost.company}}
-            class="text-blue-600 hover:underline"
-          >{{@score.jobPost.company.name}}</LinkTo>
-        </dd>
-      </div>
-
       <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
         <dt class="font-medium text-gray-900">Resume</dt>
         <dd class="text-gray-700 sm:col-span-2">
@@ -89,18 +89,6 @@
           </dd>
         </div>
       {{/if}}
-      {{#if @onDelete}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900"></dt>
-          <dd class="sm:col-span-2 text-right">
-            <button
-              type="button"
-              class="px-2 py-1 text-xs rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
-              {{on "click" @onDelete}}
-            >Delete Score</button>
-          </dd>
-        </div>
-      {{/if}}
     </dl>
   </div>
-</div>
+</article>

@@ -6,6 +6,9 @@
           <th
             class="px-4 py-3 text-left font-semibold text-gray-600"
           >Question</th>
+          {{#unless (eq @showJobPost false)}}
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
+          {{/unless}}
           <th
             class="px-4 py-3 text-center font-semibold text-gray-600 w-24"
           >Answers</th>
@@ -25,6 +28,18 @@
             >
               {{question.content}}
             </td>
+            {{#unless (eq @showJobPost false)}}
+              <td class="px-4 py-3 text-gray-600">
+                {{#if question.jobPost.id}}
+                  <LinkTo
+                    @route="job-posts.show.questions.show"
+                    @models={{array question.jobPost question}}
+                  >{{question.jobPost.title}}</LinkTo>
+                {{else}}
+                  <span class="text-gray-400">&mdash;</span>
+                {{/if}}
+              </td>
+            {{/unless}}
             <td class="px-4 py-3 text-center">
               {{#if question.answers.length}}
                 <LinkTo
@@ -42,11 +57,19 @@
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-1.5 flex-wrap">
                 {{#if @showRoute}}
-                  <LinkTo
-                    @route={{@showRoute}}
-                    @model={{question}}
-                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                  >Show</LinkTo>
+                  {{#if question.jobPost.id}}
+                    <LinkTo
+                      @route="job-posts.show.questions.show"
+                      @models={{array question.jobPost question}}
+                      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                    >Show</LinkTo>
+                  {{else}}
+                    <LinkTo
+                      @route={{@showRoute}}
+                      @model={{question}}
+                      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                    >Show</LinkTo>
+                  {{/if}}
                 {{/if}}
                 {{#if @editRoute}}
                   <LinkTo

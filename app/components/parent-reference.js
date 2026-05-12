@@ -1,10 +1,9 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
 
-// Display-side companion to <ResourceLink>: yields @parent for rendering
-// only when the current route is NOT inside @parentScope. When already
-// inside the parent's route, the breadcrumb is redundant — so the block
-// stays hidden.
+// Yields @parent for rendering only when the current route is NOT inside
+// @parentScope. When already inside the parent's route, the breadcrumb is
+// redundant — so the block stays hidden.
 //
 // Stackable: a record with multiple useful parents (e.g. cover-letter →
 // jobPost AND company) wraps each in its own <ParentReference>; each

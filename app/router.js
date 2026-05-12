@@ -124,7 +124,9 @@ Router.map(function () {
         this.route('scrapes', function () {
           this.route('show', { path: '/:scrape_id' });
         });
-        this.route('summaries');
+        this.route('summaries', function () {
+          this.route('show', { path: '/:summary_id' });
+        });
       },
     );
     this.route('new', function () {

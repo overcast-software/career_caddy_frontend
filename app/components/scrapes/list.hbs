@@ -50,9 +50,10 @@
             {{#unless (eq @showJobPost false)}}
               <td class="px-4 py-3 text-gray-600">
                 {{#if scrape.jobPost.id}}
-                  <LinkTo @route="job-posts.show" @model={{scrape.jobPost}}>
-                    {{scrape.jobPost.title}}
-                  </LinkTo>
+                  <LinkTo
+                    @route="job-posts.show.scrapes.show"
+                    @models={{array scrape.jobPost scrape}}
+                  >{{scrape.jobPost.title}}</LinkTo>
                 {{else}}
                   <span class="text-gray-400">&mdash;</span>
                 {{/if}}
@@ -95,11 +96,19 @@
             </td>
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-2">
-                <LinkTo
-                  @route={{or @viewRoute "scrapes.show"}}
-                  @model={{scrape}}
-                  class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                >View</LinkTo>
+                {{#if scrape.jobPost.id}}
+                  <LinkTo
+                    @route="job-posts.show.scrapes.show"
+                    @models={{array scrape.jobPost scrape}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >View</LinkTo>
+                {{else}}
+                  <LinkTo
+                    @route="scrapes.show"
+                    @model={{scrape}}
+                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  >View</LinkTo>
+                {{/if}}
                 {{#if @onRetry}}
                   <button
                     type="button"

@@ -55,11 +55,19 @@
               {{#if (and @isPending (@isPending score))}}
                 <SpinnerInline @label={{or score.status "Scoring…"}} />
               {{else if score.score}}
-                <LinkTo
-                  @route="scores.show"
-                  @model={{score}}
-                  class="text-accent-600"
-                >{{score.score}}</LinkTo>
+                {{#if score.jobPost.id}}
+                  <LinkTo
+                    @route="job-posts.show.scores.show"
+                    @models={{array score.jobPost score}}
+                    class="text-accent-600"
+                  >{{score.score}}</LinkTo>
+                {{else}}
+                  <LinkTo
+                    @route="scores.show"
+                    @model={{score}}
+                    class="text-accent-600"
+                  >{{score.score}}</LinkTo>
+                {{/if}}
               {{else if score.status}}
                 <span
                   class="px-2 py-0.5 rounded-full text-xs font-medium
@@ -74,9 +82,10 @@
             {{#unless (eq @showJobPost false)}}
               <td class="px-4 py-3 text-gray-600">
                 {{#if score.jobPost.id}}
-                  <LinkTo @route="job-posts.show" @model={{score.jobPost}}>
-                    {{score.jobPost.title}}
-                  </LinkTo>
+                  <LinkTo
+                    @route="job-posts.show.scores.show"
+                    @models={{array score.jobPost score}}
+                  >{{score.jobPost.title}}</LinkTo>
                 {{else}}
                   <span class="text-gray-400">&mdash;</span>
                 {{/if}}
@@ -127,11 +136,19 @@
                   {{! pending — no actions }}
                 {{else}}
                   <div class="flex items-center justify-end gap-2">
-                    <LinkTo
-                      @route="scores.show"
-                      @model={{score}}
-                      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                    >View</LinkTo>
+                    {{#if score.jobPost.id}}
+                      <LinkTo
+                        @route="job-posts.show.scores.show"
+                        @models={{array score.jobPost score}}
+                        class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                      >View</LinkTo>
+                    {{else}}
+                      <LinkTo
+                        @route="scores.show"
+                        @model={{score}}
+                        class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
+                      >View</LinkTo>
+                    {{/if}}
                     {{#if @onDelete}}
                       <button
                         type="button"
