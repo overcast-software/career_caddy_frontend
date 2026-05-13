@@ -106,7 +106,13 @@
       </div>
     </div>
 
-    <JobPosts::DuplicateCandidates @jobPost={{this.model}} />
+    {{! @candidates is the resolved async hasMany on the JobPost model;
+        the route's model() awaits .hasMany('duplicateCandidates').reload()
+        so by first paint the proxy is settled and the component can
+        iterate it directly. }}
+    <JobPosts::DuplicateCandidates
+      @candidates={{this.model.duplicateCandidates}}
+    />
 
     {{#if this.model.description}}
       <Panel::Card @title="About the job">

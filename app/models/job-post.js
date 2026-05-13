@@ -72,6 +72,16 @@ export default class JobPostModel extends Model {
   jobApplications;
   @hasMany('question', { async: true, inverse: 'jobPost' }) questions;
   @hasMany('summary', { async: true, inverse: 'jobPost' }) summaries;
+  // Possible-duplicate candidates surfaced as the amber banner above
+  // jp.show's description. inverse: null because the candidate side is
+  // a thin read-only view, not a real bi-directional FK. The custom
+  // adapter (urlForFindHasMany) routes loads to the sub-collection
+  // endpoint /job-posts/:id/duplicate-candidates/. Loaded by the
+  // jp.show route's model() via .hasMany('duplicateCandidates').load()
+  // so a route-param change (clicking a candidate's LinkTo to navigate)
+  // re-runs the query as part of the model resolution.
+  @hasMany('job-post-duplicate-candidate', { async: true, inverse: null })
+  duplicateCandidates;
 
   get needsScrape() {
     return !this.description?.trim();

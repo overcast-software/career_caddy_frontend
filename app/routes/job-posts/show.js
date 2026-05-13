@@ -7,9 +7,17 @@ export default class JobPostsShowRoute extends Route {
   @service flashMessages;
 
   async model({ job_post_id }) {
-    return await this.store.findRecord('job-post', job_post_id, {
+    const jp = await this.store.findRecord('job-post', job_post_id, {
       include: 'scrapes',
     });
+    // Reload the duplicate-candidates async hasMany on every route
+    // activation — including a param change from clicking a candidate's
+    // LinkTo. .reload() bypasses the per-record relationship cache so
+    // the second visit doesn't show the first visit's stale list. The
+    // custom job-post adapter's urlForFindHasMany routes the call to
+    // /api/v1/job-posts/<id>/duplicate-candidates/.
+    await jp.hasMany('duplicateCandidates').reload();
+    return jp;
   }
 
   setupController(controller, model) {
