@@ -7,17 +7,17 @@ export default class JobPostsShowRoute extends Route {
   @service flashMessages;
 
   async model({ job_post_id }) {
-    const jp = await this.store.findRecord('job-post', job_post_id, {
-      include: 'scrapes',
+    // `?include=duplicate-candidates` brings the candidate set in the same
+    // round-trip as the JobPost itself — JP payload carries the
+    // relationships.duplicate-candidates {data, links} block and the top-
+    // level included[] holds the candidate resources, so Ember Data
+    // populates the hasMany without a second request. The serializer-side
+    // links.related declaration also makes a future .reload() work, but
+    // the include= path is the one we actually exercise on every nav.
+    return this.store.findRecord('job-post', job_post_id, {
+      include: 'scrapes,duplicate-candidates',
+      reload: true,
     });
-    // Reload the duplicate-candidates async hasMany on every route
-    // activation — including a param change from clicking a candidate's
-    // LinkTo. .reload() bypasses the per-record relationship cache so
-    // the second visit doesn't show the first visit's stale list. The
-    // custom job-post adapter's urlForFindHasMany routes the call to
-    // /api/v1/job-posts/<id>/duplicate-candidates/.
-    await jp.hasMany('duplicateCandidates').reload();
-    return jp;
   }
 
   setupController(controller, model) {
