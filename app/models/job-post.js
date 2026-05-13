@@ -83,6 +83,17 @@ export default class JobPostModel extends Model {
   @hasMany('job-post-duplicate-candidate', { async: true, inverse: null })
   duplicateCandidates;
 
+  // Synchronous materialized view of the async hasMany above. The
+  // route's model() awaits .reload() so by first paint the relationship
+  // is loaded; this getter unwraps the PromiseManyArray (which isn't
+  // JS-iterable) into the underlying record array consumers can
+  // for...of over. Mirrors the activeScrape / activeScore pattern below
+  // and matches the project's "hasMany('rel').value() + for...of" rule
+  // for async hasMany access in JS.
+  get duplicateCandidatesList() {
+    return this.hasMany('duplicateCandidates').value() || [];
+  }
+
   get needsScrape() {
     return !this.description?.trim();
   }
