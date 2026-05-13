@@ -77,6 +77,37 @@
     </div>
   </div>
 
+  {{! Page context — surfaces what the chat sends to the server as
+      page_context (chat.service.js sends currentPage.url + route +
+      params on every turn). Without this strip the user can't tell
+      the AI knows which page they're on. }}
+  {{#if this.chat.currentPage.url}}
+    <div
+      class="flex items-center gap-2 px-4 py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 text-xs text-gray-500 dark:text-gray-400"
+      title="The AI sees this URL on every turn — it can answer about what's on the page."
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="size-3.5 shrink-0 text-gray-400 dark:text-gray-500"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
+        />
+      </svg>
+      <span class="shrink-0">Context:</span>
+      <code
+        class="font-mono text-gray-700 dark:text-gray-300 truncate"
+      >{{this.chat.currentPage.url}}</code>
+    </div>
+  {{/if}}
+
   {{! Messages }}
   <div class="flex-1 overflow-y-auto px-4 py-3 space-y-4" id="chat-messages">
     {{#if this.messages.length}}
