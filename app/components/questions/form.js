@@ -20,6 +20,12 @@ export default class QuestionsFormComponent extends Component {
     const q = args.question;
     if (!q) return;
 
+    // Whether the question came in with a JobApp pre-filled. Used to
+    // lock the JobApp picker — landing on jp.show.questions.new
+    // pre-fills only the JobPost, and the picker must stay editable so
+    // the user can attach the question to one of that JP's apps.
+    this._initialJobAppLocked = Boolean(q.belongsTo('jobApplication').id());
+
     const company = q.belongsTo('company').value();
     if (company) {
       this.selectedCompany = company;
@@ -83,6 +89,10 @@ export default class QuestionsFormComponent extends Component {
 
   get hasLockedContext() {
     return this.selectedJobPost || this.selectedJobAppOption;
+  }
+
+  get jobAppLocked() {
+    return this._initialJobAppLocked;
   }
 
   @action
