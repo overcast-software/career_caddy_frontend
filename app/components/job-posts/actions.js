@@ -125,9 +125,7 @@ export default class JobPostsActions extends Component {
       user,
     });
     try {
-      await this.spinner.wrap(newScore.save(), {
-        label: 'Scoring, please wait…',
-      });
+      await this.spinner.wrap(newScore.save(), { label: 'Scoring…' });
       this.router.transitionTo('job-posts.show.scores', jobPost);
     } catch (e) {
       newScore.unloadRecord();
