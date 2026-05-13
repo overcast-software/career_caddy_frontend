@@ -27,10 +27,6 @@ export default class JobPostsShowCoverLettersController extends Controller {
     return [CAREER_DATA_OPTION, ...Array.from(all)];
   }
 
-  @action isPending(record) {
-    return this.pollable.isPending(record);
-  }
-
   @action selectResume(resume) {
     this.selectedResume = resume;
   }

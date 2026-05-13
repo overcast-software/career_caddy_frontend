@@ -52,8 +52,11 @@
               </td>
             {{/unless}}
             <td class="px-4 py-3 font-medium">
-              {{#if (and @isPending (@isPending score))}}
-                <SpinnerInline @label={{or score.status "Scoring…"}} />
+              {{#if score.isPending}}
+                <SpinnerInline
+                  @label="Scoring…"
+                  @title="Scoring — this page auto-refreshes when ready"
+                />
               {{else if score.score}}
                 {{#if score.jobPost.id}}
                   <LinkTo
@@ -132,7 +135,7 @@
             {{/if}}
             {{#unless (eq @showActions false)}}
               <td class="px-4 py-3 text-right">
-                {{#if (and @isPending (@isPending score))}}
+                {{#if score.isPending}}
                   {{! pending — no actions }}
                 {{else}}
                   <div class="flex items-center justify-end gap-2">

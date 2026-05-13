@@ -56,7 +56,7 @@
               {{/if}}
             </td>
             <td class="px-4 py-3 text-right">
-              {{#if (and @isPending (@isPending coverLetter))}}
+              {{#if coverLetter.isPending}}
                 <SpinnerInline
                   @label="Generating…"
                   @title="Generating — this page auto-refreshes when ready"
