@@ -1,9 +1,13 @@
 {{! Banner above jp.show description that surfaces probable duplicates.
-    Renders only when the duplicate-candidates endpoint returned ≥ 1 row.
-    The list is read-only for now: clicking a candidate opens that jp.
-    Future: add 'Mark as duplicate' / 'Mark as different' actions
+    Pure renderer — receives @candidates from the jp.show route's
+    controller (loadDuplicateCandidates), re-fetched on every route
+    activation including a candidate's LinkTo navigation. List shape:
+    [{id, title, companyName, confidence, matchSignals: [...]}].
+
+    Renders nothing when the list is empty. Future: add Mark-as-
+    duplicate / Mark-as-different actions
     (POST /job-posts/:id/duplicate-decisions/). }}
-{{#if this.candidates.length}}
+{{#if this.rows.length}}
   <div
     class="rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
     data-test-duplicate-banner
@@ -25,13 +29,13 @@
       <div class="min-w-0 flex-1">
         <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
           {{if
-            (eq this.candidates.length 1)
+            (eq this.rows.length 1)
             "Possible duplicate"
-            (concat this.candidates.length " possible duplicates")
+            (concat this.rows.length " possible duplicates")
           }}
         </p>
         <ul class="mt-1.5 space-y-1">
-          {{#each this.candidates as |c|}}
+          {{#each this.rows as |c|}}
             <li class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm">
               <LinkTo
                 @route="job-posts.show"
