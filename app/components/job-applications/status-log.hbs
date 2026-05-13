@@ -1,11 +1,11 @@
 <div class="space-y-4">
   <h3
-    class="text-xs font-semibold uppercase tracking-wider text-gray-500"
+    class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
   >Status History</h3>
 
   {{#if this.sortedStatuses.length}}
     <ol
-      class="relative space-y-6 before:absolute before:-ms-px before:h-full before:w-0.5 before:rounded-full before:bg-gray-200"
+      class="relative space-y-6 before:absolute before:-ms-px before:h-full before:w-0.5 before:rounded-full before:bg-gray-200 dark:before:bg-gray-700"
     >
       {{#each this.sortedStatuses as |entry|}}
         <li class="relative -ms-1.5 flex items-start gap-4">
@@ -17,19 +17,25 @@
             <div class="flex items-start justify-between gap-2">
               <div>
                 {{#if entry.displayDate}}
-                  <time class="text-xs/none font-medium text-gray-500">
+                  <time
+                    class="text-xs/none font-medium text-gray-500 dark:text-gray-400"
+                  >
                     {{format-date entry.displayDate "MMM D, YYYY"}}
                   </time>
                 {{/if}}
                 <h3
                   class="mt-0.5 text-sm font-semibold
-                    {{if entry.isCurrent 'text-gray-900' 'text-gray-600'}}"
+                    {{if
+                      entry.isCurrent
+                      'text-gray-900 dark:text-gray-100'
+                      'text-gray-600 dark:text-gray-300'
+                    }}"
                 >
                   {{entry.statusLabel}}
                 </h3>
                 {{#if entry.record.note}}
                   <p
-                    class="mt-0.5 text-xs text-gray-500"
+                    class="mt-0.5 text-xs text-gray-500 dark:text-gray-400"
                   >{{entry.record.note}}</p>
                 {{/if}}
               </div>
@@ -42,7 +48,7 @@
                     {{if
                       (eq this.expandedId entry.record.id)
                       'text-accent-500'
-                      'text-gray-300 hover:text-gray-500'
+                      'text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400'
                     }}"
                   {{on "click" (fn this.toggleExpand entry.record)}}
                 >
@@ -60,7 +66,7 @@
                 <button
                   type="button"
                   title="Remove this entry"
-                  class="text-gray-300 hover:text-red-500 transition-colors"
+                  class="text-gray-300 hover:text-red-500 transition-colors dark:text-gray-600 dark:hover:text-red-400"
                   {{on "click" (fn this.deleteEntry entry.record)}}
                 >
                   <svg
@@ -84,7 +90,7 @@
                 <input
                   type="datetime-local"
                   aria-label="Status date"
-                  class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent-400"
+                  class="text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-accent-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:[color-scheme:dark]"
                   value={{this.editingDate}}
                   {{on "change" this.updateEditingDate}}
                 />
@@ -92,7 +98,7 @@
                   rows="2"
                   aria-label="Status note"
                   placeholder="Add a note…"
-                  class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent-400 resize-none"
+                  class="w-full text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-accent-400 resize-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                   {{on "input" this.updateEditingNote}}
                 >{{this.editingNote}}</textarea>
                 <div class="flex gap-2">
@@ -103,7 +109,7 @@
                   >Save</button>
                   <button
                     type="button"
-                    class="text-xs text-gray-500 hover:text-gray-700"
+                    class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     {{on "click" this.cancelEdit}}
                   >Cancel</button>
                 </div>
@@ -114,13 +120,14 @@
       {{/each}}
     </ol>
   {{else}}
-    <p class="text-sm italic text-gray-400">No history yet — log the first
-      status below.</p>
+    <p class="text-sm italic text-gray-400 dark:text-gray-500">No history yet —
+      log the first status below.</p>
   {{/if}}
 
-  <div class="border-t border-gray-100 pt-4 space-y-2">
-    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">Log
-      status</p>
+  <div class="border-t border-gray-100 pt-4 space-y-2 dark:border-gray-700">
+    <p
+      class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
+    >Log status</p>
     <div class="space-y-2">
       <div class="flex gap-2 items-start">
         <div class="flex-1">
@@ -148,14 +155,14 @@
         rows="2"
         aria-label="Note for this status"
         placeholder="Add a note (optional)…"
-        class="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent-400 resize-none"
+        class="w-full text-xs border border-gray-300 rounded px-2 py-1 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-accent-400 resize-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
         value={{this.logNote}}
         {{on "input" this.updateLogNote}}
       ></textarea>
 
       {{#if this.impliedStatuses.length}}
         <p
-          class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2.5 py-1.5"
+          class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2.5 py-1.5 dark:text-amber-200 dark:bg-amber-900/30 dark:border-amber-700/50"
         >
           Will also log:
           <span class="font-medium">{{this.willLogPreview}}</span>
