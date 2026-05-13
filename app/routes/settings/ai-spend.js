@@ -4,22 +4,30 @@ import { reportFetch } from 'career-caddy-frontend/utils/report-fetch';
 
 export default class SettingsAiSpendRoute extends Route {
   @service api;
+  @service currentUser;
+  @service store;
 
   async model() {
-    const { data, meta, error } = await reportFetch(
-      this.api,
-      'ai-usages/summary',
-      { period: 'daily', group_by: 'agent_name', days: '30' },
-    );
-    if (error) return null;
-    return { data, meta };
-  }
-
-  setupController(controller, model) {
-    super.setupController(controller, model);
-    // Populate the staff-only user dropdown on first render. Controller's
-    // loadUsers() guards on isStaff and idempotency, so it's safe to call
-    // unconditionally here.
-    controller.loadUsers();
+    const isStaff = Boolean(this.currentUser.user?.isStaff);
+    const [report, users] = await Promise.all([
+      reportFetch(this.api, 'ai-usages/summary', {
+        period: 'daily',
+        group_by: 'agent_name',
+        days: '30',
+      }),
+      // Staff-only user dropdown. `reload: true` bypasses Ember Data's
+      // cache-only short-circuit (which on a cold refresh returns just
+      // currentUser.user without re-fetching). Returned RecordArray is
+      // live + reactive; never .slice() it (memory: feedback_async_hasmany_js).
+      isStaff
+        ? this.store.findAll('user', { reload: true })
+        : Promise.resolve(null),
+    ]);
+    if (report.error) return null;
+    return {
+      data: report.data,
+      meta: report.meta,
+      users,
+    };
   }
 }

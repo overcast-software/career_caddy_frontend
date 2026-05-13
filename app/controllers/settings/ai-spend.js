@@ -8,14 +8,12 @@ export default class SettingsAiSpendController extends Controller {
   @service api;
   @service currentUser;
   @service flashMessages;
-  @service store;
 
   @tracked isLoading = false;
   @tracked period = 'daily';
   @tracked groupBy = 'agent_name';
   @tracked days = 30;
   @tracked selectedUserId = '';
-  @tracked users = [];
 
   get buckets() {
     return this.model?.data?.buckets ?? [];
@@ -52,15 +50,11 @@ export default class SettingsAiSpendController extends Controller {
     return this.currentUser.user?.isStaff;
   }
 
-  @action
-  async loadUsers() {
-    if (!this.isStaff || this.users.length > 0) return;
-    try {
-      const results = await this.store.findAll('user');
-      this.users = results.slice();
-    } catch {
-      // Non-critical — dropdown just stays empty
-    }
+  // Live, reactive RecordArray returned by the route's findAll('user').
+  // Never .slice() — Ember Data RecordArray reactivity dies on the
+  // copied plain Array (memory: feedback_async_hasmany_js).
+  get users() {
+    return this.model?.users ?? [];
   }
 
   @action
@@ -71,9 +65,6 @@ export default class SettingsAiSpendController extends Controller {
 
   @action
   async reloadData() {
-    if (this.isStaff && this.users.length === 0) {
-      await this.loadUsers();
-    }
     this.isLoading = true;
     try {
       const { data, meta, error } = await reportFetch(
@@ -91,7 +82,9 @@ export default class SettingsAiSpendController extends Controller {
         this.flashMessages.danger('Failed to load AI spend data.');
         return;
       }
-      this.model = { data, meta };
+      // Preserve the route-resolved users list — Refresh re-fetches only
+      // the spend report, not the dropdown options.
+      this.model = { ...this.model, data, meta };
     } catch {
       this.flashMessages.danger('Failed to load AI spend data.');
     } finally {
