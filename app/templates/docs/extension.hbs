@@ -1,0 +1,195 @@
+{{page-title "Documentation — Browser Extension"}}
+<div class="container mx-auto max-w-3xl py-6 px-4 space-y-6">
+
+  <Panel::Card>
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">
+      Career Caddy Sender
+    </h1>
+    <p class="text-gray-600 mb-4">
+      The Career Caddy Sender is a browser extension that captures any job
+      posting you're looking at and sends it to your Career Caddy library with a
+      single click. The page becomes a
+      <LinkTo @route="docs.job-posts" class="text-accent-600 underline">Job Post</LinkTo>,
+      optionally
+      <LinkTo
+        @route="docs.scores"
+        class="text-accent-600 underline"
+      >scored</LinkTo>
+      against your
+      <LinkTo @route="docs.career-data" class="text-accent-600 underline">Career
+        Data</LinkTo>
+      automatically.
+    </p>
+    <div>
+      {{#if this.installLink.available}}
+        <a
+          href={{this.installLink.url}}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 rounded-md bg-jade-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-jade-700"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="size-5 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
+            />
+          </svg>
+          {{this.installLink.label}}
+        </a>
+      {{else}}
+        <div
+          class="rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+        >
+          <p class="font-semibold mb-1">{{this.installLink.label}}</p>
+          <p>
+            The extension is published for Chrome (also Edge, Brave, Opera) and
+            Firefox. Open this page in one of those browsers to get the install
+            button.
+          </p>
+        </div>
+      {{/if}}
+      <p class="text-xs text-gray-500 mt-2">
+        Available on the Chrome Web Store and Firefox Add-ons. We pick the right
+        store automatically based on the browser you're viewing this page in.
+      </p>
+    </div>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">First-time setup</h2>
+    <ol class="space-y-3 text-gray-600 list-decimal list-inside">
+      <li>
+        Install the extension from the store, then pin the toolbar icon (in
+        Chrome it lives behind the puzzle-piece menu until you pin it).
+      </li>
+      <li>
+        Make sure you're signed in to
+        <code class="text-sm">careercaddy.online</code>
+        in another tab — the extension uses your existing SPA session, so
+        there's no second login.
+      </li>
+      <li>
+        Click the toolbar icon. The first time, the popup shows a
+        <strong>Connect</strong>
+        button. Click it. The extension reads your session, mints a dedicated
+        API key (named
+        <code class="text-sm">Career Caddy Sender — YYYY-MM-DD</code>), and
+        stores only that key locally.
+      </li>
+    </ol>
+    <p class="text-gray-500 text-sm mt-3">
+      If you're not signed in, the popup will link you to the login page — sign
+      in there, reopen the popup, and you're connected.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Sending a job post</h2>
+    <ol class="space-y-3 text-gray-600 list-decimal list-inside">
+      <li>
+        Open any job posting in a normal tab.
+      </li>
+      <li>
+        Click the Career Caddy toolbar icon. The popup reads the URL of the
+        active tab and asks the API whether you've already saved this post.
+      </li>
+      <li>
+        If it's new, you'll see
+        <strong>Send this page</strong>
+        — click it. The extension reads the page text, POSTs it to your account,
+        and the popup closes.
+      </li>
+      <li>
+        A system notification fires when the scrape finishes (typically in ~30
+        seconds). You'll get
+        <em>Added ✓ — &lt;Title&gt;</em>
+        when the JobPost is created.
+      </li>
+    </ol>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">
+      Auto-score against Career Data
+    </h2>
+    <p class="text-gray-600 mb-3">
+      The popup has a toggle for
+      <strong>"Also score against career data"</strong>. When it's on, the
+      extension chains a
+      <LinkTo
+        @route="docs.scores"
+        class="text-accent-600 underline"
+      >Score</LinkTo>
+      generation onto the scrape and the OS notification reports the result
+      (e.g.
+      <em>Scored 87 ✓ — &lt;Title&gt;</em>) instead of just confirming the add.
+      If scoring fails (no Career Data set up yet, AI quota exhausted), it falls
+      back to the plain "Added" notification so you still hear something.
+    </p>
+    <p class="text-gray-600">
+      The toggle remembers its state. Defaults to on for fresh installs.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">
+      Already-saved posts
+    </h2>
+    <p class="text-gray-600 mb-3">
+      If the page you're on is already in your library, the popup says so and
+      offers a link straight to the existing JobPost — no duplicate created.
+    </p>
+    <p class="text-gray-600">
+      If the existing post is flagged
+      <em>incomplete</em>
+      (e.g. it was created from an email stub or the AI couldn't extract a job
+      description from the original page), the popup heading swaps to
+      <strong>Complete this post</strong>
+      and the action button becomes
+      <strong>Resend to complete</strong>. Clicking it re-sends the page text,
+      which the API uses to fill in the missing fields without creating a
+      duplicate.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">Disconnecting</h2>
+    <p class="text-gray-600">
+      Click
+      <strong>Disconnect</strong>
+      in the popup to revoke the extension's API key on the server and clear it
+      from local storage. You can also revoke the key by name under
+      <em>Settings → API Keys</em>
+      in Career Caddy. Either way, the extension goes back to its first-run
+      Connect screen the next time you open it.
+    </p>
+  </Panel::Card>
+
+  <Panel::Card>
+    <h2 class="text-xl font-semibold text-gray-800 mb-3">
+      What it doesn't do
+    </h2>
+    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+      <li>It doesn't read any page until you click the toolbar icon.</li>
+      <li>It doesn't track which sites you visit.</li>
+      <li>It doesn't talk to anyone except your Career Caddy account.</li>
+    </ul>
+    <p class="text-gray-600 mt-3">
+      The full
+      <LinkTo @route="docs.extension-privacy" class="text-accent-600 underline">
+        privacy policy
+      </LinkTo>
+      walks through every permission the extension requests and why.
+    </p>
+  </Panel::Card>
+
+</div>

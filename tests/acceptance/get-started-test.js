@@ -21,9 +21,12 @@ module('Acceptance | get-started landing', function (hooks) {
     await visit('/get-started');
 
     assert.strictEqual(currentURL(), '/get-started', 'stayed on /get-started');
-    assert
-      .dom('a[href*="chromewebstore.google.com"]')
-      .exists('install CTA links to the Chrome Web Store');
+    // Test browser may be Chrome or Firefox; the CTA picks the matching
+    // store. Accept either origin so the test stays green in both.
+    const installLink = document.querySelector(
+      'a[href*="chromewebstore.google.com"], a[href*="addons.mozilla.org"]',
+    );
+    assert.ok(installLink, 'install CTA links to a browser extension store');
     assert
       .dom('a[href="/login"]')
       .exists('secondary path to sign-in is offered');

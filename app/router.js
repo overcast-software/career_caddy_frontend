@@ -227,6 +227,7 @@ Router.map(function () {
     this.route('scores');
     this.route('summaries');
     this.route('scrapes');
+    this.route('extension');
     this.route('extension-privacy');
   });
   this.route('questions', function () {

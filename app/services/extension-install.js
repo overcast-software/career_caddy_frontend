@@ -2,12 +2,11 @@ import Service from '@ember/service';
 
 // Single source of truth for the install CTA shown on /get-started and
 // elsewhere. Detects the browser from userAgent and returns the right
-// store URL + label. Firefox AMO listing isn't live yet (per Operations
-// notes — submission checklist exists but the .xpi hasn't shipped),
-// so Firefox returns `available: false` and routes to the Chrome
-// fallback copy.
+// store URL + label.
 const CHROME_STORE_URL =
-  'https://chromewebstore.google.com/detail/pjdajamkhjkemoaogohehcdpfkocofhd';
+  'https://chromewebstore.google.com/detail/career-caddy-sender/pjdajamkhjkemoaogohehcdpfkocofhd';
+const FIREFOX_STORE_URL =
+  'https://addons.mozilla.org/en-US/firefox/addon/career-caddy-sender/';
 
 function detectBrowser(ua) {
   if (typeof ua !== 'string') return 'other';
@@ -44,9 +43,9 @@ export default class ExtensionInstallService extends Service {
         };
       case 'firefox':
         return {
-          url: CHROME_STORE_URL,
-          label: 'Firefox add-on — coming soon',
-          available: false,
+          url: FIREFOX_STORE_URL,
+          label: 'Install the Firefox add-on',
+          available: true,
         };
       case 'safari':
         return {
