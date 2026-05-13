@@ -60,8 +60,11 @@
               </td>
             {{/unless}}
             <td class="px-4 py-3">
-              {{#if (and @isPending (@isPending scrape))}}
-                <SpinnerInline @label={{or scrape.status "pending"}} />
+              {{#if scrape.isPending}}
+                <SpinnerInline
+                  @label="Scraping…"
+                  @title="Scraping — this page auto-refreshes when ready"
+                />
               {{else}}
                 <span
                   class="px-2 py-0.5 rounded-full text-xs font-medium

@@ -9,10 +9,6 @@ export default class JobPostsShowScrapesIndexController extends Controller {
   @service spinner;
   @service flashMessages;
 
-  @action isPending(record) {
-    return this.pollable.isPending(record);
-  }
-
   @action async createScrape() {
     const jobPost = getOwner(this)
       .lookup('route:job-posts.show')

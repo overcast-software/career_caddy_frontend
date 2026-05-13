@@ -3,6 +3,7 @@ import {
   apiAction,
   collectionAction,
 } from 'career-caddy-frontend/utils/api-action';
+import { TERMINAL } from 'career-caddy-frontend/services/pollable';
 
 export default class ScrapeModel extends Model {
   @attr('string') url;
@@ -36,5 +37,13 @@ export default class ScrapeModel extends Model {
       path: 'from-text',
       data: payload,
     });
+  }
+
+  // Server-derived "in flight" gate; F5-survivable. See ScoreModel.isPending.
+  // Note: Scrape uses a richer status vocabulary than the AI resources
+  // (extracting, updating_profile, hold, …); anything not in TERMINAL is
+  // treated as in-flight.
+  get isPending() {
+    return this.status && !TERMINAL.has(this.status);
   }
 }
