@@ -1,6 +1,28 @@
-{{page-title "Activity"}}
+{{! Rendered by Ember while reports.activity's model hook is pending.
+    Mirrors the chart-shaped skeletons in
+    application-flow/loading.hbs and sources/loading.hbs — heading +
+    a tall pulse for the activity calendar + a shorter pulse for the
+    optional stacked-status chart. The generic <LoadingSkeleton />
+    (8-card list) used to render here looked like a list page, not a
+    chart page. }}
 <RouteLayout>
   <:main>
-    <LoadingSkeleton />
+    <div class="space-y-4">
+      <header class="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 class="text-xl font-semibold">Activity</h1>
+      </header>
+      <div
+        class="animate-pulse rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700"
+      >
+        <div class="h-4 w-1/3 rounded bg-gray-200 dark:bg-gray-700"></div>
+        <div class="mt-4 h-[180px] rounded bg-gray-100 dark:bg-gray-800"></div>
+      </div>
+      <div
+        class="animate-pulse rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700"
+      >
+        <div class="h-4 w-1/4 rounded bg-gray-200 dark:bg-gray-700"></div>
+        <div class="mt-4 h-[240px] rounded bg-gray-100 dark:bg-gray-800"></div>
+      </div>
+    </div>
   </:main>
 </RouteLayout>
