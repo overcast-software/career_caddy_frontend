@@ -106,12 +106,13 @@
       </div>
     </div>
 
-    {{! @candidates is the resolved async hasMany on the JobPost model;
-        the route's model() awaits .hasMany('duplicateCandidates').reload()
-        so by first paint the proxy is settled and the component can
-        iterate it directly. }}
+    {{! `duplicateCandidatesList` is the JobPost getter that unwraps
+        the async hasMany PromiseManyArray (not JS-iterable) into the
+        underlying record array. The route's model() awaits
+        .hasMany('duplicateCandidates').reload() so by first paint the
+        relationship is loaded and the getter returns a real array. }}
     <JobPosts::DuplicateCandidates
-      @candidates={{this.model.duplicateCandidates}}
+      @candidates={{this.model.duplicateCandidatesList}}
     />
 
     {{#if this.model.description}}
