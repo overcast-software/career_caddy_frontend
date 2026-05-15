@@ -918,11 +918,21 @@ async function grabHints(tabId, hostname, apiKey) {
           const ref = document.referrer;
           if (!ref) return null;
           try {
-            const host = new URL(ref).hostname.toLowerCase().replace(/^www\./, '');
+            const parsed = new URL(ref);
+            const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
             const allowed = referrerHosts.some(
               (h) => host === h || host.endsWith('.' + h),
             );
-            return allowed ? ref : null;
+            if (!allowed) return null;
+            // LinkedIn's safety/go interstitial (and similar cross-origin
+            // redirects) strips the path on the way out, leaving only the
+            // bare origin as document.referrer. A bare-origin referrer
+            // carries no JP-binding info — every cross-platform submit
+            // referred via LinkedIn would otherwise bind to the same
+            // useless stub at https://www.linkedin.com/. Drop it client-
+            // side so the api never sees the signal.
+            if (!parsed.pathname || parsed.pathname === '/') return null;
+            return ref;
           } catch {
             return null;
           }
