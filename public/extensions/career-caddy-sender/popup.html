@@ -424,6 +424,51 @@
         color: var(--text-muted);
         margin-top: 2px;
       }
+
+      /* DEV-ONLY hints preview. Surfaces the {canonical_link_hint,
+         apply_url_hint, referrer_url} the popup is about to send so the
+         developer can verify selector matches against the active page
+         before clicking Send. Strip before store submission. */
+      .dev-hints {
+        margin-top: 12px;
+        padding: 8px 10px;
+        background: var(--bg-soft);
+        border: 1px dashed var(--border);
+        border-radius: 6px;
+        font-size: 11px;
+      }
+      .dev-hints-title {
+        font-weight: 600;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-faint);
+        margin-bottom: 6px;
+      }
+      .dev-hint-row {
+        display: flex;
+        gap: 6px;
+        align-items: baseline;
+        line-height: 1.4;
+      }
+      .dev-hint-key {
+        flex-shrink: 0;
+        min-width: 56px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .dev-hint-val {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        color: var(--text-muted);
+      }
+      .dev-hint-val.empty {
+        color: var(--text-faint);
+        font-style: italic;
+      }
     </style>
   </head>
   <body>
@@ -483,6 +528,24 @@
       </button>
       <div class="status" id="post-send-score-status"></div>
       <button id="dismiss" class="linkbtn hidden" type="button" style="margin-top: 10px;">Dismiss</button>
+
+      <!-- DEV-ONLY hints preview — strip before store submission. -->
+      <div id="dev-hints" class="dev-hints">
+        <div class="dev-hints-title">Hints to send</div>
+        <div class="dev-hint-row">
+          <span class="dev-hint-key">canonical</span>
+          <span class="dev-hint-val empty" id="dev-hint-canonical">—</span>
+        </div>
+        <div class="dev-hint-row">
+          <span class="dev-hint-key">apply</span>
+          <span class="dev-hint-val empty" id="dev-hint-apply">—</span>
+        </div>
+        <div class="dev-hint-row">
+          <span class="dev-hint-key">referrer</span>
+          <span class="dev-hint-val empty" id="dev-hint-referrer">—</span>
+        </div>
+      </div>
+
       <div class="footer">
         <button
           id="theme-toggle"
@@ -521,6 +584,24 @@
         This page is already in your Career Caddy library. To re-scrape, open
         it in Career Caddy and use Refresh.
       </p>
+
+      <!-- DEV-ONLY hints preview — strip before store submission. -->
+      <div id="dev-hints-tracked" class="dev-hints">
+        <div class="dev-hints-title">Hints on this page</div>
+        <div class="dev-hint-row">
+          <span class="dev-hint-key">canonical</span>
+          <span class="dev-hint-val empty" id="dev-hint-canonical-t">—</span>
+        </div>
+        <div class="dev-hint-row">
+          <span class="dev-hint-key">apply</span>
+          <span class="dev-hint-val empty" id="dev-hint-apply-t">—</span>
+        </div>
+        <div class="dev-hint-row">
+          <span class="dev-hint-key">referrer</span>
+          <span class="dev-hint-val empty" id="dev-hint-referrer-t">—</span>
+        </div>
+      </div>
+
       <div class="footer">
         <button
           id="theme-toggle-tracked"

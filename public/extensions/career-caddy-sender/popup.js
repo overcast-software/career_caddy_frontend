@@ -237,6 +237,64 @@ function showConnect(message = '') {
   setStatus(connectStatus, message);
 }
 
+// DEV-ONLY hints preview helpers. Surfaces the hint values the popup
+// would send so a selector miss is visible at-a-glance during dogfood.
+// Strip before store submission.
+function _setDevHint(elId, value) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (value) {
+    el.textContent = value;
+    el.title = value;
+    el.classList.remove('empty');
+  } else {
+    el.textContent = '—';
+    el.removeAttribute('title');
+    el.classList.add('empty');
+  }
+}
+
+async function populateDevHints(suffix = '') {
+  const ids = {
+    canonical: 'dev-hint-canonical' + suffix,
+    apply: 'dev-hint-apply' + suffix,
+    referrer: 'dev-hint-referrer' + suffix,
+  };
+  // Reset to placeholders while we fetch.
+  _setDevHint(ids.canonical, null);
+  _setDevHint(ids.apply, null);
+  _setDevHint(ids.referrer, null);
+  let saved;
+  try {
+    saved = await api.storage.local.get(['ccApiKey']);
+  } catch {
+    return;
+  }
+  if (!saved.ccApiKey) return;
+  let tab;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    return;
+  }
+  if (!tab || !tab.id || !tab.url) return;
+  let host;
+  try {
+    host = new URL(tab.url).hostname;
+  } catch {
+    return;
+  }
+  let hints;
+  try {
+    hints = await grabHints(tab.id, host, saved.ccApiKey);
+  } catch {
+    return;
+  }
+  _setDevHint(ids.canonical, hints.canonical_link_hint);
+  _setDevHint(ids.apply, hints.apply_url_hint);
+  _setDevHint(ids.referrer, hints.referrer_url);
+}
+
 function showConnected(name, incompleteTarget = null) {
   hideAllScreens();
   screenConnected.classList.remove('hidden');
@@ -244,6 +302,7 @@ function showConnected(name, incompleteTarget = null) {
   hideResultLink();
   setSendingState(false);
   setStatus(sendStatus, '');
+  populateDevHints('');
 
   // Resend mode: an existing JobPost was found at this URL but is
   // flagged incomplete (cc_auto email-stub, user-flagged, or the
@@ -276,6 +335,7 @@ function showConnected(name, incompleteTarget = null) {
 function showTracked({ id, title, company, topScore, hasPendingScore }, name) {
   hideAllScreens();
   screenTracked.classList.remove('hidden');
+  populateDevHints('-t');
   trackedJobPostId = id;
   trackedTitleEl.textContent = title || '(untitled job post)';
   trackedCompanyEl.textContent = company || '';
@@ -678,10 +738,14 @@ const REFERRER_HOSTS_LIST = [
 // Keep the shape identical to what the api returns.
 const BAKED_EXTENSION_SELECTORS = {
   'linkedin.com': {
+    // LinkedIn's current job DOM ships hashed atomic class names that
+    // rotate on every release (the old `jobs-apply-button` class is
+    // gone). Anchor to the accessibility contract (aria-label) and the
+    // safety/go wrapper href instead — both are stable surfaces.
     apply_button_selectors: [
-      'a.jobs-apply-button[href]',
-      'a[data-test-job-apply-button][href]',
-      'a[data-control-name="jobdetails_topcard_inapply"][href]',
+      'a[aria-label="Apply on company website"][href]',
+      'a[aria-label^="Apply on" i][href]',
+      'a[href*="linkedin.com/safety/go/"][target="_blank"]',
     ],
     canonical_link_selectors: ['meta[property="og:url"]'],
     apply_url_decoder: 'linkedin_safety_go',
