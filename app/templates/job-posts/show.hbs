@@ -113,6 +113,7 @@
         relationship is loaded and the getter returns a real array. }}
     <JobPosts::DuplicateCandidates
       @candidates={{this.model.duplicateCandidatesList}}
+      @jobPost={{this.model}}
     />
 
     {{#if this.model.description}}

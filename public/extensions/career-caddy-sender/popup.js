@@ -655,6 +655,100 @@ async function grabPayload(tabId) {
   return { url: top.result.url, text: allText };
 }
 
+// Top-frame-only extractors for cross-platform dedup hints. Each is
+// best-effort — selector misses or DOM shape changes return null without
+// throwing, so a LinkedIn layout shift never blocks a send. Returns:
+//   { apply_url_hint, canonical_link_hint, referrer_url }
+//
+// Per popup → page context boundary, the `func` body must be
+// self-contained: closure refs to module-scoped constants are NOT
+// available inside the injected script. The referrer allowlist is
+// duplicated inline below.
+async function grabHints(tabId) {
+  const results = await api.scripting.executeScript({
+    target: { tabId },
+    func: () => {
+      const REFERRER_HOSTS = new Set([
+        'linkedin.com',
+        'indeed.com',
+        'glassdoor.com',
+        'ziprecruiter.com',
+      ]);
+
+      function decodeLinkedInSafetyGo(href) {
+        if (!href) return null;
+        try {
+          const parsed = new URL(href, location.href);
+          if (
+            parsed.hostname.endsWith('linkedin.com') &&
+            parsed.pathname.startsWith('/safety/go')
+          ) {
+            const dest = parsed.searchParams.get('url');
+            return dest || null;
+          }
+          // Non-safety/go href — return the raw absolute URL.
+          return parsed.toString();
+        } catch {
+          return null;
+        }
+      }
+
+      function extractApplyUrl() {
+        if (!location.hostname.endsWith('linkedin.com')) return null;
+        const selectors = [
+          'a.jobs-apply-button[href]',
+          'a[data-test-job-apply-button][href]',
+          'a[data-control-name="jobdetails_topcard_inapply"][href]',
+        ];
+        for (const sel of selectors) {
+          const el = document.querySelector(sel);
+          if (el && el.getAttribute('href')) {
+            const decoded = decodeLinkedInSafetyGo(el.getAttribute('href'));
+            if (decoded) return decoded;
+          }
+        }
+        return null;
+      }
+
+      function extractCanonicalLink() {
+        if (!location.hostname.endsWith('linkedin.com')) return null;
+        const meta = document.querySelector('meta[property="og:url"]');
+        const content = meta && meta.getAttribute('content');
+        if (!content) return null;
+        try {
+          return new URL(content, location.href).toString();
+        } catch {
+          return null;
+        }
+      }
+
+      function extractReferrer() {
+        const raw = document.referrer;
+        if (!raw) return null;
+        try {
+          const host = new URL(raw).hostname.toLowerCase().replace(/^www\./, '');
+          const allowed = [...REFERRER_HOSTS].some(
+            (h) => host === h || host.endsWith('.' + h),
+          );
+          return allowed ? raw : null;
+        } catch {
+          return null;
+        }
+      }
+
+      return {
+        apply_url_hint: extractApplyUrl(),
+        canonical_link_hint: extractCanonicalLink(),
+        referrer_url: extractReferrer(),
+      };
+    },
+  });
+  if (!results || !results.length || !results[0] || !results[0].result) {
+    return { apply_url_hint: null, canonical_link_hint: null, referrer_url: null };
+  }
+  return results[0].result;
+}
+
 function clearPending() {
   return api.storage.local.remove('ccPending').catch(() => {});
 }
@@ -701,6 +795,17 @@ sendBtn.addEventListener('click', async () => {
     return;
   }
 
+  // Hints are best-effort — a thrown extractor must never block the send.
+  let hints = { apply_url_hint: null, canonical_link_hint: null, referrer_url: null };
+  try {
+    const [tab2] = await api.tabs.query({ active: true, currentWindow: true });
+    if (tab2 && tab2.id) {
+      hints = await grabHints(tab2.id);
+    }
+  } catch (err) {
+    console.warn('[cc-sender] hint extraction failed', err);
+  }
+
   setStatus(sendStatus, 'Sending…');
 
   const wantsScore = autoScoreBox.checked;
@@ -718,6 +823,9 @@ sendBtn.addEventListener('click', async () => {
         link: payload.url,
         source: 'extension',
         auto_score: wantsScore,
+        apply_url_hint: hints.apply_url_hint,
+        canonical_link_hint: hints.canonical_link_hint,
+        referrer_url: hints.referrer_url,
       }),
     });
   } catch (err) {
@@ -798,8 +906,14 @@ sendBtn.addEventListener('click', async () => {
   );
   const newJobTitle =
     includedJobPost?.attributes?.title || payload.url;
-  if (newJobPostId) {
-    showResultLink(newJobPostId, { withScores: wantsScore });
+  // canonical_redirect (from response meta) tells us where the user
+  // should actually land — when LinkedIn is submitted with apply_url_hint
+  // pointing at an ATS JP, the ATS JP is the canonical record and the
+  // link should route there instead of the LinkedIn JP we just created.
+  const canonicalRedirect = body?.meta?.canonical_redirect || null;
+  const landingJobPostId = canonicalRedirect || newJobPostId;
+  if (landingJobPostId) {
+    showResultLink(landingJobPostId, { withScores: wantsScore });
   }
 
   // Fire the immediate "Added ✓" / "Added ✓ — scoring…" notification

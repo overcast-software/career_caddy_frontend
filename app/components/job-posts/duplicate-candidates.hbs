@@ -4,10 +4,11 @@
     activation including a candidate's LinkTo navigation. List shape:
     [{id, title, companyName, confidence, matchSignals: [...]}].
 
-    Renders nothing when the list is empty. Future: add Mark-as-
-    duplicate / Mark-as-different actions
-    (POST /job-posts/:id/duplicate-decisions/). }}
-{{#if this.rows.length}}
+    Renders the staff-only "Run resolve-and-dedupe" header button
+    whenever @jobPost is passed in (regardless of candidate count) so
+    a JP with no obvious duplicates can still be probed manually for
+    tracker-URL stubs the synchronous from-text path missed. }}
+{{#if (or this.rows.length this.isStaff)}}
   <div
     class="rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
     data-test-duplicate-banner
@@ -27,45 +28,66 @@
         />
       </svg>
       <div class="min-w-0 flex-1">
-        <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
-          {{if
-            (eq this.rows.length 1)
-            "Possible duplicate"
-            (concat this.rows.length " possible duplicates")
-          }}
-        </p>
-        <ul class="mt-1.5 space-y-1">
-          {{#each this.rows as |c|}}
-            <li class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm">
-              <LinkTo
-                @route="job-posts.show"
-                @model={{c.id}}
-                class="text-accent-600 hover:underline dark:text-accent-400 truncate max-w-md"
-                data-test-duplicate-candidate={{c.id}}
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
+            {{#if this.rows.length}}
+              {{if
+                (eq this.rows.length 1)
+                "Possible duplicate"
+                (concat this.rows.length " possible duplicates")
+              }}
+            {{else}}
+              No likely duplicates
+            {{/if}}
+          </p>
+          {{#if (and this.isStaff @jobPost)}}
+            <button
+              type="button"
+              class="inline-flex items-center gap-1 rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-200 hover:bg-amber-200 disabled:opacity-60 disabled:cursor-not-allowed dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-400/30 dark:hover:bg-amber-500/30"
+              disabled={{this.resolving}}
+              data-test-resolve-and-dedupe
+              {{on "click" this.resolveAndDedupe}}
+            >
+              {{if this.resolving "Queuing…" "Run resolve-and-dedupe"}}
+            </button>
+          {{/if}}
+        </div>
+        {{#if this.rows.length}}
+          <ul class="mt-1.5 space-y-1">
+            {{#each this.rows as |c|}}
+              <li
+                class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm"
               >
-                #{{c.id}}
-                {{c.title}}
-              </LinkTo>
-              {{#if c.companyName}}
-                <span class="text-xs text-gray-500 dark:text-gray-400">
-                  ·
-                  {{c.companyName}}
+                <LinkTo
+                  @route="job-posts.show"
+                  @model={{c.id}}
+                  class="text-accent-600 hover:underline dark:text-accent-400 truncate max-w-md"
+                  data-test-duplicate-candidate={{c.id}}
+                >
+                  #{{c.id}}
+                  {{c.title}}
+                </LinkTo>
+                {{#if c.companyName}}
+                  <span class="text-xs text-gray-500 dark:text-gray-400">
+                    ·
+                    {{c.companyName}}
+                  </span>
+                {{/if}}
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset
+                    {{if
+                      (eq c.confidence 'high')
+                      'bg-amber-100 text-amber-800 ring-amber-200 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-400/30'
+                      'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
+                    }}"
+                  title="{{c.signals}}"
+                >
+                  {{c.confidence}}
                 </span>
-              {{/if}}
-              <span
-                class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset
-                  {{if
-                    (eq c.confidence 'high')
-                    'bg-amber-100 text-amber-800 ring-amber-200 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-400/30'
-                    'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
-                  }}"
-                title="{{c.signals}}"
-              >
-                {{c.confidence}}
-              </span>
-            </li>
-          {{/each}}
-        </ul>
+              </li>
+            {{/each}}
+          </ul>
+        {{/if}}
       </div>
     </div>
   </div>

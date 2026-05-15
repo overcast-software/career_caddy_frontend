@@ -1,4 +1,4 @@
-# Career Caddy Sender — v1.1.1
+# Career Caddy Sender — v1.2.0
 
 A browser extension that captures the active page's URL + visible text and
 POSTs it directly to your Career Caddy instance. The popup shows a one-time
@@ -28,6 +28,22 @@ fires the page off and an OS-level system notification announces the result.
 
 ## Version history
 
+- **1.2.0** — Cross-platform dedup hints. On send, the popup now also
+  extracts three best-effort signals from the active page and forwards
+  them to `POST /api/v1/scrapes/from-text/`: (a) `apply_url_hint` —
+  on LinkedIn job pages, reads `a.jobs-apply-button[href]` and decodes
+  the `linkedin.com/safety/go/?url=…` wrapper to recover the embedded
+  ATS URL; (b) `canonical_link_hint` — on LinkedIn, reads
+  `<meta property="og:url">` so the persisted JP lands on the clean
+  canonical link rather than a tracker-laden `location.href`;
+  (c) `referrer_url` — universal, filtered through an allowlist
+  (linkedin.com, indeed.com, glassdoor.com, ziprecruiter.com) so the
+  symmetric ATS-from-LinkedIn flow gets captured too. The api creates
+  stub JobPosts for hint URLs that don't yet exist and surfaces a
+  `canonical_redirect` in the response so the popup links the user to
+  whichever JP is the canonical record (ATS preferred over jobboard).
+  Every extractor is null-safe — a LinkedIn layout shift never blocks
+  a send.
 - **1.1.1** — Resend-to-complete UX for incomplete posts. When the active
   page maps to an existing JobPost flagged `complete=false` (cc_auto
   email-stub, user-flagged "Mark incomplete", or CompletenessReviewer
