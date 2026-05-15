@@ -31,19 +31,30 @@ fires the page off and an OS-level system notification announces the result.
 - **1.2.0** — Cross-platform dedup hints. On send, the popup now also
   extracts three best-effort signals from the active page and forwards
   them to `POST /api/v1/scrapes/from-text/`: (a) `apply_url_hint` —
-  on LinkedIn job pages, reads `a.jobs-apply-button[href]` and decodes
-  the `linkedin.com/safety/go/?url=…` wrapper to recover the embedded
-  ATS URL; (b) `canonical_link_hint` — on LinkedIn, reads
-  `<meta property="og:url">` so the persisted JP lands on the clean
-  canonical link rather than a tracker-laden `location.href`;
-  (c) `referrer_url` — universal, filtered through an allowlist
-  (linkedin.com, indeed.com, glassdoor.com, ziprecruiter.com) so the
-  symmetric ATS-from-LinkedIn flow gets captured too. The api creates
-  stub JobPosts for hint URLs that don't yet exist and surfaces a
-  `canonical_redirect` in the response so the popup links the user to
-  whichever JP is the canonical record (ATS preferred over jobboard).
-  Every extractor is null-safe — a LinkedIn layout shift never blocks
-  a send.
+  reads the per-host apply-button selectors and decodes wrapper URLs
+  (e.g. LinkedIn's `safety/go/?url=…` → embedded ATS URL);
+  (b) `canonical_link_hint` — reads the per-host canonical-link
+  selectors (LinkedIn's `<meta property="og:url">`) so the persisted JP
+  lands on the clean canonical link rather than a tracker-laden
+  `location.href`; (c) `referrer_url` — universal, filtered through an
+  allowlist (linkedin.com, indeed.com, glassdoor.com, ziprecruiter.com)
+  so the symmetric ATS-from-LinkedIn flow gets captured too. The api
+  creates stub JobPosts for hint URLs that don't yet exist and surfaces
+  a `canonical_redirect` in the response so the popup links the user
+  to whichever JP is the canonical record (ATS preferred over
+  jobboard).
+
+  Per-host selectors live on `ScrapeProfile.extension_selectors` and
+  are fetched lazily from
+  `GET /api/v1/scrape-profiles/extension-selectors/?hostname=…` on
+  send; the popup caches per-hostname in `chrome.storage` for an hour
+  and falls back to baked LinkedIn defaults if the api is unreachable
+  or has no profile for the host. Disconnect clears the cache. Adding
+  a new host is now a one-row api seed plus (if the host uses a novel
+  apply-link wrapper) one entry in the popup's `DECODERS` registry.
+
+  Every extractor is null-safe — a layout shift, DNS hiccup, or
+  network failure never blocks a send.
 - **1.1.1** — Resend-to-complete UX for incomplete posts. When the active
   page maps to an existing JobPost flagged `complete=false` (cc_auto
   email-stub, user-flagged "Mark incomplete", or CompletenessReviewer

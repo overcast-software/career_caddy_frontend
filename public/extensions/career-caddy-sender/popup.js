@@ -624,6 +624,7 @@ async function handleDisconnect() {
     'ccApiKey',
     'ccKeyId',
     'ccUsername',
+    'ccExtensionSelectorCache',
   ]);
   disconnectBtn.disabled = false;
   disconnectTrackedBtn.disabled = false;
@@ -655,98 +656,241 @@ async function grabPayload(tabId) {
   return { url: top.result.url, text: allText };
 }
 
-// Top-frame-only extractors for cross-platform dedup hints. Each is
-// best-effort — selector misses or DOM shape changes return null without
-// throwing, so a LinkedIn layout shift never blocks a send. Returns:
-//   { apply_url_hint, canonical_link_hint, referrer_url }
-//
-// Per popup → page context boundary, the `func` body must be
-// self-contained: closure refs to module-scoped constants are NOT
-// available inside the injected script. The referrer allowlist is
-// duplicated inline below.
-async function grabHints(tabId) {
-  const results = await api.scripting.executeScript({
-    target: { tabId },
-    func: () => {
-      const REFERRER_HOSTS = new Set([
-        'linkedin.com',
-        'indeed.com',
-        'glassdoor.com',
-        'ziprecruiter.com',
-      ]);
+// Cross-platform dedup hints: per-host selectors live on the api in
+// ScrapeProfile.extension_selectors. The popup fetches them lazily on
+// send via GET /scrape-profiles/extension-selectors/?hostname=, caches
+// per-host in chrome.storage with a TTL, and falls back to baked
+// LinkedIn defaults when the api is unreachable or no profile exists.
+// All extractors are null-safe — a layout shift or DNS hiccup never
+// blocks a send.
 
-      function decodeLinkedInSafetyGo(href) {
-        if (!href) return null;
-        try {
-          const parsed = new URL(href, location.href);
-          if (
-            parsed.hostname.endsWith('linkedin.com') &&
-            parsed.pathname.startsWith('/safety/go')
-          ) {
-            const dest = parsed.searchParams.get('url');
-            return dest || null;
-          }
-          // Non-safety/go href — return the raw absolute URL.
-          return parsed.toString();
-        } catch {
-          return null;
-        }
+// Universal referrer allowlist; not per-host. Keeps the api round-trip
+// out of the path that filters useless referrers (Hacker News, Gmail).
+const REFERRER_HOSTS_LIST = [
+  'linkedin.com',
+  'indeed.com',
+  'glassdoor.com',
+  'ziprecruiter.com',
+];
+
+// Baked fallback so a fresh install, an api outage, or a host with no
+// profile still gets the LinkedIn extraction the 1.2.0 release shipped.
+// Keep the shape identical to what the api returns.
+const BAKED_EXTENSION_SELECTORS = {
+  'linkedin.com': {
+    apply_button_selectors: [
+      'a.jobs-apply-button[href]',
+      'a[data-test-job-apply-button][href]',
+      'a[data-control-name="jobdetails_topcard_inapply"][href]',
+    ],
+    canonical_link_selectors: ['meta[property="og:url"]'],
+    apply_url_decoder: 'linkedin_safety_go',
+  },
+};
+
+// Named decoders the api references by string in apply_url_decoder. The
+// extension owns the JS; the api just ships a name so a profile mutation
+// never lets the api execute arbitrary code in the popup. New hosts with
+// novel apply-link wrappers add a new entry here and a new value in the
+// api's seed migration.
+const DECODERS = {
+  linkedin_safety_go: (href, baseHref) => {
+    try {
+      const parsed = new URL(href, baseHref);
+      if (
+        parsed.hostname.endsWith('linkedin.com') &&
+        parsed.pathname.startsWith('/safety/go')
+      ) {
+        const dest = parsed.searchParams.get('url');
+        return dest || null;
       }
+      return parsed.toString();
+    } catch {
+      return null;
+    }
+  },
+  passthrough: (href, baseHref) => {
+    try {
+      return new URL(href, baseHref).toString();
+    } catch {
+      return null;
+    }
+  },
+};
 
-      function extractApplyUrl() {
-        if (!location.hostname.endsWith('linkedin.com')) return null;
-        const selectors = [
-          'a.jobs-apply-button[href]',
-          'a[data-test-job-apply-button][href]',
-          'a[data-control-name="jobdetails_topcard_inapply"][href]',
-        ];
-        for (const sel of selectors) {
-          const el = document.querySelector(sel);
-          if (el && el.getAttribute('href')) {
-            const decoded = decodeLinkedInSafetyGo(el.getAttribute('href'));
-            if (decoded) return decoded;
-          }
-        }
-        return null;
-      }
+const SELECTOR_CACHE_TTL_MS = 60 * 60 * 1000; // 1h
+const SELECTOR_CACHE_KEY = 'ccExtensionSelectorCache';
 
-      function extractCanonicalLink() {
-        if (!location.hostname.endsWith('linkedin.com')) return null;
-        const meta = document.querySelector('meta[property="og:url"]');
-        const content = meta && meta.getAttribute('content');
-        if (!content) return null;
-        try {
-          return new URL(content, location.href).toString();
-        } catch {
-          return null;
-        }
-      }
+function normalizeHostname(host) {
+  if (!host) return '';
+  const lower = host.toLowerCase();
+  return lower.startsWith('www.') ? lower.slice(4) : lower;
+}
 
-      function extractReferrer() {
-        const raw = document.referrer;
-        if (!raw) return null;
-        try {
-          const host = new URL(raw).hostname.toLowerCase().replace(/^www\./, '');
-          const allowed = [...REFERRER_HOSTS].some(
-            (h) => host === h || host.endsWith('.' + h),
-          );
-          return allowed ? raw : null;
-        } catch {
-          return null;
-        }
-      }
+async function readSelectorCache(host) {
+  const { [SELECTOR_CACHE_KEY]: cache = {} } = await api.storage.local.get(
+    SELECTOR_CACHE_KEY,
+  );
+  const entry = cache[host];
+  if (!entry) return null;
+  if (Date.now() - entry.fetchedAt > SELECTOR_CACHE_TTL_MS) return null;
+  return entry.value; // {value} is either {selectors} or {missing: true}
+}
 
-      return {
-        apply_url_hint: extractApplyUrl(),
-        canonical_link_hint: extractCanonicalLink(),
-        referrer_url: extractReferrer(),
-      };
-    },
-  });
-  if (!results || !results.length || !results[0] || !results[0].result) {
-    return { apply_url_hint: null, canonical_link_hint: null, referrer_url: null };
+async function writeSelectorCache(host, value) {
+  const { [SELECTOR_CACHE_KEY]: cache = {} } = await api.storage.local.get(
+    SELECTOR_CACHE_KEY,
+  );
+  cache[host] = { fetchedAt: Date.now(), value };
+  return api.storage.local.set({ [SELECTOR_CACHE_KEY]: cache });
+}
+
+// Fetch (with cache) the per-host extension selector bundle. Returns
+// either the api/baked selectors object, or null when the host has no
+// known config — caller skips apply/canonical extraction but still runs
+// the universal referrer check.
+async function loadExtensionSelectors(host, apiKey) {
+  const norm = normalizeHostname(host);
+  if (!norm) return null;
+  const cached = await readSelectorCache(norm);
+  if (cached) {
+    return cached.missing ? null : cached.selectors;
   }
-  return results[0].result;
+  let resp;
+  try {
+    resp = await fetch(
+      `${ORIGIN}/api/v1/scrape-profiles/extension-selectors/?hostname=${encodeURIComponent(
+        norm,
+      )}`,
+      {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+      },
+    );
+  } catch (err) {
+    console.warn('[cc-sender] selector fetch failed', err);
+    // Network failure — try baked default but don't cache the miss so
+    // we retry next time.
+    return BAKED_EXTENSION_SELECTORS[norm] || null;
+  }
+  if (resp.status === 404) {
+    // No api-side profile for this host; baked default if we have one,
+    // else nothing. Cache the miss so we don't refetch every send.
+    const baked = BAKED_EXTENSION_SELECTORS[norm] || null;
+    await writeSelectorCache(norm, baked ? { selectors: baked } : { missing: true });
+    return baked;
+  }
+  if (!resp.ok) {
+    console.warn('[cc-sender] selector fetch non-200', resp.status);
+    return BAKED_EXTENSION_SELECTORS[norm] || null;
+  }
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    return BAKED_EXTENSION_SELECTORS[norm] || null;
+  }
+  const attrs = body?.data?.attributes;
+  if (!attrs) {
+    return BAKED_EXTENSION_SELECTORS[norm] || null;
+  }
+  const selectors = {
+    apply_button_selectors: attrs.apply_button_selectors || [],
+    canonical_link_selectors: attrs.canonical_link_selectors || [],
+    apply_url_decoder: attrs.apply_url_decoder || null,
+  };
+  await writeSelectorCache(norm, { selectors });
+  return selectors;
+}
+
+// Top-frame-only extractors. Selectors come from the api/baked config;
+// raw hrefs come back to the popup where the named decoder runs. Two
+// reasons the decoder lives in popup context, not page context:
+//   1. Decoder code is owned by the extension, not shipped from api —
+//      keeps the api from being able to execute code in active tabs.
+//   2. The popup carries the DECODERS registry; the injected `func`
+//      must be self-contained and can't close over module-scope.
+async function grabHints(tabId, hostname, apiKey) {
+  const empty = {
+    apply_url_hint: null,
+    canonical_link_hint: null,
+    referrer_url: null,
+  };
+  const selectors = await loadExtensionSelectors(hostname, apiKey);
+  const applySelectors = (selectors && selectors.apply_button_selectors) || [];
+  const canonicalSelectors =
+    (selectors && selectors.canonical_link_selectors) || [];
+  const decoderName =
+    (selectors && selectors.apply_url_decoder) || 'passthrough';
+  const decoder = DECODERS[decoderName] || DECODERS.passthrough;
+
+  let raw;
+  try {
+    const results = await api.scripting.executeScript({
+      target: { tabId },
+      args: [applySelectors, canonicalSelectors, REFERRER_HOSTS_LIST],
+      func: (applySels, canonicalSels, referrerHosts) => {
+        function pickHref(selectors) {
+          for (const sel of selectors) {
+            const el = document.querySelector(sel);
+            if (el && el.getAttribute('href')) {
+              return el.getAttribute('href');
+            }
+          }
+          return null;
+        }
+        function pickMetaContent(selectors) {
+          for (const sel of selectors) {
+            const el = document.querySelector(sel);
+            const content =
+              el && (el.getAttribute('content') || el.getAttribute('href'));
+            if (content) return content;
+          }
+          return null;
+        }
+        function pickReferrer() {
+          const ref = document.referrer;
+          if (!ref) return null;
+          try {
+            const host = new URL(ref).hostname.toLowerCase().replace(/^www\./, '');
+            const allowed = referrerHosts.some(
+              (h) => host === h || host.endsWith('.' + h),
+            );
+            return allowed ? ref : null;
+          } catch {
+            return null;
+          }
+        }
+        return {
+          applyHref: pickHref(applySels),
+          canonicalHref: pickMetaContent(canonicalSels),
+          referrerHref: pickReferrer(),
+          baseHref: location.href,
+        };
+      },
+    });
+    raw = results && results[0] && results[0].result;
+  } catch (err) {
+    console.warn('[cc-sender] executeScript failed', err);
+    return empty;
+  }
+  if (!raw) return empty;
+  const applyDecoded = raw.applyHref ? decoder(raw.applyHref, raw.baseHref) : null;
+  let canonicalDecoded = null;
+  if (raw.canonicalHref) {
+    try {
+      canonicalDecoded = new URL(raw.canonicalHref, raw.baseHref).toString();
+    } catch {
+      canonicalDecoded = null;
+    }
+  }
+  return {
+    apply_url_hint: applyDecoded,
+    canonical_link_hint: canonicalDecoded,
+    referrer_url: raw.referrerHref || null,
+  };
 }
 
 function clearPending() {
@@ -799,8 +943,9 @@ sendBtn.addEventListener('click', async () => {
   let hints = { apply_url_hint: null, canonical_link_hint: null, referrer_url: null };
   try {
     const [tab2] = await api.tabs.query({ active: true, currentWindow: true });
-    if (tab2 && tab2.id) {
-      hints = await grabHints(tab2.id);
+    if (tab2 && tab2.id && tab2.url) {
+      const host = new URL(tab2.url).hostname;
+      hints = await grabHints(tab2.id, host, saved.ccApiKey);
     }
   } catch (err) {
     console.warn('[cc-sender] hint extraction failed', err);
