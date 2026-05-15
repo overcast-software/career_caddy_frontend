@@ -747,7 +747,17 @@ const BAKED_EXTENSION_SELECTORS = {
       'a[aria-label^="Apply on" i][href]',
       'a[href*="linkedin.com/safety/go/"][target="_blank"]',
     ],
-    canonical_link_selectors: ['meta[property="og:url"]'],
+    // LinkedIn's <head> ships no og:url / link[rel=canonical] — the
+    // canonical URL is JS-constructed for the share-menu. But the
+    // rendered job page DOM has multiple plain anchors pointing at the
+    // canonical `/jobs/view/<id>/` path (On-site / Full-time pills,
+    // View job post link). First match wins; pickMetaContent falls
+    // back to `href` for non-meta elements.
+    canonical_link_selectors: [
+      'a[href^="https://www.linkedin.com/jobs/view/"][href$="/"]',
+      'meta[property="og:url"]',
+      'link[rel="canonical"]',
+    ],
     apply_url_decoder: 'linkedin_safety_go',
   },
 };
