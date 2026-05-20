@@ -30,19 +30,21 @@ fires the page off and an OS-level system notification announces the result.
 
 - **1.2.0** — Cross-platform dedup hints. On send, the popup now also
   extracts three best-effort signals from the active page and forwards
-  them to `POST /api/v1/scrapes/from-text/`: (a) `apply_url_hint` —
-  reads the per-host apply-button selectors and decodes wrapper URLs
-  (e.g. LinkedIn's `safety/go/?url=…` → embedded ATS URL);
-  (b) `canonical_link_hint` — reads the per-host canonical-link
-  selectors (LinkedIn's `<meta property="og:url">`) so the persisted JP
-  lands on the clean canonical link rather than a tracker-laden
-  `location.href`; (c) `referrer_url` — universal, filtered through an
-  allowlist (linkedin.com, indeed.com, glassdoor.com, ziprecruiter.com)
-  so the symmetric ATS-from-LinkedIn flow gets captured too. The api
-  creates stub JobPosts for hint URLs that don't yet exist and surfaces
-  a `canonical_redirect` in the response so the popup links the user
-  to whichever JP is the canonical record (ATS preferred over
-  jobboard).
+  them to `POST /api/v1/scrapes/from-text/`: (a) `apply_url` — reads
+  the per-host apply-button selectors and decodes wrapper URLs (e.g.
+  LinkedIn's `safety/go/?url=…` → embedded ATS URL), written directly
+  to `JobPost.apply_url`; (b) `canonical_link_hint` — reads the
+  per-host canonical-link selectors (LinkedIn's `<meta
+  property="og:url">`) so the persisted JP lands on the clean canonical
+  link rather than a tracker-laden `location.href`; (c) `referrer_url`
+  — universal, filtered through an allowlist (linkedin.com, indeed.com,
+  glassdoor.com, ziprecruiter.com) so the symmetric ATS-from-LinkedIn
+  flow gets captured too. The api creates referrer stubs for referrer
+  URLs that don't yet exist and surfaces a `canonical_redirect` in the
+  response so the popup links the user to whichever JP is the canonical
+  record (ATS preferred over jobboard). On the tracked screen (existing
+  JP), the popup also PATCHes `apply_url` onto the JP when the page
+  yields a new one — single-channel storage, no special endpoint.
 
   Per-host selectors live on `ScrapeProfile.extension_selectors` and
   are fetched lazily from
