@@ -11,6 +11,10 @@ export default class JobPostsFormComponent extends Component {
   @service spinner;
   @service pollable;
   @tracked _selectedCompany = null;
+  // Intermediary value for apply_url so fast typing doesn't get clobbered
+  // by Ember-Data tracking re-renders. Mirrors the _selectedCompany shape:
+  // null = "untouched, fall back to model"; "" = "user cleared it".
+  @tracked _applyUrl = null;
   @tracked showDeleteConfirm = false;
   @tracked pasteText = '';
   @tracked reextracting = false;
@@ -27,6 +31,15 @@ export default class JobPostsFormComponent extends Component {
 
   get selectedCompany() {
     return this._selectedCompany ?? this.args.jobPost?.company;
+  }
+
+  get applyUrlInput() {
+    return this._applyUrl ?? this.args.jobPost?.applyUrl ?? '';
+  }
+
+  @action
+  updateApplyUrl(event) {
+    this._applyUrl = event.target.value;
   }
 
   @action
@@ -64,17 +77,28 @@ export default class JobPostsFormComponent extends Component {
   }
 
   @action
-  async submitEdit(event) {
+  submitEdit(event) {
     event.preventDefault();
-    try {
-      await this.args.jobPost.save();
-      this.flashMessages.success('Job post saved.');
-      this.router.transitionTo('job-posts.show', this.args.jobPost);
-    } catch (error) {
-      this.flashMessages.danger(
-        error?.errors?.[0]?.detail ?? 'Failed to save job post.',
-      );
+    // Flush the apply_url intermediary onto the model. Null sentinel means
+    // the user never touched the field — leave the model value alone so
+    // a no-op save() doesn't mass-clear apply_url to "".
+    if (this._applyUrl !== null) {
+      this.args.jobPost.applyUrl = this._applyUrl;
     }
+    return this.args.jobPost
+      .save()
+      .then(() => {
+        // Reset intermediary so a subsequent save() reads the freshly
+        // persisted model value rather than the stale staged input.
+        this._applyUrl = null;
+        this.flashMessages.success('Job post saved.');
+        this.router.transitionTo('job-posts.show', this.args.jobPost);
+      })
+      .catch((error) => {
+        this.flashMessages.danger(
+          error?.errors?.[0]?.detail ?? 'Failed to save job post.',
+        );
+      });
   }
 
   @action

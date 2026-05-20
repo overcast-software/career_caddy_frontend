@@ -20,6 +20,40 @@
     />
   </div>
 
+  <div class="field-full">
+    <label class="field-label" for="canonical-link">Canonical URL</label>
+    <p class="mt-1 mb-2 text-sm text-gray-600 dark:text-gray-400">
+      Computed from URL on save. Career Caddy uses this to detect
+      within-platform duplicates.
+    </p>
+    <div
+      id="canonical-link"
+      data-test-canonical-link
+      class="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 p-2 font-mono text-sm text-gray-700 dark:text-gray-300 break-all"
+    >
+      {{#if @jobPost.canonicalLink}}
+        {{@jobPost.canonicalLink}}
+      {{else}}
+        <span class="text-gray-400 italic">— (no canonical URL yet)</span>
+      {{/if}}
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="apply-url">Apply URL</label>
+    <input
+      id="apply-url"
+      type="text"
+      data-test-apply-url
+      value={{this.applyUrlInput}}
+      {{on "input" this.updateApplyUrl}}
+    />
+    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+      Employer ATS destination. Career Caddy uses this to detect cross-platform
+      duplicates.
+    </p>
+  </div>
+
   <div class="field">
     <label class="field-label">Company</label>
     <PowerSelectWithCreate
