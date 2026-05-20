@@ -7,4 +7,11 @@
     style="aspect-ratio: 720/460;"
     {{on-render this.setupSvg @nodes @links}}
   ></svg>
+  {{#if this.layoutError}}
+    <p
+      class="mt-3 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+      data-test-sankey-error
+    >Could not render the flow ({{this.layoutError}}). The underlying counts are
+      still accurate.</p>
+  {{/if}}
 </div>

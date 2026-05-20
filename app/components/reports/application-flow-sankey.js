@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { select } from 'd3-selection';
 import 'd3-transition'; // side-effect: adds .transition() to d3-selection
@@ -37,6 +38,11 @@ const TRANSITION_MS = 500;
 export default class ApplicationFlowSankeyComponent extends Component {
   @service router;
   el = null;
+  // Set when d3-sankey rejects the graph (typically "circular link" from
+  // computeNodeDepths on a cyclic edge set). We catch it so a bad payload
+  // doesn't blank the whole reports page; the template renders a small
+  // inline error instead.
+  @tracked layoutError = null;
 
   _goToNode(d) {
     const params = NODE_LINK_PARAMS[d.id];
@@ -84,10 +90,22 @@ export default class ApplicationFlowSankeyComponent extends Component {
       ]);
 
     const indexed = nodes.map((n, i) => ({ ...n, index: i }));
-    const graph = layout({
-      nodes: indexed,
-      links: links.map((l) => ({ ...l })),
-    });
+    let graph;
+    try {
+      graph = layout({
+        nodes: indexed,
+        links: links.map((l) => ({ ...l })),
+      });
+      this.layoutError = null;
+    } catch (e) {
+      // d3-sankey throws "circular link" on a cyclic edge set. The api
+      // is supposed to keep its sequences monotonic so the aggregate is
+      // a DAG; if a regression slips through we'd rather show an inline
+      // error than crash the route. Surface the message for debugging.
+      this.layoutError = e?.message || 'Could not lay out flow';
+      svg.selectAll('*').remove();
+      return;
+    }
 
     svg.attr('viewBox', `0 0 ${W} ${H}`).attr('class', 'w-full h-auto');
 
