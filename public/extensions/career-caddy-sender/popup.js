@@ -291,8 +291,34 @@ async function populateDevHints(suffix = '') {
     return;
   }
   _setDevHint(ids.canonical, hints.canonical_link_hint);
-  _setDevHint(ids.apply, hints.apply_url_hint);
+  _setDevHint(ids.apply, hints.apply_url);
   _setDevHint(ids.referrer, hints.referrer_url);
+  // Passive backfill on the tracked screen: when the extension extracts
+  // an apply URL for a JP that's already in the library, PATCH it onto
+  // the JP. Single-channel apply_url storage means the api accepts the
+  // value via straight JSON:API PATCH — no verb endpoint. Idempotent;
+  // the api may no-op when apply_url is already set.
+  if (suffix === '-t' && hints.apply_url && trackedJobPostId) {
+    try {
+      await fetch(`${ORIGIN}/api/v1/job-posts/${trackedJobPostId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'application/vnd.api+json',
+          Authorization: `Bearer ${saved.ccApiKey}`,
+        },
+        body: JSON.stringify({
+          data: {
+            type: 'job-post',
+            id: String(trackedJobPostId),
+            attributes: { apply_url: hints.apply_url },
+          },
+        }),
+      });
+    } catch (err) {
+      console.warn('[cc-sender] apply_url backfill PATCH failed', err);
+    }
+  }
 }
 
 function showConnected(name, incompleteTarget = null) {
@@ -888,7 +914,7 @@ async function loadExtensionSelectors(host, apiKey) {
 //      must be self-contained and can't close over module-scope.
 async function grabHints(tabId, hostname, apiKey) {
   const empty = {
-    apply_url_hint: null,
+    apply_url: null,
     canonical_link_hint: null,
     referrer_url: null,
   };
@@ -971,7 +997,7 @@ async function grabHints(tabId, hostname, apiKey) {
     }
   }
   return {
-    apply_url_hint: applyDecoded,
+    apply_url: applyDecoded,
     canonical_link_hint: canonicalDecoded,
     referrer_url: raw.referrerHref || null,
   };
@@ -1024,7 +1050,7 @@ sendBtn.addEventListener('click', async () => {
   }
 
   // Hints are best-effort — a thrown extractor must never block the send.
-  let hints = { apply_url_hint: null, canonical_link_hint: null, referrer_url: null };
+  let hints = { apply_url: null, canonical_link_hint: null, referrer_url: null };
   try {
     const [tab2] = await api.tabs.query({ active: true, currentWindow: true });
     if (tab2 && tab2.id && tab2.url) {
@@ -1052,7 +1078,7 @@ sendBtn.addEventListener('click', async () => {
         link: payload.url,
         source: 'extension',
         auto_score: wantsScore,
-        apply_url_hint: hints.apply_url_hint,
+        apply_url: hints.apply_url,
         canonical_link_hint: hints.canonical_link_hint,
         referrer_url: hints.referrer_url,
       }),
@@ -1136,7 +1162,7 @@ sendBtn.addEventListener('click', async () => {
   const newJobTitle =
     includedJobPost?.attributes?.title || payload.url;
   // canonical_redirect (from response meta) tells us where the user
-  // should actually land — when LinkedIn is submitted with apply_url_hint
+  // should actually land — when LinkedIn is submitted with apply_url
   // pointing at an ATS JP, the ATS JP is the canonical record and the
   // link should route there instead of the LinkedIn JP we just created.
   const canonicalRedirect = body?.meta?.canonical_redirect || null;
