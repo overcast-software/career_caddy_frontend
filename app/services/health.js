@@ -76,9 +76,13 @@ export default class HealthService extends Service {
         return false;
       }
     } catch (error) {
+      // Fail open: a network or CORS failure during healthcheck must not
+      // silently lock first-run users out of /setup. Treat unreachable as
+      // "bootstrap might be open" so the wizard remains accessible until
+      // the API actually answers.
       this.lastError = error.message || 'Failed to reach API';
-      this.bootstrapOpen = false;
-      sessionStorage.setItem('cc:bootstrap-open', 'false');
+      this.bootstrapOpen = true;
+      sessionStorage.setItem('cc:bootstrap-open', 'true');
       return false;
     }
   }

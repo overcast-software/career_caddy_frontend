@@ -4,6 +4,14 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+# API_HOST is baked into the Ember production build via process.env.
+# Default points at prod so existing builds (no --build-arg) keep their
+# current behavior. Override at build time for dev environments served
+# from a different origin or routed same-origin behind a proxy:
+#   --build-arg API_HOST=""                       # same-origin (no CORS)
+#   --build-arg API_HOST=https://api.example.com  # explicit cross-origin
+ARG API_HOST=https://api.careercaddy.online
+ENV API_HOST=$API_HOST
 RUN npm run build
 
 # Stage 2: Serve
