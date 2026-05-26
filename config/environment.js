@@ -68,13 +68,14 @@ module.exports = function (environment) {
   }
 
   if (environment === 'production') {
-    // Use cross-origin API directly in production
-    ENV.APP.API_HOST = process.env.API_HOST || 'https://api.careercaddy.online';
+    // API_HOST is supplied by the Docker build (see frontend/Dockerfile
+    // ARG API_HOST=...). Empty string → same-origin (proxy in front of
+    // both frontend and API). A non-empty value enables cross-origin.
+    ENV.APP.API_HOST = process.env.API_HOST || null;
     if (process.env.API_NAMESPACE) {
       ENV.APP.API_NAMESPACE = process.env.API_NAMESPACE;
     }
 
-    // Build CSP connect-src dynamically
     let connectSrc = "'self'";
     if (ENV.APP.API_HOST) {
       connectSrc += ` ${ENV.APP.API_HOST}`;
