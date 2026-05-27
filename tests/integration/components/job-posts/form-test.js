@@ -135,6 +135,66 @@ module('Integration | Component | job-posts/form', function (hooks) {
     this.jobPost.save = realSave;
   });
 
+  test('duplicate-handling banner hidden when not a duplicate', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      duplicateOfId: null,
+    });
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    assert.dom('[data-test-current-duplicate-target]').doesNotExist();
+    assert.dom('[data-test-duplicate-picker]').exists();
+  });
+
+  test('duplicate-handling banner shows when duplicateOfId is set', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      duplicateOfId: 42,
+    });
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    assert
+      .dom('[data-test-current-duplicate-target]')
+      .exists('banner renders when post is a duplicate');
+    assert.dom('[data-test-current-duplicate-link]').hasText(/#42/);
+    assert.dom('[data-test-unlink-duplicate]').exists();
+    assert.dom('[data-test-promote-canonical]').exists();
+  });
+
+  test('clicking Unlink calls unlinkDuplicate on the model', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      duplicateOfId: 42,
+    });
+    let calls = 0;
+    this.jobPost.unlinkDuplicate = function () {
+      calls += 1;
+      this.duplicateOfId = null;
+      return Promise.resolve(this);
+    };
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    await click('[data-test-unlink-duplicate]');
+    assert.strictEqual(calls, 1, 'unlinkDuplicate fired');
+  });
+
+  test('clicking Promote calls promoteCanonical on the model', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      duplicateOfId: 42,
+    });
+    let calls = 0;
+    this.jobPost.promoteCanonical = function () {
+      calls += 1;
+      this.duplicateOfId = null;
+      return Promise.resolve(this);
+    };
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    await click('[data-test-promote-canonical]');
+    assert.strictEqual(calls, 1, 'promoteCanonical fired');
+  });
+
   test('submit without touching apply_url leaves the model field alone', async function (assert) {
     const store = this.owner.lookup('service:store');
     this.jobPost = store.createRecord('job-post', {

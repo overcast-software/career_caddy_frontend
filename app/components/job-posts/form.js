@@ -18,6 +18,8 @@ export default class JobPostsFormComponent extends Component {
   @tracked showDeleteConfirm = false;
   @tracked pasteText = '';
   @tracked reextracting = false;
+  @tracked selectedDupTarget = null;
+  @tracked dupSubmitting = false;
 
   // Canonical list — matches the backend's KNOWN_SOURCES constant. Kept
   // hardcoded because it rarely changes; the reports filter options
@@ -198,6 +200,85 @@ export default class JobPostsFormComponent extends Component {
     const id = this.args.jobPost?.id;
     if (!id) return;
     this.store.findRecord('job-post', id, { reload: true }).catch(() => {});
+  }
+
+  @action
+  async searchJobPosts(term) {
+    const trimmed = (term || '').trim();
+    if (!trimmed) return [];
+    // Exclude self so the user can't pick their own row in the picker.
+    const results = await this.store.query('job-post', {
+      'filter[query]': trimmed,
+      'page[size]': 20,
+    });
+    const own = this.args.jobPost?.id;
+    const out = [];
+    for (const p of results) {
+      if (p.id !== own) out.push(p);
+    }
+    return out;
+  }
+
+  @action
+  markAsDuplicate(target) {
+    if (!target) return;
+    if (this.dupSubmitting) return;
+    this.selectedDupTarget = target;
+    this.dupSubmitting = true;
+    this.args.jobPost
+      .markDuplicateOf({ target_id: parseInt(target.id, 10) })
+      .then(() => {
+        this.flashMessages.success(`Marked as duplicate of #${target.id}.`);
+        this.selectedDupTarget = null;
+        this._refreshJobPost();
+      })
+      .catch((error) => {
+        const detail =
+          error?.errors?.[0]?.detail ?? 'Failed to mark as duplicate.';
+        this.flashMessages.danger(detail);
+        this.selectedDupTarget = null;
+      })
+      .finally(() => {
+        this.dupSubmitting = false;
+      });
+  }
+
+  @action
+  unlinkDuplicate() {
+    if (this.dupSubmitting) return;
+    this.dupSubmitting = true;
+    this.args.jobPost
+      .unlinkDuplicate()
+      .then(() => {
+        this.flashMessages.success('Unlinked.');
+        this._refreshJobPost();
+      })
+      .catch((error) => {
+        const detail = error?.errors?.[0]?.detail ?? 'Failed to unlink.';
+        this.flashMessages.danger(detail);
+      })
+      .finally(() => {
+        this.dupSubmitting = false;
+      });
+  }
+
+  @action
+  promoteCanonical() {
+    if (this.dupSubmitting) return;
+    this.dupSubmitting = true;
+    this.args.jobPost
+      .promoteCanonical()
+      .then(() => {
+        this.flashMessages.success('Promoted to canonical.');
+        this._refreshJobPost();
+      })
+      .catch((error) => {
+        const detail = error?.errors?.[0]?.detail ?? 'Failed to promote.';
+        this.flashMessages.danger(detail);
+      })
+      .finally(() => {
+        this.dupSubmitting = false;
+      });
   }
 
   @action

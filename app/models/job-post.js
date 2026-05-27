@@ -26,6 +26,13 @@ export default class JobPostModel extends Model {
   @attr('string') link;
   @attr('string') canonicalLink;
   @attr('number') duplicateOfId;
+  // Self-referential FK rendered by the api as a `duplicate-of` JSON:API
+  // relationship. Reads only — writes go through the markDuplicateOf /
+  // unlinkDuplicate / promoteCanonical verb methods so the api can enforce
+  // visibility + cycle protection. inverse: null because the reverse
+  // (duplicates) is fetched separately via a sub-collection endpoint and
+  // we manage cross-side state by reloading post-mutation.
+  @belongsTo('job-post', { async: true, inverse: null }) duplicateOf;
   // Apply-destination resolver fields. Populated by the scrape-graph
   // ResolveApplyUrl node via PATCH /scrapes/:id/apply-url/. See
   // notes.org::*Apply-destination resolution.
@@ -186,5 +193,21 @@ export default class JobPostModel extends Model {
       path: 'reextract',
       data: payload,
     });
+  }
+
+  markDuplicateOf(payload) {
+    return apiAction(this, {
+      method: 'POST',
+      path: 'mark-duplicate-of',
+      data: payload,
+    });
+  }
+
+  unlinkDuplicate() {
+    return apiAction(this, { method: 'POST', path: 'unlink-duplicate' });
+  }
+
+  promoteCanonical() {
+    return apiAction(this, { method: 'POST', path: 'promote-canonical' });
   }
 }
