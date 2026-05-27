@@ -105,6 +105,27 @@
 
   <div
     class="field-full mt-2 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+    data-test-visibility
+  >
+    <label class="field-label" for="visibility">Visibility</label>
+    <p class="mt-1 mb-3 text-sm text-gray-600 dark:text-gray-400">
+      Controls who can see this post in federated contexts. Public posts are
+      addressed to the ActivityStreams public collection; Private posts have no
+      audience and stay local. Single-user instance today — future granularity
+      (Followers / Unlisted) will appear here without changing the stored shape.
+    </p>
+    <select
+      id="visibility"
+      data-test-visibility-select
+      {{on "change" this.updateVisibility}}
+    >
+      <option value="public" selected={{this.isPublic}}>Public</option>
+      <option value="private" selected={{not this.isPublic}}>Private</option>
+    </select>
+  </div>
+
+  <div
+    class="field-full mt-2 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
     data-test-duplicate-handling
   >
     <label class="field-label">Duplicate handling</label>

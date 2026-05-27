@@ -2,6 +2,14 @@ import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 import { apiAction } from 'career-caddy-frontend/utils/api-action';
 import { TERMINAL } from 'career-caddy-frontend/services/pollable';
 
+// AS2 (ActivityStreams 2.0) Public collection URI. Mirrored from the
+// api's job_post.AS2_PUBLIC — Phase 3.5 prep for Phase 4 ActivityPub
+// readiness. Posts whose `audience` list contains this string are
+// public. Phase 4 federation dispatch will consult the same field on
+// the server; today this drives the jp.edit Visibility selector and the
+// jp.show "Private" badge.
+export const AS2_PUBLIC = 'https://www.w3.org/ns/activitystreams#Public';
+
 function _firstNonTerminal(records) {
   if (!records) return null;
   for (const r of records) {
@@ -70,6 +78,13 @@ export default class JobPostModel extends Model {
   // Per-user triage mutations go through POST /job-posts/:id/triage/.
   @attr() triage;
   @attr('string', { defaultValue: 'manual' }) source;
+  // ActivityPub-aligned per-post visibility. JSON array of AS2 audience
+  // URI strings. Default on the api side is `[AS2_PUBLIC]`; defaulting
+  // here mirrors that so optimistic-create rows render with the right
+  // badge before the api response lands. Phase 4 will consume this
+  // server-side for /as-object/ + Outbox dispatch; today only the
+  // jp.edit Visibility selector and the jp.show badge read it.
+  @attr('array', { defaultValue: () => [AS2_PUBLIC] }) audience;
   @belongsTo('score', { async: true, inverse: null }) topScore;
   @belongsTo('company', { async: true, inverse: 'jobPosts' }) company;
   @hasMany('score', { async: true, inverse: 'jobPost' }) scores;
@@ -113,6 +128,16 @@ export default class JobPostModel extends Model {
   // don't need to change.
   get isStub() {
     return !this.complete;
+  }
+
+  // Mirror of the api's JobPost.is_public() — true iff the AS2 Public
+  // URI is in the audience list. Defensive against a missing / non-list
+  // audience so the show-page badge renders cleanly on legacy fixtures
+  // or mid-load proxies.
+  get isPublic() {
+    const audience = this.audience;
+    if (!Array.isArray(audience)) return false;
+    return audience.includes(AS2_PUBLIC);
   }
 
   // Active work derived from scrapes / scores relationships — any record
