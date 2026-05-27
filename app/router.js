@@ -276,6 +276,7 @@ Router.map(function () {
     this.route('application-flow');
     this.route('sources');
     this.route('activity');
+    this.route('dedupe-feedback');
   });
   this.route('settings', function () {
     this.route('profile', function () {
