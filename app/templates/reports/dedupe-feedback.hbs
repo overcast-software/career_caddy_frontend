@@ -1,0 +1,153 @@
+{{page-title "Dedupe feedback"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav></:subnav>
+  <:main>
+    <div class="space-y-6">
+      <header class="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 class="text-xl font-semibold">Dedupe feedback</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          Staff-only audit of manual duplicate-of decisions. Reveals gaps in the
+          automatic dedupe pipeline and over-eager canonicalization.
+        </p>
+      </header>
+
+      {{#if @model.error}}
+        {{#if (eq @model.error "forbidden")}}
+          <p
+            class="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/40 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 text-sm"
+          >This report is staff-only.</p>
+        {{else}}
+          <p class="text-sm text-gray-500">Could not load report.</p>
+        {{/if}}
+      {{else}}
+        <section
+          class="rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          data-test-silent-marks
+        >
+          <h2
+            class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+          >Silent marks
+            <span
+              class="ml-2 text-xs text-gray-500 dark:text-gray-400"
+            >({{@model.totals.silent_marks}})</span>
+          </h2>
+          <p class="mt-1 mb-3 text-xs text-gray-500 dark:text-gray-400">
+            Manual marks where the dedupe pipeline never surfaced the target as
+            a candidate. Each row is a missed find_duplicate / candidate rule
+            worth investigating.
+          </p>
+          {{#if @model.silent_marks.length}}
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+              {{#each @model.silent_marks as |row|}}
+                <li class="flex flex-wrap items-center gap-2 py-2">
+                  <LinkTo
+                    @route="job-posts.show"
+                    @model={{row.from_jp_id}}
+                    class="underline"
+                  >#{{row.from_jp_id}}</LinkTo>
+                  <span class="text-gray-500">→</span>
+                  <LinkTo
+                    @route="job-posts.show"
+                    @model={{row.to_jp_id}}
+                    class="underline"
+                  >#{{row.to_jp_id}}</LinkTo>
+                  <span
+                    class="ml-auto text-xs text-gray-500 dark:text-gray-400"
+                  >{{row.set_at}}</span>
+                </li>
+              {{/each}}
+            </ul>
+          {{else}}
+            <p class="text-xs text-gray-500">No silent marks captured yet.</p>
+          {{/if}}
+        </section>
+
+        <section
+          class="rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          data-test-canonical-unlinks
+        >
+          <h2
+            class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+          >Canonical-link unlinks
+            <span
+              class="ml-2 text-xs text-gray-500 dark:text-gray-400"
+            >({{@model.totals.canonical_unlinks}})</span>
+          </h2>
+          <p class="mt-1 mb-3 text-xs text-gray-500 dark:text-gray-400">
+            Manual unlinks where canonical_link had been firing. Likely
+            over-eager URL normalization (e.g. /comm/ path-segment stripping).
+          </p>
+          {{#if @model.canonical_unlinks.length}}
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+              {{#each @model.canonical_unlinks as |row|}}
+                <li class="flex flex-wrap items-center gap-2 py-2">
+                  <LinkTo
+                    @route="job-posts.show"
+                    @model={{row.from_jp_id}}
+                    class="underline"
+                  >#{{row.from_jp_id}}</LinkTo>
+                  <span class="text-gray-500">⇎</span>
+                  <LinkTo
+                    @route="job-posts.show"
+                    @model={{row.previous_to_id}}
+                    class="underline"
+                  >#{{row.previous_to_id}}</LinkTo>
+                  <span
+                    class="ml-auto text-xs text-gray-500 dark:text-gray-400"
+                  >{{row.set_at}}</span>
+                </li>
+              {{/each}}
+            </ul>
+          {{else}}
+            <p class="text-xs text-gray-500">No canonical-link unlinks yet.</p>
+          {{/if}}
+        </section>
+
+        <section
+          class="rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          data-test-promote-pairs
+        >
+          <h2
+            class="text-sm font-semibold text-gray-900 dark:text-gray-100"
+          >Promote pairs
+            <span
+              class="ml-2 text-xs text-gray-500 dark:text-gray-400"
+            >({{@model.totals.promote_pairs}})</span>
+          </h2>
+          <p class="mt-1 mb-3 text-xs text-gray-500 dark:text-gray-400">
+            Source pairs (promoted → demoted). Tally over time hints at which
+            origin users consider canonical (probably ATS over aggregators).
+          </p>
+          {{#if @model.promote_pairs.length}}
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+              {{#each @model.promote_pairs as |row|}}
+                <li class="flex flex-wrap items-center gap-2 py-2">
+                  <span class="font-mono text-xs">{{or
+                      row.from_source
+                      "—"
+                    }}</span>
+                  <span class="text-gray-500">↑ over ↓</span>
+                  <span class="font-mono text-xs">{{or
+                      row.previous_source
+                      "—"
+                    }}</span>
+                  <span class="ml-2 text-gray-500">·</span>
+                  <LinkTo
+                    @route="job-posts.show"
+                    @model={{row.from_jp_id}}
+                    class="underline"
+                  >#{{row.from_jp_id}}</LinkTo>
+                  <span
+                    class="ml-auto text-xs text-gray-500 dark:text-gray-400"
+                  >{{row.set_at}}</span>
+                </li>
+              {{/each}}
+            </ul>
+          {{else}}
+            <p class="text-xs text-gray-500">No promotes captured yet.</p>
+          {{/if}}
+        </section>
+      {{/if}}
+    </div>
+  </:main>
+</RouteLayout>
