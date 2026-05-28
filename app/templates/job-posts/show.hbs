@@ -55,6 +55,22 @@
                 {{this.model.source}}
               </span>
             {{/if}}
+            {{! Visibility chip: only rendered for non-public posts.
+                Public is the default + the overwhelming majority case,
+                so a "Public" pill would just be noise on every header.
+                Private is the exception, so it earns the chip. The
+                shape mirrors the other gray meta chips on this row.
+                Phase 4 will key federation dispatch off this same
+                audience field; today it just drives this badge. }}
+            {{#unless this.model.isPublic}}
+              <span
+                data-test-private-badge
+                class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700"
+                title="This post is private — not addressed to the ActivityStreams public collection"
+              >
+                Private
+              </span>
+            {{/unless}}
           </div>
           {{#if this.model.duplicateOfId}}
             <LinkTo

@@ -3,6 +3,7 @@ import { setupRenderingTest } from 'career-caddy-frontend/tests/helpers';
 import { render, fillIn, click } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import Service from '@ember/service';
+import { AS2_PUBLIC } from 'career-caddy-frontend/models/job-post';
 
 // Phase 1 of Plans/PLAN ActivityPub prep + job-post adaptation:
 // canonical_link must render read-only and apply_url editable on jp.edit.
@@ -193,6 +194,76 @@ module('Integration | Component | job-posts/form', function (hooks) {
     await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
     await click('[data-test-promote-canonical]');
     assert.strictEqual(calls, 1, 'promoteCanonical fired');
+  });
+
+  // Phase 3.5 prep for Phase 4 ActivityPub readiness: the Visibility
+  // selector reads + writes JobPost.audience. Public maps to the AS2
+  // Public collection URI; Private maps to an empty list. Future
+  // granularity (Followers / Unlisted) drops in over the same data
+  // shape without re-plumbing the form.
+  test('visibility selector renders and defaults to the model audience', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      audience: [AS2_PUBLIC],
+    });
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    assert
+      .dom('[data-test-visibility]')
+      .exists('Visibility section renders on the edit form');
+    assert
+      .dom('[data-test-visibility-select]')
+      .hasValue('public', 'Public is selected for an AS2 Public audience');
+  });
+
+  test('visibility selector reflects a private audience', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      audience: [],
+    });
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    assert
+      .dom('[data-test-visibility-select]')
+      .hasValue('private', 'Private is selected for an empty audience');
+  });
+
+  test('changing visibility to Private writes an empty audience array', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      audience: [AS2_PUBLIC],
+    });
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    await fillIn('[data-test-visibility-select]', 'private');
+    assert.deepEqual(
+      this.jobPost.audience,
+      [],
+      'Selecting Private clears audience to []',
+    );
+    assert.notOk(
+      this.jobPost.isPublic,
+      'isPublic getter flips to false after the write',
+    );
+  });
+
+  test('changing visibility to Public writes the AS2 Public URI', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      audience: [],
+    });
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    await fillIn('[data-test-visibility-select]', 'public');
+    assert.deepEqual(
+      this.jobPost.audience,
+      [AS2_PUBLIC],
+      'Selecting Public writes [AS2_PUBLIC] verbatim — federation peers match this URI string exactly',
+    );
+    assert.ok(
+      this.jobPost.isPublic,
+      'isPublic getter flips to true after the write',
+    );
   });
 
   test('submit without touching apply_url leaves the model field alone', async function (assert) {
