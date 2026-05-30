@@ -6,13 +6,44 @@ import { htmlSafe } from '@ember/template';
 
 export const TERMINAL = new Set(['completed', 'done', 'failed', 'error']);
 
+const BACKOFF_SEQUENCE_MS = [2000, 4000, 8000, 16000, 32000];
+
+// Long-running queue tasks (Score / Summary against tier-3 LLM,
+// or parse_scrape in Phase 5) routinely exceed the 62s baseline cap.
+// Extend the sequence by repeating the 32s ceiling so total polling
+// wall-clock reaches ~10 minutes before giving up. Per-call opt-in
+// via `record.poll({ longRunning: true })`.
+const LONG_RUNNING_BACKOFF_MS = [
+  ...BACKOFF_SEQUENCE_MS,
+  ...Array(18).fill(32000),
+];
+
+/**
+ * The polling service — both the mechanism (timer + exponential backoff +
+ * reload loop) and the policy (spinner integration, sticky flash on
+ * navigate-away, pendingIds bookkeeping for in-this-session "is record X
+ * being polled?" queries).
+ *
+ * Consumers should NOT inject this service directly. Use the Pollable
+ * mixin on the model (`app/mixins/pollable.js`) and call
+ * `record.poll(options)` / `record.pollIfPending(options)`. The service
+ * remains the single orchestration anchor — both the mixin and (later)
+ * the WarpDrive trait delegate into it.
+ */
 export default class PollableService extends Service {
-  @service poller;
   @service router;
   @service spinner;
   @service flashMessages;
 
   @tracked pendingIds = new Set();
+
+  // Per-record polling state. Lives on the service rather than the
+  // record so a navigated-away record (or a record evicted by the
+  // store mid-poll) still has its timer cleaned up via stop().
+  _timers = new Map();
+  _pollCounts = new Map();
+  _lastStatus = new Map();
+  _sequences = new Map();
 
   @action isPending(record) {
     // Short-circuit on terminal status so a stale entry left over in
@@ -35,7 +66,7 @@ export default class PollableService extends Service {
    * Pass `longRunning: true` for routes whose backend work routinely
    * exceeds the 62s baseline cap (Score / Summary against tier-3 LLMs,
    * parse_scrape jobs). The flag lifts the cap to ~10 minutes by
-   * repeating the 32s ceiling — see `services/poller.js`.
+   * repeating the 32s ceiling.
    */
   poll(record, options = {}) {
     const {
@@ -52,7 +83,7 @@ export default class PollableService extends Service {
     const returnUrl = this.router.currentURL;
     this.pendingIds = new Set([...this.pendingIds, record.id]);
 
-    this.poller.watchRecord(record, {
+    this.watchRecord(record, {
       isTerminal,
       longRunning,
       onUpdate,
@@ -102,8 +133,7 @@ export default class PollableService extends Service {
     if (!record || !record.status || terminalCheck(record)) return;
 
     this.spinner.begin({ label });
-    // `longRunning` rides through via `...rest` — pollable.poll() reads it
-    // out and forwards to the poller. Documented at the poll() docstring.
+    // `longRunning` rides through via `...rest` — poll() reads it out.
     this.poll(record, { isTerminal: terminalCheck, ...rest });
   }
 
@@ -111,7 +141,131 @@ export default class PollableService extends Service {
     if (!record) return;
     this._removePending(record.id);
     this.spinner.end();
-    this.poller.stop(record);
+    this.unwatchRecord(record);
+  }
+
+  stopAll() {
+    for (const [, id] of this._timers) {
+      clearTimeout(id);
+    }
+    this._timers.clear();
+    this._pollCounts.clear();
+    this._lastStatus.clear();
+    this._sequences.clear();
+  }
+
+  willDestroy() {
+    super.willDestroy(...arguments);
+    this.stopAll();
+  }
+
+  // ---------------------------------------------------------------------
+  // Bare-timer API — the mechanism without the policy. Was a separate
+  // `poller` service before the 2026-05-30 merge; consumers that want
+  // the backoff loop without the spinner/flash/pendingIds policy call
+  // these methods directly (see services/chat.js + the AI answer flow).
+  // The policy-aware API on top of this is `poll` / `pollIfPending` /
+  // `stop` above.
+  // ---------------------------------------------------------------------
+  watchRecord(record, options = {}) {
+    if (!record || typeof record.reload !== 'function') {
+      throw new Error(
+        'pollable.watchRecord requires an Ember Data record with reload()',
+      );
+    }
+
+    const {
+      statusField = 'status',
+      isTerminal = () => false,
+      onUpdate = null,
+      onStop = null,
+      onError = null,
+      longRunning = false,
+    } = options;
+
+    const sequence = longRunning
+      ? LONG_RUNNING_BACKOFF_MS
+      : BACKOFF_SEQUENCE_MS;
+
+    // ensure previous watcher for this record is cleared
+    this.unwatchRecord(record);
+    this._pollCounts.set(record, 0);
+    this._lastStatus.set(record, record[statusField]);
+    this._sequences.set(record, sequence);
+
+    const tick = async () => {
+      const count = this._pollCounts.get(record) || 0;
+
+      if (count >= sequence.length) {
+        this.unwatchRecord(record);
+        if (typeof onError === 'function') {
+          onError(
+            new Error(
+              'Polling timed out — the operation may still be processing. Refresh the page to check.',
+            ),
+            record,
+          );
+        }
+        return;
+      }
+
+      try {
+        await record.reload();
+        if (typeof onUpdate === 'function') onUpdate(record);
+
+        if (isTerminal(record)) {
+          this.unwatchRecord(record);
+          if (typeof onStop === 'function') onStop(record);
+          return;
+        }
+
+        // Reset backoff when status changes (e.g. hold → running)
+        const prev = this._lastStatus.get(record);
+        const curr = record[statusField];
+        if (curr !== prev) {
+          this._lastStatus.set(record, curr);
+          this._pollCounts.set(record, 0);
+        } else {
+          this._pollCounts.set(record, count + 1);
+        }
+
+        const nextCount = this._pollCounts.get(record);
+        const delay = sequence[nextCount];
+
+        if (delay !== undefined) {
+          const id = setTimeout(tick, delay);
+          this._timers.set(record, id);
+        } else {
+          this.unwatchRecord(record);
+          if (typeof onError === 'function') {
+            onError(
+              new Error(
+                'Polling timed out — the operation may still be processing. Refresh the page to check.',
+              ),
+              record,
+            );
+          }
+        }
+      } catch (e) {
+        this.unwatchRecord(record);
+        if (typeof onError === 'function') onError(e, record);
+      }
+    };
+
+    // kick off after the first backoff delay
+    const id = setTimeout(tick, sequence[0]);
+    this._timers.set(record, id);
+  }
+
+  unwatchRecord(record) {
+    const id = this._timers.get(record);
+    if (id) {
+      clearTimeout(id);
+      this._timers.delete(record);
+    }
+    this._pollCounts.delete(record);
+    this._lastStatus.delete(record);
+    this._sequences.delete(record);
   }
 
   _removePending(id) {

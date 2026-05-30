@@ -9,13 +9,15 @@ module('Unit | Service | pollable', function (hooks) {
     this.service = this.owner.lookup('service:pollable');
     this.watchedRecords = [];
     this.stoppedRecords = [];
-    this.service.poller = {
-      watchRecord: (rec, opts) => {
-        this.watchedRecords.push({ rec, opts });
-      },
-      stop: (rec) => {
-        this.stoppedRecords.push(rec);
-      },
+    // Stub the bare-timer surface so policy-path tests don't fire real
+    // setTimeouts. The service merged with the prior poller service on
+    // 2026-05-30 — `watchRecord` / `unwatchRecord` are the public bare-
+    // timer methods that `poll` and `stop` delegate into.
+    this.service.watchRecord = (rec, opts) => {
+      this.watchedRecords.push({ rec, opts });
+    };
+    this.service.unwatchRecord = (rec) => {
+      this.stoppedRecords.push(rec);
     };
     this.service.spinner = {
       _count: 0,
@@ -82,13 +84,13 @@ module('Unit | Service | pollable', function (hooks) {
     assert.false(this.service.isPending({ id: '99' }));
   });
 
-  test('poll passes onUpdate to poller.watchRecord', function (assert) {
+  test('poll passes onUpdate to watchRecord', function (assert) {
     const onUpdate = () => {};
     this.service.poll({ id: '1', reload: () => {} }, { onUpdate });
     assert.strictEqual(this.watchedRecords[0].opts.onUpdate, onUpdate);
   });
 
-  test('poll forwards longRunning to poller.watchRecord', function (assert) {
+  test('poll forwards longRunning to watchRecord', function (assert) {
     this.service.poll({ id: 'lr', reload: () => {} }, { longRunning: true });
     assert.true(this.watchedRecords[0].opts.longRunning);
   });
@@ -98,7 +100,7 @@ module('Unit | Service | pollable', function (hooks) {
     assert.false(this.watchedRecords[0].opts.longRunning);
   });
 
-  test('pollIfPending forwards longRunning to poller.watchRecord', function (assert) {
+  test('pollIfPending forwards longRunning to watchRecord', function (assert) {
     this.service.pollIfPending(
       { id: 'lr2', status: 'pending', reload: () => {} },
       { longRunning: true },
@@ -139,7 +141,7 @@ module('Unit | Service | pollable', function (hooks) {
     );
   });
 
-  test('stop removes pending and stops poller', function (assert) {
+  test('stop removes pending and stops the watcher', function (assert) {
     const rec = { id: '5', reload: () => {} };
     this.service.spinner.begin();
     this.service.poll(rec);

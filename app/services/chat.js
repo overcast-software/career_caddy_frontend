@@ -27,7 +27,7 @@ export default class ChatService extends Service {
   @service router;
   @service session;
   @service store;
-  @service poller;
+  @service pollable;
   @service currentUser;
 
   @tracked messages = [];
@@ -338,7 +338,7 @@ export default class ChatService extends Service {
     const TERMINAL = new Set(['completed', 'done', 'failed', 'error']);
     if (!POLL_TYPES.has(resource)) return;
     if (!record.status || TERMINAL.has(record.status)) return;
-    this.poller.watchRecord(record, {
+    this.pollable.watchRecord(record, {
       isTerminal: (rec) => TERMINAL.has(rec.status),
     });
   }

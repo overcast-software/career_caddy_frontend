@@ -179,7 +179,7 @@ export default class JobPostsFormComponent extends Component {
           return;
         }
         this.spinner.begin({ label: 'Re-extracting…' });
-        this.pollable.poll(scrape, {
+        scrape.poll({
           successMessage: 'Re-extract complete — fields refreshed.',
           failedMessage: 'Re-extract failed.',
           onComplete: () => {

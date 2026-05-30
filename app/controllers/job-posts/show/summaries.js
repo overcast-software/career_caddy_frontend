@@ -50,7 +50,7 @@ export default class JobPostsShowSummariesController extends Controller {
       const saved = await summary.save();
       this.instructions = '';
       if (!this.pollable.isTerminal(saved)) {
-        this.pollable.poll(saved, {
+        saved.poll({
           longRunning: true,
           successMessage: 'Summary ready.',
           failedMessage: 'Summary generation failed.',

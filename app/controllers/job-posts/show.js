@@ -192,7 +192,7 @@ export default class JobPostsShowController extends Controller {
     }
     this.spinner.begin({ label: `${label}…` });
     return new Promise((resolve, reject) => {
-      this.pollable.poll(record, {
+      record.poll({
         successMessage: null,
         failedMessage: null,
         onComplete: (rec) => resolve(rec),

@@ -3,7 +3,6 @@ import { service } from '@ember/service';
 import { getOwner } from '@ember/owner';
 
 export default class JobPostsShowSummariesShowController extends Controller {
-  @service pollable;
   @service flashMessages;
 
   get jobPost() {
@@ -13,7 +12,7 @@ export default class JobPostsShowSummariesShowController extends Controller {
   }
 
   startPollingIfPending() {
-    this.pollable.pollIfPending(this.model, {
+    this.model.pollIfPending({
       label: 'Generating summary…',
       longRunning: true,
       successMessage: 'Summary ready.',

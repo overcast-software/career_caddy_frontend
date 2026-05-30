@@ -182,7 +182,7 @@ export default class JobPostsNewPasteController extends Controller {
           `Scrape #${scrape.id} queued; polling for completion…`,
         );
         this.spinner.begin({ label: 'Parsing…' });
-        this.pollable.poll(scrape, {
+        scrape.poll({
           successMessage: 'Job post created.',
           failedMessage: 'Parse failed — try a cleaner copy of the page.',
           onComplete: (rec) => {
@@ -324,7 +324,7 @@ export default class JobPostsNewPasteController extends Controller {
               );
               return;
             }
-            this.pollable.poll(saved, {
+            saved.poll({
               successMessage: 'Score ready.',
               failedMessage: 'Scoring failed.',
               onComplete: (scoreRec) => {

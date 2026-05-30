@@ -7,7 +7,7 @@ const TERMINAL_STATUSES = ['completed', 'done', 'failed', 'error'];
 
 export default class AnswersForm extends Component {
   @service flashMessages;
-  @service poller;
+  @service pollable;
   @service router;
   @service spinner;
   @service store;
@@ -18,7 +18,7 @@ export default class AnswersForm extends Component {
   willDestroy() {
     super.willDestroy(...arguments);
     if (this.args.answer) {
-      this.poller.stop(this.args.answer);
+      this.pollable.unwatchRecord(this.args.answer);
     }
   }
 
@@ -76,7 +76,7 @@ export default class AnswersForm extends Component {
       if (this.useAI) {
         this.isPolling = true;
         this.spinner.begin({ label: 'AI is generating your answer…' });
-        this.poller.watchRecord(this.args.answer, {
+        this.pollable.watchRecord(this.args.answer, {
           isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
           onStop: (rec) => {
             this.isPolling = false;
