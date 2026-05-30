@@ -1,7 +1,8 @@
 import Model, { attr, belongsTo } from '@ember-data/model';
+import { Pollable } from 'career-caddy-frontend/traits/pollable';
 import { TERMINAL } from 'career-caddy-frontend/services/pollable';
 
-export default class ScoreModel extends Model {
+export default class ScoreModel extends Pollable(Model) {
   @attr('number') score;
   @attr('string') explanation;
   @attr('string') status;

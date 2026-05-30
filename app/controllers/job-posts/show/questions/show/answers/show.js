@@ -4,13 +4,12 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
 export default class JobPostsShowQuestionsShowAnswersShowController extends Controller {
-  @service pollable;
   @service flashMessages;
 
   @tracked copyButtonText = 'Copy';
 
   startPollingIfPending() {
-    this.pollable.pollIfPending(this.model, {
+    this.model.pollIfPending({
       label: 'Generating answer…',
       successMessage: 'Answer ready.',
       failedMessage: 'Answer generation failed.',

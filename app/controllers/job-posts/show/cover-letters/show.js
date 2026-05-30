@@ -2,11 +2,10 @@ import Controller from '@ember/controller';
 import { service } from '@ember/service';
 
 export default class JobPostsShowCoverLettersShowController extends Controller {
-  @service pollable;
   @service flashMessages;
 
   startPollingIfPending() {
-    this.pollable.pollIfPending(this.model, {
+    this.model.pollIfPending({
       label: 'Generating cover letter…',
       successMessage: 'Cover letter ready.',
       failedMessage: 'Cover letter generation failed.',

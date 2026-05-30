@@ -25,7 +25,7 @@ export default class JobPostsShowScrapesIndexController extends Controller {
       const saved = await scrape.save();
       this.flashMessages.success('Scrape queued — watching for completion.');
       if (!this.pollable.isTerminal(saved)) {
-        this.pollable.poll(saved, {
+        saved.poll({
           successMessage: 'Scrape completed.',
           failedMessage: 'Scrape failed.',
           onComplete: () => this.flashMessages.success('Scrape completed.'),

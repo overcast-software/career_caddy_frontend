@@ -97,7 +97,7 @@ export default class JobPostsShowScoresController extends Controller {
       const saved = await newScore.save();
       this.instructions = '';
       if (!this.pollable.isTerminal(saved)) {
-        this.pollable.poll(saved, {
+        saved.poll({
           longRunning: true,
           successMessage: 'Score ready.',
           failedMessage: 'Scoring failed.',

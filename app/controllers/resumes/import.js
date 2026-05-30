@@ -10,7 +10,7 @@ export default class ResumesImportController extends Controller {
   @service store;
   @service flashMessages;
   @service router;
-  @service poller;
+  @service pollable;
   @service api;
 
   @tracked isUploading = false;
@@ -51,7 +51,7 @@ export default class ResumesImportController extends Controller {
         this.isUploading = false;
         this.spinner.begin({ label: 'Parsing resume…' });
 
-        this.poller.watchRecord(resume, {
+        this.pollable.watchRecord(resume, {
           isTerminal: (r) => ['completed', 'failed'].includes(r.status),
           onStop: (r) => {
             this.spinner.end();

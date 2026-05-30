@@ -9,7 +9,7 @@ export default class WizardResumeController extends Controller {
   @service api;
   @service currentUser;
   @service flashMessages;
-  @service poller;
+  @service pollable;
   @service router;
   @service session;
   @service spinner;
@@ -81,7 +81,7 @@ export default class WizardResumeController extends Controller {
         this.isUploading = false;
         this.spinner.begin({ label: 'Parsing resume…' });
 
-        this.poller.watchRecord(resume, {
+        this.pollable.watchRecord(resume, {
           isTerminal: (r) => ['completed', 'failed'].includes(r.status),
           onStop: async (r) => {
             this.spinner.end();

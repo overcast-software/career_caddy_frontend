@@ -3,14 +3,13 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 
 export default class ScrapesShowController extends Controller {
-  @service pollable;
   @service store;
   @service router;
   @service spinner;
   @service flashMessages;
 
   startPollingIfPending() {
-    this.pollable.pollIfPending(this.model, {
+    this.model.pollIfPending({
       label: 'Scraping…',
       successMessage: 'Scrape completed.',
       failedMessage: 'Scrape failed.',

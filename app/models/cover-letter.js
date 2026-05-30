@@ -1,7 +1,8 @@
 import Model, { attr, belongsTo } from '@ember-data/model';
+import { Pollable } from 'career-caddy-frontend/traits/pollable';
 import { TERMINAL } from 'career-caddy-frontend/services/pollable';
 
-export default class CoverLetterModel extends Model {
+export default class CoverLetterModel extends Pollable(Model) {
   @attr('string') content;
   @attr('string') status;
   @attr('string') instructions;

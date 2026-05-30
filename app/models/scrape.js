@@ -3,9 +3,10 @@ import {
   apiAction,
   collectionAction,
 } from 'career-caddy-frontend/utils/api-action';
+import { Pollable } from 'career-caddy-frontend/traits/pollable';
 import { TERMINAL } from 'career-caddy-frontend/services/pollable';
 
-export default class ScrapeModel extends Model {
+export default class ScrapeModel extends Pollable(Model) {
   @attr('string') url;
   @attr('string') sourceLink;
   @attr('string') cssSelectors;

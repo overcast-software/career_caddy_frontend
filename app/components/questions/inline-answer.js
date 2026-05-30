@@ -9,8 +9,6 @@ export default class QuestionsInlineAnswer extends Component {
   @service store;
   @service flashMessages;
   @service spinner;
-  @service poller;
-  @service pollable;
   @service router;
 
   @tracked answerContent = '';
@@ -54,7 +52,7 @@ export default class QuestionsInlineAnswer extends Component {
         // Without this, inline-answer users sat on the list with a
         // stale pending answer until a manual refresh.
         if (this.useAI && !TERMINAL.has(saved.status)) {
-          this.pollable.pollIfPending(saved, {
+          saved.pollIfPending({
             label: 'AI is generating your answer…',
             successMessage: 'AI answer ready.',
             failedMessage: 'AI answer generation failed.',

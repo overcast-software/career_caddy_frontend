@@ -50,7 +50,7 @@ export default class JobPostsShowCoverLettersController extends Controller {
       const saved = await cl.save();
       this.instructions = '';
       if (!this.pollable.isTerminal(saved)) {
-        this.pollable.poll(saved, {
+        saved.poll({
           successMessage: 'Cover letter ready.',
           failedMessage: 'Cover letter generation failed.',
           onComplete: () => this.flashMessages.success('Cover letter ready.'),

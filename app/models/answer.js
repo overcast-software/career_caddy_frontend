@@ -1,6 +1,7 @@
 import Model, { attr, belongsTo } from '@ember-data/model';
+import { Pollable } from 'career-caddy-frontend/traits/pollable';
 
-export default class AnswerModel extends Model {
+export default class AnswerModel extends Pollable(Model) {
   @attr content;
   @attr ai_assist;
   @attr favorite;

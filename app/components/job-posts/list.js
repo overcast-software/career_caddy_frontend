@@ -103,7 +103,7 @@ export default class JobPostsListComponent extends Component {
       return Promise.resolve(record);
     }
     return new Promise((resolve, reject) => {
-      this.pollable.poll(record, {
+      record.poll({
         successMessage: null,
         failedMessage: null,
         onComplete: (rec) => resolve(rec),
