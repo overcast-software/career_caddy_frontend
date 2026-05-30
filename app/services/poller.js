@@ -2,10 +2,21 @@ import Service from '@ember/service';
 
 const BACKOFF_SEQUENCE_MS = [2000, 4000, 8000, 16000, 32000];
 
+// Long-running queue tasks (Score / Summary against tier-3 LLM,
+// or parse_scrape in Phase 5) routinely exceed the 62s baseline cap.
+// Extend the sequence by repeating the 32s ceiling so total polling
+// wall-clock reaches ~10 minutes before giving up. Per-route opt-in
+// via `pollable.poll(record, { longRunning: true })`.
+const LONG_RUNNING_BACKOFF_MS = [
+  ...BACKOFF_SEQUENCE_MS,
+  ...Array(18).fill(32000),
+];
+
 export default class PollerService extends Service {
   _timers = new Map();
   _pollCounts = new Map();
   _lastStatus = new Map();
+  _sequences = new Map();
 
   watchRecord(record, options = {}) {
     if (!record || typeof record.reload !== 'function') {
@@ -20,17 +31,23 @@ export default class PollerService extends Service {
       onUpdate = null,
       onStop = null,
       onError = null,
+      longRunning = false,
     } = options;
+
+    const sequence = longRunning
+      ? LONG_RUNNING_BACKOFF_MS
+      : BACKOFF_SEQUENCE_MS;
 
     // ensure previous watcher for this record is cleared
     this.stop(record);
     this._pollCounts.set(record, 0);
     this._lastStatus.set(record, record[statusField]);
+    this._sequences.set(record, sequence);
 
     const tick = async () => {
       const count = this._pollCounts.get(record) || 0;
 
-      if (count >= BACKOFF_SEQUENCE_MS.length) {
+      if (count >= sequence.length) {
         this.stop(record);
         if (typeof onError === 'function') {
           onError(
@@ -64,7 +81,7 @@ export default class PollerService extends Service {
         }
 
         const nextCount = this._pollCounts.get(record);
-        const delay = BACKOFF_SEQUENCE_MS[nextCount];
+        const delay = sequence[nextCount];
 
         if (delay !== undefined) {
           const id = setTimeout(tick, delay);
@@ -87,7 +104,7 @@ export default class PollerService extends Service {
     };
 
     // kick off after the first backoff delay
-    const id = setTimeout(tick, BACKOFF_SEQUENCE_MS[0]);
+    const id = setTimeout(tick, sequence[0]);
     this._timers.set(record, id);
   }
 
@@ -99,6 +116,7 @@ export default class PollerService extends Service {
     }
     this._pollCounts.delete(record);
     this._lastStatus.delete(record);
+    this._sequences.delete(record);
   }
 
   stopAll() {
@@ -108,6 +126,7 @@ export default class PollerService extends Service {
     this._timers.clear();
     this._pollCounts.clear();
     this._lastStatus.clear();
+    this._sequences.clear();
   }
 
   willDestroy() {

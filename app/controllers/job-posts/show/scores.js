@@ -98,6 +98,7 @@ export default class JobPostsShowScoresController extends Controller {
       this.instructions = '';
       if (!this.pollable.isTerminal(saved)) {
         this.pollable.poll(saved, {
+          longRunning: true,
           successMessage: 'Score ready.',
           failedMessage: 'Scoring failed.',
           onFailed: () => this.flashMessages.danger('Scoring failed.'),

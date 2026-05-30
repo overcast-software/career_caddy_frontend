@@ -15,6 +15,7 @@ export default class JobPostsShowSummariesShowController extends Controller {
   startPollingIfPending() {
     this.pollable.pollIfPending(this.model, {
       label: 'Generating summary…',
+      longRunning: true,
       successMessage: 'Summary ready.',
       failedMessage: 'Summary generation failed.',
       onFailed: () => this.flashMessages.danger('Summary generation failed.'),
