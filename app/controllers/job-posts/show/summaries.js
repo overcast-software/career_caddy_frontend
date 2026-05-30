@@ -51,6 +51,7 @@ export default class JobPostsShowSummariesController extends Controller {
       this.instructions = '';
       if (!this.pollable.isTerminal(saved)) {
         this.pollable.poll(saved, {
+          longRunning: true,
           successMessage: 'Summary ready.',
           failedMessage: 'Summary generation failed.',
           onComplete: () => this.flashMessages.success('Summary ready.'),

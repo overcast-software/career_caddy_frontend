@@ -31,12 +31,18 @@ export default class PollableService extends Service {
   /**
    * Start polling a record. Caller must call spinner.begin() first.
    * Service calls spinner.end() on completion.
+   *
+   * Pass `longRunning: true` for routes whose backend work routinely
+   * exceeds the 62s baseline cap (Score / Summary against tier-3 LLMs,
+   * parse_scrape jobs). The flag lifts the cap to ~10 minutes by
+   * repeating the 32s ceiling — see `services/poller.js`.
    */
   poll(record, options = {}) {
     const {
       isTerminal = (rec) => this.isTerminal(rec),
       successMessage = 'Processing complete.',
       failedMessage = 'Processing failed.',
+      longRunning = false,
       onUpdate,
       onComplete,
       onFailed,
@@ -48,6 +54,7 @@ export default class PollableService extends Service {
 
     this.poller.watchRecord(record, {
       isTerminal,
+      longRunning,
       onUpdate,
       onStop: (rec) => {
         this._removePending(rec.id);
@@ -95,6 +102,8 @@ export default class PollableService extends Service {
     if (!record || !record.status || terminalCheck(record)) return;
 
     this.spinner.begin({ label });
+    // `longRunning` rides through via `...rest` — pollable.poll() reads it
+    // out and forwards to the poller. Documented at the poll() docstring.
     this.poll(record, { isTerminal: terminalCheck, ...rest });
   }
 

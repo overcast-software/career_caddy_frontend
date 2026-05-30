@@ -88,6 +88,24 @@ module('Unit | Service | pollable', function (hooks) {
     assert.strictEqual(this.watchedRecords[0].opts.onUpdate, onUpdate);
   });
 
+  test('poll forwards longRunning to poller.watchRecord', function (assert) {
+    this.service.poll({ id: 'lr', reload: () => {} }, { longRunning: true });
+    assert.true(this.watchedRecords[0].opts.longRunning);
+  });
+
+  test('poll defaults longRunning to false', function (assert) {
+    this.service.poll({ id: 'short', reload: () => {} });
+    assert.false(this.watchedRecords[0].opts.longRunning);
+  });
+
+  test('pollIfPending forwards longRunning to poller.watchRecord', function (assert) {
+    this.service.pollIfPending(
+      { id: 'lr2', status: 'pending', reload: () => {} },
+      { longRunning: true },
+    );
+    assert.true(this.watchedRecords[0].opts.longRunning);
+  });
+
   test('pollIfPending skips terminal records', function (assert) {
     this.service.pollIfPending({ id: '1', status: 'completed' });
     assert.strictEqual(this.watchedRecords.length, 0);
