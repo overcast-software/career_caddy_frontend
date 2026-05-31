@@ -60,6 +60,11 @@ export default class EventsService extends Service {
   _reconnectMs = RECONNECT_INITIAL_MS;
   _stopped = false;
   _retryTimer = null;
+  // Listeners notified AFTER a record reload completes. Pollable
+  // subscribes here to fire onComplete / onFailed without timer-
+  // polling when the SSE channel is healthy. Set rather than array
+  // so addListener/removeListener pairs are idempotent and O(1).
+  _listeners = new Set();
 
   @tracked connected = false;
 
@@ -178,9 +183,40 @@ export default class EventsService extends Service {
       // record they didn't ask for. Skip.
       return;
     }
-    // Idempotent: if a page-action poller also reloaded this record on
-    // its own timer, the second reload is harmless and the data is
-    // identical.
-    record.reload();
+    // Reload + notify listeners AFTER the new state lands. Pollable
+    // subscribes via addListener to fire its terminal callbacks
+    // (onComplete / onFailed) without timer-polling.
+    record.reload().then(
+      () => this._notify(modelName, record),
+      // reload failure: still notify with the stale record so
+      // pollable can decide what to do (likely re-poll or fall back).
+      () => this._notify(modelName, record),
+    );
+  }
+
+  /** Subscribe to post-reload notifications. Returns an unsubscribe
+   *  thunk. The callback receives (modelName, record) AFTER the
+   *  record's reload promise has settled — its store state is fresh.
+   */
+  addListener(fn) {
+    this._listeners.add(fn);
+    return () => this._listeners.delete(fn);
+  }
+
+  removeListener(fn) {
+    this._listeners.delete(fn);
+  }
+
+  _notify(modelName, record) {
+    // Snapshot the set so a listener that unsubscribes itself doesn't
+    // perturb the iteration.
+    const snapshot = Array.from(this._listeners);
+    for (const fn of snapshot) {
+      try {
+        fn(modelName, record);
+      } catch (e) {
+        console.warn('[events] listener threw:', e);
+      }
+    }
   }
 }
