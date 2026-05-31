@@ -109,33 +109,30 @@ export default class PollableService extends Service {
       }
     };
 
-    // SSE-first: when the events channel is connected the api emits a
-    // pg_notify on each terminal transition, the events service reloads
-    // the matching record, and we hear about it via addListener. No
-    // timer-polling needed — the network panel stays clean of repeated
-    // GET /api/v1/<resource>/<id>/ requests.
+    // SSE only. The api emits pg_notify on every terminal transition,
+    // the events service reloads the matching record, and pollable
+    // hears about it via addListener. Timer-polling is OFF —
+    // record.poll(...) registers an SSE listener and waits. If the
+    // events channel is disconnected, the spinner stays up until
+    // reconnection (the events service auto-reconnects with backoff).
     //
-    // The polling timer stays as the cold-path fallback when SSE is
-    // disconnected. Once SSE proves itself in prod the fallback can
-    // retire entirely (per Plans/Push status updates — Phase 5+).
-    if (this.events?.connected) {
-      this._watchViaEvents(record, {
-        isTerminal,
-        onUpdate,
-        onStop,
-        onError: (err) =>
-          this._handlePollError(record, returnUrl, err, onError),
-      });
-      return;
-    }
-
-    this.watchRecord(record, {
+    // Polling fallback was retired 2026-05-30 once SSE proved itself
+    // end-to-end. The bare-timer API (watchRecord / unwatchRecord) is
+    // still exposed for non-status-polling consumers (chat streaming,
+    // resume ingest, AI answer wizard) that don't go through this
+    // method.
+    //
+    // The longRunning flag is no longer consulted — SSE has no cap.
+    this._watchViaEvents(record, {
       isTerminal,
-      longRunning,
       onUpdate,
       onStop,
       onError: (err) => this._handlePollError(record, returnUrl, err, onError),
     });
+    // Touch longRunning so the destructure-with-default doesn't get
+    // flagged as unused; the flag is documented and may be reused if
+    // we ever ship a different mechanism.
+    void longRunning;
   }
 
   _handlePollError(record, returnUrl, err, onError) {

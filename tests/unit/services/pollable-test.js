@@ -19,10 +19,19 @@ module('Unit | Service | pollable', function (hooks) {
     this.service.unwatchRecord = (rec) => {
       this.stoppedRecords.push(rec);
     };
-    // Stub the events service — these tests cover the polling-fallback
-    // path. SSE-mode tests live in this file too (search "events.connected")
-    // and explicitly set events.connected = true before calling poll().
-    this.service.events = { connected: false, addListener: () => () => {} };
+    // Stub the events service. poll() now exclusively goes through
+    // the SSE listener path (timer-polling was retired 2026-05-30).
+    // The per-test "eventsBus()" helper below builds a richer stub
+    // for tests that need to emit events and inspect the listener
+    // count; this beforeEach default keeps the simpler tests happy.
+    this.listeners = new Set();
+    this.service.events = {
+      connected: true,
+      addListener: (fn) => {
+        this.listeners.add(fn);
+        return () => this.listeners.delete(fn);
+      },
+    };
     this.service.spinner = {
       _count: 0,
       isShowing: false,
@@ -88,42 +97,18 @@ module('Unit | Service | pollable', function (hooks) {
     assert.false(this.service.isPending({ id: '99' }));
   });
 
-  test('poll passes onUpdate to watchRecord', function (assert) {
-    const onUpdate = () => {};
-    this.service.poll({ id: '1', reload: () => {} }, { onUpdate });
-    assert.strictEqual(this.watchedRecords[0].opts.onUpdate, onUpdate);
-  });
-
-  test('poll forwards longRunning to watchRecord', function (assert) {
-    this.service.poll({ id: 'lr', reload: () => {} }, { longRunning: true });
-    assert.true(this.watchedRecords[0].opts.longRunning);
-  });
-
-  test('poll defaults longRunning to false', function (assert) {
-    this.service.poll({ id: 'short', reload: () => {} });
-    assert.false(this.watchedRecords[0].opts.longRunning);
-  });
-
-  test('pollIfPending forwards longRunning to watchRecord', function (assert) {
-    this.service.pollIfPending(
-      { id: 'lr2', status: 'pending', reload: () => {} },
-      { longRunning: true },
-    );
-    assert.true(this.watchedRecords[0].opts.longRunning);
-  });
-
   test('pollIfPending skips terminal records', function (assert) {
     this.service.pollIfPending({ id: '1', status: 'completed' });
-    assert.strictEqual(this.watchedRecords.length, 0);
+    assert.strictEqual(this.listeners.size, 0);
     assert.false(this.service.spinner.isShowing);
   });
 
-  test('pollIfPending starts spinner and polls non-terminal records', function (assert) {
+  test('pollIfPending starts spinner and registers SSE listener', function (assert) {
     this.service.pollIfPending(
       { id: '2', status: 'pending', reload: () => {} },
       { label: 'Testing…' },
     );
-    assert.strictEqual(this.watchedRecords.length, 1);
+    assert.strictEqual(this.listeners.size, 1);
     assert.true(this.service.spinner.isShowing);
     assert.strictEqual(this.service.spinner.label, 'Testing…');
   });
@@ -133,11 +118,7 @@ module('Unit | Service | pollable', function (hooks) {
     this.service.poll(rec);
     const countBefore = this.service.spinner._count;
     this.service.pollIfPending(rec, { label: 'Again…' });
-    assert.strictEqual(
-      this.watchedRecords.length,
-      1,
-      'watchRecord not called again',
-    );
+    assert.strictEqual(this.listeners.size, 1, 'no extra listener registered');
     assert.strictEqual(
       this.service.spinner._count,
       countBefore,
@@ -145,49 +126,20 @@ module('Unit | Service | pollable', function (hooks) {
     );
   });
 
-  test('stop removes pending and stops the watcher', function (assert) {
-    const rec = { id: '5', reload: () => {} };
+  test('stop removes pending and unsubscribes the listener', function (assert) {
+    const rec = { id: '5', status: 'pending', reload: () => {} };
     this.service.spinner.begin();
     this.service.poll(rec);
+    assert.strictEqual(this.listeners.size, 1);
     this.service.stop(rec);
     assert.false(this.service.pendingIds.has('5'));
-    assert.true(this.stoppedRecords.includes(rec));
+    assert.strictEqual(this.listeners.size, 0);
   });
 
-  test('onStop fires onComplete and ends spinner when not navigated', function (assert) {
-    let completeCalled = false;
-    this.service.spinner.begin();
-    this.service.poll(
-      { id: '10', reload: () => {} },
-      { onComplete: () => (completeCalled = true) },
-    );
-    const { opts } = this.watchedRecords[0];
-    opts.onStop({ id: '10', status: 'completed' });
-    assert.true(completeCalled);
-    assert.false(this.service.spinner.isShowing);
-    assert.strictEqual(
-      this.flashMessages.length,
-      0,
-      'no flash when on same page',
-    );
-  });
-
-  test('onStop fires flash link when navigated away', function (assert) {
-    this.service.spinner.begin();
-    this.service.poll({ id: '11', reload: () => {} });
-    this.service.router = { currentURL: '/somewhere-else' };
-    const { opts } = this.watchedRecords[0];
-    opts.onStop({ id: '11', status: 'completed' });
-    assert.strictEqual(this.flashMessages.length, 1);
-    assert.true(this.flashMessages[0].opts.sticky);
-  });
-
-  // ── SSE mode ───────────────────────────────────────────────────────
-  // When events.connected, poll() must NOT start the timer; it should
-  // register a listener on the events service and fire the terminal
-  // callbacks from there. This is the primary reactivity path
-  // post-Phase 3; timer polling is the fallback for SSE-disconnected
-  // sessions.
+  // ── SSE listener behavior ──────────────────────────────────────────
+  // poll() now exclusively registers an SSE listener; timer polling
+  // was retired. These tests cover what the listener does on each
+  // emitted event for the watched record.
 
   function eventsBus() {
     const listeners = new Set();
@@ -206,21 +158,11 @@ module('Unit | Service | pollable', function (hooks) {
     };
   }
 
-  test('poll skips watchRecord when events.connected', function (assert) {
+  test('poll registers exactly one SSE listener', function (assert) {
     const bus = eventsBus();
     this.service.events = bus;
-    this.service.poll({ id: 'sse-1', reload: () => {} });
-
-    assert.strictEqual(
-      this.watchedRecords.length,
-      0,
-      'no timer-polling when SSE is connected',
-    );
-    assert.strictEqual(
-      bus.listenerCount(),
-      1,
-      'one SSE listener registered for this record',
-    );
+    this.service.poll({ id: 'sse-1', status: 'pending', reload: () => {} });
+    assert.strictEqual(bus.listenerCount(), 1);
   });
 
   test('SSE listener fires onComplete when record reaches terminal', function (assert) {
