@@ -17,6 +17,7 @@ const DOCS_ROUTES = new Set([
 
 export default class ApplicationRoute extends Route {
   @service currentUser;
+  @service events;
   @service flashMessages;
   @service router;
   @service health;
@@ -129,6 +130,12 @@ export default class ApplicationRoute extends Route {
       this._redirectUnauthenticated(routeName);
       return;
     }
+
+    // Open the SSE channel for worker terminal-status notifications.
+    // events.start() is idempotent — same singleton-style hook as the
+    // other auth-gated services above. Closes on session.invalidate
+    // via events.willDestroy if the user logs out.
+    this.events.start();
 
     // Load the onboarding singleton once per session — gated by the
     // null check, so navigating between routes is a no-op. Reset on
