@@ -31,6 +31,7 @@ const LONG_RUNNING_BACKOFF_MS = [
  * the WarpDrive trait delegate into it.
  */
 export default class PollableService extends Service {
+  @service events;
   @service router;
   @service spinner;
   @service flashMessages;
@@ -44,6 +45,10 @@ export default class PollableService extends Service {
   _pollCounts = new Map();
   _lastStatus = new Map();
   _sequences = new Map();
+  // SSE-mode bookkeeping: per-record unsubscribe thunks returned by
+  // events.addListener. Kept here so stop()/stopAll() can revoke them
+  // the same way they clear timers in polling mode.
+  _eventUnsubscribers = new Map();
 
   @action isPending(record) {
     // Short-circuit on terminal status so a stale entry left over in
@@ -83,42 +88,100 @@ export default class PollableService extends Service {
     const returnUrl = this.router.currentURL;
     this.pendingIds = new Set([...this.pendingIds, record.id]);
 
+    // onStop dispatches the success / fail message + navigate-away flash.
+    // Shared between the SSE path and the timer-polling fallback so the
+    // user-facing semantics are identical regardless of mechanism.
+    const onStop = (rec) => {
+      this._removePending(rec.id);
+      this.spinner.end();
+      const navigatedAway = this.router.currentURL !== returnUrl;
+      const failed = rec.status === 'failed' || rec.status === 'error';
+      if (failed) {
+        if (navigatedAway) {
+          this._flashLink(returnUrl, failedMessage, 'danger');
+        }
+        onFailed?.(rec);
+      } else {
+        if (navigatedAway) {
+          this._flashLink(returnUrl, successMessage, 'success');
+        }
+        onComplete?.(rec);
+      }
+    };
+
+    // SSE-first: when the events channel is connected the api emits a
+    // pg_notify on each terminal transition, the events service reloads
+    // the matching record, and we hear about it via addListener. No
+    // timer-polling needed — the network panel stays clean of repeated
+    // GET /api/v1/<resource>/<id>/ requests.
+    //
+    // The polling timer stays as the cold-path fallback when SSE is
+    // disconnected. Once SSE proves itself in prod the fallback can
+    // retire entirely (per Plans/Push status updates — Phase 5+).
+    if (this.events?.connected) {
+      this._watchViaEvents(record, {
+        isTerminal,
+        onUpdate,
+        onStop,
+        onError: (err) =>
+          this._handlePollError(record, returnUrl, err, onError),
+      });
+      return;
+    }
+
     this.watchRecord(record, {
       isTerminal,
       longRunning,
       onUpdate,
-      onStop: (rec) => {
-        this._removePending(rec.id);
-        this.spinner.end();
-        const navigatedAway = this.router.currentURL !== returnUrl;
-        const failed = rec.status === 'failed' || rec.status === 'error';
-
-        if (failed) {
-          if (navigatedAway) {
-            this._flashLink(returnUrl, failedMessage, 'danger');
-          }
-          onFailed?.(rec);
-        } else {
-          if (navigatedAway) {
-            this._flashLink(returnUrl, successMessage, 'success');
-          }
-          onComplete?.(rec);
-        }
-      },
-      onError: (err) => {
-        this._removePending(record.id);
-        this.spinner.end();
-        const navigatedAway = this.router.currentURL !== returnUrl;
-        if (navigatedAway) {
-          this._flashLink(
-            returnUrl,
-            'Lost connection while polling.',
-            'danger',
-          );
-        }
-        onError?.(err, record);
-      },
+      onStop,
+      onError: (err) => this._handlePollError(record, returnUrl, err, onError),
     });
+  }
+
+  _handlePollError(record, returnUrl, err, onError) {
+    this._removePending(record.id);
+    this.spinner.end();
+    const navigatedAway = this.router.currentURL !== returnUrl;
+    if (navigatedAway) {
+      this._flashLink(returnUrl, 'Lost connection while polling.', 'danger');
+    }
+    onError?.(err, record);
+  }
+
+  /** SSE-driven watch. Registers a listener on the events service;
+   *  when the matching record reloads and reaches terminal, fire onStop.
+   *  onUpdate fires on every reload (not just terminal) to mirror the
+   *  timer-poll contract. */
+  _watchViaEvents(record, { isTerminal, onUpdate, onStop, onError }) {
+    // Clear any prior watcher on this record so re-poll'ing a record
+    // doesn't accumulate listeners.
+    this._unwatchViaEvents(record);
+
+    const handler = (_modelName, reloaded) => {
+      if (String(reloaded.id) !== String(record.id)) return;
+      try {
+        if (typeof onUpdate === 'function') onUpdate(reloaded);
+        if (isTerminal(reloaded)) {
+          this._unwatchViaEvents(reloaded);
+          onStop?.(reloaded);
+        }
+      } catch (err) {
+        this._unwatchViaEvents(record);
+        onError?.(err);
+      }
+    };
+
+    const unsubscribe = this.events.addListener(handler);
+    this._eventUnsubscribers.set(String(record.id), unsubscribe);
+  }
+
+  _unwatchViaEvents(record) {
+    const key = String(record.id);
+    const unsubscribe = this._eventUnsubscribers.get(key);
+    if (unsubscribe) {
+      unsubscribe();
+      this._eventUnsubscribers.delete(key);
+    }
   }
 
   /**
@@ -142,6 +205,7 @@ export default class PollableService extends Service {
     this._removePending(record.id);
     this.spinner.end();
     this.unwatchRecord(record);
+    this._unwatchViaEvents(record);
   }
 
   stopAll() {
@@ -152,6 +216,15 @@ export default class PollableService extends Service {
     this._pollCounts.clear();
     this._lastStatus.clear();
     this._sequences.clear();
+    // Revoke any SSE listeners that the per-record watchers installed.
+    for (const [, unsubscribe] of this._eventUnsubscribers) {
+      try {
+        unsubscribe();
+      } catch {
+        /* listener already dropped; safe to ignore */
+      }
+    }
+    this._eventUnsubscribers.clear();
   }
 
   willDestroy() {

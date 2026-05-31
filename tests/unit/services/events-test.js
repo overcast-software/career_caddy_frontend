@@ -23,11 +23,15 @@ module('Unit | Service | events', function (hooks) {
     return {
       reload() {
         reloads.push(this);
+        // The service now chains .then() onto reload() to fire post-
+        // reload listener notifications, so the stub must return a
+        // Promise — undefined would throw a TypeError mid-handler.
+        return Promise.resolve(this);
       },
     };
   }
 
-  test('_handleMessage reloads the matching record', function (assert) {
+  test('_handleMessage reloads the matching record', async function (assert) {
     const rec = makeRecord(this.reloads);
     this.records.set('score:42', rec);
 
@@ -40,11 +44,14 @@ module('Unit | Service | events', function (hooks) {
       }),
     });
 
+    // reload() fires synchronously inside _handleMessage; the .then()
+    // chain that notifies listeners is async, so the assertion checks
+    // the immediate reload call rather than waiting on the promise.
     assert.strictEqual(this.reloads.length, 1, 'reload fired once');
     assert.strictEqual(this.reloads[0], rec, 'on the matching record');
   });
 
-  test('_handleMessage maps cover_letter to cover-letter model', function (assert) {
+  test('_handleMessage maps cover_letter to cover-letter model', async function (assert) {
     const rec = makeRecord(this.reloads);
     this.records.set('cover-letter:5', rec);
 
