@@ -183,15 +183,18 @@ export default class EventsService extends Service {
       // record they didn't ask for. Skip.
       return;
     }
-    // Reload + notify listeners AFTER the new state lands. Pollable
-    // subscribes via addListener to fire its terminal callbacks
-    // (onComplete / onFailed) without timer-polling.
-    record.reload().then(
-      () => this._notify(modelName, record),
-      // reload failure: still notify with the stale record so
-      // pollable can decide what to do (likely re-poll or fall back).
-      () => this._notify(modelName, record),
-    );
+
+    // Wrap in .catch — Ember Data 5.6's reload pipeline can throw
+    //   "can't access property 'data', documentHash is undefined"
+    // out of the JSON:API cache layer when SSE fires for a record
+    // whose cache is in an in-between state (freshly-saved race,
+    // evicted record, etc.). Log and continue; the listener still
+    // gets notified so the spinner ends and the user sees terminal
+    // state on next interaction or page reload.
+    record
+      .reload()
+      .catch((e) => console.warn('[events] reload failed:', e))
+      .finally(() => this._notify(modelName, record));
   }
 
   /** Subscribe to post-reload notifications. Returns an unsubscribe
