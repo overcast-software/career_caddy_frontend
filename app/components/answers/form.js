@@ -45,13 +45,15 @@ export default class AnswersForm extends Component {
     }
   }
 
-  @action async save(event) {
+  @action save(event) {
     event.preventDefault();
-    const question = this.args.answer.question;
+    const answer = this.args.answer;
+    const question = answer.question;
+    const useAI = this.useAI;
 
     const afterSave = () => {
       if (this.args.onSave) {
-        this.args.onSave(this.args.answer);
+        this.args.onSave(answer);
         return;
       }
       const current = this.router.currentRouteName;
@@ -60,50 +62,71 @@ export default class AnswersForm extends Component {
         '.answers.show',
       );
       if (showRoute !== current) {
-        this.router.transitionTo(showRoute, this.args.answer.id);
+        this.router.transitionTo(showRoute, answer.id);
       } else if (question?.id) {
         this.router.transitionTo(
           'questions.show.answers.show',
           question.id,
-          this.args.answer.id,
+          answer.id,
         );
       }
     };
 
-    try {
-      await this.args.answer.save();
-      this.store.peekRecord('career-data', '1')?.markDirty();
-      if (this.useAI) {
-        this.isPolling = true;
-        this.spinner.begin({ label: 'AI is generating your answer…' });
-        this.pollable.watchRecord(this.args.answer, {
-          isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
-          onStop: (rec) => {
-            this.isPolling = false;
-            this.spinner.end();
-            if (rec.status === 'failed' || rec.status === 'error') {
-              this.flashMessages.danger('AI failed to generate an answer.');
-            } else {
-              this.flashMessages.success('AI answer generated successfully.');
-              this.useAI = false;
-              afterSave();
-            }
-          },
-          onError: () => {
-            this.isPolling = false;
-            this.spinner.end();
-            this.flashMessages.danger(
-              'Lost connection while waiting for AI answer.',
-            );
-          },
-        });
-      } else {
-        this.flashMessages.success('Successfully saved answer');
-        afterSave();
-      }
-    } catch {
-      this.flashMessages.danger('Failed to save answer.');
-    }
+    // The save success path runs side effects (career-data marking,
+    // route transition, AI polling setup) that can throw for non-HTTP
+    // reasons after the row is already persisted server-side. Keep the
+    // save's own .catch() narrowly scoped so a post-success throw never
+    // fires the "Failed to save answer." flash on a row that did save.
+    // Mirrors the post-success cleanup-trail filter in <Answers::Show>
+    // deleteAnswer (real HTTP error = has .status or .errors[]).
+    answer
+      .save()
+      .catch((error) => {
+        const isRealHttpError =
+          error?.status ||
+          (Array.isArray(error?.errors) && error.errors.length > 0);
+        if (isRealHttpError && error.status !== 403) {
+          this.flashMessages.danger('Failed to save answer.');
+        }
+        // Re-throw so the success .then() chain is skipped.
+        throw error;
+      })
+      .then(() => {
+        this.store.peekRecord('career-data', '1')?.markDirty();
+        if (useAI) {
+          this.isPolling = true;
+          this.spinner.begin({ label: 'AI is generating your answer…' });
+          this.pollable.watchRecord(answer, {
+            isTerminal: (rec) => TERMINAL_STATUSES.includes(rec.status),
+            onStop: (rec) => {
+              this.isPolling = false;
+              this.spinner.end();
+              if (rec.status === 'failed' || rec.status === 'error') {
+                this.flashMessages.danger('AI failed to generate an answer.');
+              } else {
+                this.flashMessages.success('AI answer generated successfully.');
+                this.useAI = false;
+                afterSave();
+              }
+            },
+            onError: () => {
+              this.isPolling = false;
+              this.spinner.end();
+              this.flashMessages.danger(
+                'Lost connection while waiting for AI answer.',
+              );
+            },
+          });
+        } else {
+          this.flashMessages.success('Successfully saved answer');
+          afterSave();
+        }
+      })
+      .catch(() => {
+        // Swallow — either already-flashed save failure (re-thrown above)
+        // or a post-success throw that we deliberately don't surface as
+        // "save failed".
+      });
   }
 
   @action cancel() {
