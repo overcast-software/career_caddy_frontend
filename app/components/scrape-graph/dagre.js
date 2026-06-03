@@ -86,6 +86,27 @@ export default class ScrapeGraphDagre extends Component {
     return last.graph_payload?.routed_to || last.graph_node;
   }
 
+  // Returns a `(label) => pixelWidth` function backed by a canvas 2d
+  // context (single allocation, reused across nodes). The same font
+  // attrs the SVG text uses go into ctx.font, so the measurement
+  // matches what gets rendered. Falls back to a per-char heuristic
+  // (~6.2px per char at 10px sans-serif) on the rare environment that
+  // lacks canvas — overshoots a hair, which is the safe direction.
+  _buildLabelMeasurer(fontSize, fontFamily) {
+    try {
+      const canvas =
+        this._measureCanvas ||
+        (this._measureCanvas = document.createElement('canvas'));
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('no 2d ctx');
+      ctx.font = `${fontSize}px ${fontFamily}`;
+      return (label) => ctx.measureText(label || '').width;
+    } catch {
+      const perChar = fontSize * 0.62;
+      return (label) => (label || '').length * perChar;
+    }
+  }
+
   @action
   render(element) {
     this._svg = element;
@@ -100,8 +121,22 @@ export default class ScrapeGraphDagre extends Component {
     const VISITED_EDGE_COLOR = '#ea580c'; // orange-600
 
     // ---- dagre layout ----
-    const NODE_W = 110;
+    // NODE_W floor; per-node width is bumped to fit the label so long
+    // names like "Obstacle agent" or "SettleEvidence" don't overflow
+    // the rect (and, at the right edge, the SVG itself — which was the
+    // visible crop on /scrapes/:id/graph).
+    const NODE_W_MIN = 110;
+    const NODE_W_PAD = 16; // 8px gutter on each side of the label
     const NODE_H = 44;
+    const FONT_SIZE = 10;
+    const FONT_FAMILY = 'ui-sans-serif, system-ui, sans-serif';
+    const measureLabelWidth = this._buildLabelMeasurer(FONT_SIZE, FONT_FAMILY);
+    const widthForNode = (n) =>
+      Math.max(
+        NODE_W_MIN,
+        Math.ceil(measureLabelWidth(n.label || '') + NODE_W_PAD),
+      );
+
     const g = new dagre.graphlib.Graph({ multigraph: false });
     // Left-to-right reads better than top-to-bottom for this graph:
     // the main chain (StartScrape → … → ResolveApplyUrl) is long and
@@ -118,7 +153,7 @@ export default class ScrapeGraphDagre extends Component {
     g.setDefaultEdgeLabel(() => ({}));
 
     for (const n of structure.nodes) {
-      g.setNode(n.id, { width: NODE_W, height: NODE_H, ...n });
+      g.setNode(n.id, { width: widthForNode(n), height: NODE_H, ...n });
     }
     for (const e of structure.edges || []) {
       if (g.hasNode(e.from) && g.hasNode(e.to)) {
@@ -320,9 +355,9 @@ export default class ScrapeGraphDagre extends Component {
 
     nodeSel
       .append('rect')
-      .attr('x', -NODE_W / 2)
+      .attr('x', (d) => -d.width / 2)
       .attr('y', -NODE_H / 2)
-      .attr('width', NODE_W)
+      .attr('width', (d) => d.width)
       .attr('height', NODE_H)
       .attr('rx', 8)
       .attr('ry', 8)
@@ -343,8 +378,8 @@ export default class ScrapeGraphDagre extends Component {
       .append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', '0.35em')
-      .attr('font-size', 10)
-      .attr('font-family', 'ui-sans-serif, system-ui, sans-serif')
+      .attr('font-size', FONT_SIZE)
+      .attr('font-family', FONT_FAMILY)
       .attr('fill', (d) => (visitedNodes.has(d.id) ? '#ffffff' : '#1f2937'))
       .attr('pointer-events', 'none')
       .text((d) => d.label);
