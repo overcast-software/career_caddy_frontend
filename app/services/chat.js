@@ -62,6 +62,14 @@ export default class ChatService extends Service {
     this._scrollChat();
   }
 
+  /** Drop the last message entirely. Used when a stream resolves to a
+   *  pure side effect (e.g. only a navigate marker) and we don't want to
+   *  leave an empty assistant bubble behind. */
+  _removeLastMessage() {
+    if (this.messages.length === 0) return;
+    this.messages = this.messages.slice(0, -1);
+  }
+
   /** Append a tool-call breadcrumb to the last assistant message. */
   _appendToolCall(call) {
     const prev = this.messages[this.messages.length - 1];
@@ -286,9 +294,11 @@ export default class ChatService extends Service {
       // Strip navigate markers from final text and trigger navigation.
       // Kept until phase 4 of the AG-UI migration moves navigate fully
       // onto the propose_actions tool.
+      let hadNavigate = false;
       if (accumulated) {
         const navMatches = [...accumulated.matchAll(NAVIGATE_RE)];
         if (navMatches.length > 0) {
+          hadNavigate = true;
           accumulated = accumulated.replace(NAVIGATE_RE, '').trim();
           this._replaceLastMessage(accumulated);
           const lastNav = navMatches[navMatches.length - 1][1];
@@ -297,7 +307,29 @@ export default class ChatService extends Service {
       }
 
       if (!accumulated) {
-        this._replaceLastMessage('(no response from agent)');
+        if (hadNavigate) {
+          // Stream contained ONLY a navigate marker. The route transition
+          // IS the response — drop the empty assistant placeholder so the
+          // "(no response from agent)" literal can't race in and flash
+          // before the transition completes.
+          this._removeLastMessage();
+        } else {
+          // Truly empty agent response — typically an upstream timeout
+          // (e.g. chat_server's httpx.ReadTimeout on /api/v1/me/). Keep a
+          // fallback so the user isn't left staring at a blank bubble,
+          // include the conversationId so the operator can correlate
+          // against logfire, and attach a Retry elicitation action so the
+          // user has a one-click affordance to re-send the same message.
+          const detail = this.conversationId
+            ? ` (conversation ${this.conversationId})`
+            : '';
+          this._replaceLastMessage(
+            `(no response from agent)${detail} — it's safe to try again.`,
+          );
+          this._updateLastMessage({
+            elicitation: { actions: [{ label: 'Retry', message: text }] },
+          });
+        }
       }
     } catch (error) {
       this._replaceLastMessage(`Failed to connect: ${error.message}`);
