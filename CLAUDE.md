@@ -1,6 +1,31 @@
 # frontend/CLAUDE.md
 
 Frontend-specific guidance for Claude Code when working in `frontend/`.
+This file is a pointer; the canonical state lives in `frontend/notes.org`.
+
+## Source of truth — read FIRST
+
+- **`frontend/notes.org`** (drill via `claude/cf-*`) — style
+  conventions (Tailwind + HyperUI), Ember Data array footguns, async
+  getter / .then-chain pattern, plan-CSS-across-themes audit, polling
+  is a service, no logic in component constructors.
+- **Parent `todo.org`** (drill via `claude/cc-*`) — frontend
+  work-items are filed under the parent `Inbox`; there is no
+  `frontend/todo.org`.
+
+Boot sequence (every cc-frontend session):
+
+```
+emacsclient --eval '(claude/cf-help)'
+emacsclient --eval '(claude/cf-notes-toc)'
+emacsclient --eval '(claude/cf-notes-read "Architecture/Style — Tailwind + HyperUI")'
+emacsclient --eval '(claude/cf-notes-read "Architecture/Ember Data array footguns")'
+emacsclient --eval '(claude/cf-notes-read "Architecture/Async getters + .then chains")'
+```
+
+For color or dark-mode work, also read
+`Architecture/Plan CSS across themes` before writing any color
+utility.
 
 ## Stack
 
