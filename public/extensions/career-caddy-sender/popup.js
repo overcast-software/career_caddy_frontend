@@ -1113,25 +1113,101 @@ sendBtn.addEventListener('click', async () => {
 
   const wantsScore = autoScoreBox.checked;
 
+  // Phase C gate — when structured_prefill landed BOTH title AND
+  // company_name AND the page yielded a non-empty description, we have
+  // everything the JobPost write path needs without the server-side
+  // browser tier. Take the extension-direct fast path: POST a Scrape
+  // with source_mode=extension-direct + captured_payload, and the
+  // scrape graph short-circuits straight to PersistJobPost (Phase B).
+  //
+  // Gate-fail (any field empty) → fall through to today's
+  // /scrapes/from-text/ path, unchanged. That's the safety net for
+  // hosts where the per-host selectors haven't been seeded yet.
+  //
+  // Trust presence, iterate — no validator threshold at v1 (Doug's
+  // baked decision on the plan node). When real false-positives show
+  // up, add a confidence gate then.
+  const directTitle = hints.structured_prefill?.title || '';
+  const directCompany = hints.structured_prefill?.company_name || '';
+  const directDescription = payload.text || '';
+  const useDirectPost =
+    directTitle.trim().length > 0 &&
+    directCompany.trim().length > 0 &&
+    directDescription.trim().length > 0;
+
   let resp;
   try {
-    resp = await fetch(`${ORIGIN}/api/v1/scrapes/from-text/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${saved.ccApiKey}`,
-      },
-      body: JSON.stringify({
-        text: payload.text,
-        link: payload.url,
-        source: 'extension',
-        auto_score: wantsScore,
-        apply_url: hints.apply_url,
-        canonical_link_hint: hints.canonical_link_hint,
-        referrer_url: hints.referrer_url,
-        structured_prefill: hints.structured_prefill,
-      }),
-    });
+    if (useDirectPost) {
+      // The api's apply_url + canonical_link_hint + referrer_url live
+      // outside captured_payload today (the from-text endpoint reads
+      // them as top-level kwargs). For the direct-POST path, fold
+      // apply_url and location (when we get one) into captured_payload
+      // and ship the remaining dedup hints (canonical_link_hint,
+      // referrer_url, structured_prefill) under extraction_hints so
+      // the graph can reuse them on the bias-toward-canonical merge.
+      const capturedPayload = {
+        title: directTitle,
+        company: directCompany,
+        description: directDescription,
+      };
+      if (hints.apply_url) capturedPayload.apply_url = hints.apply_url;
+      // location: structured_prefill doesn't carry location at v1 —
+      // when the per-host selectors start shipping a `location` key,
+      // it flows through structured_prefill.location automatically.
+      const directLocation = hints.structured_prefill?.location || '';
+      if (directLocation.trim().length > 0) {
+        capturedPayload.location = directLocation;
+      }
+      const extractionHints = {};
+      if (hints.canonical_link_hint) {
+        extractionHints.canonical_link_hint = hints.canonical_link_hint;
+      }
+      if (hints.referrer_url) {
+        extractionHints.referrer_url = hints.referrer_url;
+      }
+      if (hints.structured_prefill) {
+        extractionHints.structured_prefill = hints.structured_prefill;
+      }
+      if (Object.keys(extractionHints).length > 0) {
+        capturedPayload.extraction_hints = extractionHints;
+      }
+      resp = await fetch(`${ORIGIN}/api/v1/scrapes/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'application/vnd.api+json',
+          Authorization: `Bearer ${saved.ccApiKey}`,
+        },
+        body: JSON.stringify({
+          data: {
+            type: 'scrape',
+            attributes: {
+              link: payload.url,
+              source_mode: 'extension-direct',
+              captured_payload: capturedPayload,
+            },
+          },
+        }),
+      });
+    } else {
+      resp = await fetch(`${ORIGIN}/api/v1/scrapes/from-text/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${saved.ccApiKey}`,
+        },
+        body: JSON.stringify({
+          text: payload.text,
+          link: payload.url,
+          source: 'extension',
+          auto_score: wantsScore,
+          apply_url: hints.apply_url,
+          canonical_link_hint: hints.canonical_link_hint,
+          referrer_url: hints.referrer_url,
+          structured_prefill: hints.structured_prefill,
+        }),
+      });
+    }
   } catch (err) {
     setStatus(sendStatus, `Network error: ${err.message}`, 'error');
     setSendingState(false);

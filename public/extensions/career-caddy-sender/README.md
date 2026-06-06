@@ -1,4 +1,4 @@
-# Career Caddy Sender — v1.2.0
+# Career Caddy Sender — v1.3.0
 
 A browser extension that captures the active page's URL + visible text and
 POSTs it directly to your Career Caddy instance. The popup shows a one-time
@@ -28,6 +28,24 @@ fires the page off and an OS-level system notification announces the result.
 
 ## Version history
 
+- **1.3.0** — Extension direct-POST when capture is complete (Phase C of
+  the extension-direct plan). When the per-host `job_data_selectors`
+  yield BOTH `title` and `company_name` non-empty AND the page body
+  text (description) is non-empty, the popup now POSTs a scrape with
+  `source_mode=extension-direct` and a `captured_payload` carrying
+  title / company / description (+ optional apply_url / location /
+  extraction_hints) to `POST /api/v1/scrapes/` (JSON:API). The
+  scrape-graph fast path (Phase B) short-circuits the browser tier and
+  goes straight to PersistJobPost — zero server-side browser cost on
+  the hot path. When the gate fails (any field empty), the popup
+  falls through to today's `POST /api/v1/scrapes/from-text/` path,
+  unchanged — that's the safety net for hosts whose
+  `extension_selectors` haven't been seeded yet. Trust presence,
+  iterate — no validator threshold at v1; non-empty is the gate.
+  Requires api Phase A (Scrape.source_mode + captured_payload +
+  serializer validation) in prod for the new behavior to land
+  successfully; before then, gate-pass POSTs will 400 and gate-fail
+  POSTs keep working as today.
 - **1.2.0** — Cross-platform dedup hints. On send, the popup now also
   extracts three best-effort signals from the active page and forwards
   them to `POST /api/v1/scrapes/from-text/`: (a) `apply_url` — reads
