@@ -785,6 +785,14 @@ const BAKED_EXTENSION_SELECTORS = {
       'link[rel="canonical"]',
     ],
     apply_url_decoder: 'linkedin_safety_go',
+    // Structured-prefill selectors: keep in sync with the
+    // 0093_seed_linkedin_job_data_selectors migration. The api ships
+    // these by default; the baked copy fires only when the api is
+    // unreachable.
+    job_data_selectors: {
+      title: 'h1',
+      company_name: "a[href*='/company/']",
+    },
   },
 };
 
@@ -900,6 +908,14 @@ async function loadExtensionSelectors(host, apiKey) {
     apply_button_selectors: attrs.apply_button_selectors || [],
     canonical_link_selectors: attrs.canonical_link_selectors || [],
     apply_url_decoder: attrs.apply_url_decoder || null,
+    // Structured-prefill: per-field selectors the popup runs against
+    // the active tab DOM to ship a {title, company_name, ...} dict
+    // alongside the raw text. Treat null/non-dict as empty so a stale
+    // cache or a host without the field still flows through.
+    job_data_selectors:
+      attrs.job_data_selectors && typeof attrs.job_data_selectors === 'object'
+        ? attrs.job_data_selectors
+        : {},
   };
   await writeSelectorCache(norm, { selectors });
   return selectors;
@@ -917,6 +933,7 @@ async function grabHints(tabId, hostname, apiKey) {
     apply_url: null,
     canonical_link_hint: null,
     referrer_url: null,
+    structured_prefill: null,
   };
   const selectors = await loadExtensionSelectors(hostname, apiKey);
   const applySelectors = (selectors && selectors.apply_button_selectors) || [];
@@ -925,13 +942,20 @@ async function grabHints(tabId, hostname, apiKey) {
   const decoderName =
     (selectors && selectors.apply_url_decoder) || 'passthrough';
   const decoder = DECODERS[decoderName] || DECODERS.passthrough;
+  const jobDataSelectors =
+    (selectors && selectors.job_data_selectors) || {};
 
   let raw;
   try {
     const results = await api.scripting.executeScript({
       target: { tabId },
-      args: [applySelectors, canonicalSelectors, REFERRER_HOSTS_LIST],
-      func: (applySels, canonicalSels, referrerHosts) => {
+      args: [
+        applySelectors,
+        canonicalSelectors,
+        REFERRER_HOSTS_LIST,
+        jobDataSelectors,
+      ],
+      func: (applySels, canonicalSels, referrerHosts, jobDataSels) => {
         function pickHref(selectors) {
           for (const sel of selectors) {
             const el = document.querySelector(sel);
@@ -973,11 +997,29 @@ async function grabHints(tabId, hostname, apiKey) {
             return null;
           }
         }
+        function pickPrefill(selectorMap) {
+          if (!selectorMap || typeof selectorMap !== 'object') return null;
+          const out = {};
+          for (const [field, sel] of Object.entries(selectorMap)) {
+            if (!sel || typeof sel !== 'string') continue;
+            let el = null;
+            try {
+              el = document.querySelector(sel);
+            } catch {
+              continue;
+            }
+            if (!el) continue;
+            const text = (el.innerText || el.textContent || '').trim();
+            if (text) out[field] = text;
+          }
+          return Object.keys(out).length ? out : null;
+        }
         return {
           applyHref: pickHref(applySels),
           canonicalHref: pickMetaContent(canonicalSels),
           referrerHref: pickReferrer(),
           baseHref: location.href,
+          prefill: pickPrefill(jobDataSels),
         };
       },
     });
@@ -1000,6 +1042,7 @@ async function grabHints(tabId, hostname, apiKey) {
     apply_url: applyDecoded,
     canonical_link_hint: canonicalDecoded,
     referrer_url: raw.referrerHref || null,
+    structured_prefill: raw.prefill || null,
   };
 }
 
@@ -1050,7 +1093,12 @@ sendBtn.addEventListener('click', async () => {
   }
 
   // Hints are best-effort — a thrown extractor must never block the send.
-  let hints = { apply_url: null, canonical_link_hint: null, referrer_url: null };
+  let hints = {
+    apply_url: null,
+    canonical_link_hint: null,
+    referrer_url: null,
+    structured_prefill: null,
+  };
   try {
     const [tab2] = await api.tabs.query({ active: true, currentWindow: true });
     if (tab2 && tab2.id && tab2.url) {
@@ -1081,6 +1129,7 @@ sendBtn.addEventListener('click', async () => {
         apply_url: hints.apply_url,
         canonical_link_hint: hints.canonical_link_hint,
         referrer_url: hints.referrer_url,
+        structured_prefill: hints.structured_prefill,
       }),
     });
   } catch (err) {
