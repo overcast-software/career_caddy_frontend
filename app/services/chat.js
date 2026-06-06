@@ -128,6 +128,16 @@ export default class ChatService extends Service {
 
     this.isStreaming = true;
     let accumulated = '';
+    // Set when the stream carried a RUN_ERROR event so the post-loop
+    // empty-accumulated fallback at the bottom of this function doesn't
+    // overwrite the error copy the server already gave us. RUN_ERROR
+    // doesn't append to `accumulated`, so without this flag the fallback
+    // sees an empty accumulator and clobbers the operator-friendly error
+    // message with the bare "(no response from agent)" string. Doug
+    // surfaced this 2026-06-06 against the chat_server httpx.ReadTimeout
+    // /me/ path — the server's "Could not reach the chat backend right
+    // now" was flashing then disappearing.
+    let gotRunError = false;
     // Per-toolCallId bookkeeping for AG-UI's split tool-call events.
     // name: so we can detect propose_actions on END
     // argsBuffer: streamed JSON text from TOOL_CALL_ARGS deltas
@@ -289,6 +299,7 @@ export default class ChatService extends Service {
               }
 
               case AG_UI.RUN_ERROR: {
+                gotRunError = true;
                 this._replaceLastMessage(
                   `Error: ${event.message || 'stream error'}`,
                 );
@@ -320,7 +331,7 @@ export default class ChatService extends Service {
         }
       }
 
-      if (!accumulated) {
+      if (!accumulated && !gotRunError) {
         if (hadNavigate) {
           // Stream contained ONLY a navigate marker. The route transition
           // IS the response — drop the empty assistant placeholder so the

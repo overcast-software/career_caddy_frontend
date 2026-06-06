@@ -167,6 +167,37 @@ module('Unit | Service | chat', function (hooks) {
     );
   });
 
+  test('RUN_ERROR survives the empty-accumulated fallback', async function (assert) {
+    // Doug 2026-06-06: chat_server emits a RunErrorEvent when the
+    // /api/v1/me/ fetch times out ("Could not reach the chat backend
+    // right now"). The frontend's RUN_ERROR handler set the right
+    // copy, but the subsequent if-no-accumulated guard then clobbered
+    // it with the bare "(no response from agent)" fallback. Lock in
+    // that the server's error copy is what the user sees.
+    globalThis.fetch = () =>
+      Promise.resolve(
+        fakeSSEResponse([
+          {
+            type: 'RUN_ERROR',
+            message: 'Could not reach the chat backend right now.',
+          },
+        ]),
+      );
+
+    await this.service.sendMessage('hello?');
+
+    const assistant = this.service.messages[1];
+    assert.strictEqual(
+      assistant.content,
+      'Error: Could not reach the chat backend right now.',
+      'RUN_ERROR copy survives, no fallback clobber',
+    );
+    assert.notOk(
+      assistant.elicitation,
+      'no Retry elicitation attached — server already said the right thing',
+    );
+  });
+
   test('unauthed send short-circuits with the friendly log-in copy and never touches fetch', async function (assert) {
     // Doug 2026-06-06: chat panel rendered on signup; users tried to send
     // and got a long hang before the api 401 surfaced. The defense-in-
