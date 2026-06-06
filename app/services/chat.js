@@ -112,6 +112,20 @@ export default class ChatService extends Service {
       { role: 'assistant', content: '', timestamp: new Date() },
     ];
 
+    // Defense-in-depth: the floating chat button is hidden when the
+    // session isn't authenticated, but the panel may still be reachable
+    // (open in a tab during a session expiry, deep-linked, etc.) — answer
+    // locally with the same copy the api 401 path produces so the user
+    // gets instant feedback instead of a network round-trip waiting on
+    // a 401 they could never authenticate past.
+    if (!this.session.isAuthenticated) {
+      this._replaceLastMessage(
+        "Hey there! I'd love to help, but I need you to log in first. " +
+          "Head over to the [login page](/login) and come back — I'll be right here waiting.",
+      );
+      return;
+    }
+
     this.isStreaming = true;
     let accumulated = '';
     // Per-toolCallId bookkeeping for AG-UI's split tool-call events.

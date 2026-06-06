@@ -30,8 +30,11 @@ module('Unit | Service | chat', function (hooks) {
     this.service = this.owner.lookup('service:chat');
 
     // Stub session — sendMessage calls ensureFreshToken + reads
-    // authorizationHeader before issuing the fetch.
+    // authorizationHeader before issuing the fetch. isAuthenticated
+    // must be truthy: the service short-circuits unauthed sends with a
+    // friendly "log in first" message and never touches fetch.
     this.service.session = {
+      isAuthenticated: true,
       ensureFreshToken: () => Promise.resolve(),
       authorizationHeader: 'Bearer test-token',
     };
@@ -162,6 +165,28 @@ module('Unit | Service | chat', function (hooks) {
       assistant.content,
       "(no response from agent) — it's safe to try again.",
     );
+  });
+
+  test('unauthed send short-circuits with the friendly log-in copy and never touches fetch', async function (assert) {
+    // Doug 2026-06-06: chat panel rendered on signup; users tried to send
+    // and got a long hang before the api 401 surfaced. The defense-in-
+    // depth short-circuit answers locally so there is no network at all.
+    this.service.session.isAuthenticated = false;
+    let fetched = false;
+    globalThis.fetch = () => {
+      fetched = true;
+      return Promise.resolve(fakeSSEResponse([{ type: 'RUN_FINISHED' }]));
+    };
+
+    await this.service.sendMessage('can you help me?');
+
+    assert.notOk(fetched, 'fetch was never called');
+    const assistant = this.service.messages[1];
+    assert.ok(
+      assistant.content.includes('need you to log in first'),
+      'shows the log-in copy',
+    );
+    assert.notOk(this.service.isStreaming, 'streaming flag stays false');
   });
 
   test('truly empty stream attaches a Retry elicitation carrying the original message', async function (assert) {
