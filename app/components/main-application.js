@@ -9,6 +9,7 @@ export default class MainApplicationComponent extends Component {
   @service currentUser;
   @service chat;
   @service router;
+  @service session;
   @service spinner;
   @tracked sidebarOpen = localStorage.getItem(SIDEBAR_KEY) === 'true';
 

@@ -106,4 +106,38 @@ module('Integration | Component | main-application', function (hooks) {
         'sidebar closes on mobile when overlay is clicked',
       );
   });
+
+  // ── Chat affordance gating ────────────────────────────────────────────────
+  //
+  // Doug 2026-06-06: PR #177 wrapped <Chat::Sidebar /> and the "Chat with AI"
+  // footer button in {{#if this.session.isAuthenticated}}, but the component
+  // class wasn't injecting `session` — so the gate read `undefined` and
+  // evaluated falsy for everyone, hiding chat from authenticated users too.
+  // These tests lock in both directions.
+
+  test('"Chat with AI" button renders for authenticated users', async function (assert) {
+    const session = this.owner.lookup('service:session');
+    Object.defineProperty(session, 'isAuthenticated', {
+      value: true,
+      configurable: true,
+    });
+
+    await render(hbs`<MainApplication />`);
+    assert
+      .dom('button[title="Open Caddy AI chat"]')
+      .exists('chat button visible to logged-in users');
+  });
+
+  test('"Chat with AI" button hidden when session is not authenticated', async function (assert) {
+    const session = this.owner.lookup('service:session');
+    Object.defineProperty(session, 'isAuthenticated', {
+      value: false,
+      configurable: true,
+    });
+
+    await render(hbs`<MainApplication />`);
+    assert
+      .dom('button[title="Open Caddy AI chat"]')
+      .doesNotExist('chat button hidden from unauthed visitors');
+  });
 });
