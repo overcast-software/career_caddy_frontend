@@ -268,6 +268,9 @@ Router.map(function () {
     this.route('scrape-profiles', function () {
       this.route('show', { path: '/:scrape_profile_id' });
     });
+    this.route('companies', function () {
+      this.route('show', { path: '/:company_id' });
+    });
     this.route('ai-models');
     this.route('scrape-graph');
   });

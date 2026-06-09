@@ -1,0 +1,71 @@
+import { module, test } from 'qunit';
+import { setupRenderingTest } from 'career-caddy-frontend/tests/helpers';
+import { render } from '@ember/test-helpers';
+import { hbs } from 'ember-cli-htmlbars';
+
+module('Integration | Component | companies/aliases-panel', function (hooks) {
+  setupRenderingTest(hooks);
+
+  test('renders the empty state when no aliases are present', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.company = store.createRecord('company', { name: 'Acme' });
+    await render(hbs`<Companies::AliasesPanel @company={{this.company}} />`);
+    assert.dom('[data-test-aliases-panel]').exists();
+    assert.dom('[data-test-alias-row]').doesNotExist();
+    assert.dom('h2').hasText('Name aliases');
+  });
+
+  test('renders one row per alias with source badge', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    // Push the Company with its aliases relationship populated so the
+    // hasMany('aliases').value() path resolves synchronously in the
+    // component getter.
+    store.push({
+      data: {
+        type: 'company',
+        id: '900',
+        attributes: { name: 'Acme' },
+        relationships: {
+          aliases: {
+            data: [
+              { type: 'company-alias', id: '1' },
+              { type: 'company-alias', id: '2' },
+            ],
+          },
+        },
+      },
+      included: [
+        {
+          type: 'company-alias',
+          id: '1',
+          attributes: {
+            name: 'Acme Corp',
+            'name-slug': 'acme',
+            source: 'extraction',
+          },
+        },
+        {
+          type: 'company-alias',
+          id: '2',
+          attributes: {
+            name: 'Acme, Inc.',
+            'name-slug': 'acme-inc',
+            source: 'manual',
+          },
+        },
+      ],
+    });
+    this.company = store.peekRecord('company', '900');
+
+    await render(hbs`<Companies::AliasesPanel @company={{this.company}} />`);
+
+    assert.dom('[data-test-alias-row]').exists({ count: 2 });
+    assert.dom('[data-test-alias-row="1"]').includesText('Acme Corp');
+    assert
+      .dom('[data-test-alias-row="1"] [data-test-alias-source]')
+      .hasText('extraction');
+    assert
+      .dom('[data-test-alias-row="2"] [data-test-alias-source]')
+      .hasText('manual');
+  });
+});

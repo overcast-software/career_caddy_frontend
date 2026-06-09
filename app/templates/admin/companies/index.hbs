@@ -1,0 +1,104 @@
+{{page-title "Companies — Admin"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
+    <LinkTo @route="admin.users.index" class="nav-link">Users</LinkTo>
+    <LinkTo @route="admin.waitlist" class="nav-link">Waitlist</LinkTo>
+    <LinkTo @route="admin.invitations" class="nav-link">Invitations</LinkTo>
+    <LinkTo @route="admin.scrape-profiles" class="nav-link">Scrape Profiles</LinkTo>
+    <LinkTo @route="admin.companies.index" class="nav-link">Companies</LinkTo>
+    <LinkTo @route="admin.ai-models" class="nav-link">AI Models</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card">
+      <div class="mb-4">
+        <h1 class="text-xl font-semibold">Companies</h1>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          Staff curation hub for the dedupe pipeline. Open a Company to view its
+          name aliases or merge it into another.
+        </p>
+      </div>
+
+      {{#if this.model.length}}
+        <div
+          class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+        >
+          <table class="min-w-full text-sm">
+            <thead
+              class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600"
+            >
+              <tr>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >ID</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >Name</th>
+                <th
+                  class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
+                >Job Posts</th>
+                <th
+                  class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
+                >Applications</th>
+                <th
+                  class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
+                >Scrapes</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              {{#each this.model as |company|}}
+                <tr
+                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  data-test-company-row={{company.id}}
+                >
+                  <td
+                    class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400"
+                  >{{company.id}}</td>
+                  <td
+                    class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    <LinkTo
+                      @route="admin.companies.show"
+                      @model={{company.id}}
+                      class="text-accent-600 dark:text-accent-400 hover:underline"
+                    >
+                      {{company.name}}
+                    </LinkTo>
+                    {{#if company.displayName}}
+                      <span
+                        class="ml-2 text-xs text-gray-500 dark:text-gray-400"
+                      >({{company.displayName}})</span>
+                    {{/if}}
+                  </td>
+                  <td
+                    class="px-4 py-3 text-right text-gray-600 dark:text-gray-300"
+                  >{{or company.jobPostsCount 0}}</td>
+                  <td
+                    class="px-4 py-3 text-right text-gray-600 dark:text-gray-300"
+                  >{{or company.jobApplicationsCount 0}}</td>
+                  <td
+                    class="px-4 py-3 text-right text-gray-600 dark:text-gray-300"
+                  >{{or company.scrapesCount 0}}</td>
+                  <td class="px-4 py-3 text-sm">
+                    <LinkTo
+                      @route="admin.companies.show"
+                      @model={{company.id}}
+                      class="text-accent-600 dark:text-accent-400 hover:underline"
+                    >
+                      Manage
+                    </LinkTo>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      {{else}}
+        <EmptyState @message="No companies yet." />
+      {{/if}}
+    </div>
+  </:main>
+</RouteLayout>
