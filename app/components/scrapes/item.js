@@ -53,7 +53,12 @@ export default class ScrapesItemComponent extends Component {
     if (!id) return;
     try {
       const result = await this.store.query('screenshot', { scrape_id: id });
-      this.screenshots = (result.toArray?.() ?? []).map((s) => ({
+      // store.query returns an AdapterPopulatedRecordArray (iterable in
+      // Ember Data 5+ but no longer exposes .toArray()). Array.from is
+      // the one-shot composition shape for non-reactive consumers; the
+      // old `.toArray?.() ?? []` silently produced an empty list.
+      const rows = result ? Array.from(result) : [];
+      this.screenshots = rows.map((s) => ({
         filename: s.filename,
         url: `${this.api.baseUrl}scrapes/${id}/screenshots/${s.filename}`,
         revealed: false,
