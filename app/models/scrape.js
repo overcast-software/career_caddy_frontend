@@ -18,6 +18,13 @@ export default class ScrapeModel extends Pollable(Model) {
   @attr('string') html;
   @attr('string') latestStatusNote;
   @attr('boolean', { defaultValue: false }) skipExtract;
+  // Trigram-similar Company suggestions written by the extractor when
+  // a new Company is minted (no exact CompanyAlias hit). Raw JSON
+  // shape: ``[{company_id, name, similarity}, ...]`` — top 3 ordered
+  // by similarity desc. Drives the "Suggested companies" callout on
+  // the Scrape show page; staff click through to /admin/companies/:id
+  // to merge.
+  @attr() companySuggestions;
   @belongsTo('job-post', { async: true, inverse: 'scrapes' }) jobPost;
   @belongsTo('company', { async: true, inverse: 'scrapes' }) company;
   @hasMany('scrape', { async: true, inverse: 'sourceScrape' }) scrapes;

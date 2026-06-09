@@ -1,4 +1,5 @@
 import Model, { attr, hasMany } from '@ember-data/model';
+import { apiAction } from 'career-caddy-frontend/utils/api-action';
 export default class CompanyModel extends Model {
   @attr('string') name;
   @attr('string') displayName;
@@ -50,4 +51,24 @@ export default class CompanyModel extends Model {
   }
   @hasMany('score', { async: true, inverse: 'company' }) scores;
   @hasMany('project', { async: true, inverse: null }) projects;
+  // Name-variant aliases (Phase A dedupe redesign). The api side
+  // exposes the relationship via the company-alias serializer + a
+  // sub-collection endpoint; this declaration is the consumer side
+  // so <Companies::AliasesPanel> can read .hasMany('aliases').value()
+  // through the standard Ember Data pattern.
+  @hasMany('company-alias', { async: true, inverse: 'company' }) aliases;
+
+  // Staff-only verb: POST /api/v1/companies/:id/merge-into/
+  // Moves all FKs (JobPost, Scrape, JobApplication, CompanyAlias)
+  // from this Company into ``targetId`` and deletes the source.
+  // Returns the target Company resource — the response is auto-pushed
+  // through apiAction so the resolved record is the live store-backed
+  // target. Caller should transitionTo the target after success.
+  mergeInto(targetId) {
+    return apiAction(this, {
+      method: 'POST',
+      path: 'merge-into',
+      data: { target_id: targetId },
+    });
+  }
 }

@@ -1,6 +1,39 @@
 {{page-title "Scrape"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
+    {{#if this.model.companySuggestions.length}}
+      <div
+        class="mb-4 rounded-md bg-blue-50 p-3 ring-1 ring-inset ring-blue-200 dark:bg-blue-500/10 dark:ring-blue-500/30"
+        data-test-company-suggestions
+      >
+        <p class="text-sm font-medium text-blue-800 dark:text-blue-200">
+          Suggested companies (trigram match)
+        </p>
+        <p class="mt-1 text-xs text-blue-700 dark:text-blue-300">
+          The extractor minted a new Company for this scrape. These look similar
+          — open the curation hub to review and merge if needed.
+        </p>
+        <ul class="mt-2 space-y-1">
+          {{#each this.model.companySuggestions as |s|}}
+            <li class="flex items-baseline gap-x-2 text-sm">
+              <LinkTo
+                @route="admin.companies.show"
+                @model={{s.company_id}}
+                class="text-accent-700 dark:text-accent-300 hover:underline"
+                data-test-company-suggestion={{s.company_id}}
+              >
+                {{s.name}}
+              </LinkTo>
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                similarity
+                {{s.similarity}}
+              </span>
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+
     <Scrapes::Item @scrape={{this.model}} />
 
     <div class="form-actions mt-4">

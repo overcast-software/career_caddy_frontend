@@ -1,0 +1,77 @@
+{{!
+  Renders the Company's name-variant aliases. Each row shows the
+  variant name, a source-coded badge (extraction / manual / backfill),
+  and the alias's createdAt. Empty state when no aliases have been
+  recorded yet.
+}}
+<div class="panel-card" data-test-aliases-panel>
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold">Name aliases</h2>
+    <span class="text-xs text-gray-500 dark:text-gray-400">
+      {{this.rows.length}}
+      {{if (eq this.rows.length 1) "variant" "variants"}}
+    </span>
+  </div>
+
+  {{#if this.rows.length}}
+    <div
+      class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+    >
+      <table class="min-w-full text-sm">
+        <thead
+          class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600"
+        >
+          <tr>
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+            >Name</th>
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+            >Slug</th>
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+            >Source</th>
+            <th
+              class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+            >Added</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+          {{#each this.rows as |row|}}
+            <tr
+              class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              data-test-alias-row={{row.id}}
+            >
+              <td
+                class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100"
+              >{{row.name}}</td>
+              <td
+                class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs"
+              >{{row.nameSlug}}</td>
+              <td class="px-4 py-3">
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
+                    {{row.sourceClasses}}"
+                  data-test-alias-source
+                >
+                  {{row.sourceLabel}}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                {{#if row.createdAt}}
+                  {{moment-format row.createdAt "MMM D, YYYY"}}
+                {{else}}
+                  —
+                {{/if}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  {{else}}
+    <EmptyState
+      @message="No name aliases yet. Variants are recorded automatically when the extractor mints this Company or when staff perform a merge."
+    />
+  {{/if}}
+</div>
