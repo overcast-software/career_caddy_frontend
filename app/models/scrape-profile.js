@@ -1,4 +1,5 @@
 import Model, { attr } from '@ember-data/model';
+import { apiAction } from 'career-caddy-frontend/utils/api-action';
 
 export default class ScrapeProfileModel extends Model {
   @attr('string') hostname;
@@ -35,5 +36,23 @@ export default class ScrapeProfileModel extends Model {
     if (pct >= 80) return 'text-green-600 dark:text-green-400';
     if (pct >= 50) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-red-600 dark:text-red-400';
+  }
+
+  // Staff-only verb: POST /scrape-profiles/:id/sharpen/. Queues a
+  // browser-driven re-capture that refreshes the profile's selectors +
+  // extraction hints from a fresh page render. The api gates on the
+  // hostname having at least one successful scrape; absent that, it
+  // returns 422 and we surface a friendlier message. Optional `force`
+  // payload skips the freshness check (e.g. re-run shortly after the
+  // last sharpen if the selectors clearly didn't take). Response is
+  // 202 + the same scrape-profile resource so the store picks up any
+  // attribute mutations the api made synchronously; the async sharpen
+  // job lands its changes later via a subsequent scrape attach.
+  sharpen({ force = false } = {}) {
+    return apiAction(this, {
+      method: 'POST',
+      path: 'sharpen',
+      data: { force },
+    });
   }
 }
