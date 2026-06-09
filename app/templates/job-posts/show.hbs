@@ -81,6 +81,27 @@
               Duplicate of #{{this.model.duplicateOfId}}
             </LinkTo>
           {{/if}}
+          {{#if this.model.repostedFromId}}
+            <LinkTo
+              @route="job-posts.show"
+              @model={{this.model.repostedFromId}}
+              class="mt-1 ml-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-500/30"
+              data-test-reposted-from
+            >
+              Reposted from #{{this.model.repostedFromId}}
+            </LinkTo>
+          {{/if}}
+          {{#if this.model.repostsCount}}
+            <span
+              class="mt-1 ml-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-500/30"
+              title="This posting has been re-listed elsewhere"
+              data-test-reposts-count
+            >
+              {{this.model.repostsCount}}
+              {{if (eq this.model.repostsCount 1) "repost" "reposts"}}
+              of this
+            </span>
+          {{/if}}
           {{#if (eq this.model.postingStatus "closed")}}
             <span
               class="mt-1 ml-1 inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/30"

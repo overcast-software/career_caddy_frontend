@@ -164,5 +164,116 @@ module('Unit | Model | job post', function (hooks) {
         text: 'pasted job description',
       });
     });
+
+    test('markDuplicateOf({target_id}) POSTs to /job-posts/:id/mark-duplicate-of/', async function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: { type: 'job-post', id: '81', attributes: {} },
+      });
+      const jp = store.peekRecord('job-post', '81');
+      await jp.markDuplicateOf({ target_id: 99 });
+      assert.strictEqual(this.ajaxCalls.length, 1);
+      assert.strictEqual(this.ajaxCalls[0].method, 'POST');
+      assert.true(
+        this.ajaxCalls[0].url.endsWith('/job-posts/81/mark-duplicate-of/'),
+        `URL ${this.ajaxCalls[0].url} ends with the verb path`,
+      );
+      assert.deepEqual(this.ajaxCalls[0].options?.data, { target_id: 99 });
+    });
+
+    test('markDuplicateOf forwards field_overrides + relation untouched', async function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: { type: 'job-post', id: '82', attributes: {} },
+      });
+      const jp = store.peekRecord('job-post', '82');
+      await jp.markDuplicateOf({
+        target_id: 100,
+        field_overrides: { title: 'A', description: 'B' },
+        relation: 'repost',
+      });
+      assert.strictEqual(this.ajaxCalls.length, 1);
+      assert.deepEqual(this.ajaxCalls[0].options?.data, {
+        target_id: 100,
+        field_overrides: { title: 'A', description: 'B' },
+        relation: 'repost',
+      });
+    });
+  });
+
+  module('Phase C — repost relation', function () {
+    test('repostedFromId attr is exposed for the show-page pill', function (assert) {
+      const store = this.owner.lookup('service:store');
+      // store.push expects JSON:API normalized attrs — camelCase keys
+      // matching the @attr property name on the model.
+      store.push({
+        data: {
+          type: 'job-post',
+          id: '90',
+          attributes: { repostedFromId: 42 },
+        },
+      });
+      const jp = store.peekRecord('job-post', '90');
+      assert.strictEqual(jp.repostedFromId, 42);
+    });
+
+    test('repostedFrom belongsTo resolves to the referenced JP', function (assert) {
+      const store = this.owner.lookup('service:store');
+      // Relationship key matches the camelCase property name on the
+      // model, not the dasherized JSON:API wire format. The serializer
+      // dasherizes on outbound writes; store.push is post-normalize.
+      store.push({
+        data: [
+          { type: 'job-post', id: '91', attributes: {} },
+          {
+            type: 'job-post',
+            id: '92',
+            attributes: {},
+            relationships: {
+              repostedFrom: { data: { type: 'job-post', id: '91' } },
+            },
+          },
+        ],
+      });
+      const repost = store.peekRecord('job-post', '92');
+      const original = repost.belongsTo('repostedFrom').value();
+      assert.ok(original, 'live belongsTo resolves without await');
+      assert.strictEqual(original.id, '91');
+    });
+
+    test('reposts hasMany is reachable via the reverse FK', function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: [
+          {
+            type: 'job-post',
+            id: '93',
+            attributes: {},
+            relationships: {
+              reposts: {
+                data: [
+                  { type: 'job-post', id: '94' },
+                  { type: 'job-post', id: '95' },
+                ],
+              },
+            },
+          },
+          { type: 'job-post', id: '94', attributes: {} },
+          { type: 'job-post', id: '95', attributes: {} },
+        ],
+      });
+      const original = store.peekRecord('job-post', '93');
+      const reposts = original.hasMany('reposts').value() || [];
+      const ids = [];
+      for (const r of reposts) ids.push(r.id);
+      assert.deepEqual(ids.sort(), ['94', '95']);
+      assert.strictEqual(original.repostsCount, 2);
+    });
+
+    test('repostsCount falls back to 0 when relationship has not loaded', function (assert) {
+      const store = this.owner.lookup('service:store');
+      const jp = store.createRecord('job-post', {});
+      assert.strictEqual(jp.repostsCount, 0);
+    });
   });
 });

@@ -34,6 +34,12 @@ export default class JobPostModel extends Model {
   @attr('string') link;
   @attr('string') canonicalLink;
   @attr('number') duplicateOfId;
+  // Phase C dedupe redesign — repost relation FK. Distinct from
+  // `duplicateOfId`: a repost is a *new* posting of the same role at
+  // a later date (often after a >14-day gap); both rows stay
+  // independently queryable. Read-only here; writes flow through the
+  // markDuplicateOf verb with payload `{ relation: "repost" }`.
+  @attr('number') repostedFromId;
   // Self-referential FK rendered by the api as a `duplicate-of` JSON:API
   // relationship. Reads only — writes go through the markDuplicateOf /
   // unlinkDuplicate / promoteCanonical verb methods so the api can enforce
@@ -41,12 +47,21 @@ export default class JobPostModel extends Model {
   // (duplicates) is fetched separately via a sub-collection endpoint and
   // we manage cross-side state by reloading post-mutation.
   @belongsTo('job-post', { async: true, inverse: null }) duplicateOf;
+  // Self-referential FK for the "this is a repost of an older posting"
+  // signal. Set server-side when markDuplicateOf is called with
+  // relation="repost"; the bi-directional `reposts` hasMany below is the
+  // reverse. Used by jp.show to render the "Reposted from #X" and
+  // "X reposts of this" pills. Writes flow through markDuplicateOf with
+  // relation="repost", same as duplicateOf.
+  @belongsTo('job-post', { async: true, inverse: 'reposts' }) repostedFrom;
+  @hasMany('job-post', { async: true, inverse: 'repostedFrom' }) reposts;
   // Apply-destination resolver fields. Populated by the scrape-graph
   // ResolveApplyUrl node via PATCH /scrapes/:id/apply-url/. See
   // notes.org::*Apply-destination resolution.
   @attr('string') applyUrl;
   @attr('string') applyUrlStatus;
   @attr('date') applyUrlResolvedAt;
+  @attr('string') location;
   // 'open' / 'closed' / null. null = unknown — historical posts and
   // anything the extractor's text-signals didn't fire on. List view
   // hides 'closed' by default; jp.show surfaces a chip only on closed.
@@ -104,6 +119,18 @@ export default class JobPostModel extends Model {
   // re-runs the query as part of the model resolution.
   @hasMany('job-post-duplicate-candidate', { async: true, inverse: null })
   duplicateCandidates;
+
+  // Synchronous count of `reposts` for the "X reposts of this" pill on
+  // jp.show. Reads the live ManyArray (no .slice() / .toArray()) and
+  // falls back to 0 when the relationship hasn't been materialized
+  // (e.g. mid-load proxy on first render). jp.show's route may opt to
+  // include=reposts on its findRecord so the count renders without a
+  // follow-up fetch; absent the include the pill stays hidden, which
+  // is the correct "unknown" presentation.
+  get repostsCount() {
+    const live = this.hasMany('reposts').value();
+    return live?.length || 0;
+  }
 
   // Synchronous materialized view of the async hasMany above. The
   // route's model() awaits .reload() so by first paint the relationship
@@ -220,6 +247,17 @@ export default class JobPostModel extends Model {
     });
   }
 
+  // POST /job-posts/:id/mark-duplicate-of/. Payload shape (server-side,
+  // see api/job_posts/views.py::mark_duplicate_of):
+  //   { target_id: int (required),
+  //     field_overrides?: { title|description|apply_url|location|company: "A"|"B" },
+  //     relation?: "duplicate" | "repost" }
+  // - field_overrides keys are independent; subset is fine. "A" copies
+  //   the *from* (this) JP's value onto the target; "B" keeps the
+  //   target's existing value. Omitted keys default to keeping target.
+  // - relation="duplicate" (default) sets duplicate_of_id on this JP.
+  //   relation="repost" sets reposted_from_id instead; both rows remain
+  //   independently queryable.
   markDuplicateOf(payload) {
     return apiAction(this, {
       method: 'POST',

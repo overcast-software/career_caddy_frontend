@@ -236,11 +236,26 @@ export default class JobPostsFormComponent extends Component {
     return out;
   }
 
+  // Two-step dup picker: PowerSelect onChange just stages the target so
+  // staff can decide between "Mark as duplicate" (quick) and
+  // "Compare side-by-side" (open /admin/dedupe/:a/compare/:b for
+  // field-level review). The old behavior — immediate mark on select —
+  // had no escape hatch if you mis-clicked.
   @action
-  markAsDuplicate(target) {
+  selectDupTarget(target) {
+    this.selectedDupTarget = target;
+  }
+
+  @action
+  clearDupTarget() {
+    this.selectedDupTarget = null;
+  }
+
+  @action
+  confirmMarkAsDuplicate() {
+    const target = this.selectedDupTarget;
     if (!target) return;
     if (this.dupSubmitting) return;
-    this.selectedDupTarget = target;
     this.dupSubmitting = true;
     this.args.jobPost
       .markDuplicateOf({ target_id: parseInt(target.id, 10) })
@@ -253,7 +268,6 @@ export default class JobPostsFormComponent extends Component {
         const detail =
           error?.errors?.[0]?.detail ?? 'Failed to mark as duplicate.';
         this.flashMessages.danger(detail);
-        this.selectedDupTarget = null;
       })
       .finally(() => {
         this.dupSubmitting = false;
