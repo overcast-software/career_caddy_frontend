@@ -273,6 +273,9 @@ Router.map(function () {
     });
     this.route('ai-models');
     this.route('scrape-graph');
+    this.route('dedupe', function () {
+      this.route('compare', { path: ':a/compare/:b' });
+    });
   });
   this.route('career-data', function () {});
   this.route('reports', function () {

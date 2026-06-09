@@ -84,6 +84,14 @@
                 >
                   {{c.confidence}}
                 </span>
+                {{#if (and this.isStaff @jobPost)}}
+                  <LinkTo
+                    @route="admin.dedupe.compare"
+                    @models={{array @jobPost.id c.id}}
+                    class="text-xs text-accent-600 hover:underline dark:text-accent-400"
+                    data-test-compare-candidate={{c.id}}
+                  >Compare</LinkTo>
+                {{/if}}
               </li>
             {{/each}}
           </ul>

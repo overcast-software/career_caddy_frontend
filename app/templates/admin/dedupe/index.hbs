@@ -1,0 +1,36 @@
+{{page-title "Dedupe — Admin"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
+    <LinkTo @route="admin.users.index" class="nav-link">Users</LinkTo>
+    <LinkTo @route="admin.waitlist" class="nav-link">Waitlist</LinkTo>
+    <LinkTo @route="admin.invitations" class="nav-link">Invitations</LinkTo>
+    <LinkTo @route="admin.scrape-profiles" class="nav-link">Scrape Profiles</LinkTo>
+    <LinkTo @route="admin.companies.index" class="nav-link">Companies</LinkTo>
+    <LinkTo @route="admin.dedupe" class="nav-link">Dedupe</LinkTo>
+    <LinkTo @route="admin.ai-models" class="nav-link">AI Models</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card">
+      <div class="mb-4">
+        <h1 class="text-xl font-semibold">Dedupe</h1>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          Staff curation hub for the duplicate / repost pipeline.
+        </p>
+      </div>
+      <div
+        class="rounded-md bg-gray-50 p-4 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 text-sm text-gray-700 dark:text-gray-300"
+      >
+        <p class="mb-2">
+          Use the
+          <span class="font-medium">Compare</span>
+          buttons on a job post's edit form or in the "possible duplicates"
+          banner to open a side-by-side review of two posts.
+        </p>
+        <p class="text-gray-600 dark:text-gray-400">
+          The suspected-duplicates queue (Phase D) is not built yet.
+        </p>
+      </div>
+    </div>
+  </:main>
+</RouteLayout>

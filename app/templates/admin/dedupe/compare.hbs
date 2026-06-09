@@ -1,0 +1,205 @@
+{{page-title
+  (concat "Compare JP #" this.model.a.id " vs #" this.model.b.id " — Admin")
+}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
+    <LinkTo @route="admin.users.index" class="nav-link">Users</LinkTo>
+    <LinkTo @route="admin.waitlist" class="nav-link">Waitlist</LinkTo>
+    <LinkTo @route="admin.invitations" class="nav-link">Invitations</LinkTo>
+    <LinkTo @route="admin.scrape-profiles" class="nav-link">Scrape Profiles</LinkTo>
+    <LinkTo @route="admin.companies.index" class="nav-link">Companies</LinkTo>
+    <LinkTo @route="admin.dedupe" class="nav-link">Dedupe</LinkTo>
+    <LinkTo @route="admin.ai-models" class="nav-link">AI Models</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card">
+      <div class="mb-4">
+        <h1 class="text-xl font-semibold">
+          Compare JP
+          <LinkTo
+            @route="job-posts.show"
+            @model={{this.model.a.id}}
+            class="text-accent-600 hover:underline dark:text-accent-400"
+            data-test-compare-a-link
+          >#{{this.model.a.id}}</LinkTo>
+          vs
+          <LinkTo
+            @route="job-posts.show"
+            @model={{this.model.b.id}}
+            class="text-accent-600 hover:underline dark:text-accent-400"
+            data-test-compare-b-link
+          >#{{this.model.b.id}}</LinkTo>
+        </h1>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          Pick which side's value should win for each field. "Keep canonical"
+          leaves the target's existing value untouched.
+        </p>
+      </div>
+
+      <form data-test-compare-form {{on "submit" this.submit}}>
+        <div
+          class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+        >
+          <table
+            class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm"
+          >
+            <thead class="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th
+                  class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                >Field</th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                >A — JP #{{this.model.a.id}}</th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                >B — JP #{{this.model.b.id}}</th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                >Pick</th>
+              </tr>
+            </thead>
+            <tbody
+              class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-900"
+            >
+              {{#each this.comparableRows as |row|}}
+                <tr data-test-compare-row={{row.key}}>
+                  <td
+                    class="px-4 py-3 align-top font-medium text-gray-700 dark:text-gray-300"
+                  >{{row.label}}</td>
+                  <td
+                    class="px-4 py-3 align-top text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words"
+                  >
+                    {{#if row.valueA}}
+                      {{row.valueA}}
+                    {{else}}
+                      <span
+                        class="italic text-gray-400 dark:text-gray-500"
+                      >(empty)</span>
+                    {{/if}}
+                  </td>
+                  <td
+                    class="px-4 py-3 align-top text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words"
+                  >
+                    {{#if row.valueB}}
+                      {{row.valueB}}
+                    {{else}}
+                      <span
+                        class="italic text-gray-400 dark:text-gray-500"
+                      >(empty)</span>
+                    {{/if}}
+                  </td>
+                  <td class="px-4 py-3 align-top">
+                    <fieldset
+                      class="flex flex-col gap-1.5 text-xs"
+                      data-test-compare-pick={{row.key}}
+                    >
+                      <label class="inline-flex items-center gap-1.5">
+                        <input
+                          type="radio"
+                          name={{concat "pick-" row.key}}
+                          value="A"
+                          checked={{eq row.selection "A"}}
+                          data-test-compare-pick-a={{row.key}}
+                          {{on "change" (fn this.setOverride row.key "A")}}
+                          class="h-3.5 w-3.5 border-gray-300 text-accent-600 focus:ring-accent-500 dark:border-gray-600 dark:bg-gray-800"
+                        />
+                        <span class="text-gray-700 dark:text-gray-300">Take A</span>
+                      </label>
+                      <label class="inline-flex items-center gap-1.5">
+                        <input
+                          type="radio"
+                          name={{concat "pick-" row.key}}
+                          value="B"
+                          checked={{eq row.selection "B"}}
+                          data-test-compare-pick-b={{row.key}}
+                          {{on "change" (fn this.setOverride row.key "B")}}
+                          class="h-3.5 w-3.5 border-gray-300 text-accent-600 focus:ring-accent-500 dark:border-gray-600 dark:bg-gray-800"
+                        />
+                        <span class="text-gray-700 dark:text-gray-300">Take B</span>
+                      </label>
+                      <label class="inline-flex items-center gap-1.5">
+                        <input
+                          type="radio"
+                          name={{concat "pick-" row.key}}
+                          value="canonical"
+                          checked={{eq row.selection "canonical"}}
+                          data-test-compare-pick-canonical={{row.key}}
+                          {{on
+                            "change"
+                            (fn this.setOverride row.key "canonical")
+                          }}
+                          class="h-3.5 w-3.5 border-gray-300 text-accent-600 focus:ring-accent-500 dark:border-gray-600 dark:bg-gray-800"
+                        />
+                        <span class="text-gray-700 dark:text-gray-300">Keep
+                          canonical</span>
+                      </label>
+                    </fieldset>
+                  </td>
+                </tr>
+              {{else}}
+                <tr>
+                  <td
+                    colspan="4"
+                    class="px-4 py-6 text-center text-sm italic text-gray-500 dark:text-gray-400"
+                  >
+                    No comparable fields — both posts have empty values for the
+                    standard set.
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+
+        <div
+          class="mt-6 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+        >
+          <fieldset data-test-compare-relation>
+            <legend
+              class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+            >Relation</legend>
+            <p class="mt-1 mb-3 text-sm text-gray-600 dark:text-gray-400">
+              Default target = JP #{{this.model.b.id}}. "Not related" disables
+              the submit button.
+            </p>
+            <div class="flex flex-wrap gap-4">
+              {{#each this.relationOptions as |opt|}}
+                <label class="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="relation"
+                    value={{opt.value}}
+                    checked={{eq this.relation opt.value}}
+                    data-test-compare-relation-option={{opt.value}}
+                    {{on "change" (fn this.setRelation opt.value)}}
+                    class="h-4 w-4 border-gray-300 text-accent-600 focus:ring-accent-500 dark:border-gray-600 dark:bg-gray-800"
+                  />
+                  <span
+                    class="text-gray-700 dark:text-gray-300"
+                  >{{opt.label}}</span>
+                </label>
+              {{/each}}
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="form-actions mt-6 justify-end">
+          <button
+            type="submit"
+            class="btn primary"
+            disabled={{not this.canSubmit}}
+            data-test-compare-submit
+          >{{this.submitLabel}}</button>
+          <LinkTo
+            @route="job-posts.show"
+            @model={{this.model.a.id}}
+            class="btn"
+            data-test-compare-cancel
+          >Cancel</LinkTo>
+        </div>
+      </form>
+    </div>
+  </:main>
+</RouteLayout>

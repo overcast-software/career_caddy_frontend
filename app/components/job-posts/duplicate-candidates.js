@@ -6,9 +6,11 @@ import { tracked } from '@glimmer/tracking';
 const SIGNAL_LABELS = {
   canonical_link: 'same URL',
   fingerprint: 'same company + title',
+  normalized_fingerprint: 'same company + normalized title',
   title_similarity: 'title overlap',
   apply_hint: 'apply-button link',
   referrer_hint: 'referrer link',
+  repost: 'likely repost',
 };
 
 // Pure renderer for the possible-duplicate banner shown above

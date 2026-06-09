@@ -15,7 +15,10 @@ export default class JobPostsShowRoute extends Route {
     // links.related declaration also makes a future .reload() work, but
     // the include= path is the one we actually exercise on every nav.
     return this.store.findRecord('job-post', job_post_id, {
-      include: 'scrapes,duplicate-candidates',
+      // `reposts` is included so the "X reposts of this" pill renders
+      // its count without a follow-up sub-collection fetch. Phase C
+      // dedupe redesign.
+      include: 'scrapes,duplicate-candidates,reposts',
       reload: true,
     });
   }
