@@ -23,7 +23,15 @@ export default class ScrapesGraphRoute extends Route {
     // {scrape_id, graph_node, graph_payload, note, created_at}. Compose
     // them from the live ScrapeStatus records so the template stays
     // unchanged and the records can still be inspected via the store.
-    const trace = (traceResult.toArray?.() ?? []).map((row) => ({
+    //
+    // store.query() returns an AdapterPopulatedRecordArray which is
+    // iterable in Ember Data 5+ but no longer exposes .toArray(). The
+    // old `traceResult.toArray?.() ?? []` silently returned [] and the
+    // graph rendered with no visited path. Array.from is correct here
+    // because the result feeds a one-shot snake_case composition for
+    // a non-reactive d3 render — not a tracked template consumer.
+    const traceRows = traceResult ? Array.from(traceResult) : [];
+    const trace = traceRows.map((row) => ({
       scrape_id: row.belongsTo('scrape')?.id?.(),
       graph_node: row.graphNode,
       graph_payload: row.graphPayload,

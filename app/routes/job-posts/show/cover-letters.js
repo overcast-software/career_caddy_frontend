@@ -19,7 +19,12 @@ export default class JobPostsShowCoverLettersRoute extends Route {
     // Resume polling for any cover letters still generating — covers the
     // page-reload case where the user comes back mid-generation and
     // expects a spinner + flash on completion.
-    for (const cl of model?.toArray?.() ?? model ?? []) {
+    // `model` is the resolved hasMany (ManyArray) — iterable directly.
+    // Don't reach for .toArray(): Ember Data 5+ doesn't expose it on
+    // these arrays and an optional-chained `.toArray?.()` returns
+    // undefined silently. See cf-notes Architecture/Ember Data array
+    // footguns.
+    for (const cl of model ?? []) {
       cl.pollIfPending({
         label: 'Generating cover letter…',
         successMessage: 'Cover letter ready.',
