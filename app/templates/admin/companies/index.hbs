@@ -12,15 +12,29 @@
   </:subnav>
   <:main>
     <div class="panel-card">
-      <div class="mb-4">
-        <h1 class="text-xl font-semibold">Companies</h1>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Staff curation hub for the dedupe pipeline. Open a Company to view its
-          name aliases or merge it into another.
-        </p>
+      <div
+        class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+      >
+        <div>
+          <h1 class="text-xl font-semibold">Companies</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Staff curation hub for the dedupe pipeline. Open a Company to view
+            its name aliases or merge it into another.
+          </p>
+        </div>
+        <div class="sm:w-80">
+          <Menus::SubnavSearch
+            @value={{this.search}}
+            @onSearch={{this.updateSearch}}
+            @onSearchStart={{this.startSearching}}
+            @placeholder="Search companies..."
+          />
+        </div>
       </div>
 
-      {{#if this.model.length}}
+      {{#if this.isSearching}}
+        <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+      {{else if this.model.length}}
         <div
           class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
         >
@@ -97,6 +111,15 @@
             </tbody>
           </table>
         </div>
+        <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
+          <div
+            class="py-4 text-center text-sm text-gray-400 dark:text-gray-500"
+          >
+            Loading more…
+          </div>
+        </InfinityLoader>
+      {{else if this.search}}
+        <EmptyState @message="No companies match your search." />
       {{else}}
         <EmptyState @message="No companies yet." />
       {{/if}}
