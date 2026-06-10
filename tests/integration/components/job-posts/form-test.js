@@ -266,6 +266,89 @@ module('Integration | Component | job-posts/form', function (hooks) {
     );
   });
 
+  // Regression: deleting a job-post used to make jp.index "freak out"
+  // and render "missing company" on sibling rows that shared a Company
+  // via the list payload's `included` array. Root cause was a
+  // destroyRecord().then(unloadRecord()) pair — Ember Data 5+ already
+  // evicts the identifier on destroy, so the follow-up unload runs the
+  // inverse-cleanup on Company.jobPosts a second time and the async
+  // belongsTo proxies on neighbors transiently resolve to null. The
+  // fix is to stop calling unloadRecord() after destroyRecord().
+  test('submitDelete calls destroyRecord and does NOT follow with unloadRecord', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', { title: 'Engineer' });
+    let destroyCalls = 0;
+    let unloadCalls = 0;
+    this.jobPost.destroyRecord = function () {
+      destroyCalls += 1;
+      return Promise.resolve(this);
+    };
+    this.jobPost.unloadRecord = function () {
+      unloadCalls += 1;
+    };
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    await click('[data-test-delete-trigger]');
+    await click('[data-test-delete-confirm]');
+    assert.strictEqual(destroyCalls, 1, 'destroyRecord fired once');
+    assert.strictEqual(
+      unloadCalls,
+      0,
+      'unloadRecord NOT called — would double-tap Company.jobPosts inverse-cleanup',
+    );
+    assert.strictEqual(this.flashCalls.success, 1, 'success flash fired');
+    assert.strictEqual(
+      this.transitions.length,
+      1,
+      'transitionTo to jp.index fired',
+    );
+  });
+
+  test('nuclearDelete calls deleteRecord exactly once and does NOT call unloadRecord', async function (assert) {
+    // Set isStaff so the nuclear button renders.
+    this.owner.unregister('service:current-user');
+    this.owner.register(
+      'service:current-user',
+      class extends Service {
+        user = { id: 1, username: 'tester', isStaff: true };
+      },
+    );
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', { title: 'Engineer' });
+    let nuclearCalls = 0;
+    let deleteCalls = 0;
+    let unloadCalls = 0;
+    this.jobPost.nuclearDelete = function () {
+      nuclearCalls += 1;
+      return Promise.resolve(this);
+    };
+    this.jobPost.deleteRecord = function () {
+      deleteCalls += 1;
+    };
+    this.jobPost.unloadRecord = function () {
+      unloadCalls += 1;
+    };
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    await click('[data-test-delete-trigger]');
+    await click('[data-test-nuclear-delete]');
+    assert.strictEqual(nuclearCalls, 1, 'nuclearDelete model action fired');
+    assert.strictEqual(
+      deleteCalls,
+      1,
+      'deleteRecord fired once — flips isDeleted=true for list-model.js cache invalidation',
+    );
+    assert.strictEqual(
+      unloadCalls,
+      0,
+      'unloadRecord NOT called — keeps identifier so inverse-cleanup runs only once',
+    );
+    assert.strictEqual(this.flashCalls.success, 1, 'success flash fired');
+    assert.strictEqual(
+      this.transitions.length,
+      1,
+      'transitionTo to jp.index fired',
+    );
+  });
+
   test('submit without touching apply_url leaves the model field alone', async function (assert) {
     const store = this.owner.lookup('service:store');
     this.jobPost = store.createRecord('job-post', {
