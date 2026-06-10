@@ -142,7 +142,17 @@ export default class JobPostsFormComponent extends Component {
     this.args.jobPost
       .destroyRecord()
       .then(() => {
-        this.args.jobPost.unloadRecord();
+        // Do NOT call unloadRecord() after destroyRecord().
+        // Ember Data 5+ destroyRecord() already evicts the identifier
+        // and tears down inverses (e.g. Company.jobPosts). Calling
+        // unloadRecord() runs that inverse-cleanup a SECOND time —
+        // sibling JobPost rows on jp.index that share a Company via
+        // the included payload see their async belongsTo('company')
+        // proxy transiently resolve to null, and the index template
+        // renders "missing company" until a hard refresh.
+        // Cache invalidation for list-model.js fires off isDestroyed,
+        // so the InfinityModel-cached jp.index drops the row on its
+        // own next entry.
         this.flashMessages.success('Job post deleted.');
         this.router.transitionTo('job-posts.index');
       })
@@ -319,17 +329,16 @@ export default class JobPostsFormComponent extends Component {
     jobPost
       .nuclearDelete()
       .then(() => {
-        // deleteRecord() before unloadRecord() so any live tracked
-        // arrays (ember-infinity's array on jp.index, peekAll
-        // consumers) drop their reference. Without it, the cached
-        // InfinityModel on jp.index re-renders this row after we
-        // navigate back and reading any relationship throws
-        // "this.store is undefined" / "_graph" — record proxy
-        // detached but still in the array. Server-side cascade
-        // already removed every child relation, so we don't need
-        // the unloadAll() storm that nuked sibling posts' children.
+        // nuclearDelete() is a verb-DELETE via apiAction — the api
+        // performs the cascade server-side but Ember Data isn't told
+        // to evict the record. Flip isDeleted via deleteRecord() so
+        // list-model.js _hasDestroyedRecord drops the cached
+        // InfinityModel on next jp.index entry. Do NOT call
+        // unloadRecord(): the identifier-eviction triggers a second
+        // inverse-cleanup pass on Company.jobPosts that transiently
+        // null-out the company belongsTo on sibling rows (the
+        // "freaks out, claims missing company" symptom).
         jobPost.deleteRecord();
-        jobPost.unloadRecord();
         this.flashMessages.success('Job post and all children deleted.');
         this.router.transitionTo('job-posts.index');
       })
