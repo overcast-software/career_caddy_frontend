@@ -21,11 +21,6 @@ export default class AdminCompaniesIndexRoute extends Route {
     search: { refreshModel: true },
   };
 
-  setupController(controller, model) {
-    super.setupController(controller, model);
-    controller.isSearching = false;
-  }
-
   // In-route refresh (debounce updating QPs) would render
   // index-loading.hbs, which has no <:subnav> slot — the search
   // input gets torn down + remounted, losing focus. Suppress the
