@@ -22,7 +22,7 @@ module('Unit | Controller | admin/companies/index', function (hooks) {
 
   test('startSearching flips the loading flag on', function (assert) {
     const controller = this.owner.lookup('controller:admin/companies/index');
-    assert.false(controller.isSearching, 'starts off');
+    assert.notOk(controller.isSearching, 'starts off (undefined is falsy)');
     controller.startSearching();
     assert.true(controller.isSearching, 'flag flipped on');
   });
