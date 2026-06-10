@@ -7,6 +7,7 @@ import config from 'career-caddy-frontend/config/environment';
 
 export default class SessionService extends Service {
   @service router;
+  @service store;
 
   _activityWatchStarted = false;
 
@@ -47,7 +48,29 @@ export default class SessionService extends Service {
   }
 
   handleInvalidation() {
+    // Privacy-critical: every record loaded by the prior session must
+    // be evicted before another user signs in on the same tab. Without
+    // this, Ember Data's identity map retains JobPost / Score /
+    // CoverLetter / Summary / JobApplication / Resume records (and
+    // their sideloaded relationships, including top_score from
+    // /api/v1/job-posts/<id>/) past logout — and the next login's
+    // store.findRecord / peekRecord can hand back the prior user's
+    // data before the api roundtrip completes.
+    //
+    // ESA fires handleInvalidation after the session has already
+    // flipped to unauthenticated, so the store is in a quiescent
+    // state — safe to unloadAll. Centralized here so EVERY invalidation
+    // path (top-bar logout, /logout route, adapter 401 → invalidate,
+    // application beforeModel currentUser-load failure) gets the same
+    // cleanup without each caller having to remember.
     getOwner(this).lookup('service:current-user').user = null;
+    const events = getOwner(this).lookup('service:events');
+    if (events) {
+      // Close the SSE channel so the prior user's terminal-status
+      // events don't bleed into the next session.
+      events.stop();
+    }
+    this.store.unloadAll();
     this.router.transitionTo('login');
   }
 
