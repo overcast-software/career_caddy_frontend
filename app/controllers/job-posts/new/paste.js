@@ -222,8 +222,20 @@ export default class JobPostsNewPasteController extends Controller {
                 queryParams: { auto: '1' },
               });
             } else {
-              this.flashMessages.info(`Navigating to job post #${jobPostId}.`);
-              this.router.transitionTo('job-posts.show', jobPostId);
+              // Land on the scrape detail nested under the new JobPost
+              // so the user can see what was extracted and follow the
+              // status-note trail. The parent show was the old
+              // destination but it doesn't tell the user which scrape
+              // ran nor what it found, only the materialized JobPost
+              // fields.
+              this.flashMessages.info(
+                `Navigating to scrape #${rec.id} on job post #${jobPostId}.`,
+              );
+              this.router.transitionTo(
+                'job-posts.show.scrapes.show',
+                jobPostId,
+                rec.id,
+              );
             }
           },
           onFailed: (rec) => {
