@@ -11,7 +11,7 @@ export default class AdminCompaniesIndexController extends Controller {
   queryParams = ['search'];
 
   @tracked search = '';
-  @tracked isSearching = false;
+  @tracked isSearching;
 
   @action
   updateSearch(value) {
