@@ -194,7 +194,38 @@ export default class EventsService extends Service {
     record
       .reload()
       .catch((e) => console.warn('[events] reload failed:', e))
+      .then(() => this._cascadeReload(modelName, record))
       .finally(() => this._notify(modelName, record));
+  }
+
+  /** When a scrape transitions, the api writes back to the parent
+   *  JobPost (description, title, company, link, etc.). The backend
+   *  only emits a `scrape` event on the channel — there is no
+   *  `job_post` type — so we cascade the reload here. Otherwise
+   *  `job-posts.show` (whose template renders `model.description`
+   *  directly) sits on stale data until the user navigates away and
+   *  back.
+   *
+   *  Only cascade when the parent is already in the store
+   *  (peekRecord-able) — same store-as-reactivity rule as the top-
+   *  level handler. If the user isn't on a page that has the parent
+   *  loaded, there's nothing to refresh. */
+  _cascadeReload(modelName, record) {
+    if (modelName !== 'scrape') return;
+    let parentId;
+    try {
+      parentId = record.belongsTo?.('jobPost')?.id();
+    } catch {
+      return;
+    }
+    if (parentId == null) return;
+    const parent = this.store.peekRecord('job-post', String(parentId));
+    if (!parent) return;
+    return parent
+      .reload()
+      .catch((e) =>
+        console.warn('[events] job-post cascade reload failed:', e),
+      );
   }
 
   /** Subscribe to post-reload notifications. Returns an unsubscribe

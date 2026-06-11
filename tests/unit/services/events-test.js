@@ -120,6 +120,103 @@ module('Unit | Service | events', function (hooks) {
     assert.strictEqual(this.reloads.length, 0);
   });
 
+  test('_handleMessage cascades scrape reload to parent job-post', async function (assert) {
+    // The api updates JobPost columns (description, title, company,
+    // etc.) when a scrape parses successfully, but the backend emits
+    // only a `scrape` event on the channel. The events service has
+    // to cascade the reload so jp.show templates rendering
+    // model.description re-render without manual navigation.
+    const scrape = {
+      reload() {
+        this.reloads.push(this);
+        return Promise.resolve(this);
+      },
+      reloads: this.reloads,
+      belongsTo(name) {
+        if (name !== 'jobPost') return { id: () => null };
+        return { id: () => '99' };
+      },
+    };
+    const jobPost = makeRecord(this.reloads);
+    this.records.set('scrape:7', scrape);
+    this.records.set('job-post:99', jobPost);
+
+    this.service._handleMessage({
+      data: JSON.stringify({
+        type: 'scrape',
+        id: 7,
+        status: 'completed',
+        user_id: 1,
+      }),
+    });
+
+    // Drain microtasks so the .then() that fires _cascadeReload runs.
+    await Promise.resolve();
+    await Promise.resolve();
+
+    assert.strictEqual(this.reloads.length, 2, 'scrape + parent reload');
+    assert.strictEqual(this.reloads[0], scrape, 'scrape reloaded first');
+    assert.strictEqual(this.reloads[1], jobPost, 'job-post reloaded after');
+  });
+
+  test('_handleMessage skips job-post cascade when parent is not in store', async function (assert) {
+    // Same as above but the user is on a page that has the scrape
+    // loaded without the parent JobPost in the store (e.g. an admin
+    // scrape view). The cascade peekRecord misses and we skip — no
+    // prefetch of records the user didn't ask for.
+    const scrape = {
+      reload() {
+        this.reloads.push(this);
+        return Promise.resolve(this);
+      },
+      reloads: this.reloads,
+      belongsTo() {
+        return { id: () => '99' };
+      },
+    };
+    this.records.set('scrape:7', scrape);
+    // Intentionally no job-post:99.
+
+    this.service._handleMessage({
+      data: JSON.stringify({
+        type: 'scrape',
+        id: 7,
+        status: 'completed',
+        user_id: 1,
+      }),
+    });
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    assert.strictEqual(this.reloads.length, 1, 'only scrape reloaded');
+  });
+
+  test('_handleMessage does not cascade for non-scrape events', async function (assert) {
+    // A score event must not trigger a job-post reload even if the
+    // score is wired to a job-post — the cascade is scoped to scrape
+    // events only (where the backend known-mutates JobPost columns).
+    const score = makeRecord(this.reloads);
+    const jobPost = makeRecord(this.reloads);
+    this.records.set('score:42', score);
+    this.records.set('job-post:99', jobPost);
+
+    this.service._handleMessage({
+      data: JSON.stringify({
+        type: 'score',
+        id: 42,
+        status: 'completed',
+        user_id: 7,
+      }),
+    });
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    assert.strictEqual(this.reloads.length, 1, 'only score reloaded');
+    assert.strictEqual(this.reloads[0], score);
+  });
+
   test('stop() is idempotent and clears state', function (assert) {
     // Without an open EventSource, stop should still flip _stopped and
     // not throw.
