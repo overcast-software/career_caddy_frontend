@@ -1262,9 +1262,15 @@ sendBtn.addEventListener('click', async () => {
     return;
   }
 
-  const scrapeId = body?.data?.id;
+  // api PR #171 mirrors data.id onto meta.scrape_id as a defensive
+  // fallback channel; read data.id first, fall back to meta.scrape_id.
+  const scrapeId = body?.data?.id || body?.meta?.scrape_id;
   if (!scrapeId) {
-    setStatus(sendStatus, 'Sent, but no scrape id returned.', 'error');
+    setStatus(
+      sendStatus,
+      'Sent. Network response was malformed; check `/job-posts`.',
+      'error',
+    );
     setSendingState(false);
     await clearPending();
     return;
