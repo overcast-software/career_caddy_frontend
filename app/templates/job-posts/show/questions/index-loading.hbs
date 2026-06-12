@@ -1,0 +1,16 @@
+{{! Rendered into job-posts.show's outlet while the questions.index
+    route's model() promise is pending. Mirrors questions/index.hbs:
+    a heading row with a "New Question" button on the right, then a
+    table of questions (Question | Answers | Fav | Actions). The route
+    also loads the answers via ?include=answers — the same skeleton
+    covers both, since the user perceives one "Questions" tab. }}
+<div
+  class="mb-4 flex animate-pulse items-center justify-between"
+  role="status"
+  aria-label="Loading…"
+>
+  <div class="h-5 w-28 rounded bg-gray-200 dark:bg-gray-700"></div>
+  <div class="h-9 w-32 rounded bg-gray-200 dark:bg-gray-700"></div>
+</div>
+
+<TableSkeleton @hasActionsCol={{true}} />

@@ -1,0 +1,62 @@
+{{! Table-shaped loading skeleton used by the *-loading.hbs templates
+    in tabs of job-posts/show. Mirrors the dominant shape of the table
+    style sub-routes (scores, summaries, cover-letters, applications,
+    questions) so the transition to real data doesn't cause a layout
+    jump.
+
+    Args:
+    - @rows (number) — row count for the body, default 5.
+    - @hasActionsCol (boolean) — when true, the trailing right-aligned
+      column renders two button-shaped placeholders to mirror the
+      "View / Delete" action clusters in the live tables. }}
+<div
+  class="animate-pulse overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+  role="status"
+  aria-label="Loading…"
+>
+  <div
+    class="grid grid-cols-12 gap-4 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-600 dark:bg-gray-700"
+  >
+    <div class="col-span-5 h-3 w-24 rounded bg-gray-200 dark:bg-gray-700"></div>
+    <div class="col-span-3 h-3 w-20 rounded bg-gray-200 dark:bg-gray-700"></div>
+    <div class="col-span-2 h-3 w-16 rounded bg-gray-200 dark:bg-gray-700"></div>
+    {{#if @hasActionsCol}}
+      <div
+        class="col-span-2 h-3 w-16 justify-self-end rounded bg-gray-200 dark:bg-gray-700"
+      ></div>
+    {{else}}
+      <div
+        class="col-span-2 h-3 w-16 rounded bg-gray-200 dark:bg-gray-700"
+      ></div>
+    {{/if}}
+  </div>
+  <div class="divide-y divide-gray-100 dark:divide-gray-700">
+    {{#each (array 1 2 3 4 5)}}
+      <div class="grid grid-cols-12 items-center gap-4 px-4 py-3">
+        <div
+          class="col-span-5 h-3 w-3/4 rounded bg-gray-100 dark:bg-gray-800"
+        ></div>
+        <div
+          class="col-span-3 h-3 w-1/2 rounded bg-gray-100 dark:bg-gray-800"
+        ></div>
+        <div
+          class="col-span-2 h-3 w-2/3 rounded bg-gray-100 dark:bg-gray-800"
+        ></div>
+        {{#if @hasActionsCol}}
+          <div class="col-span-2 flex items-center justify-end gap-2">
+            <div
+              class="h-6 w-12 rounded border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
+            ></div>
+            <div
+              class="h-6 w-14 rounded border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
+            ></div>
+          </div>
+        {{else}}
+          <div
+            class="col-span-2 h-3 w-1/3 rounded bg-gray-100 dark:bg-gray-800"
+          ></div>
+        {{/if}}
+      </div>
+    {{/each}}
+  </div>
+</div>
