@@ -51,6 +51,19 @@ const TYPE_TO_MODEL = {
   scrape: 'scrape',
 };
 
+// Per-type sideload spec for the post-event reload. When the api
+// finishes a scrape it also writes back to the parent JobPost
+// (description, title, company, link), but the SSE channel only
+// emits a `scrape` event — without ?include=job-post the JobPost in
+// the store stays stale and jp.show keeps rendering the old
+// description until the user navigates away. The JSON:API compound
+// document Ember Data gets back from a `?include=job-post` reload
+// auto-pushes the JobPost from `included[]`, every template reading
+// model.description re-renders, and we avoid a second round-trip.
+const RELOAD_INCLUDE = {
+  scrape: 'job-post',
+};
+
 export default class EventsService extends Service {
   @service api;
   @service session;
@@ -191,8 +204,18 @@ export default class EventsService extends Service {
     // evicted record, etc.). Log and continue; the listener still
     // gets notified so the spinner ends and the user sees terminal
     // state on next interaction or page reload.
+    //
+    // For types in RELOAD_INCLUDE, ask the api to sideload the
+    // related record(s) via JSON:API ?include=. Ember Data parses
+    // the compound document and auto-pushes any related records
+    // from `included[]` into the store — no manual cascade, no
+    // peekRecord, no second round-trip. Default JSONAPIAdapter
+    // buildQuery reads snapshot.include (set from reload options)
+    // and serializes it as `?include=<value>`.
+    const include = RELOAD_INCLUDE[type];
+    const reloadOptions = include ? { include } : undefined;
     record
-      .reload()
+      .reload(reloadOptions)
       .catch((e) => console.warn('[events] reload failed:', e))
       .finally(() => this._notify(modelName, record));
   }
