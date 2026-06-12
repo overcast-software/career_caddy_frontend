@@ -8,7 +8,10 @@ export default class JobPostsShowScoresRoute extends Route {
     const { job_post_id } = this.paramsFor('job-posts.show');
     await Promise.all([
       this.store.query('score', { 'filter[job_post_id]': job_post_id }),
-      this.store.query('resume', { slim: 1 }),
+      this.store.query('resume', {
+        'fields[resume]': 'name,title,notes,favorite,profession',
+        meta: 'counts',
+      }),
     ]);
     const jobPost = this.store.peekRecord('job-post', job_post_id);
     return jobPost.hasMany('scores').value();
