@@ -1,17 +1,17 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
 
-// Per-company staff view. The api CompanySerializer does not yet
-// emit ``relationships.aliases`` and there is no
-// ``/companies/:id/aliases/`` sub-collection endpoint, so
-// ``include=aliases`` is intentionally omitted here — passing it
-// was the trigger for a runaway fetch loop on this route. When the
-// CompanyAlias serializer ships, restore the include and re-add the
-// <Companies::AliasesPanel> render in the template.
+// Per-company staff view. ``include=aliases,canonical`` sideloads
+// the Phase A self-FK relationships so <Companies::AliasesPanel>
+// resolves ``company.hasMany('aliases').value()`` synchronously on
+// first paint without a follow-up GET. The api ships these
+// relationships as Company resources (api PR #176 — Phase A).
 export default class AdminCompaniesShowRoute extends Route {
   @service store;
 
   model(params) {
-    return this.store.findRecord('company', params.company_id);
+    return this.store.findRecord('company', params.company_id, {
+      include: 'aliases,canonical',
+    });
   }
 }

@@ -1,17 +1,30 @@
 {{!
-  Renders the Company's name-variant aliases. Each row shows the
-  variant name, a source-coded badge (extraction / manual / backfill),
-  and the alias's createdAt. Empty state when no aliases have been
-  recorded yet.
+  Renders the Company's aliases (Phase A self-FK: every Company whose
+  canonical_id == this.id). Each row links to the alias's own staff
+  page. An expander panel below the table lets staff demote the
+  current Company into an alias of another via the markAsAliasOf
+  action (POST /companies/:id/mark-as-alias-of/).
 }}
-<div class="panel-card" data-test-aliases-panel>
+<div class="panel-card mt-6" data-test-aliases-panel>
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-lg font-semibold">Name aliases</h2>
     <span class="text-xs text-gray-500 dark:text-gray-400">
       {{this.rows.length}}
-      {{if (eq this.rows.length 1) "variant" "variants"}}
+      {{if (eq this.rows.length 1) "alias" "aliases"}}
     </span>
   </div>
+
+  {{#if this.isAlias}}
+    <div
+      class="mb-4 rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
+      data-test-already-alias
+    >
+      <p class="text-sm text-amber-800 dark:text-amber-200">
+        This Company is itself an alias. Visit the canonical record to manage
+        its aliases.
+      </p>
+    </div>
+  {{/if}}
 
   {{#if this.rows.length}}
     <div
@@ -27,13 +40,10 @@
             >Name</th>
             <th
               class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-            >Slug</th>
+            >Display name</th>
             <th
               class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-            >Source</th>
-            <th
-              class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-            >Added</th>
+            >ID</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -44,26 +54,23 @@
             >
               <td
                 class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100"
-              >{{row.name}}</td>
-              <td
-                class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs"
-              >{{row.nameSlug}}</td>
-              <td class="px-4 py-3">
-                <span
-                  class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
-                    {{row.sourceClasses}}"
-                  data-test-alias-source
-                >
-                  {{row.sourceLabel}}
-                </span>
+              >
+                <LinkTo
+                  @route="admin.companies.show"
+                  @model={{row.id}}
+                  class="text-accent-600 dark:text-accent-400 hover:underline"
+                >{{row.name}}</LinkTo>
               </td>
               <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
-                {{#if row.createdAt}}
-                  {{moment-format row.createdAt "MMM D, YYYY"}}
+                {{#if row.displayName}}
+                  {{row.displayName}}
                 {{else}}
                   —
                 {{/if}}
               </td>
+              <td
+                class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400"
+              >#{{row.id}}</td>
             </tr>
           {{/each}}
         </tbody>
@@ -71,7 +78,66 @@
     </div>
   {{else}}
     <EmptyState
-      @message="No name aliases yet. Variants are recorded automatically when the extractor mints this Company or when staff perform a merge."
+      @message="No aliases yet. Aliases are recorded when staff mark a Company as an alias of this one, or when a merge runs."
     />
   {{/if}}
+
+  {{#unless this.isAlias}}
+    <div class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
+      <h3 class="text-sm font-semibold mb-2">Mark this Company as alias of
+        another</h3>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        Sets this Company's canonical pointer at the target. Non-destructive —
+        both rows stay; Phase B dedupe consults the canonical pointer.
+      </p>
+
+      <div class="max-w-md">
+        <PowerSelect
+          @options={{this.emptyOptions}}
+          @selected={{this.aliasTarget}}
+          @search={{this.searchCompanies}}
+          @searchEnabled={{true}}
+          @placeholder="Search for the canonical company…"
+          @onChange={{this.selectAliasTarget}}
+          as |company|
+        >
+          {{company.name}}
+          {{#if company.displayName}}
+            <span class="text-xs text-gray-500">({{company.displayName}})</span>
+          {{/if}}
+        </PowerSelect>
+      </div>
+
+      {{#if this.aliasTarget}}
+        <div
+          class="mt-4 rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
+          data-test-alias-confirm
+        >
+          <p class="text-sm text-amber-800 dark:text-amber-200">
+            Mark
+            <span class="font-medium">{{@company.name}}</span>
+            (#{{@company.id}}) as alias of
+            <span class="font-medium">{{this.aliasTarget.name}}</span>
+            (#{{this.aliasTarget.id}})?
+          </p>
+          <div class="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              class="btn primary"
+              disabled={{this.aliasing}}
+              {{on "click" this.confirmMarkAsAlias}}
+            >
+              {{if this.aliasing "Marking…" "Confirm"}}
+            </button>
+            <button
+              type="button"
+              class="btn"
+              disabled={{this.aliasing}}
+              {{on "click" this.clearAliasTarget}}
+            >Cancel</button>
+          </div>
+        </div>
+      {{/if}}
+    </div>
+  {{/unless}}
 </div>

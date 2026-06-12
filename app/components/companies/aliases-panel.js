@@ -1,48 +1,115 @@
 import Component from '@glimmer/component';
+import { action } from '@ember/object';
+import { service } from '@ember/service';
+import { tracked } from '@glimmer/tracking';
 
-const SOURCE_BADGE = {
-  extraction: {
-    label: 'extraction',
-    classes:
-      'bg-accent-100 text-accent-700 ring-accent-200 dark:bg-accent-900/30 dark:text-accent-300 dark:ring-accent-700',
-  },
-  manual: {
-    label: 'manual',
-    classes:
-      'bg-blue-100 text-blue-700 ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-700',
-  },
-  backfill: {
-    label: 'backfill',
-    classes:
-      'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700',
-  },
-};
-
-const FALLBACK_BADGE = SOURCE_BADGE.backfill;
-
-// Pure renderer for Company.aliases on /admin/companies/:id. The
-// alias collection is the async hasMany on Company — the route's
-// model() requests it via ``include=aliases`` so by first paint the
-// relationship is loaded. Pattern matches <JobPosts::DuplicateCandidates>:
-// hasMany('rel').value() + for...of (no .slice / .toArray /
-// .objectAt per the project's Ember Data convention).
+// Renders the Company.aliases sub-collection on /admin/companies/:id.
+//
+// Phase A self-FK shape (api PR #176): an "alias" of this Company is
+// itself a Company resource whose ``canonical_id == this.id``. The
+// admin/companies/show route requests ``include=aliases,canonical``
+// so the relationship is materialized synchronously by first paint.
+//
+// Pattern matches <JobPosts::DuplicateCandidates>: hasMany('rel').value()
+// + for...of (no .slice / .toArray / .objectAt per the project's
+// Ember Data convention).
+//
+// Also exposes a staff-only "mark this Company as alias of another"
+// affordance — POST /companies/:id/mark-as-alias-of/ via the
+// markAsAliasOf model method (apiAction pattern). The companion
+// "unmark" verb does not yet exist on the api (Phase A omission);
+// promoting an alias back to canonical is captured as inbox
+// follow-up.
 export default class CompaniesAliasesPanelComponent extends Component {
+  @service store;
+  @service router;
+  @service flashMessages;
+
+  @tracked aliasTarget = null;
+  @tracked aliasing = false;
+
+  // PowerSelect requires @options even when @search is used (the
+  // initial empty dropdown reads from this). Search-only flow.
+  emptyOptions = [];
+
   get rows() {
     const live = this.args.company?.hasMany('aliases').value();
     if (!live) return [];
     const out = [];
     for (const alias of live) {
       if (!alias) continue;
-      const badge = SOURCE_BADGE[alias.source] || FALLBACK_BADGE;
       out.push({
         id: alias.id,
         name: alias.name,
-        nameSlug: alias.nameSlug,
-        sourceLabel: badge.label,
-        sourceClasses: badge.classes,
-        createdAt: alias.createdAt,
+        displayName: alias.displayName,
       });
     }
     return out;
+  }
+
+  get isAlias() {
+    // belongsTo('canonical').value() returns the live record or null.
+    // The api emits a `canonical` relationship linkage when the
+    // company is itself aliased; null means this row IS canonical.
+    return Boolean(this.args.company?.belongsTo('canonical').value());
+  }
+
+  // PowerSelect onSearch — async filter against the api. Mirrors the
+  // merge-into search (controllers/admin/companies/show.js):
+  // filter[query] = icontains on name and display_name; small page so
+  // staff are pinpointing a known target, not browsing.
+  searchCompanies = (term) => {
+    if (!term || term.length < 2) return [];
+    return this.store
+      .query('company', {
+        'filter[query]': term,
+        'page[size]': 20,
+      })
+      .then((results) => {
+        const sourceId = this.args.company?.id;
+        const filtered = [];
+        for (const c of results) {
+          if (c.id !== sourceId) filtered.push(c);
+        }
+        return filtered;
+      });
+  };
+
+  @action
+  selectAliasTarget(company) {
+    this.aliasTarget = company;
+  }
+
+  @action
+  clearAliasTarget() {
+    this.aliasTarget = null;
+  }
+
+  @action
+  confirmMarkAsAlias() {
+    if (!this.aliasTarget || this.aliasing) return;
+    const target = this.aliasTarget;
+    const targetId = target.id;
+    const sourceName = this.args.company.name;
+    this.aliasing = true;
+    this.args.company
+      .markAsAliasOf(targetId)
+      .then(() => {
+        this.flashMessages.success(
+          `Marked "${sourceName}" as alias of "${target.name}".`,
+        );
+        this.aliasTarget = null;
+        // Send staff to the now-canonical record so they can see the
+        // aggregated alias list under the canonical's panel.
+        this.router.transitionTo('admin.companies.show', targetId);
+      })
+      .catch((err) => {
+        const detail =
+          err?.errors?.[0]?.detail || err?.message || 'Unknown error';
+        this.flashMessages.danger(`Mark-as-alias failed: ${detail}`);
+      })
+      .finally(() => {
+        this.aliasing = false;
+      });
   }
 }
