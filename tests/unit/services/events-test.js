@@ -19,10 +19,13 @@ module('Unit | Service | events', function (hooks) {
     };
   });
 
-  function makeRecord(reloads) {
+  function makeRecord(reloads, reloadOptions) {
     return {
-      reload() {
+      reload(options) {
         reloads.push(this);
+        // Capture the reload options the service passed in so tests
+        // can assert on ?include= sideload requests.
+        if (reloadOptions) reloadOptions.push(options);
         // The service now chains .then() onto reload() to fire post-
         // reload listener notifications, so the stub must return a
         // Promise — undefined would throw a TypeError mid-handler.
@@ -118,6 +121,61 @@ module('Unit | Service | events', function (hooks) {
       data: JSON.stringify({ type: 'score', status: 'completed' }),
     });
     assert.strictEqual(this.reloads.length, 0);
+  });
+
+  test('_handleMessage reload passes ?include=job-post for scrape events', function (assert) {
+    // A completed scrape's api response writes back to the parent
+    // JobPost (description, title, company, link, etc.) but the
+    // SSE channel only emits a `scrape` event. The service asks the
+    // adapter to sideload the parent via JSON:API ?include=job-post
+    // so Ember Data auto-pushes the JobPost from `included[]` and
+    // every template reading model.description re-renders without
+    // navigation or a manual peekRecord cascade.
+    const reloadOptions = [];
+    const rec = makeRecord(this.reloads, reloadOptions);
+    this.records.set('scrape:7', rec);
+
+    this.service._handleMessage({
+      data: JSON.stringify({
+        type: 'scrape',
+        id: 7,
+        status: 'completed',
+        user_id: 1,
+      }),
+    });
+
+    assert.strictEqual(this.reloads.length, 1, 'scrape reloaded once');
+    assert.deepEqual(
+      reloadOptions[0],
+      { include: 'job-post' },
+      'reload called with ?include=job-post sideload',
+    );
+  });
+
+  test('_handleMessage reload passes no options for non-scrape events', function (assert) {
+    // Score / summary / cover_letter / answer / resume don't have a
+    // known parent the api known-mutates on transition, so reload
+    // stays a bare GET — no speculative include payload, no extra
+    // sideload work on the api.
+    const reloadOptions = [];
+    const rec = makeRecord(this.reloads, reloadOptions);
+    this.records.set('score:42', rec);
+
+    this.service._handleMessage({
+      data: JSON.stringify({
+        type: 'score',
+        id: 42,
+        status: 'completed',
+        user_id: 7,
+      }),
+    });
+
+    assert.strictEqual(this.reloads.length, 1, 'score reloaded once');
+    assert.strictEqual(
+      reloadOptions[0],
+      undefined,
+      'reload called without options for non-scrape types',
+    );
   });
 
   test('stop() is idempotent and clears state', function (assert) {
