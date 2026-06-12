@@ -1,12 +1,19 @@
-import { module, test } from 'qunit';
+import { module, skip } from 'qunit';
 import { setupRenderingTest } from 'career-caddy-frontend/tests/helpers';
 import { render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 
+// The Company.aliases hasMany is intentionally NOT declared right
+// now (it sent Ember Data into a runaway fetch loop on
+// /admin/companies/:id when the api did not expose the
+// relationship). The <Companies::AliasesPanel> component + template
+// stay in the tree as dormant scaffolding; these tests are skipped
+// until the api ships the CompanyAlias serializer and Company
+// re-declares the relationship. See app/models/company.js.
 module('Integration | Component | companies/aliases-panel', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('renders the empty state when no aliases are present', async function (assert) {
+  skip('renders the empty state when no aliases are present', async function (assert) {
     const store = this.owner.lookup('service:store');
     this.company = store.createRecord('company', { name: 'Acme' });
     await render(hbs`<Companies::AliasesPanel @company={{this.company}} />`);
@@ -15,7 +22,7 @@ module('Integration | Component | companies/aliases-panel', function (hooks) {
     assert.dom('h2').hasText('Name aliases');
   });
 
-  test('renders one row per alias with source badge', async function (assert) {
+  skip('renders one row per alias with source badge', async function (assert) {
     const store = this.owner.lookup('service:store');
     // Push the Company with its aliases relationship populated so the
     // hasMany('aliases').value() path resolves synchronously in the

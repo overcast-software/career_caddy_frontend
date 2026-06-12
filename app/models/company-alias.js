@@ -14,5 +14,9 @@ export default class CompanyAliasModel extends Model {
   @attr('string') nameSlug;
   @attr('string') source;
   @attr('date') createdAt;
-  @belongsTo('company', { async: true, inverse: 'aliases' }) company;
+  // Inverse intentionally ``null`` until Company re-declares the
+  // ``aliases`` hasMany (blocked on the api shipping the
+  // CompanySerializer relationship + sub-collection endpoint). See
+  // app/models/company.js for the loop reproducer.
+  @belongsTo('company', { async: true, inverse: null }) company;
 }

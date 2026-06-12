@@ -63,7 +63,12 @@
       </div>
     </div>
 
-    <Companies::AliasesPanel @company={{this.model}} />
+    {{! <Companies::AliasesPanel @company=this.model /> intentionally
+        omitted — the api does not yet expose Company.aliases as a
+        JSON:API relationship or sub-collection, and rendering the
+        panel sent Ember Data into a runaway fetch loop trying to
+        materialize the async hasMany. Restore once the
+        CompanyAlias serializer ships. }}
 
     <div class="panel-card mt-6" data-test-merge-panel>
       <h2 class="text-lg font-semibold mb-2">Merge into another company</h2>
