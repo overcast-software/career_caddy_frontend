@@ -1,0 +1,12 @@
+{{! Rendered into job-posts.show's outlet while the scores route's
+    model() promise is pending. Mirrors the shape of scores.hbs (new-
+    score panel + Scores::List table) so the transition to real data
+    doesn't cause a layout jump. }}
+<NewActionPanelSkeleton @withInstructions={{true}} />
+
+<section class="mb-6">
+  <div
+    class="mb-2 h-4 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+  ></div>
+  <TableSkeleton @hasActionsCol={{true}} />
+</section>

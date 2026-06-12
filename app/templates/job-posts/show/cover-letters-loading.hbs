@@ -1,0 +1,11 @@
+{{! Rendered into job-posts.show's outlet while the cover-letters
+    route's model() promise is pending. Mirrors cover-letters.hbs
+    (new-cover-letter panel + CoverLetters::List table). }}
+<NewActionPanelSkeleton @withInstructions={{true}} />
+
+<section class="mb-6">
+  <div
+    class="mb-2 h-4 w-28 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+  ></div>
+  <TableSkeleton @hasActionsCol={{true}} />
+</section>

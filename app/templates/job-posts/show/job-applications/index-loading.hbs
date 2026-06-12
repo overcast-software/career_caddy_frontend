@@ -1,0 +1,13 @@
+{{! Rendered into job-posts.show's outlet while the
+    job-applications.index route's model() promise is pending. Mirrors
+    job-applications/index.hbs (new-application panel + applications
+    table). The new-application row uses a LinkTo "Apply" button — no
+    AI instructions textarea, so @withInstructions is omitted. }}
+<NewActionPanelSkeleton />
+
+<section class="mb-6">
+  <div
+    class="mb-2 h-4 w-28 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+  ></div>
+  <TableSkeleton @hasActionsCol={{true}} />
+</section>

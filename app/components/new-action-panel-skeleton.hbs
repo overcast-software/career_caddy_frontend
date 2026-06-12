@@ -1,0 +1,26 @@
+{{! Skeleton for the "New score / summary / cover letter / application"
+    panel that sits at the top of the scores, summaries, cover-letters,
+    and applications tabs of job-posts/show. Mirrors panel-card +
+    PowerSelect + button + textarea so the page doesn't jump when the
+    real model resolves.
+
+    Args:
+    - @withInstructions (boolean) — render the textarea-shaped row
+      below the select+button. The applications tab omits this row
+      (it has no AI instructions input), the other three include it. }}
+<section class="panel-card mb-6" role="status" aria-label="Loading…">
+  <div
+    class="h-4 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+  ></div>
+  <div class="panel-body animate-pulse">
+    <div class="flex items-center gap-2">
+      <div
+        class="h-9 max-w-xs flex-1 rounded border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
+      ></div>
+      <div class="h-9 w-20 shrink-0 rounded bg-gray-200 dark:bg-gray-700"></div>
+    </div>
+    {{#if @withInstructions}}
+      <div class="mt-2 h-16 w-full rounded bg-gray-100 dark:bg-gray-800"></div>
+    {{/if}}
+  </div>
+</section>
