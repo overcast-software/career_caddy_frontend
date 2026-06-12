@@ -51,12 +51,18 @@ export default class CompanyModel extends Model {
   }
   @hasMany('score', { async: true, inverse: 'company' }) scores;
   @hasMany('project', { async: true, inverse: null }) projects;
-  // Name-variant aliases (Phase A dedupe redesign). The api side
-  // exposes the relationship via the company-alias serializer + a
-  // sub-collection endpoint; this declaration is the consumer side
-  // so <Companies::AliasesPanel> can read .hasMany('aliases').value()
-  // through the standard Ember Data pattern.
-  @hasMany('company-alias', { async: true, inverse: 'company' }) aliases;
+  // Name-variant aliases (Phase A dedupe redesign) are intentionally
+  // NOT declared as a hasMany here yet. The api CompanySerializer
+  // does not emit ``relationships.aliases`` and there is no
+  // ``/companies/:id/aliases/`` endpoint — declaring the async
+  // hasMany sent Ember Data into a runaway fetch loop on
+  // /admin/companies/:id (the relationship reference repeatedly
+  // tried to materialize against a missing endpoint as the template
+  // re-read it under autotrack). When the api ships the
+  // CompanyAlias serializer + sideload, re-add:
+  //   @hasMany('company-alias', { async: true, inverse: 'company' }) aliases;
+  // and restore the ``include: 'aliases'`` on
+  // admin/companies/show.js + the <Companies::AliasesPanel> render.
 
   // Staff-only verb: POST /api/v1/companies/:id/merge-into/
   // Moves all FKs (JobPost, Scrape, JobApplication, CompanyAlias)
