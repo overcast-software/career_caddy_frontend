@@ -1,4 +1,4 @@
-{{page-title (concat this.model.sourceCompany.name " — Company Admin")}}
+{{page-title (concat this.model.name " — Company Admin")}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
     <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
@@ -13,7 +13,7 @@
   <:main>
     <div class="panel-card mb-6">
       <div class="flex items-center justify-between mb-2">
-        <h1 class="text-xl font-semibold">{{this.model.sourceCompany.name}}</h1>
+        <h1 class="text-xl font-semibold">{{this.model.name}}</h1>
         <LinkTo
           @route="admin.companies.index"
           class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
@@ -24,94 +24,50 @@
           <dt class="text-gray-500 dark:text-gray-400">ID</dt>
           <dd
             class="font-mono text-gray-900 dark:text-gray-100"
-          >{{this.model.sourceCompany.id}}</dd>
+          >{{this.model.id}}</dd>
         </div>
         <div>
           <dt class="text-gray-500 dark:text-gray-400">Job posts</dt>
           <dd class="font-medium text-gray-900 dark:text-gray-100">{{or
-              this.model.sourceCompany.jobPostsCount
+              this.model.jobPostsCount
               0
             }}</dd>
         </div>
         <div>
           <dt class="text-gray-500 dark:text-gray-400">Applications</dt>
           <dd class="font-medium text-gray-900 dark:text-gray-100">{{or
-              this.model.sourceCompany.jobApplicationsCount
+              this.model.jobApplicationsCount
               0
             }}</dd>
         </div>
         <div>
           <dt class="text-gray-500 dark:text-gray-400">Scrapes</dt>
           <dd class="font-medium text-gray-900 dark:text-gray-100">{{or
-              this.model.sourceCompany.scrapesCount
+              this.model.scrapesCount
               0
             }}</dd>
         </div>
       </dl>
-      {{#if this.model.sourceCompany.displayName}}
+      {{#if this.model.displayName}}
         <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
           Display name:
-          <span
-            class="font-medium"
-          >{{this.model.sourceCompany.displayName}}</span>
+          <span class="font-medium">{{this.model.displayName}}</span>
         </p>
       {{/if}}
       <div class="mt-4 flex items-center gap-3">
         <LinkTo
           @route="companies.show"
-          @model={{this.model.sourceCompany.id}}
+          @model={{this.model.id}}
           class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
         >View public Company page →</LinkTo>
       </div>
     </div>
 
-    <Companies::AliasesPanel @company={{this.model.sourceCompany}} />
-
-    <div class="panel-card mt-6" data-test-federation-panel>
-      <h2 class="text-lg font-semibold mb-2">Federation</h2>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        When enabled, this company exposes an ActivityStreams 2.0 actor at
-        <code class="font-mono text-xs">/companies/{{or
-            this.model.sourceCompany.slug
-            "<slug>"
-          }}/</code>
-        and the public Subscribe affordance lights up. The slug is the public
-        WebFinger handle.
-      </p>
-      <div class="space-y-3">
-        <div>
-          <dt class="text-xs text-gray-500 dark:text-gray-400">Slug</dt>
-          <dd class="font-mono text-sm text-gray-900 dark:text-gray-100">
-            {{#if this.model.sourceCompany.slug}}
-              {{this.model.sourceCompany.slug}}
-            {{else}}
-              <span class="italic text-gray-400 dark:text-gray-500">not set</span>
-            {{/if}}
-          </dd>
-        </div>
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            data-test-federation-toggle
-            checked={{this.model.sourceCompany.federationEnabled}}
-            disabled={{this.savingFederation}}
-            {{on "change" this.toggleFederationEnabled}}
-          />
-          <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
-            Federation enabled
-          </span>
-          {{#if this.savingFederation}}
-            <span
-              class="text-xs text-gray-500 dark:text-gray-400"
-            >Saving…</span>
-          {{/if}}
-        </label>
-      </div>
-    </div>
+    <Companies::AliasesPanel @company={{this.model}} />
 
     <Companies::SearchTable
-      @sourceCompany={{this.model.sourceCompany}}
-      @searchResults={{this.model.searchResults}}
+      @sourceCompany={{this.model}}
+      @searchResults={{this.searchResults}}
       @searchTerm={{this.search}}
       @isSearching={{this.isSearching}}
       @onSearch={{this.updateSearch}}

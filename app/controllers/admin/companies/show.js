@@ -4,62 +4,47 @@ import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 
 // Controller for /admin/companies/:company_id. Owns the search
-// queryParam + Federation toggle. The relate-actions
+// queryParam + the SearchTable's InfinityModel. The relate-actions
 // (merge-into / mark-as-alias both directions) live in
 // <Companies::SearchTable>.
+//
+// Mirrors /admin/companies/index's search shape (Menus::SubnavSearch
+// → updateSearch → infinity.model('company', { filter[query] })) so
+// there's one canonical company-search pattern in the staff tree.
 export default class AdminCompaniesShowController extends Controller {
+  @service infinity;
   @service flashMessages;
 
   queryParams = ['search'];
 
   @tracked search = '';
   @tracked isSearching = false;
+  @tracked searchResults = null;
 
-  // Phase 6a — federation toggle in-flight flag. Disables the
-  // checkbox while the PATCH is pending so a double-click can't
-  // queue two saves.
-  @tracked savingFederation = false;
+  // Rebuild the InfinityModel from the current `search` value.
+  // Called from the route's setupController on every entry/refresh
+  // and from updateSearch when the user types. Replacing the
+  // InfinityModel (rather than mutating it) lets ember-infinity
+  // restart its paging cursor cleanly.
+  @action
+  refreshResults() {
+    this.searchResults = this.infinity.model('company', {
+      perPage: 20,
+      startingPage: 1,
+      sort: 'name',
+      ...(this.search ? { 'filter[query]': this.search } : {}),
+    });
+  }
 
   @action
   updateSearch(value) {
     this.search = value;
     this.isSearching = false;
+    this.refreshResults();
   }
 
   @action
   startSearching() {
     this.isSearching = true;
-  }
-
-  // Phase 6a — staff Federation-enabled toggle. Standard Ember Data
-  // PATCH (no apiAction verb) because ``federation_enabled`` is just
-  // a model attribute on Company. Mirror of answers/show.js
-  // toggleFavorite — flip the attribute, save, rollback on failure.
-  @action
-  toggleFederationEnabled(event) {
-    if (this.savingFederation) return;
-    const next = event.target.checked;
-    const company = this.model.sourceCompany;
-    const previous = company.federationEnabled;
-    company.federationEnabled = next;
-    this.savingFederation = true;
-    company
-      .save()
-      .then(() => {
-        this.flashMessages.success(
-          next
-            ? `Federation enabled for "${company.name}".`
-            : `Federation disabled for "${company.name}".`,
-        );
-      })
-      .catch((err) => {
-        company.federationEnabled = previous;
-        const detail =
-          err?.errors?.[0]?.detail || err?.message || 'Unknown error';
-        this.flashMessages.danger(`Failed to update federation: ${detail}`);
-      })
-      .finally(() => {
-        this.savingFederation = false;
-      });
   }
 }
