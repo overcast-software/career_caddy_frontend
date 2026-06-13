@@ -42,6 +42,13 @@ export default class SessionService extends Service {
       .lookup('service:current-user')
       .load()
       .catch((err) => console.warn('Failed to load user after login:', err));
+    // Symmetric with handleInvalidation's events.stop() — application
+    // beforeModel won't re-fire to start the SSE channel after the
+    // login transition, so do it here. events.start() is idempotent.
+    const events = getOwner(this).lookup('service:events');
+    if (events) {
+      events.start();
+    }
     // Job Posts is the dashboard — first thing users want to see post-login.
     // The public landing (/) is a marketing surface for cold visitors.
     this.router.transitionTo('job-posts.index');

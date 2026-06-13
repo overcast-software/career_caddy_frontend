@@ -26,30 +26,16 @@ export default class CompaniesSearchTableComponent extends Component {
   // Per-row so the spinner pins to the actual button you clicked.
   @tracked actingId = null;
 
-  // Locally suppress rows that the user just marked as aliases of the
-  // current Company — the InfinityModel doesn't get a re-query so
-  // they'd otherwise linger.
-  @tracked _suppressedIds = new Set();
-
-  // Template-level filter — never iterate the InfinityModel in JS
-  // (ArrayProxy's Symbol.iterator isn't reliable across ember-data
-  // versions; {{#each}} handles it correctly). Mirrors the index
-  // page's pattern of just passing the live model to {{#each}}.
-  shouldShowRow = (row) => {
-    if (!row) return false;
-    if (row.id === this.args.sourceCompany?.id) return false;
-    if (this._suppressedIds.has(row.id)) return false;
-    return true;
-  };
-
-  // Template hint: are any rows in the current page going to render?
-  // Used to flip between the table and the "No matches" empty state.
-  get hasVisibleRows() {
+  // Template hint: any rows in the current page? Used to flip between
+  // the table and the empty-state branch. .length on the InfinityModel
+  // is safe to read; iterating with for...of isn't.
+  get hasRows() {
     const live = this.args.searchResults;
     if (!live) return false;
-    const length = live.length ?? 0;
-    return length > 0;
+    return (live.length ?? 0) > 0;
   }
+
+  isSelf = (row) => row?.id === this.args.sourceCompany?.id;
 
   isActing(prefix, id) {
     return this.actingId === `${prefix}:${id}`;
@@ -122,11 +108,6 @@ export default class CompaniesSearchTableComponent extends Component {
         this.flashMessages.success(
           `Marked "${targetName}" as alias of "${source.name}".`,
         );
-        // Pop the row out so it doesn't linger in the current results.
-        // Assign a fresh Set — tracked Set mutations don't propagate.
-        const next = new Set(this._suppressedIds);
-        next.add(targetId);
-        this._suppressedIds = next;
       })
       .catch((err) => {
         const detail =
