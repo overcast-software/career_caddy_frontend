@@ -1,5 +1,34 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
+    {{! Phase 4 federation: origin instance broadcast an ActivityPub
+        Delete for this row, tombstoning it. The api persists the
+        retraction timestamp + originating hostname; the local rows +
+        application records (scores, applications, cover letters) all
+        remain intact and continue to render below. Local-instance
+        suppression deferred — frontend has no `CAREER_CADDY_INSTANCE`
+        config wired up yet, so we gate on `sourceDeletedAt` alone.
+        Follow-up: thread the local hostname through config/environment
+        and skip the banner when sourceInstance matches it. }}
+    {{#if this.model.sourceDeletedAt}}
+      <div
+        class="rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
+        data-test-source-withdrawn
+        role="status"
+      >
+        <p class="text-sm text-amber-800 dark:text-amber-200">
+          <span class="font-medium">Original posting withdrawn.</span>
+          The job post
+          {{#if this.model.sourceInstance}}
+            on
+            <span class="font-medium">{{this.model.sourceInstance}}</span>
+          {{/if}}
+          was retracted on
+          {{format-date this.model.sourceDeletedAt "MMM D, YYYY"}}. Your
+          application records remain intact.
+        </p>
+      </div>
+    {{/if}}
+
     <div class="panel-card space-y-3 pb-4">
       {{! Title/meta row, then actions row below — full width on every
           viewport. Earlier we pinned actions to the right of the title

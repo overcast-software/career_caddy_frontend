@@ -93,6 +93,16 @@ export default class JobPostModel extends Model {
   // Per-user triage mutations go through POST /job-posts/:id/triage/.
   @attr() triage;
   @attr('string', { defaultValue: 'manual' }) source;
+  // Phase 4 ActivityPub federation — `sourceInstance` is the originating
+  // instance hostname (local rows default to env `CAREER_CADDY_INSTANCE`
+  // server-side; federated rows carry the remote host). Read-only on the
+  // api. `sourceDeletedAt` is non-null only when the origin instance has
+  // broadcast an inbound ActivityPub `Delete` for the row — i.e. the
+  // original posting has been withdrawn at the source. jp.show keys the
+  // "Original posting withdrawn" banner off this field. Read-only; no
+  // input flow.
+  @attr('string') sourceInstance;
+  @attr('date') sourceDeletedAt;
   // ActivityPub-aligned per-post visibility. JSON array of AS2 audience
   // URI strings. Default on the api side is `[AS2_PUBLIC]`; defaulting
   // here mirrors that so optimistic-create rows render with the right
