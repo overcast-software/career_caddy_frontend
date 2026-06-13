@@ -70,6 +70,48 @@
         materialize the async hasMany. Restore once the
         CompanyAlias serializer ships. }}
 
+    <div class="panel-card mt-6" data-test-federation-panel>
+      <h2 class="text-lg font-semibold mb-2">Federation</h2>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        When enabled, this company exposes an ActivityStreams 2.0 actor at
+        <code class="font-mono text-xs">/companies/{{or
+            this.model.slug
+            "<slug>"
+          }}/</code>
+        and the public Subscribe affordance lights up. The slug is the public
+        WebFinger handle.
+      </p>
+      <div class="space-y-3">
+        <div>
+          <dt class="text-xs text-gray-500 dark:text-gray-400">Slug</dt>
+          <dd class="font-mono text-sm text-gray-900 dark:text-gray-100">
+            {{#if this.model.slug}}
+              {{this.model.slug}}
+            {{else}}
+              <span class="italic text-gray-400 dark:text-gray-500">not set</span>
+            {{/if}}
+          </dd>
+        </div>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            data-test-federation-toggle
+            checked={{this.model.federationEnabled}}
+            disabled={{this.savingFederation}}
+            {{on "change" this.toggleFederationEnabled}}
+          />
+          <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+            Federation enabled
+          </span>
+          {{#if this.savingFederation}}
+            <span
+              class="text-xs text-gray-500 dark:text-gray-400"
+            >Saving…</span>
+          {{/if}}
+        </label>
+      </div>
+    </div>
+
     <div class="panel-card mt-6" data-test-merge-panel>
       <h2 class="text-lg font-semibold mb-2">Merge into another company</h2>
       <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">

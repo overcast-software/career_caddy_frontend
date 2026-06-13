@@ -4,6 +4,14 @@ export default class CompanyModel extends Model {
   @attr('string') name;
   @attr('string') displayName;
   @attr('string') note;
+  // Phase 6a — federation handle + opt-in toggle. ``slug`` is the
+  // public WebFinger handle (nullable until backfilled, staff can
+  // edit). ``federationEnabled`` is the operator-visible toggle that
+  // controls whether the AS2 actor + Subscribe affordance light up.
+  // Both surface on the JSON:API read path; PATCH flows through the
+  // standard CompanyViewSet.update.
+  @attr('string') slug;
+  @attr('boolean', { defaultValue: false }) federationEnabled;
   @attr('number') jobPostsCount;
   @attr('number') jobApplicationsCount;
   @attr('number') scrapesCount;
