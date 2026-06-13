@@ -1,6 +1,7 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'career-caddy-frontend/tests/helpers';
 import { render, fillIn, click } from '@ember/test-helpers';
+import { clickTrigger } from 'ember-power-select/test-support/helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import Service from '@ember/service';
 import { AS2_PUBLIC } from 'career-caddy-frontend/models/job-post';
@@ -145,6 +146,51 @@ module('Integration | Component | job-posts/form', function (hooks) {
     await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
     assert.dom('[data-test-current-duplicate-target]').doesNotExist();
     assert.dom('[data-test-duplicate-picker]').exists();
+  });
+
+  // Regression: the duplicate picker opens its dropdown when clicked, but
+  // without @searchEnabled={{true}} the before-options template renders
+  // nothing (the inner {{#if @searchEnabled ...}} gates the entire
+  // <input type="search"> element). Result: dropdown opens, placeholder
+  // shows on the trigger, focus stays on the non-input trigger, and
+  // typed characters fall into PowerSelect's typeahead-on-options task
+  // which is a no-op because there are no @options (only an async
+  // @search). The fix is to pass @searchEnabled={{true}} like every
+  // other working <PowerSelect> in the codebase. This test fails on
+  // main by asserting that the search input element exists in the DOM
+  // after opening the dropdown.
+  test('duplicate picker renders a search input when the dropdown opens', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      duplicateOfId: null,
+    });
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    // Scope the trigger click to the duplicate-handling section so we
+    // don't pick up the Company PowerSelectWithCreate also rendered in
+    // this form. `data-test-duplicate-picker` lands on the trigger
+    // element itself via ...attributes, so the bare data attribute IS
+    // already `.ember-power-select-trigger`; clickTrigger's descendant
+    // form needs a wrapper to scope by.
+    await clickTrigger('[data-test-duplicate-handling]');
+    // The dropdown is rendered in a wormhole at the document root, so
+    // assert.dom (scoped to the rendering test container) misses it.
+    // Query the document directly.
+    const input = document.querySelector('.ember-power-select-search-input');
+    assert.ok(
+      input,
+      'before-options renders <input class="ember-power-select-search-input"> when dropdown opens — gated by @searchEnabled',
+    );
+    assert.strictEqual(
+      input?.tagName,
+      'INPUT',
+      'search field is a real <input>, not a div the user can mistake for one',
+    );
+    assert.strictEqual(
+      input?.getAttribute('type'),
+      'search',
+      'search field is type="search" so the browser routes keystrokes into its value',
+    );
   });
 
   test('duplicate-handling banner shows when duplicateOfId is set', async function (assert) {
