@@ -54,24 +54,20 @@
           <span class="font-medium">{{this.model.displayName}}</span>
         </p>
       {{/if}}
-      <div class="mt-4 flex items-center gap-3">
+      <div class="mt-4 flex flex-wrap items-center gap-3">
         <LinkTo
           @route="companies.show"
           @model={{this.model.id}}
           class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
         >View public Company page →</LinkTo>
+        <LinkTo
+          @route="admin.companies.index"
+          @query={{hash source=this.model.id}}
+          class="btn"
+        >Find related companies →</LinkTo>
       </div>
     </div>
 
     <Companies::AliasesPanel @company={{this.model}} />
-
-    <Companies::SearchTable
-      @sourceCompany={{this.model}}
-      @searchResults={{this.searchResults}}
-      @searchTerm={{this.search}}
-      @isSearching={{this.isSearching}}
-      @onSearch={{this.updateSearch}}
-      @onSearchStart={{this.startSearching}}
-    />
   </:main>
 </RouteLayout>
