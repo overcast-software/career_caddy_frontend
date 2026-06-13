@@ -16,10 +16,10 @@ import { tracked } from '@glimmer/tracking';
 //
 // Also exposes a staff-only "mark this Company as alias of another"
 // affordance — POST /companies/:id/mark-as-alias-of/ via the
-// markAsAliasOf model method (apiAction pattern). The companion
-// "unmark" verb does not yet exist on the api (Phase A omission);
-// promoting an alias back to canonical is captured as inbox
-// follow-up.
+// markAsAliasOf model method (apiAction pattern). When the Company
+// is itself an alias (canonical is non-null), the panel surfaces an
+// "Unmark — restore as canonical" button next to the amber notice
+// that POSTs /companies/:id/unmark-as-alias-of/ via unmarkAsAliasOf.
 export default class CompaniesAliasesPanelComponent extends Component {
   @service store;
   @service router;
@@ -27,6 +27,7 @@ export default class CompaniesAliasesPanelComponent extends Component {
 
   @tracked aliasTarget = null;
   @tracked aliasing = false;
+  @tracked unmarking = false;
 
   // PowerSelect requires @options even when @search is used (the
   // initial empty dropdown reads from this). Search-only flow.
@@ -83,6 +84,36 @@ export default class CompaniesAliasesPanelComponent extends Component {
   @action
   clearAliasTarget() {
     this.aliasTarget = null;
+  }
+
+  @action
+  confirmUnmark() {
+    if (this.unmarking) return;
+    const company = this.args.company;
+    if (!company) return;
+    const sourceName = company.name;
+    const sourceId = company.id;
+    this.unmarking = true;
+    company
+      .unmarkAsAliasOf()
+      .then(() => {
+        this.flashMessages.success(`Restored "${sourceName}" as canonical.`);
+        // Stay on the same Company — it's canonical now. apiAction
+        // auto-pushes the updated resource, so canonical flips to
+        // null in the store and the @tracked relationship getters
+        // re-render the panel (amber notice hides, mark-as-alias
+        // affordance restores). transitionTo nudges the route so any
+        // include= load also refreshes.
+        this.router.transitionTo('admin.companies.show', sourceId);
+      })
+      .catch((err) => {
+        const detail =
+          err?.errors?.[0]?.detail || err?.message || 'Failed to unmark';
+        this.flashMessages.danger(`Unmark failed: ${detail}`);
+      })
+      .finally(() => {
+        this.unmarking = false;
+      });
   }
 
   @action

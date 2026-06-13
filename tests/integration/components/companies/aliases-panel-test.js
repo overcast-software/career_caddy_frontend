@@ -1,6 +1,6 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'career-caddy-frontend/tests/helpers';
-import { render } from '@ember/test-helpers';
+import { click, render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 
 // Phase A self-FK: an alias of a Company is itself a Company resource
@@ -97,5 +97,81 @@ module('Integration | Component | companies/aliases-panel', function (hooks) {
     assert.dom('[data-test-already-alias]').exists();
     // Mark-as-alias affordance is hidden for already-aliased rows.
     assert.dom('[data-test-alias-confirm]').doesNotExist();
+  });
+
+  test('unmark button is visible when canonical is set, hidden otherwise', async function (assert) {
+    const store = this.owner.lookup('service:store');
+
+    // Canonical (no canonical pointer) — no unmark button.
+    store.push({
+      data: {
+        type: 'company',
+        id: '920',
+        attributes: { name: 'Acme' },
+        relationships: {
+          aliases: { data: [] },
+          canonical: { data: null },
+        },
+      },
+    });
+    this.canonical = store.peekRecord('company', '920');
+    await render(hbs`<Companies::AliasesPanel @company={{this.canonical}} />`);
+    assert.dom('[data-test-unmark-button]').doesNotExist();
+
+    // Aliased (canonical pointer set) — unmark button surfaces.
+    store.push({
+      data: {
+        type: 'company',
+        id: '921',
+        attributes: { name: 'Acme Subsidiary' },
+        relationships: {
+          aliases: { data: [] },
+          canonical: { data: { type: 'company', id: '920' } },
+        },
+      },
+    });
+    this.aliased = store.peekRecord('company', '921');
+    await render(hbs`<Companies::AliasesPanel @company={{this.aliased}} />`);
+    assert.dom('[data-test-unmark-button]').exists();
+    assert
+      .dom('[data-test-unmark-button]')
+      .hasText('Unmark — restore as canonical');
+  });
+
+  test('clicking unmark invokes the unmarkAsAliasOf model verb', async function (assert) {
+    const store = this.owner.lookup('service:store');
+
+    // Stub the router-service transitionTo so we don't actually navigate.
+    const router = this.owner.lookup('service:router');
+    router.transitionTo = () => Promise.resolve();
+
+    store.push({
+      data: {
+        type: 'company',
+        id: '930',
+        attributes: { name: 'Acme Subsidiary' },
+        relationships: {
+          aliases: { data: [] },
+          canonical: { data: { type: 'company', id: '900' } },
+        },
+      },
+      included: [{ type: 'company', id: '900', attributes: { name: 'Acme' } }],
+    });
+    const company = store.peekRecord('company', '930');
+
+    // Mock the model verb on this instance (apiAction pattern returns
+    // a resolved Company; we don't care about the resolved value, only
+    // that the verb was hit).
+    let called = 0;
+    company.unmarkAsAliasOf = () => {
+      called += 1;
+      return Promise.resolve(company);
+    };
+    this.company = company;
+
+    await render(hbs`<Companies::AliasesPanel @company={{this.company}} />`);
+    await click('[data-test-unmark-button]');
+
+    assert.strictEqual(called, 1, 'unmarkAsAliasOf called once');
   });
 });

@@ -19,10 +19,21 @@
       class="mb-4 rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
       data-test-already-alias
     >
-      <p class="text-sm text-amber-800 dark:text-amber-200">
-        This Company is itself an alias. Visit the canonical record to manage
-        its aliases.
-      </p>
+      <div class="flex items-start justify-between gap-3">
+        <p class="text-sm text-amber-800 dark:text-amber-200">
+          This Company is itself an alias. Visit the canonical record to manage
+          its aliases, or unmark to restore it as canonical.
+        </p>
+        <button
+          type="button"
+          class="btn"
+          disabled={{this.unmarking}}
+          data-test-unmark-button
+          {{on "click" this.confirmUnmark}}
+        >
+          {{if this.unmarking "Unmarking…" "Unmark — restore as canonical"}}
+        </button>
+      </div>
     </div>
   {{/if}}
 

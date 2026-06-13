@@ -76,14 +76,25 @@ export default class CompanyModel extends Model {
   // Body shape: { target_id: <int> }. Returns the updated source
   // Company resource — auto-pushed through apiAction so the resolved
   // value is the live store-backed record.
-  //
-  // No companion "unmark" verb exists on the api yet; promoting an
-  // alias back to canonical is not supported in Phase A.
   markAsAliasOf(targetId) {
     return apiAction(this, {
       method: 'POST',
       path: 'mark-as-alias-of',
       data: { target_id: targetId },
+    });
+  }
+
+  // Staff-only verb: POST /api/v1/companies/:id/unmark-as-alias-of/
+  // Clears ``self.canonical_id`` (sets it to NULL), restoring this
+  // Company as canonical. No payload. Returns the updated Company
+  // resource — auto-pushed through apiAction so the resolved value
+  // is the live store-backed record. The api returns 400 if this
+  // Company is already canonical (UI hides the affordance in that
+  // case, but the catch handles it defensively).
+  unmarkAsAliasOf() {
+    return apiAction(this, {
+      method: 'POST',
+      path: 'unmark-as-alias-of',
     });
   }
 
