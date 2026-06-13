@@ -37,9 +37,9 @@ export default class CompaniesSearchTableComponent extends Component {
 
   isSelf = (row) => row?.id === this.args.sourceCompany?.id;
 
-  isActing(prefix, id) {
-    return this.actingId === `${prefix}:${id}`;
-  }
+  // Arrow class field — regular method syntax doesn't bind `this`
+  // when the template invokes it as `(this.isActing ...)`.
+  isActing = (prefix, id) => this.actingId === `${prefix}:${id}`;
 
   @action
   mergeCurrentInto(target) {
