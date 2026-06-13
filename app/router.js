@@ -272,6 +272,9 @@ Router.map(function () {
       this.route('show', { path: '/:company_id' });
       this.route('related', { path: '/:company_id/related' });
     });
+    this.route('job-posts', function () {
+      this.route('dupes', { path: '/:job_post_id/dupes' });
+    });
     this.route('ai-models');
     this.route('scrape-graph');
     this.route('dedupe', function () {
