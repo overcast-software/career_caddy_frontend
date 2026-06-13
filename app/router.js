@@ -270,6 +270,7 @@ Router.map(function () {
     });
     this.route('companies', function () {
       this.route('show', { path: '/:company_id' });
+      this.route('related', { path: '/:company_id/related' });
     });
     this.route('ai-models');
     this.route('scrape-graph');

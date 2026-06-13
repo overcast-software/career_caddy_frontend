@@ -18,9 +18,10 @@ import { tracked } from '@glimmer/tracking';
 // panel surfaces an "Unmark — restore as canonical" button next to
 // the amber notice that POSTs /companies/:id/unmark-as-alias-of/ via
 // unmarkAsAliasOf. Forward direction (mark this as alias of another
-// / mark another as alias of this) lives on /admin/companies?source=
-// <id>, the staff search surface reached via the "Find related
-// companies →" button on the parent route.
+// / mark another as alias of this) lives on
+// /admin/companies/<id>/related — the relate-actions workspace
+// reached via the "Find related companies →" button on the parent
+// route.
 export default class CompaniesAliasesPanelComponent extends Component {
   @service router;
   @service flashMessages;

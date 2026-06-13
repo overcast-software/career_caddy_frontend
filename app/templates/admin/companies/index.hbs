@@ -32,40 +32,6 @@
         </div>
       </div>
 
-      {{#if this.relateMode}}
-        <div
-          class="mb-4 rounded-md bg-accent-50 p-3 ring-1 ring-inset ring-accent-200 dark:bg-accent-500/10 dark:ring-accent-500/30"
-          data-test-relate-banner
-        >
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <p class="text-sm text-accent-800 dark:text-accent-200">
-              Relate mode for
-              {{#if this.sourceCompany}}
-                <span class="font-medium">{{this.sourceCompany.name}}</span>
-                (#{{this.source}})
-              {{else}}
-                Company
-                <span class="font-mono">#{{this.source}}</span>
-                (not loaded —
-                <LinkTo
-                  @route="admin.companies.show"
-                  @model={{this.source}}
-                  class="underline"
-                >open it</LinkTo>
-                to enable per-row actions)
-              {{/if}}
-              — pick a row to merge, set as canonical, or adopt as alias.
-            </p>
-            <button
-              type="button"
-              class="btn"
-              data-test-exit-relate
-              {{on "click" this.exitRelateMode}}
-            >Exit relate mode</button>
-          </div>
-        </div>
-      {{/if}}
-
       {{#if this.isSearching}}
         <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
       {{else if this.model.length}}
@@ -100,8 +66,7 @@
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
               {{#each this.model as |company|}}
                 <tr
-                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50
-                    {{if (this.isSource company) 'opacity-60'}}"
+                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   data-test-company-row={{company.id}}
                 >
                   <td
@@ -122,11 +87,6 @@
                         class="ml-2 text-xs text-gray-500 dark:text-gray-400"
                       >({{company.displayName}})</span>
                     {{/if}}
-                    {{#if (this.isSource company)}}
-                      <span
-                        class="ml-2 rounded bg-accent-50 px-1.5 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-500/10 dark:text-accent-300"
-                      >source</span>
-                    {{/if}}
                   </td>
                   <td
                     class="px-4 py-3 text-right text-gray-600 dark:text-gray-300"
@@ -138,58 +98,13 @@
                     class="px-4 py-3 text-right text-gray-600 dark:text-gray-300"
                   >{{or company.scrapesCount 0}}</td>
                   <td class="px-4 py-3 text-sm">
-                    <div class="flex flex-wrap items-center gap-2">
-                      <LinkTo
-                        @route="admin.companies.show"
-                        @model={{company.id}}
-                        class="text-accent-600 dark:text-accent-400 hover:underline"
-                      >
-                        Manage
-                      </LinkTo>
-                      {{#if this.relateMode}}
-                        {{#unless (this.isSource company)}}
-                          <button
-                            type="button"
-                            class="btn"
-                            disabled={{this.actingId}}
-                            data-test-action="merge"
-                            {{on "click" (fn this.mergeSourceInto company)}}
-                          >
-                            {{if
-                              (this.isActing "merge" company.id)
-                              "Merging…"
-                              "Merge source into this"
-                            }}
-                          </button>
-                          <button
-                            type="button"
-                            class="btn"
-                            disabled={{this.actingId}}
-                            data-test-action="mark-source"
-                            {{on "click" (fn this.markSourceAsAliasOf company)}}
-                          >
-                            {{if
-                              (this.isActing "mark-source" company.id)
-                              "Marking…"
-                              "Set this as canonical"
-                            }}
-                          </button>
-                          <button
-                            type="button"
-                            class="btn"
-                            disabled={{this.actingId}}
-                            data-test-action="adopt"
-                            {{on "click" (fn this.adoptRowAsAlias company)}}
-                          >
-                            {{if
-                              (this.isActing "adopt" company.id)
-                              "Marking…"
-                              "Adopt as alias"
-                            }}
-                          </button>
-                        {{/unless}}
-                      {{/if}}
-                    </div>
+                    <LinkTo
+                      @route="admin.companies.show"
+                      @model={{company.id}}
+                      class="text-accent-600 dark:text-accent-400 hover:underline"
+                    >
+                      Manage
+                    </LinkTo>
                   </td>
                 </tr>
               {{/each}}

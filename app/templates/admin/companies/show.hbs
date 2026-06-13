@@ -61,8 +61,8 @@
           class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
         >View public Company page →</LinkTo>
         <LinkTo
-          @route="admin.companies.index"
-          @query={{hash source=this.model.id}}
+          @route="admin.companies.related"
+          @model={{this.model.id}}
           class="btn"
         >Find related companies →</LinkTo>
       </div>
