@@ -229,13 +229,17 @@ export default class JobPostsFormComponent extends Component {
     this.store.findRecord('job-post', id, { reload: true }).catch(() => {});
   }
 
-  @action
-  async searchJobPosts(term) {
+  _lastTerm = null;
+  _lastResults = null;
+
+  searchJobPosts = async (term) => {
     const trimmed = (term || '').trim();
-    if (!trimmed) return [];
-    // Exclude self so the user can't pick their own row in the picker.
+    if (trimmed.length < 2) return [];
+    if (trimmed === this._lastTerm) return this._lastResults;
     const results = await this.store.query('job-post', {
       'filter[query]': trimmed,
+      include: 'company',
+      'fields[company]': 'name',
       'page[size]': 20,
     });
     const own = this.args.jobPost?.id;
@@ -243,8 +247,10 @@ export default class JobPostsFormComponent extends Component {
     for (const p of results) {
       if (p.id !== own) out.push(p);
     }
+    this._lastTerm = trimmed;
+    this._lastResults = out;
     return out;
-  }
+  };
 
   // Two-step dup picker: PowerSelect onChange just stages the target so
   // staff can decide between "Mark as duplicate" (quick) and
