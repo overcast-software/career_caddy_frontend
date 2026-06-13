@@ -238,6 +238,8 @@ export default class JobPostsFormComponent extends Component {
     if (trimmed === this._lastTerm) return this._lastResults;
     const results = await this.store.query('job-post', {
       'filter[query]': trimmed,
+      include: 'company',
+      'fields[company]': 'name',
       'page[size]': 20,
     });
     const own = this.args.jobPost?.id;
