@@ -229,13 +229,13 @@ export default class JobPostsFormComponent extends Component {
     this.store.findRecord('job-post', id, { reload: true }).catch(() => {});
   }
 
-  #lastTerm = null;
-  #lastResults = null;
+  _lastTerm = null;
+  _lastResults = null;
 
   searchJobPosts = async (term) => {
     const trimmed = (term || '').trim();
     if (trimmed.length < 2) return [];
-    if (trimmed === this.#lastTerm) return this.#lastResults;
+    if (trimmed === this._lastTerm) return this._lastResults;
     const results = await this.store.query('job-post', {
       'filter[query]': trimmed,
       'page[size]': 20,
@@ -245,8 +245,8 @@ export default class JobPostsFormComponent extends Component {
     for (const p of results) {
       if (p.id !== own) out.push(p);
     }
-    this.#lastTerm = trimmed;
-    this.#lastResults = out;
+    this._lastTerm = trimmed;
+    this._lastResults = out;
     return out;
   };
 
