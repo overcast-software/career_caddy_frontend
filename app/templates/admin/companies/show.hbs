@@ -1,4 +1,4 @@
-{{page-title (concat this.model.name " — Company Admin")}}
+{{page-title (concat this.model.sourceCompany.name " — Company Admin")}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:subnav>
     <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
@@ -13,7 +13,7 @@
   <:main>
     <div class="panel-card mb-6">
       <div class="flex items-center justify-between mb-2">
-        <h1 class="text-xl font-semibold">{{this.model.name}}</h1>
+        <h1 class="text-xl font-semibold">{{this.model.sourceCompany.name}}</h1>
         <LinkTo
           @route="admin.companies.index"
           class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
@@ -24,53 +24,55 @@
           <dt class="text-gray-500 dark:text-gray-400">ID</dt>
           <dd
             class="font-mono text-gray-900 dark:text-gray-100"
-          >{{this.model.id}}</dd>
+          >{{this.model.sourceCompany.id}}</dd>
         </div>
         <div>
           <dt class="text-gray-500 dark:text-gray-400">Job posts</dt>
           <dd class="font-medium text-gray-900 dark:text-gray-100">{{or
-              this.model.jobPostsCount
+              this.model.sourceCompany.jobPostsCount
               0
             }}</dd>
         </div>
         <div>
           <dt class="text-gray-500 dark:text-gray-400">Applications</dt>
           <dd class="font-medium text-gray-900 dark:text-gray-100">{{or
-              this.model.jobApplicationsCount
+              this.model.sourceCompany.jobApplicationsCount
               0
             }}</dd>
         </div>
         <div>
           <dt class="text-gray-500 dark:text-gray-400">Scrapes</dt>
           <dd class="font-medium text-gray-900 dark:text-gray-100">{{or
-              this.model.scrapesCount
+              this.model.sourceCompany.scrapesCount
               0
             }}</dd>
         </div>
       </dl>
-      {{#if this.model.displayName}}
+      {{#if this.model.sourceCompany.displayName}}
         <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
           Display name:
-          <span class="font-medium">{{this.model.displayName}}</span>
+          <span
+            class="font-medium"
+          >{{this.model.sourceCompany.displayName}}</span>
         </p>
       {{/if}}
       <div class="mt-4 flex items-center gap-3">
         <LinkTo
           @route="companies.show"
-          @model={{this.model.id}}
+          @model={{this.model.sourceCompany.id}}
           class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
         >View public Company page →</LinkTo>
       </div>
     </div>
 
-    <Companies::AliasesPanel @company={{this.model}} />
+    <Companies::AliasesPanel @company={{this.model.sourceCompany}} />
 
     <div class="panel-card mt-6" data-test-federation-panel>
       <h2 class="text-lg font-semibold mb-2">Federation</h2>
       <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
         When enabled, this company exposes an ActivityStreams 2.0 actor at
         <code class="font-mono text-xs">/companies/{{or
-            this.model.slug
+            this.model.sourceCompany.slug
             "<slug>"
           }}/</code>
         and the public Subscribe affordance lights up. The slug is the public
@@ -80,8 +82,8 @@
         <div>
           <dt class="text-xs text-gray-500 dark:text-gray-400">Slug</dt>
           <dd class="font-mono text-sm text-gray-900 dark:text-gray-100">
-            {{#if this.model.slug}}
-              {{this.model.slug}}
+            {{#if this.model.sourceCompany.slug}}
+              {{this.model.sourceCompany.slug}}
             {{else}}
               <span class="italic text-gray-400 dark:text-gray-500">not set</span>
             {{/if}}
@@ -91,7 +93,7 @@
           <input
             type="checkbox"
             data-test-federation-toggle
-            checked={{this.model.federationEnabled}}
+            checked={{this.model.sourceCompany.federationEnabled}}
             disabled={{this.savingFederation}}
             {{on "change" this.toggleFederationEnabled}}
           />
@@ -107,6 +109,13 @@
       </div>
     </div>
 
-    <Companies::SearchTable @sourceCompany={{this.model}} />
+    <Companies::SearchTable
+      @sourceCompany={{this.model.sourceCompany}}
+      @searchResults={{this.model.searchResults}}
+      @searchTerm={{this.search}}
+      @isSearching={{this.isSearching}}
+      @onSearch={{this.updateSearch}}
+      @onSearchStart={{this.startSearching}}
+    />
   </:main>
 </RouteLayout>

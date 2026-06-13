@@ -1,13 +1,21 @@
 {{!
-  Search the company list and act on results from
-  <span>@sourceCompany</span>. Replaces the merge-into PowerSelect on
-  controllers/admin/companies/show.js + the mark-as-alias PowerSelect
-  inside <Companies::AliasesPanel>.
+  Server-side company search rendered as a table with relate-actions.
+  Search input + InfinityLoader mirror /companies/index; the parent
+  route drives the queryParam + infinity model. We just render and
+  per-row act.
 }}
 <div class="panel-card mt-6" data-test-companies-search-table>
-  <h2 class="text-lg font-semibold mb-2">Find related companies</h2>
+  <div class="flex items-center justify-between mb-2">
+    <h2 class="text-lg font-semibold">Find related companies</h2>
+    <Menus::SubnavSearch
+      @value={{@searchTerm}}
+      @onSearch={{@onSearch}}
+      @onSearchStart={{@onSearchStart}}
+      @placeholder="Search companies…"
+    />
+  </div>
   <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-    Server-side search across all companies. Use the per-row actions to merge
+    Use the per-row actions to merge
     <span class="font-medium">{{@sourceCompany.name}}</span>
     into a result, mark
     <span class="font-medium">{{@sourceCompany.name}}</span>
@@ -15,25 +23,9 @@
     <span class="font-medium">{{@sourceCompany.name}}</span>.
   </p>
 
-  <div class="max-w-md mb-4">
-    <label class="block">
-      <span class="sr-only">Search companies</span>
-      <input
-        type="search"
-        class="w-full input"
-        placeholder="Search companies… (min 2 characters)"
-        value={{this.search}}
-        {{on "input" this.updateSearch}}
-        data-test-search-input
-      />
-    </label>
-  </div>
-
-  {{#if this.searching}}
+  {{#if @isSearching}}
     <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Searching…</p>
-  {{/if}}
-
-  {{#if this.results.length}}
+  {{else if this.rows.length}}
     <div
       class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
     >
@@ -57,7 +49,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-          {{#each this.results as |row|}}
+          {{#each this.rows as |row|}}
             <tr
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
               data-test-search-row={{row.id}}
@@ -131,9 +123,10 @@
         </tbody>
       </table>
     </div>
-  {{else if this.searching}}
-    {{! waiting on the in-flight query }}
-  {{else if (gte this.search.length 2)}}
-    <p class="text-sm text-gray-500 dark:text-gray-400">No matches.</p>
+    <InfinityLoader @infinityModel={{@searchResults}} @hideOnInfinity={{true}}>
+      <div class="py-4 text-center text-sm text-gray-400">Loading more…</div>
+    </InfinityLoader>
+  {{else}}
+    <p class="text-sm text-gray-500 dark:text-gray-400">No companies match.</p>
   {{/if}}
 </div>

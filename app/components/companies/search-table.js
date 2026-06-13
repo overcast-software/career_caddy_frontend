@@ -7,68 +7,42 @@ import { tracked } from '@glimmer/tracking';
 // Replaces the two ad-hoc PowerSelects (merge-into + mark-as-alias)
 // that previously lived on /admin/companies/:id.
 //
-// One canonical search shape so future callsites consume this
-// component instead of reinventing the search call (the
-// reinvention-pile is documented in the parent todo).
+// Search state lives on the parent route's queryParam — the route
+// drives ember-infinity, the component just renders. This matches
+// /companies/index's shape.
 //
 // Args:
-// - sourceCompany: the Company that row-actions act on / from.
+//   @sourceCompany   — the Company that row-actions act on / from.
+//   @searchResults   — the ember-infinity InfinityModel for the query.
+//   @searchTerm      — the current search value (drives the input).
+//   @isSearching     — true while the debounced input is settling.
+//   @onSearch        — (value) → void; route updates the queryParam.
+//   @onSearchStart   — () → void; flips controller.isSearching=true.
 export default class CompaniesSearchTableComponent extends Component {
-  @service store;
   @service router;
   @service flashMessages;
 
-  @tracked search = '';
-  @tracked results = [];
-  @tracked searching = false;
   // actingId = `<verb>:<rowId>` for the in-flight row action, or null.
   // Per-row so the spinner pins to the actual button you clicked.
   @tracked actingId = null;
 
-  _lastTerm = null;
-  _searchTimer = null;
+  // Locally suppress rows that the user just marked as aliases of the
+  // current Company — the InfinityModel doesn't get a re-query so
+  // they'd otherwise linger.
+  @tracked _suppressedIds = new Set();
 
-  willDestroy() {
-    super.willDestroy(...arguments);
-    if (this._searchTimer) clearTimeout(this._searchTimer);
-  }
-
-  @action
-  updateSearch(event) {
-    this.search = event.target.value;
-    if (this._searchTimer) clearTimeout(this._searchTimer);
-    this._searchTimer = setTimeout(() => this._runSearch(), 250);
-  }
-
-  _runSearch() {
-    const trimmed = this.search.trim();
-    if (trimmed.length < 2) {
-      this.results = [];
-      this._lastTerm = null;
-      return;
+  get rows() {
+    const live = this.args.searchResults;
+    if (!live) return [];
+    const sourceId = this.args.sourceCompany?.id;
+    const out = [];
+    for (const c of live) {
+      if (!c) continue;
+      if (c.id === sourceId) continue;
+      if (this._suppressedIds.has(c.id)) continue;
+      out.push(c);
     }
-    if (trimmed === this._lastTerm) return;
-    this.searching = true;
-    this.store
-      .query('company', {
-        'filter[query]': trimmed,
-        'page[size]': 20,
-      })
-      .then((rows) => {
-        const sourceId = this.args.sourceCompany?.id;
-        const out = [];
-        for (const c of rows) {
-          if (c.id !== sourceId) out.push(c);
-        }
-        this.results = out;
-        this._lastTerm = trimmed;
-      })
-      .catch(() => {
-        this.flashMessages.danger('Company search failed.');
-      })
-      .finally(() => {
-        this.searching = false;
-      });
+    return out;
   }
 
   isActing(prefix, id) {
@@ -142,10 +116,11 @@ export default class CompaniesSearchTableComponent extends Component {
         this.flashMessages.success(
           `Marked "${targetName}" as alias of "${source.name}".`,
         );
-        // Stay on the current page; just pop the row out of results
-        // and let the AliasesPanel's hasMany('aliases') re-render with
-        // the new alias the api just attached.
-        this.results = this.results.filter((r) => r.id !== targetId);
+        // Pop the row out so it doesn't linger in the current results.
+        // Assign a fresh Set — tracked Set mutations don't propagate.
+        const next = new Set(this._suppressedIds);
+        next.add(targetId);
+        this._suppressedIds = next;
       })
       .catch((err) => {
         const detail =
