@@ -95,8 +95,6 @@ module('Integration | Component | companies/aliases-panel', function (hooks) {
     await render(hbs`<Companies::AliasesPanel @company={{this.company}} />`);
 
     assert.dom('[data-test-already-alias]').exists();
-    // Mark-as-alias affordance is hidden for already-aliased rows.
-    assert.dom('[data-test-alias-confirm]').doesNotExist();
   });
 
   test('unmark button is visible when canonical is set, hidden otherwise', async function (assert) {

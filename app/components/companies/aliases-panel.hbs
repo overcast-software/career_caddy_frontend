@@ -94,61 +94,11 @@
   {{/if}}
 
   {{#unless this.isAlias}}
-    <div class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
-      <h3 class="text-sm font-semibold mb-2">Mark this Company as alias of
-        another</h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Sets this Company's canonical pointer at the target. Non-destructive —
-        both rows stay; Phase B dedupe consults the canonical pointer.
-      </p>
-
-      <div class="max-w-md">
-        <PowerSelect
-          @options={{this.emptyOptions}}
-          @selected={{this.aliasTarget}}
-          @search={{this.searchCompanies}}
-          @searchEnabled={{true}}
-          @placeholder="Search for the canonical company…"
-          @onChange={{this.selectAliasTarget}}
-          as |company|
-        >
-          {{company.name}}
-          {{#if company.displayName}}
-            <span class="text-xs text-gray-500">({{company.displayName}})</span>
-          {{/if}}
-        </PowerSelect>
-      </div>
-
-      {{#if this.aliasTarget}}
-        <div
-          class="mt-4 rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
-          data-test-alias-confirm
-        >
-          <p class="text-sm text-amber-800 dark:text-amber-200">
-            Mark
-            <span class="font-medium">{{@company.name}}</span>
-            (#{{@company.id}}) as alias of
-            <span class="font-medium">{{this.aliasTarget.name}}</span>
-            (#{{this.aliasTarget.id}})?
-          </p>
-          <div class="mt-3 flex items-center gap-2">
-            <button
-              type="button"
-              class="btn primary"
-              disabled={{this.aliasing}}
-              {{on "click" this.confirmMarkAsAlias}}
-            >
-              {{if this.aliasing "Marking…" "Confirm"}}
-            </button>
-            <button
-              type="button"
-              class="btn"
-              disabled={{this.aliasing}}
-              {{on "click" this.clearAliasTarget}}
-            >Cancel</button>
-          </div>
-        </div>
-      {{/if}}
-    </div>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+      Use the
+      <span class="font-medium">Find related companies</span>
+      table below to mark another Company as an alias of this one or to mark
+      this one as an alias of another.
+    </p>
   {{/unless}}
 </div>

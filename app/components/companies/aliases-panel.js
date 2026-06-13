@@ -14,24 +14,16 @@ import { tracked } from '@glimmer/tracking';
 // + for...of (no .slice / .toArray / .objectAt per the project's
 // Ember Data convention).
 //
-// Also exposes a staff-only "mark this Company as alias of another"
-// affordance — POST /companies/:id/mark-as-alias-of/ via the
-// markAsAliasOf model method (apiAction pattern). When the Company
-// is itself an alias (canonical is non-null), the panel surfaces an
-// "Unmark — restore as canonical" button next to the amber notice
-// that POSTs /companies/:id/unmark-as-alias-of/ via unmarkAsAliasOf.
+// When the Company is itself an alias (canonical is non-null), the
+// panel surfaces an "Unmark — restore as canonical" button next to
+// the amber notice that POSTs /companies/:id/unmark-as-alias-of/ via
+// unmarkAsAliasOf. Forward direction (mark this as alias of another
+// / mark another as alias of this) lives in <Companies::SearchTable>.
 export default class CompaniesAliasesPanelComponent extends Component {
-  @service store;
   @service router;
   @service flashMessages;
 
-  @tracked aliasTarget = null;
-  @tracked aliasing = false;
   @tracked unmarking = false;
-
-  // PowerSelect requires @options even when @search is used (the
-  // initial empty dropdown reads from this). Search-only flow.
-  emptyOptions = [];
 
   get rows() {
     const live = this.args.company?.hasMany('aliases').value();
@@ -53,37 +45,6 @@ export default class CompaniesAliasesPanelComponent extends Component {
     // The api emits a `canonical` relationship linkage when the
     // company is itself aliased; null means this row IS canonical.
     return Boolean(this.args.company?.belongsTo('canonical').value());
-  }
-
-  // PowerSelect onSearch — async filter against the api. Mirrors the
-  // merge-into search (controllers/admin/companies/show.js):
-  // filter[query] = icontains on name and display_name; small page so
-  // staff are pinpointing a known target, not browsing.
-  searchCompanies = (term) => {
-    if (!term || term.length < 2) return [];
-    return this.store
-      .query('company', {
-        'filter[query]': term,
-        'page[size]': 20,
-      })
-      .then((results) => {
-        const sourceId = this.args.company?.id;
-        const filtered = [];
-        for (const c of results) {
-          if (c.id !== sourceId) filtered.push(c);
-        }
-        return filtered;
-      });
-  };
-
-  @action
-  selectAliasTarget(company) {
-    this.aliasTarget = company;
-  }
-
-  @action
-  clearAliasTarget() {
-    this.aliasTarget = null;
   }
 
   @action
@@ -113,34 +74,6 @@ export default class CompaniesAliasesPanelComponent extends Component {
       })
       .finally(() => {
         this.unmarking = false;
-      });
-  }
-
-  @action
-  confirmMarkAsAlias() {
-    if (!this.aliasTarget || this.aliasing) return;
-    const target = this.aliasTarget;
-    const targetId = target.id;
-    const sourceName = this.args.company.name;
-    this.aliasing = true;
-    this.args.company
-      .markAsAliasOf(targetId)
-      .then(() => {
-        this.flashMessages.success(
-          `Marked "${sourceName}" as alias of "${target.name}".`,
-        );
-        this.aliasTarget = null;
-        // Send staff to the now-canonical record so they can see the
-        // aggregated alias list under the canonical's panel.
-        this.router.transitionTo('admin.companies.show', targetId);
-      })
-      .catch((err) => {
-        const detail =
-          err?.errors?.[0]?.detail || err?.message || 'Unknown error';
-        this.flashMessages.danger(`Mark-as-alias failed: ${detail}`);
-      })
-      .finally(() => {
-        this.aliasing = false;
       });
   }
 }
