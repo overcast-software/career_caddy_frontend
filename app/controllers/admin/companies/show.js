@@ -15,6 +15,10 @@ export default class AdminCompaniesShowController extends Controller {
 
   @tracked mergeTarget = null;
   @tracked merging = false;
+  // Phase 6a — federation toggle in-flight flag. Disables the
+  // checkbox while the PATCH is pending so a double-click can't
+  // queue two saves.
+  @tracked savingFederation = false;
 
   // PowerSelect requires @options even when @search is used (the
   // initial empty dropdown reads from this). Search-only flow, so the
@@ -52,6 +56,37 @@ export default class AdminCompaniesShowController extends Controller {
   @action
   clearMergeTarget() {
     this.mergeTarget = null;
+  }
+
+  // Phase 6a — staff Federation-enabled toggle. Standard Ember Data
+  // PATCH (no apiAction verb) because ``federation_enabled`` is just
+  // a model attribute on Company. Mirror of answers/show.js
+  // toggleFavorite — flip the attribute, save, rollback on failure.
+  @action
+  toggleFederationEnabled(event) {
+    if (this.savingFederation) return;
+    const next = event.target.checked;
+    const previous = this.model.federationEnabled;
+    this.model.federationEnabled = next;
+    this.savingFederation = true;
+    this.model
+      .save()
+      .then(() => {
+        this.flashMessages.success(
+          next
+            ? `Federation enabled for "${this.model.name}".`
+            : `Federation disabled for "${this.model.name}".`,
+        );
+      })
+      .catch((err) => {
+        this.model.federationEnabled = previous;
+        const detail =
+          err?.errors?.[0]?.detail || err?.message || 'Unknown error';
+        this.flashMessages.danger(`Failed to update federation: ${detail}`);
+      })
+      .finally(() => {
+        this.savingFederation = false;
+      });
   }
 
   @action
