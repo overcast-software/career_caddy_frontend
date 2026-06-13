@@ -31,18 +31,24 @@ export default class CompaniesSearchTableComponent extends Component {
   // they'd otherwise linger.
   @tracked _suppressedIds = new Set();
 
-  get rows() {
+  // Template-level filter — never iterate the InfinityModel in JS
+  // (ArrayProxy's Symbol.iterator isn't reliable across ember-data
+  // versions; {{#each}} handles it correctly). Mirrors the index
+  // page's pattern of just passing the live model to {{#each}}.
+  shouldShowRow = (row) => {
+    if (!row) return false;
+    if (row.id === this.args.sourceCompany?.id) return false;
+    if (this._suppressedIds.has(row.id)) return false;
+    return true;
+  };
+
+  // Template hint: are any rows in the current page going to render?
+  // Used to flip between the table and the "No matches" empty state.
+  get hasVisibleRows() {
     const live = this.args.searchResults;
-    if (!live) return [];
-    const sourceId = this.args.sourceCompany?.id;
-    const out = [];
-    for (const c of live) {
-      if (!c) continue;
-      if (c.id === sourceId) continue;
-      if (this._suppressedIds.has(c.id)) continue;
-      out.push(c);
-    }
-    return out;
+    if (!live) return false;
+    const length = live.length ?? 0;
+    return length > 0;
   }
 
   isActing(prefix, id) {
