@@ -12,13 +12,29 @@
   </:subnav>
   <:main>
     <div class="panel-card">
-      <h1 class="text-xl font-semibold mb-4">Scrape Profiles</h1>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Domain-level profiles that capture page structure and extraction
-        patterns from past scrapes.
-      </p>
+      <div
+        class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+      >
+        <div>
+          <h1 class="text-xl font-semibold">Scrape Profiles</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Domain-level profiles that capture page structure and extraction
+            patterns from past scrapes.
+          </p>
+        </div>
+        <div class="sm:w-80">
+          <Menus::SubnavSearch
+            @value={{this.search}}
+            @onSearch={{this.updateSearch}}
+            @onSearchStart={{this.startSearching}}
+            @placeholder="Search by hostname..."
+          />
+        </div>
+      </div>
 
-      {{#if this.model.length}}
+      {{#if this.isSearching}}
+        <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+      {{else if this.model.length}}
         <div
           class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
         >
@@ -55,7 +71,10 @@
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
               {{#each this.model as |profile|}}
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <tr
+                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  data-test-scrape-profile-row={{profile.id}}
+                >
                   <td
                     class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100"
                   >
@@ -117,6 +136,15 @@
             </tbody>
           </table>
         </div>
+        <InfinityLoader @infinityModel={{this.model}} @hideOnInfinity={{true}}>
+          <div
+            class="py-4 text-center text-sm text-gray-400 dark:text-gray-500"
+          >
+            Loading more…
+          </div>
+        </InfinityLoader>
+      {{else if this.search}}
+        <EmptyState @message="No scrape profiles match your search." />
       {{else}}
         <EmptyState
           @message="No scrape profiles yet. Profiles are created automatically after successful scrapes."
