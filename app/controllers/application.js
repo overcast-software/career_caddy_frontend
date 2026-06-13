@@ -18,8 +18,9 @@ export default class ApplicationController extends Controller {
 
   @action
   async invalidateSession() {
+    // session.invalidate() → handleInvalidation handles store cleanup
+    // + SSE shutdown + routing centrally.
     await this.session.invalidate();
-    this.store.unloadAll();
   }
 
   @action setLoading(loading) {

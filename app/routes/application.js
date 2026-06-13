@@ -125,9 +125,16 @@ export default class ApplicationRoute extends Route {
     try {
       await this.currentUser.load();
     } catch {
+      // session.invalidate() → handleInvalidation does store.unloadAll
+      // + events.stop + transition to /login. Skip the explicit
+      // redirect when handleInvalidation already routes us to /login;
+      // only redirect when the user was on a docs-mapped route and we
+      // want the docs-fallback flash instead.
       await this.session.invalidate();
-      this.store.unloadAll();
-      this._redirectUnauthenticated(routeName);
+      const baseRoute = routeName?.split('.')[0];
+      if (DOCS_ROUTES.has(baseRoute)) {
+        this._redirectUnauthenticated(routeName);
+      }
       return;
     }
 

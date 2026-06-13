@@ -21,8 +21,10 @@ export default class TopBarComponent extends Component {
   }
 
   @action async invalidateSession() {
+    // session.invalidate() → handleInvalidation does store.unloadAll +
+    // events.stop + currentUser.user=null + transition. No need to
+    // repeat any of that here.
     await this.session.invalidate();
-    this.store.unloadAll();
     this.flashMessages.success('Signed out.');
   }
 
