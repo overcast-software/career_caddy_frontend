@@ -1,48 +1,82 @@
 import Component from '@glimmer/component';
+import { action } from '@ember/object';
+import { service } from '@ember/service';
+import { tracked } from '@glimmer/tracking';
 
-const SOURCE_BADGE = {
-  extraction: {
-    label: 'extraction',
-    classes:
-      'bg-accent-100 text-accent-700 ring-accent-200 dark:bg-accent-900/30 dark:text-accent-300 dark:ring-accent-700',
-  },
-  manual: {
-    label: 'manual',
-    classes:
-      'bg-blue-100 text-blue-700 ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-700',
-  },
-  backfill: {
-    label: 'backfill',
-    classes:
-      'bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700',
-  },
-};
-
-const FALLBACK_BADGE = SOURCE_BADGE.backfill;
-
-// Pure renderer for Company.aliases on /admin/companies/:id. The
-// alias collection is the async hasMany on Company — the route's
-// model() requests it via ``include=aliases`` so by first paint the
-// relationship is loaded. Pattern matches <JobPosts::DuplicateCandidates>:
-// hasMany('rel').value() + for...of (no .slice / .toArray /
-// .objectAt per the project's Ember Data convention).
+// Renders the Company.aliases sub-collection on /admin/companies/:id.
+//
+// Phase A self-FK shape (api PR #176): an "alias" of this Company is
+// itself a Company resource whose ``canonical_id == this.id``. The
+// admin/companies/show route requests ``include=aliases,canonical``
+// so the relationship is materialized synchronously by first paint.
+//
+// Pattern matches <JobPosts::DuplicateCandidates>: hasMany('rel').value()
+// + for...of (no .slice / .toArray / .objectAt per the project's
+// Ember Data convention).
+//
+// When the Company is itself an alias (canonical is non-null), the
+// panel surfaces an "Unmark — restore as canonical" button next to
+// the amber notice that POSTs /companies/:id/unmark-as-alias-of/ via
+// unmarkAsAliasOf. Forward direction (mark this as alias of another
+// / mark another as alias of this) lives on
+// /admin/companies/<id>/related — the relate-actions workspace
+// reached via the "Find related companies →" button on the parent
+// route.
 export default class CompaniesAliasesPanelComponent extends Component {
+  @service router;
+  @service flashMessages;
+
+  @tracked unmarking = false;
+
   get rows() {
     const live = this.args.company?.hasMany('aliases').value();
     if (!live) return [];
     const out = [];
     for (const alias of live) {
       if (!alias) continue;
-      const badge = SOURCE_BADGE[alias.source] || FALLBACK_BADGE;
       out.push({
         id: alias.id,
         name: alias.name,
-        nameSlug: alias.nameSlug,
-        sourceLabel: badge.label,
-        sourceClasses: badge.classes,
-        createdAt: alias.createdAt,
+        displayName: alias.displayName,
       });
     }
     return out;
+  }
+
+  get isAlias() {
+    // belongsTo('canonical').value() returns the live record or null.
+    // The api emits a `canonical` relationship linkage when the
+    // company is itself aliased; null means this row IS canonical.
+    return Boolean(this.args.company?.belongsTo('canonical').value());
+  }
+
+  @action
+  confirmUnmark() {
+    if (this.unmarking) return;
+    const company = this.args.company;
+    if (!company) return;
+    const sourceName = company.name;
+    const sourceId = company.id;
+    this.unmarking = true;
+    company
+      .unmarkAsAliasOf()
+      .then(() => {
+        this.flashMessages.success(`Restored "${sourceName}" as canonical.`);
+        // Stay on the same Company — it's canonical now. apiAction
+        // auto-pushes the updated resource, so canonical flips to
+        // null in the store and the @tracked relationship getters
+        // re-render the panel (amber notice hides, mark-as-alias
+        // affordance restores). transitionTo nudges the route so any
+        // include= load also refreshes.
+        this.router.transitionTo('admin.companies.show', sourceId);
+      })
+      .catch((err) => {
+        const detail =
+          err?.errors?.[0]?.detail || err?.message || 'Failed to unmark';
+        this.flashMessages.danger(`Unmark failed: ${detail}`);
+      })
+      .finally(() => {
+        this.unmarking = false;
+      });
   }
 }

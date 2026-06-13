@@ -128,12 +128,22 @@
     class="field-full mt-2 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
     data-test-duplicate-handling
   >
-    <label class="field-label">Duplicate handling</label>
-    <p class="mt-1 mb-3 text-sm text-gray-600 dark:text-gray-400">
-      Manually link this post to a known duplicate, or promote it to the
-      canonical row for its cluster. The system also auto-detects matches on
-      canonical URL, apply URL, and fingerprint.
-    </p>
+    <div class="mb-3 flex items-start justify-between gap-3">
+      <div>
+        <label class="field-label">Duplicate handling</label>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          Manually link this post to a known duplicate, or promote it to the
+          canonical row for its cluster. The system also auto-detects matches on
+          canonical URL, apply URL, and fingerprint.
+        </p>
+      </div>
+      <LinkTo
+        @route="admin.job-posts.dupes"
+        @model={{@jobPost.id}}
+        class="btn shrink-0"
+        data-test-manage-dupes
+      >Manage dupes →</LinkTo>
+    </div>
 
     {{#if @jobPost.duplicateOfId}}
       <div

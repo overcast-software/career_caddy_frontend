@@ -1,0 +1,184 @@
+{{page-title (concat "Related to " this.model.sourceCompany.name " — Admin")}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
+    <LinkTo @route="admin.users.index" class="nav-link">Users</LinkTo>
+    <LinkTo @route="admin.waitlist" class="nav-link">Waitlist</LinkTo>
+    <LinkTo @route="admin.invitations" class="nav-link">Invitations</LinkTo>
+    <LinkTo @route="admin.scrape-profiles" class="nav-link">Scrape Profiles</LinkTo>
+    <LinkTo @route="admin.companies.index" class="nav-link">Companies</LinkTo>
+    <LinkTo @route="admin.dedupe" class="nav-link">Dedupe</LinkTo>
+    <LinkTo @route="admin.ai-models" class="nav-link">AI Models</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card">
+      <div
+        class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+      >
+        <div>
+          <p
+            class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400"
+          >Related companies for</p>
+          <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            {{this.model.sourceCompany.name}}
+            <span
+              class="ml-2 font-mono text-sm font-normal text-gray-500 dark:text-gray-400"
+            >#{{this.model.sourceCompany.id}}</span>
+          </h1>
+          {{#if this.model.sourceCompany.displayName}}
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              Display name:
+              <span
+                class="font-medium"
+              >{{this.model.sourceCompany.displayName}}</span>
+            </p>
+          {{/if}}
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            Pick a row to merge
+            <span class="font-medium">{{this.model.sourceCompany.name}}</span>
+            into it, set it as the canonical for this company, or adopt it as an
+            alias.
+            <LinkTo
+              @route="admin.companies.show"
+              @model={{this.model.sourceCompany.id}}
+              class="text-accent-600 dark:text-accent-400 hover:underline"
+            >← Back to Company</LinkTo>
+          </p>
+        </div>
+        <div class="sm:w-80">
+          <Menus::SubnavSearch
+            @value={{this.search}}
+            @onSearch={{this.updateSearch}}
+            @onSearchStart={{this.startSearching}}
+            @placeholder="Search companies..."
+          />
+        </div>
+      </div>
+
+      {{#if this.isSearching}}
+        <div class="py-8 text-center text-sm text-gray-400">Searching…</div>
+      {{else if this.model.results.length}}
+        <div
+          class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+        >
+          <table class="min-w-full text-sm">
+            <thead
+              class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600"
+            >
+              <tr>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >ID</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >Name</th>
+                <th
+                  class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
+                >Job Posts</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              {{#each this.model.results as |company|}}
+                <tr
+                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50
+                    {{if (this.isSource company) 'opacity-60'}}"
+                  data-test-company-row={{company.id}}
+                >
+                  <td
+                    class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400"
+                  >{{company.id}}</td>
+                  <td
+                    class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100"
+                  >
+                    <LinkTo
+                      @route="admin.companies.show"
+                      @model={{company.id}}
+                      class="text-accent-600 dark:text-accent-400 hover:underline"
+                    >{{company.name}}</LinkTo>
+                    {{#if company.displayName}}
+                      <span
+                        class="ml-2 text-xs text-gray-500 dark:text-gray-400"
+                      >({{company.displayName}})</span>
+                    {{/if}}
+                    {{#if (this.isSource company)}}
+                      <span
+                        class="ml-2 rounded bg-accent-50 px-1.5 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-500/10 dark:text-accent-300"
+                      >source</span>
+                    {{/if}}
+                  </td>
+                  <td
+                    class="px-4 py-3 text-right text-gray-600 dark:text-gray-300"
+                  >{{or company.jobPostsCount 0}}</td>
+                  <td class="px-4 py-3 text-sm">
+                    {{#if (this.isSource company)}}
+                      <span class="text-xs text-gray-500">— this company —</span>
+                    {{else}}
+                      <div class="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          class="btn"
+                          disabled={{this.actingId}}
+                          data-test-action="merge"
+                          {{on "click" (fn this.mergeSourceInto company)}}
+                        >
+                          {{if
+                            (this.isActing "merge" company.id)
+                            "Merging…"
+                            "Merge source into this"
+                          }}
+                        </button>
+                        <button
+                          type="button"
+                          class="btn"
+                          disabled={{this.actingId}}
+                          data-test-action="mark-source"
+                          {{on "click" (fn this.markSourceAsAliasOf company)}}
+                        >
+                          {{if
+                            (this.isActing "mark-source" company.id)
+                            "Marking…"
+                            "Set this as canonical"
+                          }}
+                        </button>
+                        <button
+                          type="button"
+                          class="btn"
+                          disabled={{this.actingId}}
+                          data-test-action="adopt"
+                          {{on "click" (fn this.adoptRowAsAlias company)}}
+                        >
+                          {{if
+                            (this.isActing "adopt" company.id)
+                            "Marking…"
+                            "Adopt as alias"
+                          }}
+                        </button>
+                      </div>
+                    {{/if}}
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+        <InfinityLoader
+          @infinityModel={{this.model.results}}
+          @hideOnInfinity={{true}}
+        >
+          <div
+            class="py-4 text-center text-sm text-gray-400 dark:text-gray-500"
+          >
+            Loading more…
+          </div>
+        </InfinityLoader>
+      {{else if this.search}}
+        <EmptyState @message="No companies match your search." />
+      {{else}}
+        <EmptyState @message="No companies yet." />
+      {{/if}}
+    </div>
+  </:main>
+</RouteLayout>

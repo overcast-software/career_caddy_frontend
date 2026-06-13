@@ -36,5 +36,25 @@ module('Unit | Model | company', function (hooks) {
       );
       assert.deepEqual(this.ajaxCalls[0].options?.data, { target_id: 42 });
     });
+
+    test('unmarkAsAliasOf() POSTs with no payload to /companies/:id/unmark-as-alias-of/', async function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: { type: 'company', id: '710', attributes: { name: 'Aliased' } },
+      });
+      const company = store.peekRecord('company', '710');
+      await company.unmarkAsAliasOf();
+      assert.strictEqual(this.ajaxCalls.length, 1);
+      assert.strictEqual(this.ajaxCalls[0].method, 'POST');
+      assert.true(
+        this.ajaxCalls[0].url.endsWith('/companies/710/unmark-as-alias-of/'),
+        `URL ${this.ajaxCalls[0].url} ends with the verb path`,
+      );
+      assert.strictEqual(
+        this.ajaxCalls[0].options,
+        undefined,
+        'no body — unmark verb takes no payload',
+      );
+    });
   });
 });

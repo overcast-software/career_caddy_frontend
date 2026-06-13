@@ -7,6 +7,10 @@ import { tracked } from '@glimmer/tracking';
 // the route's `infinityModel` cache helper picks the new param up
 // via refreshModel. The controller only owns the debounce/loading
 // indicator state — the InfinityLoader handles append-on-scroll.
+//
+// Relate-actions (merge / mark-as-alias both directions) live on
+// /admin/companies/:id/related (a sibling route) — this index is
+// for general staff browsing.
 export default class AdminCompaniesIndexController extends Controller {
   queryParams = ['search'];
 

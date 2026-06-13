@@ -1,4 +1,4 @@
-import Model, { attr, hasMany } from '@ember-data/model';
+import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 import { apiAction } from 'career-caddy-frontend/utils/api-action';
 export default class CompanyModel extends Model {
   @attr('string') name;
@@ -59,18 +59,44 @@ export default class CompanyModel extends Model {
   }
   @hasMany('score', { async: true, inverse: 'company' }) scores;
   @hasMany('project', { async: true, inverse: null }) projects;
-  // Name-variant aliases (Phase A dedupe redesign) are intentionally
-  // NOT declared as a hasMany here yet. The api CompanySerializer
-  // does not emit ``relationships.aliases`` and there is no
-  // ``/companies/:id/aliases/`` endpoint — declaring the async
-  // hasMany sent Ember Data into a runaway fetch loop on
-  // /admin/companies/:id (the relationship reference repeatedly
-  // tried to materialize against a missing endpoint as the template
-  // re-read it under autotrack). When the api ships the
-  // CompanyAlias serializer + sideload, re-add:
-  //   @hasMany('company-alias', { async: true, inverse: 'company' }) aliases;
-  // and restore the ``include: 'aliases'`` on
-  // admin/companies/show.js + the <Companies::AliasesPanel> render.
+  // Phase A self-FK dedupe shape (api PR #176):
+  //   `canonical` (belongsTo Company) — NULL when this row IS canonical.
+  //   `aliases` (hasMany Company, inverse: 'canonical') — every Company
+  //   whose `canonical_id == self.id` (one-level deep by invariant).
+  // Sub-collection: GET /api/v1/companies/:id/aliases/ returns Company
+  // resources; the admin/companies/show route requests
+  // ``include=aliases,canonical`` so the relationship is materialized
+  // synchronously by first paint.
+  @hasMany('company', { async: true, inverse: 'canonical' }) aliases;
+  @belongsTo('company', { async: true, inverse: 'aliases' }) canonical;
+
+  // Staff-only verb: POST /api/v1/companies/:id/mark-as-alias-of/
+  // Sets ``self.canonical_id = target_id``, flattening alias chains
+  // (api walks to root + repoints any rows currently aliased at self).
+  // Body shape: { target_id: <int> }. Returns the updated source
+  // Company resource — auto-pushed through apiAction so the resolved
+  // value is the live store-backed record.
+  markAsAliasOf(targetId) {
+    return apiAction(this, {
+      method: 'POST',
+      path: 'mark-as-alias-of',
+      data: { target_id: targetId },
+    });
+  }
+
+  // Staff-only verb: POST /api/v1/companies/:id/unmark-as-alias-of/
+  // Clears ``self.canonical_id`` (sets it to NULL), restoring this
+  // Company as canonical. No payload. Returns the updated Company
+  // resource — auto-pushed through apiAction so the resolved value
+  // is the live store-backed record. The api returns 400 if this
+  // Company is already canonical (UI hides the affordance in that
+  // case, but the catch handles it defensively).
+  unmarkAsAliasOf() {
+    return apiAction(this, {
+      method: 'POST',
+      path: 'unmark-as-alias-of',
+    });
+  }
 
   // Staff-only verb: POST /api/v1/companies/:id/merge-into/
   // Moves all FKs (JobPost, Scrape, JobApplication, CompanyAlias)

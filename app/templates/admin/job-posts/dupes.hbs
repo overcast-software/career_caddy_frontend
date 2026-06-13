@@ -1,0 +1,215 @@
+{{page-title (concat "Dupes of " this.model.title " — Admin")}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <LinkTo @route="admin.index" class="nav-link">API Keys</LinkTo>
+    <LinkTo @route="admin.users.index" class="nav-link">Users</LinkTo>
+    <LinkTo @route="admin.waitlist" class="nav-link">Waitlist</LinkTo>
+    <LinkTo @route="admin.invitations" class="nav-link">Invitations</LinkTo>
+    <LinkTo @route="admin.scrape-profiles" class="nav-link">Scrape Profiles</LinkTo>
+    <LinkTo @route="admin.companies.index" class="nav-link">Companies</LinkTo>
+    <LinkTo @route="admin.dedupe" class="nav-link">Dedupe</LinkTo>
+    <LinkTo @route="admin.ai-models" class="nav-link">AI Models</LinkTo>
+  </:subnav>
+  <:main>
+    <div class="panel-card mb-6">
+      <p
+        class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400"
+      >Duplicates of</p>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+        {{this.model.title}}
+        <span
+          class="ml-2 font-mono text-sm font-normal text-gray-500 dark:text-gray-400"
+        >#{{this.model.id}}</span>
+      </h1>
+      {{#if this.model.company}}
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          Company:
+          <span class="font-medium">{{this.model.company.name}}</span>
+        </p>
+      {{/if}}
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <LinkTo
+          @route="job-posts.show"
+          @model={{this.model.id}}
+          class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
+        >View public JP →</LinkTo>
+        <LinkTo
+          @route="job-posts.edit"
+          @model={{this.model.id}}
+          class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
+        >Edit JP →</LinkTo>
+      </div>
+    </div>
+
+    {{#if this.currentDuplicateOfId}}
+      <div
+        class="panel-card mb-6 border-amber-300 dark:border-amber-700 bg-amber-50/40 dark:bg-amber-950/30"
+        data-test-current-duplicate-panel
+      >
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p class="text-sm text-amber-900 dark:text-amber-100">
+            This JP is currently marked as a duplicate of
+            <LinkTo
+              @route="job-posts.show"
+              @model={{this.currentDuplicateOfId}}
+              class="font-medium underline"
+            >#{{this.currentDuplicateOfId}}</LinkTo>.
+          </p>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="btn"
+              disabled={{this.actingId}}
+              data-test-promote-canonical
+              {{on "click" this.promoteCanonical}}
+            >
+              {{if
+                (this.isActing "promote" this.model.id)
+                "Promoting…"
+                "Promote this to canonical"
+              }}
+            </button>
+            <button
+              type="button"
+              class="btn"
+              disabled={{this.actingId}}
+              data-test-unlink-duplicate
+              {{on "click" this.unlinkDuplicate}}
+            >
+              {{if
+                (this.isActing "unlink" this.model.id)
+                "Unlinking…"
+                "Unlink"
+              }}
+            </button>
+          </div>
+        </div>
+      </div>
+    {{/if}}
+
+    <div class="panel-card">
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <h2 class="text-lg font-semibold">Auto-detected candidates</h2>
+        <span class="text-xs text-gray-500 dark:text-gray-400">
+          {{this.candidates.length}}
+          {{if (eq this.candidates.length 1) "candidate" "candidates"}}
+        </span>
+      </div>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        Generated server-side by the dedupe pipeline — canonical_link,
+        fingerprint, apply_url, and title+company similarity. Confidence is
+        bucketed as
+        <code>high</code>
+        /
+        <code>medium</code>
+        /
+        <code>low</code>.
+      </p>
+
+      {{#if this.candidates.length}}
+        <div
+          class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+        >
+          <table class="min-w-full text-sm">
+            <thead
+              class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600"
+            >
+              <tr>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >ID</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >Title</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >Company</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >Confidence</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >Signals</th>
+                <th
+                  class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+                >Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              {{#each this.candidates as |candidate|}}
+                <tr
+                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  data-test-candidate-row={{candidate.id}}
+                >
+                  <td
+                    class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400"
+                  >#{{candidate.id}}</td>
+                  <td
+                    class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100"
+                  >{{candidate.title}}</td>
+                  <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                    {{#if
+                      candidate.companyName
+                    }}{{candidate.companyName}}{{else}}—{{/if}}
+                  </td>
+                  <td
+                    class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400"
+                  >
+                    <span
+                      class="rounded bg-gray-100 px-1.5 py-0.5 font-medium uppercase tracking-wide dark:bg-gray-700"
+                    >{{candidate.confidence}}</span>
+                  </td>
+                  <td
+                    class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400"
+                  >
+                    {{#if candidate.matchSignals}}
+                      {{candidate.matchSignals}}
+                    {{else}}
+                      —
+                    {{/if}}
+                  </td>
+                  <td class="px-4 py-3 text-sm">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <LinkTo
+                        @route="job-posts.show"
+                        @model={{candidate.id}}
+                        class="btn"
+                        data-test-action="view"
+                      >View</LinkTo>
+                      <LinkTo
+                        @route="admin.dedupe.compare"
+                        @models={{array this.model.id candidate.id}}
+                        class="btn"
+                        data-test-action="compare"
+                      >Compare</LinkTo>
+                      <button
+                        type="button"
+                        class="btn"
+                        disabled={{this.actingId}}
+                        data-test-action="mark"
+                        {{on
+                          "click"
+                          (fn this.markSourceAsDuplicateOf candidate)
+                        }}
+                      >
+                        {{if
+                          (this.isActing "mark" candidate.id)
+                          "Marking…"
+                          "Mark source as duplicate of this"
+                        }}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      {{else}}
+        <EmptyState
+          @message="No auto-detected candidates. Use the duplicate picker on the JP edit page to mark a specific target manually."
+        />
+      {{/if}}
+    </div>
+  </:main>
+</RouteLayout>
