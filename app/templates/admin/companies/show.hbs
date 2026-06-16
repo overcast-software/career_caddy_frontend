@@ -54,120 +54,20 @@
           <span class="font-medium">{{this.model.displayName}}</span>
         </p>
       {{/if}}
-      <div class="mt-4 flex items-center gap-3">
+      <div class="mt-4 flex flex-wrap items-center gap-3">
         <LinkTo
           @route="companies.show"
           @model={{this.model.id}}
           class="text-sm text-accent-600 dark:text-accent-400 hover:underline"
         >View public Company page →</LinkTo>
+        <LinkTo
+          @route="admin.companies.related"
+          @model={{this.model.id}}
+          class="btn"
+        >Find related companies →</LinkTo>
       </div>
     </div>
 
-    {{! <Companies::AliasesPanel @company=this.model /> intentionally
-        omitted — the api does not yet expose Company.aliases as a
-        JSON:API relationship or sub-collection, and rendering the
-        panel sent Ember Data into a runaway fetch loop trying to
-        materialize the async hasMany. Restore once the
-        CompanyAlias serializer ships. }}
-
-    <div class="panel-card mt-6" data-test-federation-panel>
-      <h2 class="text-lg font-semibold mb-2">Federation</h2>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        When enabled, this company exposes an ActivityStreams 2.0 actor at
-        <code class="font-mono text-xs">/companies/{{or
-            this.model.slug
-            "<slug>"
-          }}/</code>
-        and the public Subscribe affordance lights up. The slug is the public
-        WebFinger handle.
-      </p>
-      <div class="space-y-3">
-        <div>
-          <dt class="text-xs text-gray-500 dark:text-gray-400">Slug</dt>
-          <dd class="font-mono text-sm text-gray-900 dark:text-gray-100">
-            {{#if this.model.slug}}
-              {{this.model.slug}}
-            {{else}}
-              <span class="italic text-gray-400 dark:text-gray-500">not set</span>
-            {{/if}}
-          </dd>
-        </div>
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            data-test-federation-toggle
-            checked={{this.model.federationEnabled}}
-            disabled={{this.savingFederation}}
-            {{on "change" this.toggleFederationEnabled}}
-          />
-          <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
-            Federation enabled
-          </span>
-          {{#if this.savingFederation}}
-            <span
-              class="text-xs text-gray-500 dark:text-gray-400"
-            >Saving…</span>
-          {{/if}}
-        </label>
-      </div>
-    </div>
-
-    <div class="panel-card mt-6" data-test-merge-panel>
-      <h2 class="text-lg font-semibold mb-2">Merge into another company</h2>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Move every job post, scrape, application, and alias from
-        <span class="font-medium">{{this.model.name}}</span>
-        into the target company. This action is permanent and removes the
-        current Company row.
-      </p>
-
-      <div class="max-w-md">
-        <PowerSelect
-          @options={{this.emptyOptions}}
-          @selected={{this.mergeTarget}}
-          @search={{this.searchCompanies}}
-          @searchEnabled={{true}}
-          @placeholder="Search for the target company…"
-          @onChange={{this.selectMergeTarget}}
-          as |company|
-        >
-          {{company.name}}
-          {{#if company.displayName}}
-            <span class="text-xs text-gray-500">({{company.displayName}})</span>
-          {{/if}}
-        </PowerSelect>
-      </div>
-
-      {{#if this.mergeTarget}}
-        <div
-          class="mt-4 rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
-          data-test-merge-confirm
-        >
-          <p class="text-sm text-amber-800 dark:text-amber-200">
-            Merge
-            <span class="font-medium">{{this.model.name}}</span>
-            (#{{this.model.id}}) into
-            <span class="font-medium">{{this.mergeTarget.name}}</span>
-            (#{{this.mergeTarget.id}})?
-          </p>
-          <div class="mt-3 flex items-center gap-2">
-            <button
-              type="button"
-              class="btn primary"
-              disabled={{this.merging}}
-              {{on "click" this.confirmMerge}}
-            >
-              {{if this.merging "Merging…" "Confirm merge"}}
-            </button>
-            <button
-              type="button"
-              class="btn"
-              disabled={{this.merging}}
-              {{on "click" this.clearMergeTarget}}
-            >Cancel</button>
-          </div>
-        </div>
-      {{/if}}
-    </div>
+    <Companies::AliasesPanel @company={{this.model}} />
   </:main>
 </RouteLayout>
