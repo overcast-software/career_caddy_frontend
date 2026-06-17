@@ -1,4 +1,4 @@
-# Career Caddy Sender — v1.3.0
+# Career Caddy Sender — v1.4.0
 
 A browser extension that captures the active page's URL + visible text and
 POSTs it directly to your Career Caddy instance. The popup shows a one-time
@@ -28,6 +28,27 @@ fires the page off and an OS-level system notification announces the result.
 
 ## Version history
 
+- **1.4.0** — Server-gated direct-POST fast path. The extension-direct
+  fast path is now gated on the api's per-domain **known-good** signal
+  rather than purely on client-side presence. The
+  `GET /api/v1/scrape-profiles/extension-selectors/?hostname=…` response
+  now carries two additive top-level keys (siblings of `data`):
+  `known_good` (bool) and `tier` (`"0" | "auto" | "1" | "2" | "3"`). When
+  `known_good` is `true`, the api vouches that the domain's ScrapeProfile
+  is complete: the popup trusts the curated `job_data_selectors`, and a
+  complete extraction (title + company + description) takes the
+  `source_mode=extension-direct` + `captured_payload` POST to
+  `POST /api/v1/scrapes/` — exactly the 1.3.0 Phase-C fast path. This is
+  the behavior meant to land once the ScrapeProfile is complete for the
+  invoked domain. When `known_good` is `false`, absent, or the selectors
+  fetch fails, the popup falls back to 1.3.0 behavior **unchanged** — the
+  client-side presence heuristic still drives a direct-POST when all
+  three fields are present, otherwise `POST /api/v1/scrapes/from-text/`.
+  `known_good` / `tier` are cached alongside the per-host selectors and
+  respect the existing 1h TTL. Defensive against an api that hasn't
+  deployed the new keys: a missing `known_good` is treated as `false`, so
+  the extension behaves exactly like 1.3.0 until the api ships the
+  signal — no regression for any domain.
 - **1.3.0** — Extension direct-POST when capture is complete (Phase C of
   the extension-direct plan). When the per-host `job_data_selectors`
   yield BOTH `title` and `company_name` non-empty AND the page body
