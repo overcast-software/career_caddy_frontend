@@ -916,6 +916,17 @@ async function loadExtensionSelectors(host, apiKey) {
       attrs.job_data_selectors && typeof attrs.job_data_selectors === 'object'
         ? attrs.job_data_selectors
         : {},
+    // Server-vouched signals (api PR #185): top-level siblings of `data`
+    // on the extension-selectors response, additive to the existing
+    // shape. `known_good` (bool) gates the extension-direct fast path on
+    // the domain's ScrapeProfile being complete; `tier` is the curation
+    // tier ("0" | "auto" | "1" | "2" | "3"). Both are absent on an api
+    // that hasn't deployed #185 — default known_good to false so a
+    // missing signal falls back to the client-side presence heuristic
+    // (no regression). Cached INSIDE `selectors`, so both ride the
+    // existing per-host TTL with no separate cache key.
+    known_good: body.known_good === true,
+    tier: typeof body.tier === 'string' ? body.tier : null,
   };
   await writeSelectorCache(norm, { selectors });
   return selectors;
@@ -934,6 +945,8 @@ async function grabHints(tabId, hostname, apiKey) {
     canonical_link_hint: null,
     referrer_url: null,
     structured_prefill: null,
+    known_good: false,
+    tier: null,
   };
   const selectors = await loadExtensionSelectors(hostname, apiKey);
   const applySelectors = (selectors && selectors.apply_button_selectors) || [];
@@ -944,6 +957,11 @@ async function grabHints(tabId, hostname, apiKey) {
   const decoder = DECODERS[decoderName] || DECODERS.passthrough;
   const jobDataSelectors =
     (selectors && selectors.job_data_selectors) || {};
+  // Server known-good signal for this host (see loadExtensionSelectors).
+  // Defaults to false for the baked-fallback / 404 / fetch-fail / old-api
+  // cases — anything but an explicit server `true` falls back.
+  const knownGood = !!(selectors && selectors.known_good === true);
+  const tier = (selectors && selectors.tier) || null;
 
   let raw;
   try {
@@ -1043,6 +1061,8 @@ async function grabHints(tabId, hostname, apiKey) {
     canonical_link_hint: canonicalDecoded,
     referrer_url: raw.referrerHref || null,
     structured_prefill: raw.prefill || null,
+    known_good: knownGood,
+    tier,
   };
 }
 
@@ -1113,27 +1133,65 @@ sendBtn.addEventListener('click', async () => {
 
   const wantsScore = autoScoreBox.checked;
 
-  // Phase C gate — when structured_prefill landed BOTH title AND
-  // company_name AND the page yielded a non-empty description, we have
-  // everything the JobPost write path needs without the server-side
-  // browser tier. Take the extension-direct fast path: POST a Scrape
-  // with source_mode=extension-direct + captured_payload, and the
-  // scrape graph short-circuits straight to PersistJobPost (Phase B).
-  //
-  // Gate-fail (any field empty) → fall through to today's
-  // /scrapes/from-text/ path, unchanged. That's the safety net for
-  // hosts where the per-host selectors haven't been seeded yet.
-  //
-  // Trust presence, iterate — no validator threshold at v1 (Doug's
-  // baked decision on the plan node). When real false-positives show
-  // up, add a confidence gate then.
+  // Phase C / known-good gate (v1.4.0). The curated per-host
+  // job_data_selectors are surfaced as structured_prefill; the page body
+  // is the description. When BOTH title AND company_name AND a non-empty
+  // description are present, we have everything the JobPost write path
+  // needs without the server-side browser tier — take the
+  // extension-direct fast path: POST a Scrape with
+  // source_mode=extension-direct + captured_payload, and the scrape
+  // graph short-circuits straight to PersistJobPost (Phase B).
   const directTitle = hints.structured_prefill?.title || '';
   const directCompany = hints.structured_prefill?.company_name || '';
   const directDescription = payload.text || '';
-  const useDirectPost =
+  const curatedComplete =
     directTitle.trim().length > 0 &&
     directCompany.trim().length > 0 &&
     directDescription.trim().length > 0;
+
+  // The fast path is now gated on the SERVER's per-domain known-good
+  // signal (api PR #185, top-level `known_good` on the extension-selectors
+  // response) rather than purely on client-side presence.
+  //
+  //  - known_good === true → the api vouches that this domain's
+  //    ScrapeProfile is complete. Trust the curated job_data_selectors:
+  //    a complete curated extraction takes the extension-direct fast
+  //    path. This is the behavior meant to land once the ScrapeProfile is
+  //    complete for the invoked domain.
+  //
+  //  - known_good false / absent (an api without #185) / selectors fetch
+  //    failed → fall back to v1.3.0 behavior UNCHANGED: the client-side
+  //    presence heuristic still drives a direct-POST when all three are
+  //    present, else /scrapes/from-text/. No regression for
+  //    non-known-good domains, and the extension stays correct deployed
+  //    ahead of #185 (missing known_good is treated as false — see
+  //    grabHints / loadExtensionSelectors defaults).
+  //
+  // Both arms currently admit the same hosts (the no-regression mandate
+  // keeps the not-known-good arm on the presence heuristic), so each
+  // resolves the decision to `curatedComplete`. They are kept distinct so
+  // the gate decision is observable while dogfooding the unpacked build,
+  // and so the not-known-good arm can later be tightened to from-text-only
+  // once #185 is universally deployed — without touching the wiring.
+  // Trust presence, iterate — no validator threshold at v1 (Doug's baked
+  // decision on the plan node).
+  const serverVouched = hints.known_good === true;
+  let useDirectPost;
+  if (serverVouched) {
+    useDirectPost = curatedComplete;
+    console.debug('[cc-sender] known-good fast-path gate', {
+      tier: hints.tier,
+      curatedComplete,
+      useDirectPost,
+    });
+  } else {
+    useDirectPost = curatedComplete;
+    console.debug('[cc-sender] fallback presence gate (not known-good)', {
+      knownGood: hints.known_good,
+      curatedComplete,
+      useDirectPost,
+    });
+  }
 
   let resp;
   try {
