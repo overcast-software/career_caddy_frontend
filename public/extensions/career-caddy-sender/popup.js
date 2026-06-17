@@ -1,6 +1,6 @@
 const ORIGIN = 'https://api.careercaddy.online';
 const FRONTEND_ORIGIN = 'https://careercaddy.online';
-const STORAGE_KEYS = ['ccApiKey', 'ccKeyId', 'ccUsername', 'ccAutoScore', 'ccPending'];
+const STORAGE_KEYS = ['ccApiKey', 'ccKeyId', 'ccUsername', 'ccAutoScore', 'ccPending', 'ccIsStaff'];
 const PENDING_MAX_AGE_MS = 30_000;
 const THEME_KEYS = ['ccTheme', 'ccPalette'];
 const VALID_MODES = new Set(['system', 'light', 'dark']);
@@ -83,6 +83,305 @@ const whoTrackedEl = $('who-tracked');
 const disconnectTrackedBtn = $('disconnect-tracked');
 const themeToggleTrackedBtn = $('theme-toggle-tracked');
 
+// --- Staff Tools tab (is_staff only) -------------------------------
+const tabBar = $('tab-bar');
+const tabSendBtn = $('tab-send');
+const tabToolsBtn = $('tab-tools');
+const screenTools = $('screen-tools');
+const toolHostEl = $('tool-host');
+const enrichBtn = $('enrich-btn');
+const enrichStatus = $('enrich-status');
+const enrichLinkEl = $('enrich-link');
+const whoToolsEl = $('who-tools');
+const disconnectToolsBtn = $('disconnect-tools');
+const themeToggleToolsBtn = $('theme-toggle-tools');
+
+// Staff gating + tab state. isStaff is hydrated from a cached flag on
+// load and re-verified against /api/v1/me; the api enforces staff
+// server-side on every tool call, so this only governs UI visibility.
+let isStaff = false;
+let activeTab = 'send';
+let currentSendScreenEl = null; // screenConnected | screenTracked
+let connectedName = '';
+
+async function fetchStaffFlag(apiKey) {
+  try {
+    const resp = await fetch(`${ORIGIN}/api/v1/me/`, {
+      headers: {
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
+    if (!resp.ok) return false;
+    const body = await resp.json();
+    return body?.data?.attributes?.is_staff === true;
+  } catch {
+    return false;
+  }
+}
+
+async function refreshStaffFlag(apiKey) {
+  const staff = await fetchStaffFlag(apiKey);
+  isStaff = staff;
+  try {
+    await api.storage.local.set({ ccIsStaff: staff });
+  } catch {
+    // best-effort cache; the live flag is authoritative this session
+  }
+  maybeShowTabBar();
+  return staff;
+}
+
+function hideTabBar() {
+  if (tabBar) tabBar.classList.add('hidden');
+}
+
+// The tab bar only appears for staff and only on a connected/tracked
+// screen — never on connect/loading.
+function maybeShowTabBar() {
+  if (!tabBar) return;
+  const onSendableScreen =
+    currentSendScreenEl === screenConnected ||
+    currentSendScreenEl === screenTracked;
+  if (isStaff && onSendableScreen) {
+    tabBar.classList.remove('hidden');
+  } else {
+    tabBar.classList.add('hidden');
+  }
+}
+
+// Reset to the Send tab and refresh tab-bar visibility. Called whenever
+// a send screen (connected/tracked) is shown.
+function syncTabState() {
+  activeTab = 'send';
+  if (tabSendBtn) tabSendBtn.classList.add('active');
+  if (tabToolsBtn) tabToolsBtn.classList.remove('active');
+  maybeShowTabBar();
+}
+
+function setActiveTab(tab) {
+  activeTab = tab;
+  if (tab === 'tools') {
+    if (currentSendScreenEl) currentSendScreenEl.classList.add('hidden');
+    if (screenTools) screenTools.classList.remove('hidden');
+    if (tabToolsBtn) tabToolsBtn.classList.add('active');
+    if (tabSendBtn) tabSendBtn.classList.remove('active');
+    showToolsScreen();
+  } else {
+    if (screenTools) screenTools.classList.add('hidden');
+    if (currentSendScreenEl) currentSendScreenEl.classList.remove('hidden');
+    if (tabSendBtn) tabSendBtn.classList.add('active');
+    if (tabToolsBtn) tabToolsBtn.classList.remove('active');
+  }
+}
+
+if (tabSendBtn)
+  tabSendBtn.addEventListener('click', () => setActiveTab('send'));
+if (tabToolsBtn)
+  tabToolsBtn.addEventListener('click', () => setActiveTab('tools'));
+
+// Populate the Tools tab when it opens: current host, who, page hints.
+async function showToolsScreen() {
+  if (whoToolsEl) whoToolsEl.textContent = connectedName || '';
+  let host = '';
+  try {
+    const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.url) host = new URL(tab.url).hostname;
+  } catch {
+    // no active tab / restricted URL — leave host blank
+  }
+  if (toolHostEl) toolHostEl.textContent = host || '(no active tab)';
+  setStatus(enrichStatus, '');
+  hideEnrichLink();
+  if (enrichBtn) {
+    delete enrichBtn.dataset.state;
+    enrichBtn.disabled = !host;
+  }
+  populateDevHints();
+}
+
+function hideEnrichLink() {
+  if (!enrichLinkEl) return;
+  enrichLinkEl.classList.add('hidden');
+  enrichLinkEl.removeAttribute('href');
+  enrichLinkEl.textContent = '';
+}
+
+function setEnrichSending(sending) {
+  if (!enrichBtn) return;
+  if (sending) {
+    enrichBtn.dataset.state = 'sending';
+    enrichBtn.disabled = true;
+  } else {
+    delete enrichBtn.dataset.state;
+    enrichBtn.disabled = false;
+  }
+}
+
+// Resolve the active host (and parent-domain fallbacks) to a
+// ScrapeProfile id via the staff-only list filter. Mirrors the api's
+// extension-selectors subdomain walk: exact host first, then strip the
+// leftmost label until a profile matches. Returns {id, hostname},
+// {forbidden:true}, or null (no profile for any candidate).
+async function resolveProfileId(host, apiKey) {
+  const norm = normalizeHostname(host);
+  if (!norm) return null;
+  const parts = norm.split('.');
+  const candidates = [norm];
+  for (let i = 1; i < parts.length - 1; i++) {
+    candidates.push(parts.slice(i).join('.'));
+  }
+  for (const cand of candidates) {
+    let resp;
+    try {
+      resp = await fetch(
+        `${ORIGIN}/api/v1/scrape-profiles/?filter%5Bhostname%5D=${encodeURIComponent(
+          cand,
+        )}`,
+        {
+          headers: {
+            Accept: 'application/vnd.api+json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+        },
+      );
+    } catch {
+      return null;
+    }
+    if (resp.status === 401 || resp.status === 403) {
+      return { forbidden: true };
+    }
+    if (!resp.ok) continue;
+    let body;
+    try {
+      body = await resp.json();
+    } catch {
+      continue;
+    }
+    const item = body?.data?.[0];
+    if (item && item.id) {
+      return {
+        id: item.id,
+        hostname: item.attributes?.hostname || cand,
+      };
+    }
+  }
+  return null;
+}
+
+// "Enrich profile for this domain" — resolve host -> ScrapeProfile id,
+// then POST /scrape-profiles/:id/sharpen/ (staff-only). The api enqueues
+// a sharpen pass the offline enhancer picks up; this is a request, not a
+// live agent run, so we surface the queued job id + a link to the
+// profile rather than polling to completion.
+async function handleEnrich() {
+  hideEnrichLink();
+  setEnrichSending(true);
+  setStatus(enrichStatus, 'Resolving profile…');
+
+  const saved = await api.storage.local.get(['ccApiKey']);
+  if (!saved.ccApiKey) {
+    setStatus(enrichStatus, 'Not connected.', 'error');
+    setEnrichSending(false);
+    return;
+  }
+
+  let host = '';
+  try {
+    const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.url) host = new URL(tab.url).hostname;
+  } catch {
+    // fall through to the no-host guard
+  }
+  if (!host) {
+    setStatus(enrichStatus, 'No active tab to enrich.', 'error');
+    setEnrichSending(false);
+    return;
+  }
+
+  const resolved = await resolveProfileId(host, saved.ccApiKey);
+  if (resolved && resolved.forbidden) {
+    setStatus(enrichStatus, 'Staff access required.', 'error');
+    setEnrichSending(false);
+    return;
+  }
+  if (!resolved) {
+    setStatus(
+      enrichStatus,
+      `No ScrapeProfile for ${normalizeHostname(host)} yet — capture a scrape for this domain first.`,
+      'error',
+    );
+    setEnrichSending(false);
+    return;
+  }
+
+  setStatus(enrichStatus, 'Queuing enrichment…');
+  let resp;
+  try {
+    // No request body — the sharpen action only needs the profile pk +
+    // the staff user. Omit Content-Type so DRF never tries to parse an
+    // empty body as JSON:API.
+    resp = await fetch(
+      `${ORIGIN}/api/v1/scrape-profiles/${resolved.id}/sharpen/`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/vnd.api+json',
+          Authorization: `Bearer ${saved.ccApiKey}`,
+        },
+      },
+    );
+  } catch (err) {
+    setStatus(enrichStatus, `Network error: ${err.message}`, 'error');
+    setEnrichSending(false);
+    return;
+  }
+
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    body = null;
+  }
+
+  if (resp.status === 401 || resp.status === 403) {
+    setStatus(enrichStatus, 'Staff access required.', 'error');
+    setEnrichSending(false);
+    return;
+  }
+  if (resp.status === 422) {
+    setStatus(
+      enrichStatus,
+      `No completed scrape for ${resolved.hostname} yet — use "Send this page", then enrich once it's captured.`,
+      'error',
+    );
+    setEnrichSending(false);
+    return;
+  }
+  if (!resp.ok) {
+    const detail = body?.errors?.[0]?.detail || `HTTP ${resp.status}`;
+    setStatus(enrichStatus, `Error: ${detail}`, 'error');
+    setEnrichSending(false);
+    return;
+  }
+
+  const jobId = body?.meta?.job_id;
+  setStatus(
+    enrichStatus,
+    `Enrichment queued for ${resolved.hostname}${jobId ? ` (job ${jobId})` : ''}.`,
+    'success',
+  );
+  if (enrichLinkEl) {
+    enrichLinkEl.href = `${FRONTEND_ORIGIN}/admin/scrape-profiles/${resolved.id}`;
+    enrichLinkEl.textContent = 'Open profile';
+    enrichLinkEl.classList.remove('hidden');
+  }
+  setEnrichSending(false);
+}
+
+if (enrichBtn) enrichBtn.addEventListener('click', handleEnrich);
+// --- end Staff Tools tab -------------------------------------------
+
 const SUN_SVG =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
 const MOON_SVG =
@@ -104,6 +403,7 @@ function applyTheme(mode, palette) {
   const icon = dark ? SUN_SVG : MOON_SVG;
   if (themeToggleBtn) themeToggleBtn.innerHTML = icon;
   if (themeToggleTrackedBtn) themeToggleTrackedBtn.innerHTML = icon;
+  if (themeToggleToolsBtn) themeToggleToolsBtn.innerHTML = icon;
 }
 
 function loadTheme() {
@@ -131,6 +431,8 @@ async function toggleTheme() {
 if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
 if (themeToggleTrackedBtn)
   themeToggleTrackedBtn.addEventListener('click', toggleTheme);
+if (themeToggleToolsBtn)
+  themeToggleToolsBtn.addEventListener('click', toggleTheme);
 
 // Best-effort palette sync from any open CC tab. We deliberately do NOT
 // import light/dark mode — the popup's toggle is the source of truth for
@@ -222,15 +524,20 @@ function hideAllScreens() {
   screenConnect.classList.add('hidden');
   screenConnected.classList.add('hidden');
   screenTracked.classList.add('hidden');
+  if (screenTools) screenTools.classList.add('hidden');
 }
 
 function showLoading() {
   hideAllScreens();
+  currentSendScreenEl = null;
+  hideTabBar();
   screenLoading.classList.remove('hidden');
 }
 
 function showConnect(message = '') {
   hideAllScreens();
+  currentSendScreenEl = null;
+  hideTabBar();
   screenConnect.classList.remove('hidden');
   hideResultLink();
   setSendingState(false);
@@ -254,16 +561,14 @@ function _setDevHint(elId, value) {
   }
 }
 
-async function populateDevHints(suffix = '') {
-  const ids = {
-    canonical: 'dev-hint-canonical' + suffix,
-    apply: 'dev-hint-apply' + suffix,
-    referrer: 'dev-hint-referrer' + suffix,
-  };
-  // Reset to placeholders while we fetch.
-  _setDevHint(ids.canonical, null);
-  _setDevHint(ids.apply, null);
-  _setDevHint(ids.referrer, null);
+// Populate the single staff Tools-tab hints block (canonical / apply /
+// referrer) from the active page. Display-only — the apply_url backfill
+// that used to ride along here now lives in maybeBackfillApplyUrl so it
+// fires on the tracked screen regardless of which tab is active.
+async function populateDevHints() {
+  _setDevHint('dev-hint-canonical', null);
+  _setDevHint('dev-hint-apply', null);
+  _setDevHint('dev-hint-referrer', null);
   let saved;
   try {
     saved = await api.storage.local.get(['ccApiKey']);
@@ -290,34 +595,64 @@ async function populateDevHints(suffix = '') {
   } catch {
     return;
   }
-  _setDevHint(ids.canonical, hints.canonical_link_hint);
-  _setDevHint(ids.apply, hints.apply_url);
-  _setDevHint(ids.referrer, hints.referrer_url);
-  // Passive backfill on the tracked screen: when the extension extracts
-  // an apply URL for a JP that's already in the library, PATCH it onto
-  // the JP. Single-channel apply_url storage means the api accepts the
-  // value via straight JSON:API PATCH — no verb endpoint. Idempotent;
-  // the api may no-op when apply_url is already set.
-  if (suffix === '-t' && hints.apply_url && trackedJobPostId) {
-    try {
-      await fetch(`${ORIGIN}/api/v1/job-posts/${trackedJobPostId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/vnd.api+json',
-          Accept: 'application/vnd.api+json',
-          Authorization: `Bearer ${saved.ccApiKey}`,
+  _setDevHint('dev-hint-canonical', hints.canonical_link_hint);
+  _setDevHint('dev-hint-apply', hints.apply_url);
+  _setDevHint('dev-hint-referrer', hints.referrer_url);
+}
+
+// Passive backfill: when the active page exposes an apply URL for a JP
+// that's already in the library, PATCH it onto the JP. Single-channel
+// apply_url storage means the api accepts the value via a straight
+// JSON:API PATCH — no verb endpoint. Idempotent; the api may no-op when
+// apply_url is already set. Fires from showTracked, independent of the
+// staff Tools tab (where the hints are now displayed).
+async function maybeBackfillApplyUrl() {
+  if (!trackedJobPostId) return;
+  let saved;
+  try {
+    saved = await api.storage.local.get(['ccApiKey']);
+  } catch {
+    return;
+  }
+  if (!saved.ccApiKey) return;
+  let tab;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    return;
+  }
+  if (!tab || !tab.id || !tab.url) return;
+  let host;
+  try {
+    host = new URL(tab.url).hostname;
+  } catch {
+    return;
+  }
+  let hints;
+  try {
+    hints = await grabHints(tab.id, host, saved.ccApiKey);
+  } catch {
+    return;
+  }
+  if (!hints.apply_url) return;
+  try {
+    await fetch(`${ORIGIN}/api/v1/job-posts/${trackedJobPostId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${saved.ccApiKey}`,
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'job-post',
+          id: String(trackedJobPostId),
+          attributes: { apply_url: hints.apply_url },
         },
-        body: JSON.stringify({
-          data: {
-            type: 'job-post',
-            id: String(trackedJobPostId),
-            attributes: { apply_url: hints.apply_url },
-          },
-        }),
-      });
-    } catch (err) {
-      console.warn('[cc-sender] apply_url backfill PATCH failed', err);
-    }
+      }),
+    });
+  } catch (err) {
+    console.warn('[cc-sender] apply_url backfill PATCH failed', err);
   }
 }
 
@@ -325,10 +660,12 @@ function showConnected(name, incompleteTarget = null) {
   hideAllScreens();
   screenConnected.classList.remove('hidden');
   whoEl.textContent = name || '';
+  connectedName = name || '';
+  currentSendScreenEl = screenConnected;
   hideResultLink();
   setSendingState(false);
   setStatus(sendStatus, '');
-  populateDevHints('');
+  syncTabState();
 
   // Resend mode: an existing JobPost was found at this URL but is
   // flagged incomplete (cc_auto email-stub, user-flagged, or the
@@ -361,8 +698,10 @@ function showConnected(name, incompleteTarget = null) {
 function showTracked({ id, title, company, topScore, hasPendingScore }, name) {
   hideAllScreens();
   screenTracked.classList.remove('hidden');
-  populateDevHints('-t');
   trackedJobPostId = id;
+  connectedName = name || '';
+  currentSendScreenEl = screenTracked;
+  maybeBackfillApplyUrl();
   trackedTitleEl.textContent = title || '(untitled job post)';
   trackedCompanyEl.textContent = company || '';
   const hasScore = topScore !== null && topScore !== undefined;
@@ -391,6 +730,7 @@ function showTracked({ id, title, company, topScore, hasPendingScore }, name) {
     setStatus(trackedScoreStatus, '');
   }
   whoTrackedEl.textContent = name || '';
+  syncTabState();
 }
 
 async function lookupExistingJobPost(tabUrl, apiKey) {
@@ -514,12 +854,16 @@ function loadSaved() {
   return api.storage.local.get(STORAGE_KEYS).then(async (saved) => {
     autoScoreBox.checked =
       saved.ccAutoScore === undefined ? true : !!saved.ccAutoScore;
+    // Cached staff flag gates the Tools tab instantly; refreshStaffFlag
+    // re-verifies against /api/v1/me in the background below.
+    isStaff = saved.ccIsStaff === true;
     if (saved.ccApiKey && saved.ccKeyId) {
       // Show the skeleton while the popup-open lookup resolves; resolveOpenScreen
       // swaps to either Tracked (URL already in library) or Connected (Send UI).
       // Single network request, popup-open only — never on tab change.
       showLoading();
       resolveOpenScreen(saved.ccApiKey, saved.ccUsername);
+      refreshStaffFlag(saved.ccApiKey);
     } else {
       // No stored key — try SPA-session SSO before falling back to the
       // Connect screen. Reads the active careercaddy.online tab's
@@ -533,6 +877,7 @@ function loadSaved() {
           ccUsername: ssoResult.username,
         });
         resolveOpenScreen(ssoResult.apiKey, ssoResult.username);
+        refreshStaffFlag(ssoResult.apiKey);
       } else {
         showConnect(ssoResult.message || '');
       }
@@ -692,8 +1037,9 @@ openSigninBtn.addEventListener('click', () => {
 });
 
 async function handleDisconnect() {
-  disconnectBtn.disabled = true;
-  disconnectTrackedBtn.disabled = true;
+  if (disconnectBtn) disconnectBtn.disabled = true;
+  if (disconnectTrackedBtn) disconnectTrackedBtn.disabled = true;
+  if (disconnectToolsBtn) disconnectToolsBtn.disabled = true;
   setStatus(sendStatus, 'Disconnecting…');
   const saved = await api.storage.local.get(['ccApiKey', 'ccKeyId']);
   if (saved.ccApiKey && saved.ccKeyId) {
@@ -710,15 +1056,20 @@ async function handleDisconnect() {
     'ccApiKey',
     'ccKeyId',
     'ccUsername',
+    'ccIsStaff',
     'ccExtensionSelectorCache',
   ]);
-  disconnectBtn.disabled = false;
-  disconnectTrackedBtn.disabled = false;
+  isStaff = false;
+  if (disconnectBtn) disconnectBtn.disabled = false;
+  if (disconnectTrackedBtn) disconnectTrackedBtn.disabled = false;
+  if (disconnectToolsBtn) disconnectToolsBtn.disabled = false;
   showConnect();
 }
 
 disconnectBtn.addEventListener('click', handleDisconnect);
 disconnectTrackedBtn.addEventListener('click', handleDisconnect);
+if (disconnectToolsBtn)
+  disconnectToolsBtn.addEventListener('click', handleDisconnect);
 
 async function grabPayload(tabId) {
   // allFrames so iframe-embedded ATS bodies (greenhouse boards, worksourcewa

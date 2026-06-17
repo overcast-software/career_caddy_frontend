@@ -469,10 +469,72 @@
         color: var(--text-faint);
         font-style: italic;
       }
+
+      /* Staff Tools tab — shown only when /api/v1/me reports is_staff,
+         so normal users never see it and the extension stays
+         store-shippable. */
+      .tab-bar {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 14px;
+        padding: 3px;
+        background: var(--bg-soft);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        background: none;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          color 0.15s ease;
+      }
+      .tab-btn:hover {
+        color: var(--text);
+      }
+      .tab-btn.active {
+        color: white;
+        background: var(--accent-600);
+      }
+      .tool-card {
+        margin-top: 4px;
+        padding: 12px;
+        background: var(--bg-soft);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      .tool-card + .tool-card {
+        margin-top: 12px;
+      }
+      .tool-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0 0 2px;
+      }
+      .tool-host {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        margin-bottom: 10px;
+        word-break: break-all;
+      }
     </style>
   </head>
   <body>
     <span id="version" class="version"></span>
+
+    <div id="tab-bar" class="tab-bar hidden">
+      <button id="tab-send" class="tab-btn active" type="button">Send</button>
+      <button id="tab-tools" class="tab-btn" type="button">Tools</button>
+    </div>
 
     <div id="screen-loading" class="hidden">
       <div class="skel skel-heading"></div>
@@ -529,23 +591,6 @@
       <div class="status" id="post-send-score-status"></div>
       <button id="dismiss" class="linkbtn hidden" type="button" style="margin-top: 10px;">Dismiss</button>
 
-      <!-- DEV-ONLY hints preview — strip before store submission. -->
-      <div id="dev-hints" class="dev-hints">
-        <div class="dev-hints-title">Hints to send</div>
-        <div class="dev-hint-row">
-          <span class="dev-hint-key">canonical</span>
-          <span class="dev-hint-val empty" id="dev-hint-canonical">—</span>
-        </div>
-        <div class="dev-hint-row">
-          <span class="dev-hint-key">apply</span>
-          <span class="dev-hint-val empty" id="dev-hint-apply">—</span>
-        </div>
-        <div class="dev-hint-row">
-          <span class="dev-hint-key">referrer</span>
-          <span class="dev-hint-val empty" id="dev-hint-referrer">—</span>
-        </div>
-      </div>
-
       <div class="footer">
         <button
           id="theme-toggle"
@@ -585,23 +630,6 @@
         it in Career Caddy and use Refresh.
       </p>
 
-      <!-- DEV-ONLY hints preview — strip before store submission. -->
-      <div id="dev-hints-tracked" class="dev-hints">
-        <div class="dev-hints-title">Hints on this page</div>
-        <div class="dev-hint-row">
-          <span class="dev-hint-key">canonical</span>
-          <span class="dev-hint-val empty" id="dev-hint-canonical-t">—</span>
-        </div>
-        <div class="dev-hint-row">
-          <span class="dev-hint-key">apply</span>
-          <span class="dev-hint-val empty" id="dev-hint-apply-t">—</span>
-        </div>
-        <div class="dev-hint-row">
-          <span class="dev-hint-key">referrer</span>
-          <span class="dev-hint-val empty" id="dev-hint-referrer-t">—</span>
-        </div>
-      </div>
-
       <div class="footer">
         <button
           id="theme-toggle-tracked"
@@ -614,6 +642,58 @@
         </button>
         <span class="who" id="who-tracked"></span>
         <button id="disconnect-tracked" class="linkbtn" type="button">Disconnect</button>
+      </div>
+    </div>
+
+    <div id="screen-tools" class="hidden">
+      <h1>Staff tools</h1>
+
+      <div class="tool-card">
+        <p class="tool-title">Enrich ScrapeProfile</p>
+        <div class="tool-host" id="tool-host">—</div>
+        <button id="enrich-btn" class="primary" type="button">
+          <span class="btn-label">Enrich profile for this domain</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+        <div class="status" id="enrich-status"></div>
+        <a
+          id="enrich-link"
+          class="result-link hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        ></a>
+      </div>
+
+      <!-- Page hints the popup extracts (canonical / apply / referrer).
+           Staff-only — gated by this tab, no longer stripped before
+           store submission. -->
+      <div id="dev-hints" class="dev-hints">
+        <div class="dev-hints-title">Hints on this page</div>
+        <div class="dev-hint-row">
+          <span class="dev-hint-key">canonical</span>
+          <span class="dev-hint-val empty" id="dev-hint-canonical">—</span>
+        </div>
+        <div class="dev-hint-row">
+          <span class="dev-hint-key">apply</span>
+          <span class="dev-hint-val empty" id="dev-hint-apply">—</span>
+        </div>
+        <div class="dev-hint-row">
+          <span class="dev-hint-key">referrer</span>
+          <span class="dev-hint-val empty" id="dev-hint-referrer">—</span>
+        </div>
+      </div>
+
+      <div class="footer">
+        <button
+          id="theme-toggle-tools"
+          class="iconbtn"
+          type="button"
+          title="Toggle theme"
+          aria-label="Toggle theme"
+        ></button>
+        <span class="who" id="who-tools"></span>
+        <button id="disconnect-tools" class="linkbtn" type="button">Disconnect</button>
       </div>
     </div>
 
