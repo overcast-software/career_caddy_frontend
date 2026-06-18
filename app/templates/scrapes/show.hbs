@@ -1,7 +1,7 @@
 {{page-title "Scrape"}}
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
-    {{#if this.model.companySuggestions.length}}
+    {{#if this.model.scrape.companySuggestions.length}}
       <div
         class="mb-4 rounded-md bg-blue-50 p-3 ring-1 ring-inset ring-blue-200 dark:bg-blue-500/10 dark:ring-blue-500/30"
         data-test-company-suggestions
@@ -14,7 +14,7 @@
           — open the curation hub to review and merge if needed.
         </p>
         <ul class="mt-2 space-y-1">
-          {{#each this.model.companySuggestions as |s|}}
+          {{#each this.model.scrape.companySuggestions as |s|}}
             <li class="flex items-baseline gap-x-2 text-sm">
               <LinkTo
                 @route="admin.companies.show"
@@ -34,29 +34,71 @@
       </div>
     {{/if}}
 
-    <Scrapes::Item @scrape={{this.model}} />
+    {{#if
+      (and
+        this.model.canonicalScrape
+        (not-eq this.model.canonicalScrape.id this.model.scrape.id)
+      )
+    }}
+      <div
+        class="mb-4 rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
+        data-test-redirect-banner
+      >
+        <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
+          Redirected to
+          <LinkTo
+            @route="scrapes.show"
+            @model={{this.model.canonicalScrape.id}}
+            class="underline"
+            data-test-canonical-scrape-link
+          >
+            scrape #{{this.model.canonicalScrape.id}}
+          </LinkTo>
+          {{#if this.model.jobPost}}
+            ·
+            <LinkTo
+              @route="job-posts.show"
+              @model={{this.model.jobPost.id}}
+              class="underline"
+              data-test-canonical-job-post-link
+            >
+              JobPost #{{this.model.jobPost.id}}
+            </LinkTo>
+          {{/if}}
+        </p>
+        <p class="mt-1 text-xs text-amber-700 dark:text-amber-300">
+          The tracker URL forwarded to a canonical scrape. The JobPost and
+          Company below come from the canonical leaf.
+        </p>
+      </div>
+    {{/if}}
+
+    <Scrapes::Item
+      @scrape={{this.model.scrape}}
+      @canonicalScrape={{this.model.canonicalScrape}}
+    />
 
     <div class="form-actions mt-4">
       <LinkTo
         @route="scrapes.edit"
-        @model={{this.model}}
+        @model={{this.model.scrape}}
         class="btn"
       >Edit</LinkTo>
       <button
         type="button"
         class="btn"
         title="Re-fetch the URL and run the full pipeline again"
-        {{on "click" (fn this.retryScrape this.model)}}
+        {{on "click" (fn this.retryScrape this.model.scrape)}}
       >Retry</button>
       <button
         type="button"
         class="btn"
         title="Re-run extraction on the existing scrape content (no re-fetch)"
-        {{on "click" (fn this.parseScrape this.model)}}
+        {{on "click" (fn this.parseScrape this.model.scrape)}}
       >Re-parse</button>
       <LinkTo
         @route="scrapes.graph"
-        @model={{this.model.id}}
+        @model={{this.model.scrape.id}}
         class="btn"
       >Graph</LinkTo>
     </div>
