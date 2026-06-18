@@ -665,11 +665,23 @@
         ></a>
       </div>
 
-      <!-- Page hints the popup extracts (canonical / apply / referrer).
-           Staff-only — gated by this tab, no longer stripped before
-           store submission. -->
+      <!-- Fields the extension extracts via the profile's job_data
+           selectors (structured_prefill) — THIS is what fills the JobPost.
+           Empty = no job_data selectors for this host. -->
+      <div id="prefill-box" class="dev-hints">
+        <div class="dev-hints-title">Extracted fields (job_data)</div>
+        <div id="prefill-rows">
+          <div class="dev-hint-row">
+            <span class="dev-hint-val empty">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dedup signals from the profile's extension_selectors (apply /
+           canonical) + the referrer allowlist — separate from the extracted
+           fields above. Staff-only; gated by this tab. -->
       <div id="dev-hints" class="dev-hints">
-        <div class="dev-hints-title">Hints on this page</div>
+        <div class="dev-hints-title">Dedup hints</div>
         <div class="dev-hint-row">
           <span class="dev-hint-key">canonical</span>
           <span class="dev-hint-val empty" id="dev-hint-canonical">—</span>

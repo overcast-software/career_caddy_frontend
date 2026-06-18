@@ -561,6 +561,45 @@ function _setDevHint(elId, value) {
   }
 }
 
+// Render the structured_prefill — the title/company/etc. the extension
+// extracts via the profile's job_data selectors. THIS is the field-fill,
+// distinct from the dedup hints. Keys are dynamic (depend on the host's
+// job_data selectors). Values come from the page DOM, so set them via
+// textContent, never innerHTML.
+function _renderPrefill(prefill) {
+  const container = document.getElementById('prefill-rows');
+  if (!container) return;
+  container.textContent = '';
+  const entries =
+    prefill && typeof prefill === 'object'
+      ? Object.entries(prefill).filter(([, v]) => v)
+      : [];
+  if (!entries.length) {
+    const row = document.createElement('div');
+    row.className = 'dev-hint-row';
+    const val = document.createElement('span');
+    val.className = 'dev-hint-val empty';
+    val.textContent = '—';
+    row.appendChild(val);
+    container.appendChild(row);
+    return;
+  }
+  for (const [key, value] of entries) {
+    const row = document.createElement('div');
+    row.className = 'dev-hint-row';
+    const k = document.createElement('span');
+    k.className = 'dev-hint-key';
+    k.textContent = key;
+    const v = document.createElement('span');
+    v.className = 'dev-hint-val';
+    v.textContent = value;
+    v.title = value;
+    row.appendChild(k);
+    row.appendChild(v);
+    container.appendChild(row);
+  }
+}
+
 // Populate the single staff Tools-tab hints block (canonical / apply /
 // referrer) from the active page. Display-only — the apply_url backfill
 // that used to ride along here now lives in maybeBackfillApplyUrl so it
@@ -569,6 +608,7 @@ async function populateDevHints() {
   _setDevHint('dev-hint-canonical', null);
   _setDevHint('dev-hint-apply', null);
   _setDevHint('dev-hint-referrer', null);
+  _renderPrefill(null);
   let saved;
   try {
     saved = await api.storage.local.get(['ccApiKey']);
@@ -598,6 +638,7 @@ async function populateDevHints() {
   _setDevHint('dev-hint-canonical', hints.canonical_link_hint);
   _setDevHint('dev-hint-apply', hints.apply_url);
   _setDevHint('dev-hint-referrer', hints.referrer_url);
+  _renderPrefill(hints.structured_prefill);
 }
 
 // Passive backfill: when the active page exposes an apply URL for a JP
