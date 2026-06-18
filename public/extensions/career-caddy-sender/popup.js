@@ -162,14 +162,26 @@ function syncTabState() {
 function setActiveTab(tab) {
   activeTab = tab;
   if (tab === 'tools') {
-    if (currentSendScreenEl) currentSendScreenEl.classList.add('hidden');
+    // Hide EVERY send-area screen (incl. the loading skeleton) — not just
+    // currentSendScreenEl, which is null until the popup-open lookup
+    // resolves. Otherwise the skeleton bleeds through above the Tools panel.
+    screenLoading.classList.add('hidden');
+    screenConnect.classList.add('hidden');
+    screenConnected.classList.add('hidden');
+    screenTracked.classList.add('hidden');
     if (screenTools) screenTools.classList.remove('hidden');
     if (tabToolsBtn) tabToolsBtn.classList.add('active');
     if (tabSendBtn) tabSendBtn.classList.remove('active');
     showToolsScreen();
   } else {
     if (screenTools) screenTools.classList.add('hidden');
-    if (currentSendScreenEl) currentSendScreenEl.classList.remove('hidden');
+    // Back to Send: show whatever the lookup resolved to, or the skeleton
+    // if it's still in flight.
+    if (currentSendScreenEl) {
+      currentSendScreenEl.classList.remove('hidden');
+    } else {
+      screenLoading.classList.remove('hidden');
+    }
     if (tabSendBtn) tabSendBtn.classList.add('active');
     if (tabToolsBtn) tabToolsBtn.classList.remove('active');
   }
@@ -779,6 +791,10 @@ async function lookupExistingJobPost(tabUrl, apiKey) {
   const verdict = classifyUrl(tabUrl);
   if (!verdict.ok) return null;
   let resp;
+  // Bound the lookup so the popup's loading skeleton can't hang forever on a
+  // slow/stuck request — on timeout we abort and fall back to the Send UI.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
   try {
     const url =
       `${ORIGIN}/api/v1/job-posts/?filter%5Blink%5D=${encodeURIComponent(tabUrl)}` +
@@ -788,9 +804,12 @@ async function lookupExistingJobPost(tabUrl, apiKey) {
         Accept: 'application/vnd.api+json',
         Authorization: `Bearer ${apiKey}`,
       },
+      signal: ctrl.signal,
     });
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
   if (!resp.ok) return null;
   let body;
@@ -846,12 +865,18 @@ async function lookupExistingJobPost(tabUrl, apiKey) {
 // error the catch routes to Connected — no time-based fallback, since
 // flipping to Send before the lookup returns flashes the wrong UI.
 async function resolveOpenScreen(apiKey, name) {
+  let tab;
   try {
-    const [tab] = await api.tabs.query({ active: true, currentWindow: true });
-    if (!tab || !tab.url) {
-      showConnected(name);
-      return;
-    }
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    showConnected(name);
+    return;
+  }
+  if (!tab || !tab.url) {
+    showConnected(name);
+    return;
+  }
+  try {
     const { ccPending } = await api.storage.local.get(['ccPending']);
     if (
       ccPending &&
@@ -861,26 +886,28 @@ async function resolveOpenScreen(apiKey, name) {
       showSending(name);
       return;
     }
-    const found = await lookupExistingJobPost(tab.url, apiKey);
-    if (found && found.complete) {
-      // Already in the library and flagged complete — Open the JP, no
-      // re-scrape needed. (User can flip "Mark incomplete" on the JP
-      // detail page if the scrape was wrong.)
-      showTracked(found, name);
-    } else if (found && !found.complete) {
-      // Exists but flagged !complete — cc_auto stub, user-flagged, or
-      // the CompletenessReviewer rejected an earlier scrape. Send is
-      // enabled; the from-text endpoint's dedup bypass lets the new
-      // text through and parse_scrape upgrades the JP in place. Pass
-      // the found post into showConnected so the screen renders the
-      // resend variant (banner + Resend label).
-      showConnected(name, found);
-    } else {
-      showConnected(name);
-    }
   } catch {
-    showConnected(name);
+    // fall through to the optimistic Send UI
   }
+  // Show the Send UI IMMEDIATELY rather than blocking the popup on the
+  // library lookup, which can take several seconds. Run the lookup in the
+  // background and upgrade to the Tracked / resend screen when it returns —
+  // but only if the user is still on the Send tab, so a late result never
+  // yanks them off the Tools tab.
+  showConnected(name);
+  lookupExistingJobPost(tab.url, apiKey)
+    .then((found) => {
+      if (!found || activeTab !== 'send') return;
+      if (found.complete) {
+        // Already in the library + complete — switch to the Open/Tracked UI.
+        showTracked(found, name);
+      } else {
+        // Exists but flagged !complete (cc_auto stub, user-flagged, or a
+        // rejected scrape) — render the resend variant (banner + Resend).
+        showConnected(name, found);
+      }
+    })
+    .catch(() => {});
 }
 
 function showSending(name) {
