@@ -39,6 +39,14 @@ export default class AdminCompaniesIndexRoute extends Route {
       perPage: 50,
       startingPage: 1,
       sort: 'name',
+      // Opt into per-company counts in each resource's JSON:API meta
+      // (job_applications_count + siblings), so the Applications/Job
+      // Posts/Scrapes columns come from this single list request
+      // instead of loading the relationships just to count them.
+      // Mirrors the resumes counts-in-meta pattern
+      // (routes/job-posts/show/scores.js). No-op until the api list
+      // endpoint emits the counts gated on ?meta=counts (FRON-115).
+      meta: 'counts',
       ...(search ? { 'filter[query]': search } : {}),
     });
   }
