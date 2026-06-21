@@ -96,6 +96,39 @@ const whoToolsEl = $('who-tools');
 const disconnectToolsBtn = $('disconnect-tools');
 const themeToggleToolsBtn = $('theme-toggle-tools');
 
+// "Proposed job-post" validator (staff Tools tab).
+const ppRecheckBtn = $('pp-recheck');
+const ppMsgEl = $('pp-msg');
+const ppPreviewEl = $('pp-preview');
+const ppTitleEl = $('pp-title');
+const ppMetaEl = $('pp-meta');
+const ppPostedEl = $('pp-posted');
+const ppDescEl = $('pp-desc');
+const ppFieldsEl = $('pp-fields');
+const ppVerdictEl = $('pp-verdict');
+const ppVerdictBadgeEl = $('pp-verdict-badge');
+const ppTierEl = $('pp-tier');
+const ppReasonsEl = $('pp-reasons');
+const ppCreateBtn = $('pp-create');
+const ppNoteEl = $('pp-note');
+const ppCreateStatus = $('pp-create-status');
+const ppCreateLinkEl = $('pp-create-link');
+
+// Canonical job-post field order for the per-field validation list. Fields
+// the profile configures but that aren't in this set are appended after.
+const PROPOSED_FIELD_ORDER = [
+  'title',
+  'company_name',
+  'location',
+  'salary',
+  'posted_date',
+  'description',
+];
+
+// Latest extraction stashed for the "Create job-post" button. Set by
+// renderProposedPost on every (re-)check; null until the first extraction.
+let latestProposed = null;
+
 // Staff gating + tab state. isStaff is hydrated from a cached flag on
 // load and re-verified against /api/v1/me; the api enforces staff
 // server-side on every tool call, so this only governs UI visibility.
@@ -573,43 +606,223 @@ function _setDevHint(elId, value) {
   }
 }
 
-// Render the structured_prefill — the title/company/etc. the extension
-// extracts via the profile's job_data selectors. THIS is the field-fill,
-// distinct from the dedup hints. Keys are dynamic (depend on the host's
-// job_data selectors). Values come from the page DOM, so set them via
-// textContent, never innerHTML.
-function _renderPrefill(prefill) {
-  const container = document.getElementById('prefill-rows');
-  if (!container) return;
-  container.textContent = '';
-  const entries =
-    prefill && typeof prefill === 'object'
-      ? Object.entries(prefill).filter(([, v]) => v)
-      : [];
-  if (!entries.length) {
-    const row = document.createElement('div');
-    row.className = 'dev-hint-row';
-    const val = document.createElement('span');
-    val.className = 'dev-hint-val empty';
-    val.textContent = '—';
-    row.appendChild(val);
-    container.appendChild(row);
+// --- "Proposed job-post" validator render --------------------------
+// Renders what the host's job_data selectors extract from the live DOM,
+// shaped as a JobPost, with per-field validation + the server known-good
+// verdict. All values come from the page DOM, so they are ALWAYS set via
+// textContent (never innerHTML) — pickPrefill already trimmed them.
+
+// Collapse the whole card to the message-only state. `msg` shows in the
+// pp-msg slot; pass '' to hide it entirely.
+function resetProposedPost(msg = 'Open a job page to preview.') {
+  latestProposed = null;
+  if (ppMsgEl) {
+    ppMsgEl.textContent = msg;
+    ppMsgEl.classList.toggle('hidden', !msg);
+  }
+  if (ppPreviewEl) ppPreviewEl.classList.add('hidden');
+  if (ppFieldsEl) {
+    ppFieldsEl.textContent = '';
+    ppFieldsEl.classList.add('hidden');
+  }
+  if (ppVerdictEl) ppVerdictEl.classList.add('hidden');
+  if (ppReasonsEl) {
+    ppReasonsEl.textContent = '';
+    ppReasonsEl.classList.add('hidden');
+  }
+  if (ppCreateBtn) ppCreateBtn.classList.add('hidden');
+  if (ppNoteEl) ppNoteEl.classList.add('hidden');
+  setStatus(ppCreateStatus, '');
+  hidePpCreateLink();
+}
+
+function hidePpCreateLink() {
+  if (!ppCreateLinkEl) return;
+  ppCreateLinkEl.classList.add('hidden');
+  ppCreateLinkEl.removeAttribute('href');
+  ppCreateLinkEl.textContent = '';
+}
+
+// Render the known-good verdict badge + tier + reasons. Shared by the
+// has-fields and no-job_data-selectors render paths.
+function renderVerdict(hints) {
+  if (ppVerdictBadgeEl) {
+    const good = hints.known_good === true;
+    ppVerdictBadgeEl.textContent = good ? '✓ known-good' : '✗ not known-good';
+    ppVerdictBadgeEl.className = `pp-badge ${good ? 'good' : 'bad'}`;
+  }
+  if (ppTierEl) {
+    ppTierEl.textContent = hints.tier ? `tier ${hints.tier}` : '';
+  }
+  if (ppVerdictEl) ppVerdictEl.classList.remove('hidden');
+
+  if (ppReasonsEl) {
+    ppReasonsEl.textContent = '';
+    const reasons = Array.isArray(hints.reasons) ? hints.reasons : [];
+    if (reasons.length) {
+      for (const reason of reasons) {
+        const li = document.createElement('li');
+        li.textContent = reason;
+        ppReasonsEl.appendChild(li);
+      }
+      ppReasonsEl.classList.remove('hidden');
+    } else {
+      ppReasonsEl.classList.add('hidden');
+    }
+  }
+}
+
+function renderProposedPost(hints, host) {
+  // No ScrapeProfile resolved for this host (404 / parent-domain miss).
+  if (!hints || !hints.has_selectors) {
+    resetProposedPost(
+      host ? `No ScrapeProfile for ${host}.` : 'No ScrapeProfile for this host.',
+    );
     return;
   }
-  for (const [key, value] of entries) {
-    const row = document.createElement('div');
-    row.className = 'dev-hint-row';
-    const k = document.createElement('span');
-    k.className = 'dev-hint-key';
-    k.textContent = key;
-    const v = document.createElement('span');
-    v.className = 'dev-hint-val';
-    v.textContent = value;
-    v.title = value;
-    row.appendChild(k);
-    row.appendChild(v);
-    container.appendChild(row);
+
+  const fieldList = Array.isArray(hints.prefill_fields)
+    ? hints.prefill_fields
+    : [];
+
+  // Profile exists but configures no job_data selectors — still show the
+  // verdict + reasons (the "why not known-good" detail).
+  if (!fieldList.length) {
+    if (ppMsgEl) {
+      ppMsgEl.textContent =
+        'No job_data selectors configured for this host.';
+      ppMsgEl.classList.remove('hidden');
+    }
+    if (ppPreviewEl) ppPreviewEl.classList.add('hidden');
+    if (ppFieldsEl) {
+      ppFieldsEl.textContent = '';
+      ppFieldsEl.classList.add('hidden');
+    }
+    if (ppCreateBtn) ppCreateBtn.classList.add('hidden');
+    if (ppNoteEl) ppNoteEl.classList.add('hidden');
+    setStatus(ppCreateStatus, '');
+    hidePpCreateLink();
+    renderVerdict(hints);
+    latestProposed = null;
+    return;
   }
+
+  if (ppMsgEl) ppMsgEl.classList.add('hidden');
+
+  // Index configured fields by name for the merged canonical-order list.
+  const byField = new Map();
+  for (const f of fieldList) byField.set(f.field, f);
+  const matched = (name) => {
+    const f = byField.get(name);
+    return f && f.value ? f.value : null;
+  };
+
+  // --- job-post-shaped preview (configured fields only) ---
+  const titleVal = matched('title');
+  if (ppTitleEl) {
+    ppTitleEl.textContent = titleVal || 'No title selector match';
+    ppTitleEl.classList.toggle('empty', !titleVal);
+  }
+  const metaParts = [
+    matched('company_name'),
+    matched('location'),
+    matched('salary'),
+  ].filter(Boolean);
+  if (ppMetaEl) {
+    ppMetaEl.textContent = metaParts.join(' · ');
+    ppMetaEl.classList.toggle('hidden', metaParts.length === 0);
+  }
+  const postedVal = matched('posted_date');
+  if (ppPostedEl) {
+    ppPostedEl.textContent = postedVal ? `Posted: ${postedVal}` : '';
+    ppPostedEl.classList.toggle('hidden', !postedVal);
+  }
+  const descVal = matched('description');
+  if (ppDescEl) {
+    ppDescEl.textContent = descVal || '';
+    ppDescEl.classList.toggle('hidden', !descVal);
+  }
+  if (ppPreviewEl) ppPreviewEl.classList.remove('hidden');
+
+  // --- per-field validation list ---
+  // Canonical order first, then any configured fields outside the set.
+  const ordered = [];
+  const seen = new Set();
+  for (const name of PROPOSED_FIELD_ORDER) {
+    ordered.push(name);
+    seen.add(name);
+  }
+  for (const f of fieldList) {
+    if (!seen.has(f.field)) {
+      ordered.push(f.field);
+      seen.add(f.field);
+    }
+  }
+  if (ppFieldsEl) {
+    ppFieldsEl.textContent = '';
+    for (const name of ordered) {
+      const f = byField.get(name);
+      const row = document.createElement('div');
+      row.className = 'pp-field';
+      const mark = document.createElement('span');
+      mark.className = 'pp-field-mark';
+      const key = document.createElement('span');
+      key.className = 'pp-field-key';
+      key.textContent = name;
+      const val = document.createElement('span');
+      val.className = 'pp-field-val';
+      if (!f || !f.configured) {
+        mark.classList.add('na');
+        mark.textContent = '—';
+        val.classList.add('muted');
+        val.textContent = 'not configured';
+      } else if (f.value) {
+        mark.classList.add('ok');
+        mark.textContent = '✓';
+        val.textContent = f.value;
+        val.title = f.value;
+      } else {
+        mark.classList.add('miss');
+        mark.textContent = '✗';
+        val.classList.add('muted');
+        val.textContent = f.invalid
+          ? 'invalid selector'
+          : 'no match on this page';
+      }
+      row.appendChild(mark);
+      row.appendChild(key);
+      row.appendChild(val);
+      ppFieldsEl.appendChild(row);
+    }
+    ppFieldsEl.classList.remove('hidden');
+  }
+
+  // --- verdict ---
+  renderVerdict(hints);
+
+  // --- create gate: need title + company to seed a JobPost. Description
+  // comes from the full page text at create time (matches the send path). ---
+  const company = matched('company_name');
+  const canCreate = !!(titleVal && company);
+  latestProposed = {
+    host: host || '',
+    prefill: hints.structured_prefill || null,
+    applyUrl: hints.apply_url || null,
+    canonical: hints.canonical_link_hint || null,
+    referrer: hints.referrer_url || null,
+    canCreate,
+  };
+  if (ppCreateBtn) {
+    ppCreateBtn.classList.remove('hidden');
+    ppCreateBtn.disabled = !canCreate;
+  }
+  if (ppNoteEl) ppNoteEl.classList.remove('hidden');
+  setStatus(
+    ppCreateStatus,
+    canCreate ? '' : 'Needs a title and company match to create.',
+    canCreate ? 'info' : 'error',
+  );
+  hidePpCreateLink();
 }
 
 // Populate the single staff Tools-tab hints block (canonical / apply /
@@ -620,7 +833,7 @@ async function populateDevHints() {
   _setDevHint('dev-hint-canonical', null);
   _setDevHint('dev-hint-apply', null);
   _setDevHint('dev-hint-referrer', null);
-  _renderPrefill(null);
+  resetProposedPost();
   let saved;
   try {
     saved = await api.storage.local.get(['ccApiKey']);
@@ -650,7 +863,7 @@ async function populateDevHints() {
   _setDevHint('dev-hint-canonical', hints.canonical_link_hint);
   _setDevHint('dev-hint-apply', hints.apply_url);
   _setDevHint('dev-hint-referrer', hints.referrer_url);
-  _renderPrefill(hints.structured_prefill);
+  renderProposedPost(hints, normalizeHostname(host));
 }
 
 // Passive backfill: when the active page exposes an apply URL for a JP
@@ -1346,6 +1559,13 @@ async function loadExtensionSelectors(host, apiKey) {
     // existing per-host TTL with no separate cache key.
     known_good: body.known_good === true,
     tier: typeof body.tier === 'string' ? body.tier : null,
+    // `reasons` (api PR #189): array of the per-clause known-good failures
+    // ("missing job_data selectors: …", "scrape_count=1 < 3", …), empty when
+    // known-good. OPTIONAL / graceful — absent until #189 deploys, so guard
+    // with Array.isArray and fall back to null (the verdict still renders
+    // from `known_good`/`tier` alone). Cached inside `selectors`, rides the
+    // existing per-host TTL.
+    reasons: Array.isArray(body.reasons) ? body.reasons : null,
   };
   await writeSelectorCache(norm, { selectors });
   return selectors;
@@ -1364,8 +1584,11 @@ async function grabHints(tabId, hostname, apiKey) {
     canonical_link_hint: null,
     referrer_url: null,
     structured_prefill: null,
+    prefill_fields: [],
+    has_selectors: false,
     known_good: false,
     tier: null,
+    reasons: null,
   };
   const selectors = await loadExtensionSelectors(hostname, apiKey);
   const applySelectors = (selectors && selectors.apply_button_selectors) || [];
@@ -1381,6 +1604,9 @@ async function grabHints(tabId, hostname, apiKey) {
   // cases — anything but an explicit server `true` falls back.
   const knownGood = !!(selectors && selectors.known_good === true);
   const tier = (selectors && selectors.tier) || null;
+  const reasons =
+    selectors && Array.isArray(selectors.reasons) ? selectors.reasons : null;
+  const hasSelectors = !!selectors;
 
   let raw;
   try {
@@ -1434,38 +1660,65 @@ async function grabHints(tabId, hostname, apiKey) {
             return null;
           }
         }
+        // Returns BOTH the flat matched-values dict (structured_prefill —
+        // shape the send path + api depend on, unchanged) and a per-field
+        // validation array {field, configured, value, invalid} the staff
+        // proposed-post card renders. One querySelector pass feeds both.
         function pickPrefill(selectorMap) {
-          if (!selectorMap || typeof selectorMap !== 'object') return null;
-          const out = {};
+          if (!selectorMap || typeof selectorMap !== 'object') {
+            return { values: null, fields: [] };
+          }
+          const values = {};
+          const fields = [];
           for (const [field, sel] of Object.entries(selectorMap)) {
-            if (!sel || typeof sel !== 'string') continue;
+            if (!sel || typeof sel !== 'string') {
+              fields.push({ field, configured: false, value: null });
+              continue;
+            }
             let el = null;
+            let invalid = false;
             try {
               el = document.querySelector(sel);
             } catch {
+              invalid = true;
+            }
+            if (invalid) {
+              fields.push({ field, configured: true, value: null, invalid: true });
               continue;
             }
-            if (!el) continue;
+            if (!el) {
+              fields.push({ field, configured: true, value: null });
+              continue;
+            }
             const text = (el.innerText || el.textContent || '').trim();
-            if (text) out[field] = text;
+            if (text) values[field] = text;
+            fields.push({ field, configured: true, value: text || null });
           }
-          return Object.keys(out).length ? out : null;
+          return {
+            values: Object.keys(values).length ? values : null,
+            fields,
+          };
         }
+        const prefillResult = pickPrefill(jobDataSels);
         return {
           applyHref: pickHref(applySels),
           canonicalHref: pickMetaContent(canonicalSels),
           referrerHref: pickReferrer(),
           baseHref: location.href,
-          prefill: pickPrefill(jobDataSels),
+          prefill: prefillResult.values,
+          prefillFields: prefillResult.fields,
         };
       },
     });
     raw = results && results[0] && results[0].result;
   } catch (err) {
     console.warn('[cc-sender] executeScript failed', err);
-    return empty;
+    // Restricted page — DOM unreadable. Still carry the server verdict +
+    // whether a profile exists so the card can message sensibly.
+    return { ...empty, has_selectors: hasSelectors, known_good: knownGood, tier, reasons };
   }
-  if (!raw) return empty;
+  if (!raw)
+    return { ...empty, has_selectors: hasSelectors, known_good: knownGood, tier, reasons };
   const applyDecoded = raw.applyHref ? decoder(raw.applyHref, raw.baseHref) : null;
   let canonicalDecoded = null;
   if (raw.canonicalHref) {
@@ -1480,8 +1733,11 @@ async function grabHints(tabId, hostname, apiKey) {
     canonical_link_hint: canonicalDecoded,
     referrer_url: raw.referrerHref || null,
     structured_prefill: raw.prefill || null,
+    prefill_fields: Array.isArray(raw.prefillFields) ? raw.prefillFields : [],
+    has_selectors: hasSelectors,
     known_good: knownGood,
     tier,
+    reasons,
   };
 }
 
@@ -1827,6 +2083,174 @@ sendBtn.addEventListener('click', async () => {
 });
 
 if (dismissBtn) dismissBtn.addEventListener('click', () => window.close());
+
+// "Create job-post" (staff Tools tab) — promote the validated extraction to
+// a real post via the SAME extension-direct scrape-create path the Send
+// button uses (POST /scrapes/ source_mode=extension-direct + captured_payload,
+// so the scrape graph short-circuits to PersistJobPost). title/company come
+// from the validated job_data selectors stashed by renderProposedPost;
+// description is the full page text, read at click time to mirror the send
+// path exactly. Self-contained so the 335-line send handler stays untouched.
+async function createFromProposed() {
+  if (!latestProposed || !latestProposed.canCreate) return;
+  setStatus(ppCreateStatus, 'Reading page…');
+  hidePpCreateLink();
+  if (ppCreateBtn) {
+    ppCreateBtn.dataset.state = 'sending';
+    ppCreateBtn.disabled = true;
+  }
+
+  const finish = () => {
+    if (ppCreateBtn) {
+      delete ppCreateBtn.dataset.state;
+      ppCreateBtn.disabled = false;
+    }
+  };
+
+  const saved = await api.storage.local.get(['ccApiKey']);
+  if (!saved.ccApiKey) {
+    setStatus(ppCreateStatus, 'Not connected.', 'error');
+    finish();
+    return;
+  }
+
+  let tab;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    tab = null;
+  }
+  if (!tab || !tab.id || !tab.url) {
+    setStatus(ppCreateStatus, 'No active tab to create from.', 'error');
+    finish();
+    return;
+  }
+  const verdict = classifyUrl(tab.url);
+  if (!verdict.ok) {
+    setStatus(ppCreateStatus, verdict.message, 'error');
+    finish();
+    return;
+  }
+
+  let payload;
+  try {
+    payload = await grabPayload(tab.id);
+  } catch (err) {
+    setStatus(ppCreateStatus, err.message, 'error');
+    finish();
+    return;
+  }
+  if (!payload || !payload.text) {
+    setStatus(ppCreateStatus, 'Page read blocked (restricted URL?).', 'error');
+    finish();
+    return;
+  }
+
+  const prefill = latestProposed.prefill || {};
+  const capturedPayload = {
+    title: prefill.title || '',
+    company: prefill.company_name || '',
+    description: payload.text,
+  };
+  if (latestProposed.applyUrl) {
+    capturedPayload.apply_url = latestProposed.applyUrl;
+  }
+  if (prefill.location) capturedPayload.location = prefill.location;
+  const extractionHints = {};
+  if (latestProposed.canonical) {
+    extractionHints.canonical_link_hint = latestProposed.canonical;
+  }
+  if (latestProposed.referrer) {
+    extractionHints.referrer_url = latestProposed.referrer;
+  }
+  if (latestProposed.prefill) {
+    extractionHints.structured_prefill = latestProposed.prefill;
+  }
+  if (Object.keys(extractionHints).length > 0) {
+    capturedPayload.extraction_hints = extractionHints;
+  }
+
+  setStatus(ppCreateStatus, 'Creating…');
+  let resp;
+  try {
+    resp = await fetch(`${ORIGIN}/api/v1/scrapes/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${saved.ccApiKey}`,
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'scrape',
+          attributes: {
+            link: payload.url,
+            source_mode: 'extension-direct',
+            captured_payload: capturedPayload,
+          },
+        },
+      }),
+    });
+  } catch (err) {
+    setStatus(ppCreateStatus, `Network error: ${err.message}`, 'error');
+    finish();
+    return;
+  }
+
+  if (resp.status === 401 || resp.status === 403) {
+    setStatus(ppCreateStatus, 'Session expired — reconnect required.', 'error');
+    finish();
+    return;
+  }
+
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    body = null;
+  }
+
+  if (resp.status === 409) {
+    const meta = body?.errors?.[0]?.meta || {};
+    const existingId = meta.job_post_id;
+    if (existingId && ppCreateLinkEl) {
+      ppCreateLinkEl.href = `${FRONTEND_ORIGIN}/job-posts/${existingId}`;
+      ppCreateLinkEl.textContent = 'View existing post';
+      ppCreateLinkEl.classList.remove('hidden');
+    }
+    setStatus(ppCreateStatus, 'Already in your library.', 'success');
+    finish();
+    return;
+  }
+
+  if (!resp.ok) {
+    const detail = body?.errors?.[0]?.detail || `HTTP ${resp.status}`;
+    setStatus(ppCreateStatus, `Error: ${detail}`, 'error');
+    finish();
+    return;
+  }
+
+  const newJobPostId =
+    body?.data?.relationships?.['job-post']?.data?.id || null;
+  const canonicalRedirect = body?.meta?.canonical_redirect || null;
+  const landingId = canonicalRedirect || newJobPostId;
+  if (landingId && ppCreateLinkEl) {
+    ppCreateLinkEl.href = `${FRONTEND_ORIGIN}/job-posts/${landingId}`;
+    ppCreateLinkEl.textContent = 'View job post';
+    ppCreateLinkEl.classList.remove('hidden');
+  }
+  setStatus(ppCreateStatus, 'Created ✓', 'success');
+  if (ppCreateBtn) {
+    delete ppCreateBtn.dataset.state;
+    ppCreateBtn.classList.add('hidden');
+  }
+}
+
+if (ppCreateBtn) ppCreateBtn.addEventListener('click', createFromProposed);
+// "Re-check" re-applies the host's selectors against the CURRENT DOM (SPA
+// nav) — re-runs the full Tools-tab extraction (dedup hints + proposed post).
+if (ppRecheckBtn)
+  ppRecheckBtn.addEventListener('click', () => populateDevHints());
 
 // "Score this post" — POST /api/v1/scores/ with the JobPost relationship
 // and surface a link to the score-detail page. No polling (per
