@@ -526,6 +526,158 @@
         margin-bottom: 10px;
         word-break: break-all;
       }
+
+      /* "Proposed job-post" validator (staff Tools tab). Renders what the
+         host's job_data selectors extract from the live DOM, shaped as a
+         JobPost, with per-field validation + the server known-good verdict.
+         All values come from the page DOM — set via textContent, never
+         innerHTML. Colors reuse the theme-aware vars so dark mode is free. */
+      .pp-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .pp-msg {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--text-faint);
+        font-style: italic;
+        line-height: 1.45;
+      }
+      .pp-preview {
+        margin-top: 8px;
+        padding: 10px 12px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      .pp-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.35;
+      }
+      .pp-title.empty {
+        color: var(--text-faint);
+        font-weight: 500;
+        font-style: italic;
+      }
+      .pp-meta {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 3px;
+      }
+      .pp-posted {
+        font-size: 11px;
+        color: var(--text-faint);
+        margin-top: 3px;
+      }
+      .pp-desc {
+        margin-top: 8px;
+        max-height: 96px;
+        overflow-y: auto;
+        padding: 6px 8px;
+        font-size: 11px;
+        line-height: 1.5;
+        color: var(--text-muted);
+        white-space: pre-wrap;
+        background: var(--bg-soft);
+        border: 1px solid var(--divider);
+        border-radius: 4px;
+      }
+      .pp-fields {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .pp-field {
+        display: flex;
+        gap: 6px;
+        align-items: baseline;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+      .pp-field-mark {
+        flex-shrink: 0;
+        width: 12px;
+        text-align: center;
+        font-weight: 700;
+      }
+      .pp-field-mark.ok {
+        color: var(--success);
+      }
+      .pp-field-mark.miss {
+        color: var(--error);
+      }
+      .pp-field-mark.na {
+        color: var(--text-faint);
+      }
+      .pp-field-key {
+        flex-shrink: 0;
+        min-width: 84px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .pp-field-val {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--text-muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      .pp-field-val.muted {
+        color: var(--text-faint);
+        font-style: italic;
+        font-family: inherit;
+      }
+      .pp-verdict {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .pp-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .pp-badge.good {
+        color: var(--success);
+        background: var(--bg-soft);
+        border: 1px solid var(--success);
+      }
+      .pp-badge.bad {
+        color: var(--error);
+        background: var(--bg-soft);
+        border: 1px solid var(--error);
+      }
+      .pp-tier {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .pp-reasons {
+        margin: 8px 0 0;
+        padding-left: 16px;
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.45;
+      }
+      .pp-reasons li {
+        margin-top: 2px;
+      }
+      .pp-note {
+        margin-top: 8px;
+        font-size: 10px;
+        color: var(--text-faint);
+        line-height: 1.4;
+      }
     </style>
   </head>
   <body>
@@ -665,16 +817,54 @@
         ></a>
       </div>
 
-      <!-- Fields the extension extracts via the profile's job_data
-           selectors (structured_prefill) — THIS is what fills the JobPost.
-           Empty = no job_data selectors for this host. -->
-      <div id="prefill-box" class="dev-hints">
-        <div class="dev-hints-title">Extracted fields (job_data)</div>
-        <div id="prefill-rows">
-          <div class="dev-hint-row">
-            <span class="dev-hint-val empty">—</span>
-          </div>
+      <!-- "Proposed job-post" validator. Applies the host's job_data
+           selectors to the LIVE DOM and shows the JobPost they'd produce,
+           with per-field validation + the server known-good verdict, plus a
+           button to create the post from the preview. Validate a profile's
+           selectors against a real page before it's trusted. -->
+      <div id="proposed-post-card" class="tool-card">
+        <div class="pp-head">
+          <p class="tool-title">Proposed job-post</p>
+          <button id="pp-recheck" class="linkbtn" type="button">Re-check</button>
         </div>
+
+        <!-- empty / no-profile / no-selectors message -->
+        <div id="pp-msg" class="pp-msg">Open a job page to preview.</div>
+
+        <!-- job-post-shaped preview (configured fields only) -->
+        <div id="pp-preview" class="pp-preview hidden">
+          <div id="pp-title" class="pp-title"></div>
+          <div id="pp-meta" class="pp-meta hidden"></div>
+          <div id="pp-posted" class="pp-posted hidden"></div>
+          <div id="pp-desc" class="pp-desc hidden"></div>
+        </div>
+
+        <!-- per-field validation list -->
+        <div id="pp-fields" class="pp-fields hidden"></div>
+
+        <!-- known-good verdict + tier + reasons -->
+        <div id="pp-verdict" class="pp-verdict hidden">
+          <span id="pp-verdict-badge" class="pp-badge"></span>
+          <span id="pp-tier" class="pp-tier"></span>
+        </div>
+        <ul id="pp-reasons" class="pp-reasons hidden"></ul>
+
+        <button id="pp-create" class="primary hidden" type="button" style="margin-top: 12px;">
+          <span class="btn-label">Create job-post</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+        <div id="pp-note" class="pp-note hidden">
+          Creates via the extension-direct scrape path; the description uses
+          the full page text.
+        </div>
+        <div class="status" id="pp-create-status"></div>
+        <a
+          id="pp-create-link"
+          class="result-link hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        ></a>
       </div>
 
       <!-- Dedup signals from the profile's extension_selectors (apply /
