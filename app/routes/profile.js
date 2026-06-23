@@ -8,11 +8,11 @@ import { service } from '@ember/service';
 //
 // Data path (canonical sub-collection-read pattern #3): store.query against
 // the dedicated `public-job-post` model, whose adapter targets
-// GET /api/v1/u/:username/job-posts/ WITHOUT an Authorization header. The
-// paired api slice is built in parallel and depends on BACK #91 (the publish
-// opt-in); until it (and a published post) land, the query fails/returns
-// empty and the page shows its empty state. That empty → populated transition
-// is the intended end-to-end publish test signal.
+// GET /api/v1/users/:username/job-posts/federated/ WITHOUT an Authorization
+// header (api PR #195, AllowAny). An unknown username 404s and a known user
+// with no public posts returns 200 with empty `data`; both degrade to the
+// empty state below. The empty → populated transition (once a user publishes
+// an audience-public post) is the intended end-to-end publish test signal.
 export default class ProfileRoute extends Route {
   @service store;
 

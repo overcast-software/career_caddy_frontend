@@ -50,14 +50,22 @@
             {{#if post.companyName}}
               <span>{{post.companyName}}</span>
             {{/if}}
-            {{#if (and post.companyName post.createdAt)}}
-              <span aria-hidden="true">&middot;</span>
+            {{#if post.location}}
+              {{#if post.companyName}}
+                <span aria-hidden="true">&middot;</span>
+              {{/if}}
+              <span>{{post.location}}</span>
             {{/if}}
-            {{#if post.createdAt}}
-              <time datetime={{post.createdAt}}>
-                {{format-date post.createdAt "MMM D, YYYY"}}
-              </time>
-            {{/if}}
+            {{#let (or post.postedDate post.createdAt) as |postedAt|}}
+              {{#if postedAt}}
+                {{#if (or post.companyName post.location)}}
+                  <span aria-hidden="true">&middot;</span>
+                {{/if}}
+                <time datetime={{postedAt}}>
+                  {{format-date postedAt "MMM D, YYYY"}}
+                </time>
+              {{/if}}
+            {{/let}}
           </div>
         </li>
       {{/each}}

@@ -4,8 +4,8 @@ import config from 'career-caddy-frontend/config/environment';
 // Adapter for the PUBLIC `/<username>` profile page (CC #51).
 //
 // Deliberately extends the base JSONAPIAdapter, NOT app/adapters/application.js,
-// because GET /api/v1/u/:username/job-posts/ is AllowAny / no-auth and must
-// work for a LOGGED-OUT visitor. The application adapter would defeat both
+// because GET /api/v1/users/:username/job-posts/federated/ is AllowAny / no-auth
+// and must work for a LOGGED-OUT visitor. The application adapter would defeat both
 // requirements: (1) its `headers` getter injects the JWT Authorization
 // header, and (2) its `ajax` short-circuits every request when the session
 // is unauthenticated — returning `{ data: [] }` and redirecting to /login or
@@ -37,14 +37,14 @@ export default class PublicJobPostAdapter extends JSONAPIAdapter {
     return `${url}/`;
   }
 
-  // Sub-collection read: GET /api/v1/u/:username/job-posts/. The route calls
-  // store.query('public-job-post', { username }); `username` is consumed to
-  // build the path and is never forwarded as a query param.
+  // Sub-collection read: GET /api/v1/users/:username/job-posts/federated/. The
+  // route calls store.query('public-job-post', { username }); `username` is
+  // consumed to build the path and is never forwarded as a query param.
   urlForQuery(query) {
     const username = encodeURIComponent(query.username);
     delete query.username;
     const host = this.host || '';
     const namespace = this.namespace ? `/${this.namespace}` : '';
-    return `${host}${namespace}/u/${username}/job-posts/`;
+    return `${host}${namespace}/users/${username}/job-posts/federated/`;
   }
 }
