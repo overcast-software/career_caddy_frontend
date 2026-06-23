@@ -298,6 +298,11 @@ Router.map(function () {
   });
   this.route('favorites');
   this.route('caddy');
+  // Public profile page (CC #51) — /<username>, e.g. /dough. Single dynamic
+  // segment; route-recognizer ranks static routes above it and the /*path
+  // not-found glob below it, so existing top-level routes are unaffected.
+  // Registered as public in app/services/public-routes.js.
+  this.route('profile', { path: '/:username' });
   this.route('wizard', function () {
     this.route('profession');
     this.route('resume');

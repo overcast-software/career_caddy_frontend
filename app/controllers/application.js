@@ -16,6 +16,15 @@ export default class ApplicationController extends Controller {
     return cfg && cfg.environment === 'production';
   }
 
+  // Routes that render as a bare public page — no app chrome (sidebar /
+  // top-bar / chat / footer). The public `/<username>` profile (CC #51) is a
+  // shareable surface for anonymous visitors, so it must not expose the
+  // authenticated app's navigation. `currentRouteName` is tracked on the
+  // router service, so this getter re-evaluates as routes change.
+  get chromeless() {
+    return this.router.currentRouteName === 'profile';
+  }
+
   @action
   async invalidateSession() {
     // session.invalidate() → handleInvalidation handles store cleanup

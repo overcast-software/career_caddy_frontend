@@ -14,6 +14,7 @@ export default class PublicRoutesService extends Service {
     'extension',
     'not-found',
     'reports.application-flow',
+    'profile',
   ]);
 
   prefixes = new Set(['docs']);

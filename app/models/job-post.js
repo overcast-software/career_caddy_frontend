@@ -112,6 +112,16 @@ export default class JobPostModel extends Model {
   @attr('array', { defaultValue: () => [AS2_PUBLIC] }) audience;
   @belongsTo('score', { async: true, inverse: null }) topScore;
   @belongsTo('company', { async: true, inverse: 'jobPosts' }) company;
+  // Denormalized company label. Two sources, never both: the authed app payload
+  // ships the full `company` relationship above (so `companyName` stays empty
+  // and templates read `company.name`); the PUBLIC profile feed
+  // (GET /users/:username/job-posts/federated/, api PR #195) has no `company`
+  // relationship and instead flattens the name into this attr (`company_name`,
+  // snake-cased by app/serializers/application.js). Declaring it as a plain
+  // attr — not a second belongsTo — keeps the public page loop-proof: no async
+  // relationship the federated endpoint won't emit (see frontend memory
+  // fe-aliases-hasmany-runaway-fetch).
+  @attr('string') companyName;
   @hasMany('score', { async: true, inverse: 'jobPost' }) scores;
   @hasMany('scrape', { async: true, inverse: 'jobPost' }) scrapes;
   @hasMany('cover-letter', { async: true, inverse: 'jobPost' }) coverLetters;
