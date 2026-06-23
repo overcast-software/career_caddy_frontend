@@ -7,10 +7,14 @@ import Service from '@ember/service';
 // CC #51 — public /<username> profile page. The route loads its data via
 // store.query('public-job-post', { username }) against the public no-auth
 // endpoint GET /api/v1/users/:username/job-posts/federated/ (api PR #195).
+// The api now emits JSON:API `type: "public-job-post"` directly (matching the
+// model), so the default application serializer materializes it onto the
+// public-job-post model — there is no client-side type-coercion serializer.
 // Per the project's acceptance convention (see resolve-and-dedupe-test.js /
 // mark-incomplete-test.js) we mock at the store boundary with a StoreStub
 // rather than at the network, so the populated POJOs mirror the contract's
-// attribute shape (title/company_name/location/posted_date/link).
+// attribute shape (title/company_name/location/posted_date/link) and never
+// carry a JSON:API `type` — the serializer is intentionally not exercised.
 //
 // `query` is controllable per test:
 //   - queryResult       → resolved array of post POJOs (the template reads
