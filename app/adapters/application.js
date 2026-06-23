@@ -29,9 +29,29 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
     }
   }
 
+  // Public, unauthenticated-readable endpoints (AllowAny on the api). These
+  // must reach the api while logged OUT, so they bypass the short-circuit in
+  // ajax() below. Today: the /<username> profile surface (CC #51) — the user
+  // resource and that user's federated (audience-public) job-posts feed.
+  //
+  // We key off the request URL, NOT the current route name, on purpose:
+  // during the initial transition into /<username> the router hasn't settled
+  // currentRouteName yet (the auth guard itself reads transition.to.name for
+  // the same reason), but the request URL is always known here. Extend this
+  // list as more public reads land.
+  _isPublicEndpoint(url) {
+    return /\/users\/[^/]+\/(job-posts\/federated\/)?($|\?)/.test(url);
+  }
+
   async ajax(url, method, options = {}) {
-    // No auth → no API call. Extract resource from the URL and redirect.
-    if (!this.session.isAuthenticated) {
+    // No auth + a PROTECTED endpoint → don't hit the api. Map the resource to
+    // its /docs page (or /login) and short-circuit with an empty payload.
+    // Public endpoints (see _isPublicEndpoint) are exempt: they go out
+    // unauthenticated (the `headers` getter omits Authorization when there's
+    // no token) and a logged-in viewer's JWT, if present, is simply ignored by
+    // the AllowAny endpoint. A real 401 from a protected endpoint still falls
+    // through to the refresh/login handling below.
+    if (!this.session.isAuthenticated && !this._isPublicEndpoint(url)) {
       const docsMap = {
         scores: 'docs.scores',
         summaries: 'docs.summaries',

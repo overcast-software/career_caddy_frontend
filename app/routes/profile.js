@@ -1,39 +1,48 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
 
-// Public `/<username>` profile page (CC #51) — the human-readable twin of the
-// ActivityPub actor outbox. Lists a user's PUBLISHED (audience-public) job
-// posts. Registered public in app/services/public-routes.js so a logged-out
-// visitor reaches it without an auth redirect.
+// Public `/<username>` profile page (CC #51) — the human-readable twin of a
+// user's ActivityPub actor outbox. Renders a profile header + an infinite feed
+// of that user's PUBLISHED (audience-public) job posts.
 //
-// Data path (canonical sub-collection-read pattern #3): store.query against
-// the dedicated `public-job-post` model, whose adapter targets
-// GET /api/v1/users/:username/job-posts/federated/ WITHOUT an Authorization
-// header (api PR #195, AllowAny). An unknown username 404s and a known user
-// with no public posts returns 200 with empty `data`; both degrade to the
-// empty state below. The empty → populated transition (once a user publishes
-// an audience-public post) is the intended end-to-end publish test signal.
+// Registered public in app/services/public-routes.js (so the auth guard in
+// app/routes/application.js lets a logged-out visitor in) and whitelisted in
+// app/adapters/application.js (so the two AllowAny reads below go out
+// unauthenticated). One model hook, two idiomatic Ember Data reads against the
+// REAL models — no shadow `public-job-post` model:
+//
+//   • queryRecord('user', { username })         → GET /users/:username/
+//   • query('job-post', { username, page })     → GET /users/:username/job-posts/federated/
+//
+// The per-model adapters (app/adapters/user.js, app/adapters/job-post.js) map
+// the `username` param onto those URLs. The first page seeds the controller,
+// which then advances the keyset cursor (firstPage.meta.next_cursor) on scroll
+// (see app/controllers/profile.js).
 export default class ProfileRoute extends Route {
   @service store;
 
-  model(params) {
-    const username = params.username;
+  model({ username }) {
     // .then/.catch (not async/await + try/catch) per project convention. The
-    // resolution is one-shot: a 404 (endpoint not built yet) or any failure
-    // degrades to an empty list — never a retry or render loop.
+    // resolution is one-shot and fully degrading: an unknown username (404 on
+    // the user lookup) yields a null user → the template's not-found state; a
+    // user that loads but whose feed errors yields an empty feed → the empty
+    // state. Never a login bounce (the route is public) and never a render loop.
     return this.store
-      .query('public-job-post', { username })
-      .then((posts) => this._present(username, posts, posts.meta))
-      .catch(() => this._present(username, [], null));
+      .queryRecord('user', { username })
+      .then((user) =>
+        this.store
+          .query('job-post', { username, page: { size: 20 } })
+          .then((firstPage) => ({ username, user, firstPage }))
+          .catch(() => ({ username, user, firstPage: [] })),
+      )
+      .catch(() => ({ username, user: null, firstPage: [] }));
   }
 
-  // Light actor/persona fields ride along in the JSON:API top-level `meta`
-  // (display_name, avatar_url); fall back to the username when absent.
-  _present(username, posts, meta) {
-    const m = meta || {};
-    const displayName = m.display_name || username;
-    const avatarUrl = m.avatar_url || null;
-    const initial = (displayName || username || '?').charAt(0);
-    return { username, displayName, avatarUrl, initial, posts };
+  // Seed the controller's tracked feed from each model() resolution, so
+  // navigating /alice → /bob resets the list + cursor instead of appending
+  // bob's posts onto alice's.
+  setupController(controller, model) {
+    super.setupController(controller, model);
+    controller.seed(model);
   }
 }
