@@ -1,16 +1,22 @@
 {{page-title "Career Caddy"}}
-<MainApplication @onToggleSidebar={{this.toggleSidebar}}>
+{{#if this.chromeless}}
+  {{! Bare public page (e.g. the /<username> profile, CC #51) — render the
+      outlet without the authenticated app chrome (sidebar / top-bar / chat). }}
   {{outlet}}
-  {{#if this.isProduction}}
-    {{! template-lint-disable no-forbidden-elements }}
-    <script
-      defer
-      data-domain="careercaddy.online"
-      src="https://analytics.careercaddy.online/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
-    ></script>
-    <script>window.plausible = window.plausible || function() {
-      (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
-  {{/if}}
-</MainApplication>
+{{else}}
+  <MainApplication @onToggleSidebar={{this.toggleSidebar}}>
+    {{outlet}}
+    {{#if this.isProduction}}
+      {{! template-lint-disable no-forbidden-elements }}
+      <script
+        defer
+        data-domain="careercaddy.online"
+        src="https://analytics.careercaddy.online/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
+      ></script>
+      <script>window.plausible = window.plausible || function() {
+        (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+    {{/if}}
+  </MainApplication>
+{{/if}}
 
 <BasicDropdownWormhole />
