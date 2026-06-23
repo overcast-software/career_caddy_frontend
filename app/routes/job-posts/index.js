@@ -48,7 +48,7 @@ export default class JobPostsIndexRoute extends Route {
       perPage: 20,
       startingPage: 1,
       include: 'company,scrapes,scores',
-      sort: '-posted_date',
+      sort: '-created_at',
       ...(search ? { 'filter[query]': search } : {}),
       ...(hostname ? { 'filter[hostname]': hostname } : {}),
       ...(stub ? { 'filter[stub]': stub } : {}),
