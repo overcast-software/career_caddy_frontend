@@ -167,6 +167,7 @@
             @route="job-posts.edit"
             @model={{this.model}}
           >Edit</LinkTo>
+          <JobPosts::PublishToggle @jobPost={{this.model}} />
           <JobPosts::TriageActions @jobPost={{this.model}} />
         </div>
       </div>

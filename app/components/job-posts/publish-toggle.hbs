@@ -1,0 +1,17 @@
+{{!
+  CC-56 C1 publish toggle. Reuses the project .btn design-system class for
+  visual parity with its jp.show header neighbors (Edit / Scrape & Score).
+  Private posts get the `primary` emphasis to invite publishing; public posts
+  drop to the neutral btn for the lower-stakes Unpublish. Disabled while the
+  verb is in flight. The label is driven purely by `isPublic`, which flips
+  optimistically on click.
+}}
+<button
+  type="button"
+  data-test-publish-toggle
+  class="btn small {{unless @jobPost.isPublic 'primary'}}"
+  disabled={{this.submitting}}
+  {{on "click" this.toggle}}
+>
+  {{this.label}}
+</button>

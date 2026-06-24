@@ -293,4 +293,18 @@ export default class JobPostModel extends Model {
   promoteCanonical() {
     return apiAction(this, { method: 'POST', path: 'promote-canonical' });
   }
+
+  // CC-56 C1 — one-click visibility verbs. POST /job-posts/:id/publish/
+  // adds the AS2 Public URI to `audience`; /unpublish/ removes it. Both
+  // are owner-only on the api and return the updated job-post with
+  // `audience` flipped, so apiAction's auto-push reconciles the live
+  // record (and thus the `isPublic` getter + show-page badge) without a
+  // manual reload. Driven by <JobPosts::PublishToggle>.
+  publish() {
+    return apiAction(this, { method: 'POST', path: 'publish' });
+  }
+
+  unpublish() {
+    return apiAction(this, { method: 'POST', path: 'unpublish' });
+  }
 }
