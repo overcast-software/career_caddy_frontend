@@ -2,6 +2,17 @@ const ORIGIN = 'https://api.careercaddy.online';
 const FRONTEND_ORIGIN = 'https://careercaddy.online';
 const STORAGE_KEYS = ['ccApiKey', 'ccKeyId', 'ccUsername', 'ccAutoScore', 'ccPending', 'ccIsStaff'];
 const PENDING_MAX_AGE_MS = 30_000;
+
+// CC #46 — apply-attribution stash. When the user clicks "Apply & track"
+// on a tracked JobPost we open its apply_url in a new tab and remember the
+// source JobPost so that, if they later open the popup ON that ATS apply
+// page (which has no direct JobPost match), we can still offer to track an
+// application attributed to the original post. Keyed loosely by apply_url
+// origin (ATS apply URLs redirect/append steps, so we match on origin, not
+// exact URL). Small capped list; expired entries pruned on every read/write.
+const CC_PENDING_APPLIES_KEY = 'ccPendingApplies';
+const APPLY_STASH_MAX = 5;
+const APPLY_STASH_TTL_MS = 6 * 60 * 60 * 1000; // 6h
 const THEME_KEYS = ['ccTheme', 'ccPalette'];
 const VALID_MODES = new Set(['system', 'light', 'dark']);
 const VALID_PALETTES = new Set([
@@ -82,6 +93,27 @@ let trackedJobPostId = null;
 const whoTrackedEl = $('who-tracked');
 const disconnectTrackedBtn = $('disconnect-tracked');
 const themeToggleTrackedBtn = $('theme-toggle-tracked');
+
+// --- CC #46: Track application (tracked screen) --------------------
+// Full lookup result for the currently-tracked post (id/title/company +
+// applyUrl/companyId/link), stashed by showTracked so trackApplication can
+// build the JobApplication without a second lookup.
+let trackedJobPost = null;
+const trackApplyBtn = $('track-apply-btn');
+const trackApplyStatus = $('track-apply-status');
+const trackApplyLinkEl = $('track-apply-link');
+
+// --- CC #46: Apply-attribution prompt (connected/Send screen) ------
+const applyAttrCard = $('apply-attr-card');
+const applyAttrTitleEl = $('apply-attr-title');
+const applyAttrCompanyEl = $('apply-attr-company');
+const applyAttrBtn = $('apply-attr-btn');
+const applyAttrStatus = $('apply-attr-status');
+const applyAttrLinkEl = $('apply-attr-link');
+// The stash record currently surfaced on the attribution card (so the
+// click handler knows which JobPost to attribute and which stash entry to
+// clear). Null when no offer is showing.
+let pendingApplyOffer = null;
 
 // --- Staff Tools tab (is_staff only) -------------------------------
 const tabBar = $('tab-bar');
@@ -931,6 +963,7 @@ function showConnected(name, incompleteTarget = null) {
   hideResultLink();
   setSendingState(false);
   setStatus(sendStatus, '');
+  resetApplyAttributionCard(); // CC #46: hidden unless a stash match offers it
   syncTabState();
 
   // Resend mode: an existing JobPost was found at this URL but is
@@ -961,13 +994,16 @@ function showConnected(name, incompleteTarget = null) {
   }
 }
 
-function showTracked({ id, title, company, topScore, hasPendingScore }, name) {
+function showTracked(found, name) {
+  const { id, title, company, topScore, hasPendingScore } = found;
   hideAllScreens();
   screenTracked.classList.remove('hidden');
   trackedJobPostId = id;
+  trackedJobPost = found; // CC #46: full lookup result for Track application
   connectedName = name || '';
   currentSendScreenEl = screenTracked;
   maybeBackfillApplyUrl();
+  refreshApplicationState(); // CC #46: dedupe-on-render (Track vs Open)
   trackedTitleEl.textContent = title || '(untitled job post)';
   trackedCompanyEl.textContent = company || '';
   const hasScore = topScore !== null && topScore !== undefined;
@@ -1066,6 +1102,11 @@ async function lookupExistingJobPost(tabUrl, apiKey) {
     id: item.id,
     title: attrs.title,
     company,
+    // CC #46: company id + apply_url + canonical link, used by the
+    // Track-application action and the apply-attribution stash.
+    companyId: companyRel ? String(companyRel.id) : null,
+    applyUrl: attrs.apply_url || null,
+    link: attrs.link || null,
     topScore,
     hasPendingScore,
     complete,
@@ -1110,7 +1151,14 @@ async function resolveOpenScreen(apiKey, name) {
   showConnected(name);
   lookupExistingJobPost(tab.url, apiKey)
     .then((found) => {
-      if (!found || activeTab !== 'send') return;
+      if (activeTab !== 'send') return;
+      if (!found) {
+        // No direct JobPost match. CC #46 bonus: the active tab may be an
+        // ATS apply page opened via "Apply & track" on the source post —
+        // consult the apply-attribution stash and offer to track it.
+        maybeOfferApplyAttribution(tab.url, name);
+        return;
+      }
       if (found.complete) {
         // Already in the library + complete — switch to the Open/Tracked UI.
         showTracked(found, name);
@@ -2337,6 +2385,434 @@ if (postSendScoreBtn) {
   postSendScoreBtn.addEventListener('click', () =>
     startScore(postSendScoreBtn, postSendScoreStatus),
   );
+}
+
+// ===================================================================
+// CC #46 — Track application (jp -> ja)
+// Self-contained region: turns a tracked JobPost into a JobApplication
+// via the api's existing POST /job-applications/ + dedupe sub-collection.
+// Mirrors the established raw-fetch write idiom (createFromProposed /
+// startScore). NOTE: this is the MV3 extension, not the Ember app —
+// raw fetch + plain JS arrays (.filter/.sort/.slice) are correct here.
+// ===================================================================
+
+// --- Shared api helpers --------------------------------------------
+
+// Owner-scoped dedupe: GET /job-posts/:id/job-applications/ returns this
+// user's applications for that post. Returns { appId } (first existing app
+// id, or null) or { error: true } on a network/parse failure.
+async function findExistingApplication(jobPostId, apiKey) {
+  let resp;
+  try {
+    resp = await fetch(
+      `${ORIGIN}/api/v1/job-posts/${jobPostId}/job-applications/`,
+      {
+        headers: {
+          Accept: 'application/vnd.api+json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+      },
+    );
+  } catch {
+    return { error: true };
+  }
+  if (!resp.ok) return { error: true };
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    return { error: true };
+  }
+  const first = body && Array.isArray(body.data) ? body.data[0] : null;
+  return { appId: first ? first.id : null };
+}
+
+// POST a JobApplication. company_id is inherited from the job_post
+// server-side (JobApplicationViewSet.pre_save_payload), so we send only the
+// job-post relationship — exactly matching the api's own create test. Type
+// is the dasherized resource type "job-application"; attributes are
+// snake_case. Returns { ok, appId } or { ok:false, error }.
+async function postJobApplication({ jobPostId, trackingUrl, apiKey }) {
+  let resp;
+  try {
+    resp = await fetch(`${ORIGIN}/api/v1/job-applications/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'job-application',
+          attributes: {
+            status: 'Applied',
+            applied_at: new Date().toISOString(),
+            tracking_url: trackingUrl || null,
+          },
+          relationships: {
+            'job-post': {
+              data: { type: 'job-post', id: String(jobPostId) },
+            },
+          },
+        },
+      }),
+    });
+  } catch (err) {
+    return { ok: false, error: `Network error: ${err.message}` };
+  }
+  if (resp.status === 401 || resp.status === 403) {
+    return { ok: false, error: 'Session expired — reconnect required.' };
+  }
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    body = null;
+  }
+  if (!resp.ok) {
+    return {
+      ok: false,
+      error: body?.errors?.[0]?.detail || `HTTP ${resp.status}`,
+    };
+  }
+  return { ok: true, appId: body?.data?.id || null };
+}
+
+// --- Track-application card (tracked screen) -----------------------
+
+function setTrackApplyLabel() {
+  if (!trackApplyBtn) return;
+  const lbl = trackApplyBtn.querySelector('.btn-label');
+  if (lbl) {
+    lbl.textContent =
+      trackedJobPost && trackedJobPost.applyUrl
+        ? 'Apply & track'
+        : 'Track application';
+  }
+}
+
+function setTrackApplySending(sending) {
+  if (!trackApplyBtn) return;
+  trackApplyBtn.disabled = sending;
+  if (sending) trackApplyBtn.dataset.state = 'sending';
+  else delete trackApplyBtn.dataset.state;
+}
+
+function resetTrackApplyCard() {
+  if (trackApplyBtn) {
+    trackApplyBtn.classList.remove('hidden');
+    trackApplyBtn.disabled = false;
+    delete trackApplyBtn.dataset.state;
+  }
+  if (trackApplyLinkEl) trackApplyLinkEl.classList.add('hidden');
+  if (trackApplyStatus) setStatus(trackApplyStatus, '');
+}
+
+function showTrackApplyOpenLink(appId, label) {
+  if (trackApplyBtn) trackApplyBtn.classList.add('hidden');
+  if (trackApplyLinkEl && appId) {
+    trackApplyLinkEl.href = `${FRONTEND_ORIGIN}/job-applications/${appId}`;
+    trackApplyLinkEl.classList.remove('hidden');
+  }
+  if (trackApplyStatus) setStatus(trackApplyStatus, label || '', 'success');
+}
+
+// Dedupe-on-render: when the tracked screen shows, default to the Track
+// button, then in the background check whether an application already
+// exists for this post and swap to the Open-application link if so.
+async function refreshApplicationState() {
+  if (!trackApplyBtn) return;
+  resetTrackApplyCard();
+  setTrackApplyLabel();
+  if (!trackedJobPostId) return;
+  const saved = await api.storage.local.get(['ccApiKey']);
+  if (!saved.ccApiKey) return;
+  const jpId = trackedJobPostId;
+  const existing = await findExistingApplication(jpId, saved.ccApiKey);
+  // Bail if the user moved off this post / screen while we were waiting.
+  if (trackedJobPostId !== jpId || currentSendScreenEl !== screenTracked) {
+    return;
+  }
+  if (existing && existing.appId) {
+    showTrackApplyOpenLink(existing.appId, 'Already tracked');
+  }
+}
+
+async function trackApplication() {
+  if (!trackedJobPostId) return;
+  const jpId = trackedJobPostId;
+  const post = trackedJobPost || {};
+  const applyUrl = post.applyUrl || null;
+  setTrackApplySending(true);
+  setStatus(trackApplyStatus, 'Checking…');
+
+  const saved = await api.storage.local.get(['ccApiKey']);
+  if (!saved.ccApiKey) {
+    setStatus(trackApplyStatus, 'Not connected.', 'error');
+    setTrackApplySending(false);
+    return;
+  }
+
+  // Dedupe first — never mint a duplicate.
+  const existing = await findExistingApplication(jpId, saved.ccApiKey);
+  if (existing && existing.appId) {
+    showTrackApplyOpenLink(existing.appId, 'Already tracked');
+    return;
+  }
+  if (existing && existing.error) {
+    setStatus(trackApplyStatus, 'Could not reach Career Caddy.', 'error');
+    setTrackApplySending(false);
+    return;
+  }
+
+  // tracking_url = jp.apply_url || active tab url
+  let trackingUrl = applyUrl;
+  if (!trackingUrl) {
+    try {
+      const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+      trackingUrl = (tab && tab.url) || null;
+    } catch {
+      trackingUrl = null;
+    }
+  }
+
+  setStatus(trackApplyStatus, 'Tracking…');
+  const res = await postJobApplication({
+    jobPostId: jpId,
+    trackingUrl,
+    apiKey: saved.ccApiKey,
+  });
+  if (!res.ok) {
+    setStatus(trackApplyStatus, res.error, 'error');
+    setTrackApplySending(false);
+    return;
+  }
+  showTrackApplyOpenLink(res.appId, 'Tracked ✓');
+
+  // "Apply & track": stash the source post for attribution, then open the
+  // apply page. If the user reopens the popup on that apply page (no direct
+  // JobPost match), the stash lets us resurface this application.
+  if (applyUrl) {
+    await stashPendingApply({
+      jobPostId: String(jpId),
+      companyId: post.companyId || null,
+      applyUrl,
+      jpLink: post.link || null,
+      jpTitle: post.title || null,
+      company: post.company || null,
+      ts: Date.now(),
+    });
+    try {
+      api.tabs.create({ url: applyUrl });
+    } catch {
+      // best-effort; the application is already tracked
+    }
+  }
+}
+
+if (trackApplyBtn) trackApplyBtn.addEventListener('click', trackApplication);
+
+// --- Apply-attribution stash (chrome.storage.local) ----------------
+
+function originOf(url) {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
+// Number of leading path segments shared by two same-origin URLs — the
+// tiebreak when several stashed applies share an origin.
+function pathPrefixScore(stashUrl, tabUrl) {
+  try {
+    const a = new URL(stashUrl).pathname.split('/').filter(Boolean);
+    const b = new URL(tabUrl).pathname.split('/').filter(Boolean);
+    let n = 0;
+    while (n < a.length && n < b.length && a[n] === b[n]) n++;
+    return n;
+  } catch {
+    return 0;
+  }
+}
+
+// Read the stash, pruning expired/malformed entries.
+async function loadApplyStash() {
+  let raw;
+  try {
+    const got = await api.storage.local.get([CC_PENDING_APPLIES_KEY]);
+    raw = got[CC_PENDING_APPLIES_KEY];
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(raw)) return [];
+  const now = Date.now();
+  return raw.filter(
+    (r) => r && r.applyUrl && r.jobPostId && now - r.ts <= APPLY_STASH_TTL_MS,
+  );
+}
+
+async function saveApplyStash(list) {
+  try {
+    await api.storage.local.set({ [CC_PENDING_APPLIES_KEY]: list });
+  } catch {
+    // best-effort cache
+  }
+}
+
+// One entry per apply-url origin, newest first, capped at APPLY_STASH_MAX.
+async function stashPendingApply(rec) {
+  const list = await loadApplyStash();
+  const origin = originOf(rec.applyUrl);
+  const deduped = list.filter((r) => originOf(r.applyUrl) !== origin);
+  deduped.unshift(rec);
+  await saveApplyStash(deduped.slice(0, APPLY_STASH_MAX));
+}
+
+async function clearApplyStashForJobPost(jobPostId) {
+  const list = await loadApplyStash();
+  const next = list.filter((r) => String(r.jobPostId) !== String(jobPostId));
+  if (next.length !== list.length) await saveApplyStash(next);
+}
+
+// Best same-origin, fresh stash entry for the active apply page (longest
+// path-prefix, then most recent). ATS apply URLs redirect/append steps, so
+// origin — not exact URL — is the match key.
+async function findFreshApplyStash(tabUrl) {
+  const origin = originOf(tabUrl);
+  if (!origin) return null;
+  const list = await loadApplyStash();
+  const candidates = list.filter((r) => originOf(r.applyUrl) === origin);
+  if (candidates.length === 0) return null;
+  candidates.sort((a, b) => {
+    const sa = pathPrefixScore(a.applyUrl, tabUrl);
+    const sb = pathPrefixScore(b.applyUrl, tabUrl);
+    if (sb !== sa) return sb - sa;
+    return b.ts - a.ts;
+  });
+  return candidates[0];
+}
+
+// --- Apply-attribution card (connected/Send screen) ----------------
+
+function resetApplyAttributionCard() {
+  pendingApplyOffer = null;
+  if (applyAttrCard) applyAttrCard.classList.add('hidden');
+  if (applyAttrBtn) {
+    applyAttrBtn.classList.remove('hidden');
+    applyAttrBtn.disabled = false;
+    delete applyAttrBtn.dataset.state;
+  }
+  if (applyAttrLinkEl) applyAttrLinkEl.classList.add('hidden');
+  if (applyAttrStatus) setStatus(applyAttrStatus, '');
+}
+
+function showApplyAttrOpenLink(appId, label) {
+  if (applyAttrBtn) applyAttrBtn.classList.add('hidden');
+  if (applyAttrLinkEl && appId) {
+    applyAttrLinkEl.href = `${FRONTEND_ORIGIN}/job-applications/${appId}`;
+    applyAttrLinkEl.classList.remove('hidden');
+  }
+  if (applyAttrStatus) setStatus(applyAttrStatus, label || '', 'success');
+}
+
+// Bonus path: the active tab has no direct JobPost match but its origin
+// matches a stashed "Apply & track". Offer to track an application
+// attributed to the original post (dedupe-on-render → Open application).
+async function maybeOfferApplyAttribution(tabUrl, name) {
+  if (!applyAttrCard) return;
+  const match = await findFreshApplyStash(tabUrl);
+  if (!match) return;
+  // A late stash check must not yank the user off the Tools tab or a screen
+  // that changed meanwhile.
+  if (activeTab !== 'send' || currentSendScreenEl !== screenConnected) return;
+  void name;
+  pendingApplyOffer = match;
+  if (applyAttrTitleEl) {
+    applyAttrTitleEl.textContent = match.jpTitle || '(untitled job post)';
+  }
+  if (applyAttrCompanyEl) applyAttrCompanyEl.textContent = match.company || '';
+  applyAttrCard.classList.remove('hidden');
+
+  // Dedupe-on-render: if an application already exists for the stashed post,
+  // skip straight to Open application and drop the stash entry.
+  const saved = await api.storage.local.get(['ccApiKey']);
+  if (!saved.ccApiKey) return;
+  const existing = await findExistingApplication(match.jobPostId, saved.ccApiKey);
+  if (pendingApplyOffer !== match) return; // card was reset/replaced
+  if (existing && existing.appId) {
+    showApplyAttrOpenLink(existing.appId, 'Already tracked');
+    await clearApplyStashForJobPost(match.jobPostId);
+  }
+}
+
+async function confirmApplyAttribution() {
+  const offer = pendingApplyOffer;
+  if (!offer) return;
+  if (applyAttrBtn) {
+    applyAttrBtn.disabled = true;
+    applyAttrBtn.dataset.state = 'sending';
+  }
+  if (applyAttrStatus) setStatus(applyAttrStatus, 'Checking…');
+
+  const saved = await api.storage.local.get(['ccApiKey']);
+  if (!saved.ccApiKey) {
+    if (applyAttrStatus) setStatus(applyAttrStatus, 'Not connected.', 'error');
+    if (applyAttrBtn) {
+      applyAttrBtn.disabled = false;
+      delete applyAttrBtn.dataset.state;
+    }
+    return;
+  }
+
+  // Dedupe first.
+  const existing = await findExistingApplication(offer.jobPostId, saved.ccApiKey);
+  if (existing && existing.appId) {
+    showApplyAttrOpenLink(existing.appId, 'Already tracked');
+    await clearApplyStashForJobPost(offer.jobPostId);
+    return;
+  }
+  if (existing && existing.error) {
+    if (applyAttrStatus) {
+      setStatus(applyAttrStatus, 'Could not reach Career Caddy.', 'error');
+    }
+    if (applyAttrBtn) {
+      applyAttrBtn.disabled = false;
+      delete applyAttrBtn.dataset.state;
+    }
+    return;
+  }
+
+  // tracking_url = the actual apply-page tab URL the user is on.
+  let trackingUrl = offer.applyUrl;
+  try {
+    const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.url) trackingUrl = tab.url;
+  } catch {
+    // keep the stashed applyUrl
+  }
+
+  if (applyAttrStatus) setStatus(applyAttrStatus, 'Tracking…');
+  const res = await postJobApplication({
+    jobPostId: offer.jobPostId,
+    trackingUrl,
+    apiKey: saved.ccApiKey,
+  });
+  if (!res.ok) {
+    if (applyAttrStatus) setStatus(applyAttrStatus, res.error, 'error');
+    if (applyAttrBtn) {
+      applyAttrBtn.disabled = false;
+      delete applyAttrBtn.dataset.state;
+    }
+    return;
+  }
+  showApplyAttrOpenLink(res.appId, 'Tracked ✓');
+  await clearApplyStashForJobPost(offer.jobPostId);
+}
+
+if (applyAttrBtn) {
+  applyAttrBtn.addEventListener('click', confirmApplyAttribution);
 }
 
 loadTheme();
