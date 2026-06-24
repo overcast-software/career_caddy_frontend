@@ -2,7 +2,6 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
-import { AS2_PUBLIC } from 'career-caddy-frontend/models/job-post';
 
 export default class JobPostsFormComponent extends Component {
   @service store;
@@ -32,21 +31,10 @@ export default class JobPostsFormComponent extends Component {
     return this.currentUser.user?.isStaff;
   }
 
-  // Reflects the model's audience. Reads via the model getter so any
-  // future audience changes (Followers, Unlisted) the picker doesn't yet
-  // distinguish still render with the closest-match Public/Private state.
-  get isPublic() {
-    return this.args.jobPost?.isPublic;
-  }
-
-  @action
-  updateVisibility(event) {
-    // Assign a fresh array — Ember Data tracks array identity, not
-    // contents; in-place mutation wouldn't dirty the attribute and the
-    // PATCH would silently drop the change.
-    const next = event.target.value === 'public' ? [AS2_PUBLIC] : [];
-    this.args.jobPost.audience = next;
-  }
+  // Visibility is now driven by <JobPosts::PublishToggle> in the template,
+  // which calls the model's publish()/unpublish() verbs directly (immediate
+  // effect, not Save-gated). The old isPublic getter + updateVisibility
+  // action + AS2_PUBLIC import were removed with the <select>.
 
   get selectedCompany() {
     return this._selectedCompany ?? this.args.jobPost?.company;
