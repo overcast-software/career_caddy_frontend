@@ -27,9 +27,13 @@ class StoreStub extends Service {
   page1 = [];
   page1Cursor = null;
   page2 = [];
+  // Captures the `username` the route passed into the user lookup, so a test
+  // can assert the route normalized '@dough' → 'dough' BEFORE the query (CC #67).
+  lastUserUsername = null;
 
-  queryRecord(modelName) {
+  queryRecord(modelName, query) {
     if (modelName === 'user') {
+      this.lastUserUsername = query?.username ?? null;
       if (this.userShouldReject) {
         return Promise.reject(new Error('not found'));
       }
@@ -92,6 +96,36 @@ module('Acceptance | public profile page', function (hooks) {
       .doesNotExist(
         'public profile renders chromeless — no authenticated app sidebar',
       );
+  });
+
+  test('the Mastodon-style /@dough resolves the same profile as /dough (leading @ stripped)', async function (assert) {
+    // CC #67 / BACK #94 — visiting /@dough used to pass the raw '@dough' param
+    // into the user lookup (GET /users/%40dough/ → 404 → not-found state) and
+    // render the doubled handle '@@dough'. The route now strips the leading '@'
+    // before the query AND in the returned model.username.
+    this.store.page1 = [];
+    await invalidateSession();
+    await visit('/@dough');
+
+    assert.strictEqual(
+      currentURL(),
+      '/@dough',
+      'stayed on /@dough — route is public, no redirect',
+    );
+    assert.strictEqual(
+      this.store.lastUserUsername,
+      'dough',
+      'leading @ stripped before the lookup (GET /users/dough/, not /users/%40dough/)',
+    );
+    assert
+      .dom('h1')
+      .hasText(
+        'Dough Boy',
+        '/@dough resolves the same user record as /dough — not the not-found state',
+      );
+    assert
+      .dom('header p')
+      .hasText('@dough', 'the handle renders a single @, not @@dough');
   });
 
   test('published posts render with title, company, location, date, and link', async function (assert) {

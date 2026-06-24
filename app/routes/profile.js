@@ -22,20 +22,56 @@ export default class ProfileRoute extends Route {
   @service store;
 
   model({ username }) {
+    // Normalize the raw `/:username` param so the Mastodon-style /@dough
+    // resolves identically to the canonical /dough (CC #67 / BACK #94). The
+    // router captures '@dough' verbatim; passed through untouched it would GET
+    // /users/%40dough/ → api 404 → not-found state, and the template's
+    // `@{{this.username}}` would render the doubled '@@dough'. Stripping here
+    // (and threading the cleaned handle into the returned model.username) fixes
+    // both the lookup and the rendered handle.
+    const handle = this.normalizeUsername(username);
+
     // .then/.catch (not async/await + try/catch) per project convention. The
     // resolution is one-shot and fully degrading: an unknown username (404 on
     // the user lookup) yields a null user → the template's not-found state; a
     // user that loads but whose feed errors yields an empty feed → the empty
     // state. Never a login bounce (the route is public) and never a render loop.
     return this.store
-      .queryRecord('user', { username })
+      .queryRecord('user', { username: handle })
       .then((user) =>
         this.store
-          .query('job-post', { username, page: { size: 20 } })
-          .then((firstPage) => ({ username, user, firstPage }))
-          .catch(() => ({ username, user, firstPage: [] })),
+          .query('job-post', { username: handle, page: { size: 20 } })
+          .then((firstPage) => ({ username: handle, user, firstPage }))
+          .catch(() => ({ username: handle, user, firstPage: [] })),
       )
-      .catch(() => ({ username, user: null, firstPage: [] }));
+      .catch(() => ({ username: handle, user: null, firstPage: [] }));
+  }
+
+  // Strip the Mastodon-style decorations off a /:username route param so the
+  // federation-handle URLs all resolve to the same local profile:
+  //   /@dough                     → dough   (leading '@')
+  //   /@dough@careercaddy.online  → dough   (full handle — only when the host
+  //                                           part is OUR instance)
+  // A remote handle like /@alice@mastodon.social keeps its host part and so
+  // (correctly) falls through to the not-found state rather than masquerading
+  // as the local user 'alice'. The instance host is read from
+  // window.location.host — never baked into the bundle — matching the
+  // federation host idiom in app/components/companies/subscribe-button.js, so
+  // one build serves multiple instances (mirror cluster, dev tunnels, etc.).
+  normalizeUsername(raw) {
+    let username = (raw || '').replace(/^@+/, '');
+    const at = username.indexOf('@');
+    if (at !== -1) {
+      const hostPart = username.slice(at + 1).toLowerCase();
+      const ourHost =
+        typeof window !== 'undefined' && window.location
+          ? window.location.host.toLowerCase()
+          : '';
+      if (hostPart && ourHost && hostPart === ourHost) {
+        username = username.slice(0, at);
+      }
+    }
+    return username;
   }
 
   // Seed the controller's tracked feed from each model() resolution, so
