@@ -59,6 +59,20 @@ export default class HealthService extends Service {
 
       this.bootstrapOpen = bootstrapOpen;
       this.registrationOpen = registrationOpen;
+
+      // Track the last API-confirmed initialized state in localStorage
+      // (survives reload + new tab, unlike the sessionStorage caches
+      // below). When the API affirmatively reports bootstrap is closed,
+      // remember the system is initialized so a later UNREACHABLE
+      // healthcheck can never re-expose /setup. When it reports bootstrap
+      // is open (genuine first-run, or a self-hoster who wiped the DB),
+      // clear the marker so first-run can run again.
+      if (bootstrapOpen) {
+        localStorage.removeItem('cc:initialized');
+      } else {
+        localStorage.setItem('cc:initialized', 'true');
+      }
+
       sessionStorage.setItem(
         'cc:bootstrap-open',
         bootstrapOpen ? 'true' : 'false',
@@ -76,11 +90,17 @@ export default class HealthService extends Service {
         return false;
       }
     } catch (error) {
-      // Fail open: a network or CORS failure during healthcheck must not
-      // silently lock first-run users out of /setup. Treat unreachable as
-      // "bootstrap might be open" so the wizard remains accessible until
-      // the API actually answers.
+      // Fail open ONLY for a genuine first-run. A network/CORS failure
+      // during healthcheck must not lock a brand-new self-hosted user out
+      // of /setup — but once the API has ever confirmed the system is
+      // initialized (cc:initialized marker), a transient failure must
+      // NEVER re-expose the wizard. Leave bootstrapOpen false so an
+      // initialized site stays out of /setup on a blip; only fail open
+      // when the marker is absent (true first-run, API briefly down).
       this.lastError = error.message || 'Failed to reach API';
+      if (localStorage.getItem('cc:initialized') === 'true') {
+        return false;
+      }
       this.bootstrapOpen = true;
       sessionStorage.setItem('cc:bootstrap-open', 'true');
       return false;
@@ -98,5 +118,15 @@ export default class HealthService extends Service {
   setBootstrapOpen(value) {
     this.bootstrapOpen = value;
     sessionStorage.setItem('cc:bootstrap-open', value ? 'true' : 'false');
+    // Mirror ensureHealthy so the initialized marker stays authoritative
+    // across both write paths: a confirmed-closed bootstrap (e.g. right
+    // after first-run init in setup.js) marks the system initialized so a
+    // later unreachable healthcheck never re-exposes /setup; an explicitly
+    // opened bootstrap clears it.
+    if (value) {
+      localStorage.removeItem('cc:initialized');
+    } else {
+      localStorage.setItem('cc:initialized', 'true');
+    }
   }
 }
