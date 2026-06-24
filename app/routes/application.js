@@ -110,8 +110,15 @@ export default class ApplicationRoute extends Route {
       if (!isAuthed) return;
     }
 
-    const ok = await this.health.ensureHealthy();
-    if (!ok || this.health.bootstrapOpen) {
+    // Only an affirmative bootstrap_open:true signal from the API may
+    // expose the first-run /setup wizard. A merely-failed healthcheck
+    // (transient 5xx, CORS blip, timeout) must NEVER route an initialized
+    // system to /setup — the wizard is permanently dead after first-run.
+    // On a failure without bootstrapOpen we fall through to the normal
+    // flow; the auth / currentUser path below already bounces an
+    // unreachable or unauthenticated user to /login via session.invalidate().
+    await this.health.ensureHealthy();
+    if (this.health.bootstrapOpen) {
       return this.router.replaceWith('setup');
     }
 
