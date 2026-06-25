@@ -70,6 +70,11 @@ const screenOnCc = $('screen-on-cc'); // CC #2: on-careercaddy dialogue
 const onCcOpenEl = $('on-cc-open');
 const profileCardEl = $('profile-card'); // CC #1: quick-copy profile fields
 const profileFieldsEl = $('profile-fields');
+const answerCardEl = $('answer-card'); // CC #47: answer-the-selection tool
+const answerBtn = $('answer-btn');
+const answerStatus = $('answer-status');
+const answerTextEl = $('answer-text');
+const answerCopyBtn = $('answer-copy');
 const versionEl = $('version');
 
 const openSigninBtn = $('open-signin');
@@ -1337,6 +1342,7 @@ function loadSaved() {
       }
     }
     importPaletteFromActiveTab();
+    maybeResumeAnswer(); // CC #47: resume a pending answer after reopen
   });
 }
 
@@ -2951,6 +2957,299 @@ async function confirmApplyAttribution() {
 if (applyAttrBtn) {
   applyAttrBtn.addEventListener('click', confirmApplyAttribution);
 }
+
+// ===================================================================
+// CC #47 — ad-hoc "Answer the selected text"
+// Self-contained region: read the active page selection, match a saved
+// (favorite) Answer or generate one server-side (poll until terminal),
+// then show it editable + copyable. The extension holds NO LLM key — the
+// api's ai_assist path does the work; we just poll. Pending generation is
+// stashed to chrome.storage.local so a popup close/reopen resumes.
+// ===================================================================
+const ANSWER_PENDING_KEY = 'ccAnswerPending';
+const ANSWER_POLL_INTERVAL_MS = 2500;
+const ANSWER_MAX_POLLS = 48; // ~2 min ceiling
+const ANSWER_PENDING_MAX_AGE_MS = 10 * 60 * 1000;
+let answerPolling = false;
+
+function answerSleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function setAnswerBusy(busy) {
+  if (!answerBtn) return;
+  answerBtn.disabled = busy;
+  if (busy) answerBtn.dataset.state = 'sending';
+  else delete answerBtn.dataset.state;
+}
+
+function resetAnswerResult() {
+  if (answerTextEl) {
+    answerTextEl.value = '';
+    answerTextEl.classList.add('hidden');
+  }
+  if (answerCopyBtn) answerCopyBtn.classList.add('hidden');
+}
+
+function showAnswerResult(content, message) {
+  if (answerTextEl) {
+    answerTextEl.value = content || '';
+    answerTextEl.classList.remove('hidden');
+  }
+  if (answerCopyBtn) answerCopyBtn.classList.remove('hidden');
+  setStatus(answerStatus, message || '', 'success');
+}
+
+function clearAnswerPending() {
+  return api.storage.local.remove(ANSWER_PENDING_KEY).catch(() => {});
+}
+
+// Read the active tab's selection. allFrames so a selection inside an
+// embedded ATS iframe is captured; first non-empty frame result wins.
+async function readSelectionFromActiveTab() {
+  let tab;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    return '';
+  }
+  if (!tab || tab.id == null) return '';
+  try {
+    const results = await api.scripting.executeScript({
+      target: { tabId: tab.id, allFrames: true },
+      func: () => (window.getSelection ? window.getSelection().toString() : ''),
+    });
+    if (!Array.isArray(results)) return '';
+    for (const r of results) {
+      const s = r && r.result ? String(r.result).trim() : '';
+      if (s) return s;
+    }
+    return '';
+  } catch {
+    return '';
+  }
+}
+
+// 1. Match first (free): GET /answers/?filter[query]=<sel>&include=question.
+// The api has no `favorite` query param, so prefer a favorite client-side;
+// else the most recent answer that already has content.
+async function findExistingAnswer(selection, apiKey) {
+  try {
+    const url = `${ORIGIN}/api/v1/answers/?filter[query]=${encodeURIComponent(
+      selection,
+    )}&include=question`;
+    const resp = await fetch(url, {
+      headers: {
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
+    if (!resp.ok) return null;
+    const body = await resp.json();
+    const rows = Array.isArray(body?.data) ? body.data : [];
+    const withContent = rows.filter(
+      (r) => r?.attributes?.content && String(r.attributes.content).trim(),
+    );
+    if (withContent.length === 0) return null;
+    const fav = withContent.find((r) => r?.attributes?.favorite === true);
+    const chosen = fav || withContent[0];
+    return { id: chosen.id, content: chosen.attributes.content };
+  } catch {
+    return null;
+  }
+}
+
+// 2a. Mint the Question (POST /questions/ {content}). Returns the new id.
+async function mintQuestion(content, apiKey) {
+  try {
+    const resp = await fetch(`${ORIGIN}/api/v1/questions/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        data: { type: 'question', attributes: { content } },
+      }),
+    });
+    if (!resp.ok) return null;
+    const body = await resp.json();
+    return body?.data?.id || null;
+  } catch {
+    return null;
+  }
+}
+
+// 2b. Request an AI answer (POST /answers/ {ai_assist:true} + question rel).
+// With no content this returns 202 + status 'pending' (poll it). Returns id.
+async function requestAiAnswer(questionId, apiKey) {
+  try {
+    const resp = await fetch(`${ORIGIN}/api/v1/answers/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'answer',
+          attributes: { ai_assist: true },
+          relationships: {
+            question: { data: { type: 'question', id: String(questionId) } },
+          },
+        },
+      }),
+    });
+    if (!resp.ok) return null;
+    const body = await resp.json();
+    return body?.data?.id || null;
+  } catch {
+    return null;
+  }
+}
+
+// Poll GET /answers/:id/ until status is terminal (completed|failed) or the
+// attempt cap is hit. Mirrors the scrape/score terminal-status poll idiom.
+async function pollAnswerUntilTerminal(answerId, apiKey) {
+  answerPolling = true;
+  for (let attempt = 0; attempt < ANSWER_MAX_POLLS; attempt++) {
+    await answerSleep(ANSWER_POLL_INTERVAL_MS);
+    if (!answerPolling) return; // superseded by a newer request
+    let attrs = null;
+    try {
+      const resp = await fetch(`${ORIGIN}/api/v1/answers/${answerId}/`, {
+        headers: {
+          Accept: 'application/vnd.api+json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+      if (resp.ok) {
+        const body = await resp.json();
+        attrs = body?.data?.attributes || null;
+      }
+    } catch {
+      continue; // transient — retry until the cap
+    }
+    const status = attrs?.status || null;
+    if (status === 'completed') {
+      answerPolling = false;
+      await clearAnswerPending();
+      showAnswerResult(attrs.content || '', 'Generated.');
+      setAnswerBusy(false);
+      return;
+    }
+    if (status === 'failed') {
+      answerPolling = false;
+      await clearAnswerPending();
+      setStatus(answerStatus, 'Answer generation failed — try again.', 'error');
+      setAnswerBusy(false);
+      return;
+    }
+  }
+  // Hit the cap without a terminal state — keep the stash so a reopen resumes.
+  answerPolling = false;
+  setStatus(answerStatus, 'Still generating — reopen the popup to check again.');
+  setAnswerBusy(false);
+}
+
+async function handleAnswerSelected() {
+  if (answerPolling) return;
+  const saved = await api.storage.local.get(['ccApiKey']);
+  if (!saved.ccApiKey) {
+    setStatus(answerStatus, 'Not connected.', 'error');
+    return;
+  }
+  const selection = await readSelectionFromActiveTab();
+  if (!selection) {
+    setStatus(
+      answerStatus,
+      'Select a question on the page first, then click Answer.',
+      'error',
+    );
+    return;
+  }
+  resetAnswerResult();
+  setAnswerBusy(true);
+  setStatus(answerStatus, 'Looking for a saved answer…');
+  const match = await findExistingAnswer(selection, saved.ccApiKey);
+  if (match && match.content) {
+    showAnswerResult(match.content, 'Matched a saved answer.');
+    setAnswerBusy(false);
+    return;
+  }
+  setStatus(answerStatus, 'Generating an answer…');
+  const questionId = await mintQuestion(selection, saved.ccApiKey);
+  if (!questionId) {
+    setStatus(answerStatus, 'Could not create the question.', 'error');
+    setAnswerBusy(false);
+    return;
+  }
+  const answerId = await requestAiAnswer(questionId, saved.ccApiKey);
+  if (!answerId) {
+    setStatus(answerStatus, 'Could not start answer generation.', 'error');
+    setAnswerBusy(false);
+    return;
+  }
+  await api.storage.local
+    .set({
+      [ANSWER_PENDING_KEY]: {
+        answerId,
+        questionId,
+        prompt: selection,
+        startedAt: Date.now(),
+      },
+    })
+    .catch(() => {});
+  await pollAnswerUntilTerminal(answerId, saved.ccApiKey);
+}
+
+// Resume a pending generation after a popup close/reopen. Reads the stash;
+// if fresh, polls the answer (it may have completed while the popup was
+// closed) and resumes until terminal. Reads its own apiKey so it works on
+// both the stored-key and freshly-SSO'd boot paths.
+async function maybeResumeAnswer() {
+  if (!answerCardEl || answerPolling) return;
+  let saved;
+  try {
+    saved = await api.storage.local.get(['ccApiKey', ANSWER_PENDING_KEY]);
+  } catch {
+    return;
+  }
+  const apiKey = saved?.ccApiKey;
+  const pending = saved?.[ANSWER_PENDING_KEY];
+  if (!apiKey || !pending || !pending.answerId) return;
+  if (Date.now() - (pending.startedAt || 0) > ANSWER_PENDING_MAX_AGE_MS) {
+    await clearAnswerPending();
+    return;
+  }
+  answerCardEl.open = true;
+  setAnswerBusy(true);
+  setStatus(answerStatus, 'Resuming a pending answer…');
+  await pollAnswerUntilTerminal(pending.answerId, apiKey);
+}
+
+function copyAnswerToClipboard() {
+  if (!answerTextEl || !answerCopyBtn) return;
+  const value = answerTextEl.value || '';
+  navigator.clipboard
+    .writeText(value)
+    .then(() => {
+      const prev = answerCopyBtn.textContent;
+      answerCopyBtn.textContent = 'Copied ✓';
+      setTimeout(() => {
+        answerCopyBtn.textContent = prev;
+      }, 1200);
+    })
+    .catch(() => {
+      setStatus(answerStatus, 'Copy failed.', 'error');
+    });
+}
+
+if (answerBtn) answerBtn.addEventListener('click', handleAnswerSelected);
+if (answerCopyBtn)
+  answerCopyBtn.addEventListener('click', copyAnswerToClipboard);
 
 loadTheme();
 loadSaved();

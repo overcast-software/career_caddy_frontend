@@ -747,6 +747,24 @@
         color: var(--success);
         border-color: var(--success);
       }
+
+      /* CC #47: "Answer the selected text" card body + editable result. */
+      .answer-body {
+        padding: 8px 12px 10px;
+      }
+      .answer-text {
+        width: 100%;
+        margin-top: 8px;
+        padding: 8px;
+        font-family: inherit;
+        font-size: 12px;
+        line-height: 1.45;
+        color: var(--text);
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        resize: vertical;
+      }
     </style>
   </head>
   <body>
@@ -838,6 +856,32 @@
       <details id="profile-card" class="profile-card hidden">
         <summary class="profile-summary">Copy profile details</summary>
         <div id="profile-fields" class="profile-fields"></div>
+      </details>
+
+      <!-- CC #47: ad-hoc "Answer the selected text". Reads the page selection,
+           matches a saved (favorite) answer or generates one server-side
+           (polls until terminal), then shows it editable + copyable. -->
+      <details id="answer-card" class="profile-card">
+        <summary class="profile-summary">Answer the selected text</summary>
+        <div class="answer-body">
+          <button id="answer-btn" class="primary" type="button">
+            <span class="btn-label">Answer the selected text</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+          <div class="status" id="answer-status"></div>
+          <textarea
+            id="answer-text"
+            class="answer-text hidden"
+            rows="5"
+            spellcheck="true"
+          ></textarea>
+          <button
+            id="answer-copy"
+            class="primary hidden"
+            type="button"
+            style="margin-top: 8px;"
+          >Copy answer</button>
+        </div>
       </details>
 
       <div class="footer">
