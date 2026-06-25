@@ -111,7 +111,8 @@ export default class AdminDedupeCompareController extends Controller {
     if (!this.canSubmit) return;
     const { a, b } = this.model;
     const payload = {
-      target_id: parseInt(b.id, 10),
+      // JobPost ids are opaque NanoID strings (CC-77 #79) — send as-is.
+      target_id: b.id,
       relation: this.relation,
     };
     // Only send field_overrides when the user actually picked at least

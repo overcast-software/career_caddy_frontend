@@ -10,10 +10,13 @@ export default class WizardReviewRoute extends Route {
   }
 
   async model() {
-    const resumes = await this.store.findAll('resume');
-    // Most-recent first so a freshly-imported resume floats to the top.
-    return resumes
-      .slice()
-      .sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+    // Resume ids are opaque NanoID strings (CC-77 #79), so the old
+    // Number(id)-descending sort no longer maps to recency (NanoIDs
+    // aren't monotonic and Resume carries no timestamp attr to sort by).
+    // Return the live RecordArray as the api orders it — no .slice()
+    // (Ember Data reactivity footgun). The single-resume wizard path
+    // (the common case right after import) renders the only resume
+    // regardless of order.
+    return this.store.findAll('resume');
   }
 }

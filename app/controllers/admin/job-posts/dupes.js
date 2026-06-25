@@ -42,7 +42,9 @@ export default class AdminJobPostsDupesController extends Controller {
     if (this.actingId) return;
     const source = this.model;
     if (!source) return;
-    const targetId = parseInt(candidate.id, 10);
+    // JobPost ids are opaque NanoID strings (CC-77 #79) — pass the id
+    // through untouched. parseInt() here would NaN a NanoID.
+    const targetId = candidate.id;
     this.actingId = `mark:${candidate.id}`;
     source
       .markDuplicateOf({ target_id: targetId })

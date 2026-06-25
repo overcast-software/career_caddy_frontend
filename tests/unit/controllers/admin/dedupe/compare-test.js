@@ -40,9 +40,10 @@ module('Unit | Controller | admin/dedupe/compare', function (hooks) {
       title: 'Engineer II',
       description: 'newer description',
     });
-    // Fake IDs so target_id / transition payload are real numbers.
-    Object.defineProperty(a, 'id', { value: '11' });
-    Object.defineProperty(b, 'id', { value: '22' });
+    // Fake NanoID ids (CC-77 #79) — target_id must be forwarded as the
+    // opaque string, never parseInt()'d.
+    Object.defineProperty(a, 'id', { value: 'Ab3kZ9xQ1p' });
+    Object.defineProperty(b, 'id', { value: 'Cd5mW2yR4s' });
 
     const controller = this.owner.lookup('controller:admin/dedupe/compare');
     controller.set('model', { a, b });
@@ -59,7 +60,7 @@ module('Unit | Controller | admin/dedupe/compare', function (hooks) {
     controller.setRelation('repost');
     controller.submit({ preventDefault() {} });
     assert.deepEqual(captured, {
-      target_id: 22,
+      target_id: 'Cd5mW2yR4s',
       relation: 'repost',
       field_overrides: { title: 'A' },
     });

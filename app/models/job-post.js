@@ -269,7 +269,7 @@ export default class JobPostModel extends Model {
 
   // POST /job-posts/:id/mark-duplicate-of/. Payload shape (server-side,
   // see api/job_posts/views.py::mark_duplicate_of):
-  //   { target_id: int (required),
+  //   { target_id: NanoID string (required) — CC-77 #79,
   //     field_overrides?: { title|description|apply_url|location|company: "A"|"B" },
   //     relation?: "duplicate" | "repost" }
   // - field_overrides keys are independent; subset is fine. "A" copies
