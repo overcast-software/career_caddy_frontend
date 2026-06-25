@@ -346,7 +346,7 @@ async function resolveProfileId(host, apiKey) {
   return null;
 }
 
-// "Enrich profile for this domain" — resolve host -> ScrapeProfile id,
+// "Sharpen this domain's profile" — resolve host -> ScrapeProfile id,
 // then POST /scrape-profiles/:id/sharpen/ (staff-only). The api enqueues
 // a sharpen pass the offline enhancer picks up; this is a request, not a
 // live agent run, so we surface the queued job id + a link to the
@@ -371,7 +371,7 @@ async function handleEnrich() {
     // fall through to the no-host guard
   }
   if (!host) {
-    setStatus(enrichStatus, 'No active tab to enrich.', 'error');
+    setStatus(enrichStatus, 'No active tab to sharpen.', 'error');
     setEnrichSending(false);
     return;
   }
@@ -392,7 +392,7 @@ async function handleEnrich() {
     return;
   }
 
-  setStatus(enrichStatus, 'Queuing enrichment…');
+  setStatus(enrichStatus, 'Queuing sharpen…');
   let resp;
   try {
     // No request body — the sharpen action only needs the profile pk +
@@ -429,7 +429,7 @@ async function handleEnrich() {
   if (resp.status === 422) {
     setStatus(
       enrichStatus,
-      `No completed scrape for ${resolved.hostname} yet — use "Send this page", then enrich once it's captured.`,
+      `No completed scrape for ${resolved.hostname} yet — use "Send this page", then sharpen once it's captured.`,
       'error',
     );
     setEnrichSending(false);
@@ -445,7 +445,7 @@ async function handleEnrich() {
   const jobId = body?.meta?.job_id;
   setStatus(
     enrichStatus,
-    `Enrichment queued for ${resolved.hostname}${jobId ? ` (job ${jobId})` : ''}.`,
+    `Sharpen queued for ${resolved.hostname}${jobId ? ` (job ${jobId})` : ''}.`,
     'success',
   );
   if (enrichLinkEl) {
@@ -2298,7 +2298,17 @@ if (ppCreateBtn) ppCreateBtn.addEventListener('click', createFromProposed);
 // "Re-check" re-applies the host's selectors against the CURRENT DOM (SPA
 // nav) — re-runs the full Tools-tab extraction (dedup hints + proposed post).
 if (ppRecheckBtn)
-  ppRecheckBtn.addEventListener('click', () => populateDevHints());
+  ppRecheckBtn.addEventListener('click', async () => {
+    // Re-check forces a fresh selector fetch (bypass the 1h per-host
+    // ccExtensionSelectorCache) so a just-sharpened / just-edited profile
+    // is reflected immediately instead of after the TTL.
+    try {
+      await api.storage.local.remove(SELECTOR_CACHE_KEY);
+    } catch {
+      // best-effort; fall through and re-run with whatever's cached
+    }
+    populateDevHints();
+  });
 
 // "Score this post" — POST /api/v1/scores/ with the JobPost relationship
 // and surface a link to the score-detail page. No polling (per
