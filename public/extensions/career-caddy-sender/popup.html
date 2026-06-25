@@ -678,6 +678,93 @@
         color: var(--text-faint);
         line-height: 1.4;
       }
+
+      /* CC #1: quick-copy profile fields card (Send screen). Uses only the
+         existing theme vars, so light/dark/all palettes are covered free. */
+      .profile-card {
+        margin-top: 12px;
+        background: var(--bg-soft);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      .profile-summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+        user-select: none;
+      }
+      .profile-summary::-webkit-details-marker {
+        display: none;
+      }
+      .profile-card[open] > .profile-summary {
+        border-bottom: 1px solid var(--border);
+      }
+      .profile-fields {
+        padding: 8px 12px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .profile-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .profile-label {
+        flex: 0 0 68px;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .profile-value {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 12px;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .profile-copy {
+        flex: 0 0 auto;
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        background: var(--bg);
+        border: 1px solid var(--border-strong);
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .profile-copy:hover {
+        background: var(--bg-soft);
+        color: var(--text);
+      }
+      .profile-copy.copied {
+        color: var(--success);
+        border-color: var(--success);
+      }
+
+      /* CC #47: "Answer the selected text" card body + editable result. */
+      .answer-body {
+        padding: 8px 12px 10px;
+      }
+      .answer-text {
+        width: 100%;
+        margin-top: 8px;
+        padding: 8px;
+        font-family: inherit;
+        font-size: 12px;
+        line-height: 1.45;
+        color: var(--text);
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        resize: vertical;
+      }
     </style>
   </head>
   <body>
@@ -763,6 +850,40 @@
       <div class="status" id="post-send-score-status"></div>
       <button id="dismiss" class="linkbtn hidden" type="button" style="margin-top: 10px;">Dismiss</button>
 
+      <!-- CC #1: quick-copy profile fields, sourced from /api/v1/me on popup
+           open. Collapsed by default; hidden until at least one field loads.
+           Rows are built in JS (renderProfileCard). -->
+      <details id="profile-card" class="profile-card hidden">
+        <summary class="profile-summary">Copy profile details</summary>
+        <div id="profile-fields" class="profile-fields"></div>
+      </details>
+
+      <!-- CC #47: ad-hoc "Answer the selected text". Reads the page selection,
+           matches a saved (favorite) answer or generates one server-side
+           (polls until terminal), then shows it editable + copyable. -->
+      <details id="answer-card" class="profile-card">
+        <summary class="profile-summary">Answer the selected text</summary>
+        <div class="answer-body">
+          <button id="answer-btn" class="primary" type="button">
+            <span class="btn-label">Answer the selected text</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+          <div class="status" id="answer-status"></div>
+          <textarea
+            id="answer-text"
+            class="answer-text hidden"
+            rows="5"
+            spellcheck="true"
+          ></textarea>
+          <button
+            id="answer-copy"
+            class="primary hidden"
+            type="button"
+            style="margin-top: 8px;"
+          >Copy answer</button>
+        </div>
+      </details>
+
       <div class="footer">
         <button
           id="theme-toggle"
@@ -834,14 +955,36 @@
       </div>
     </div>
 
+    <!-- CC #2: shown when the active tab is Career Caddy itself (the user
+         arrived from careercaddy, e.g. browsing job-posts). The capture form
+         is meaningless here, so surface a contextual dialogue instead. -->
+    <div id="screen-on-cc" class="hidden">
+      <h1>You're on Career Caddy</h1>
+      <p class="helper" style="margin-top: 0; margin-bottom: 14px;">
+        The Sender captures job postings from <em>other</em> sites — there's
+        nothing to send from a Career Caddy page.
+      </p>
+      <a
+        id="on-cc-open"
+        class="tracked-open"
+        href="#"
+        target="_blank"
+        rel="noopener"
+      >Browse your job posts</a>
+      <p class="helper">
+        Open a job listing on another site, then click the Sender to capture
+        it.
+      </p>
+    </div>
+
     <div id="screen-tools" class="hidden">
       <h1>Staff tools</h1>
 
       <div class="tool-card">
-        <p class="tool-title">Enrich ScrapeProfile</p>
+        <p class="tool-title">Sharpen ScrapeProfile</p>
         <div class="tool-host" id="tool-host">—</div>
         <button id="enrich-btn" class="primary" type="button">
-          <span class="btn-label">Enrich profile for this domain</span>
+          <span class="btn-label">Sharpen this domain's profile</span>
           <span class="spinner" aria-hidden="true"></span>
         </button>
         <div class="status" id="enrich-status"></div>
