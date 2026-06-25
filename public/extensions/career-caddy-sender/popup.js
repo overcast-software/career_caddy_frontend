@@ -66,6 +66,8 @@ const screenConnect = $('screen-connect');
 const screenConnected = $('screen-connected');
 const screenTracked = $('screen-tracked');
 const screenLoading = $('screen-loading');
+const screenOnCc = $('screen-on-cc'); // CC #2: on-careercaddy dialogue
+const onCcOpenEl = $('on-cc-open');
 const versionEl = $('version');
 
 const openSigninBtn = $('open-signin');
@@ -601,6 +603,7 @@ function hideAllScreens() {
   screenConnect.classList.add('hidden');
   screenConnected.classList.add('hidden');
   screenTracked.classList.add('hidden');
+  if (screenOnCc) screenOnCc.classList.add('hidden');
   if (screenTools) screenTools.classList.add('hidden');
 }
 
@@ -619,6 +622,28 @@ function showConnect(message = '') {
   hideResultLink();
   setSendingState(false);
   setStatus(connectStatus, message);
+}
+
+// CC #2: true when the URL is a Career Caddy FRONTEND page (the app itself,
+// not the API host). Used to suppress the capture form when the user opens
+// the Sender while on careercaddy.online — there's nothing external to send.
+function isCareerCaddyFrontendUrl(rawUrl) {
+  try {
+    return new URL(rawUrl).origin === FRONTEND_ORIGIN;
+  } catch {
+    return false;
+  }
+}
+
+// CC #2: the active tab is Career Caddy itself (the user arrived from
+// careercaddy, e.g. browsing job-posts). Show a contextual dialogue instead
+// of the meaningless "Send this page" capture form.
+function showOnCareerCaddy() {
+  hideAllScreens();
+  currentSendScreenEl = null;
+  hideTabBar();
+  if (onCcOpenEl) onCcOpenEl.href = `${FRONTEND_ORIGIN}/job-posts`;
+  screenOnCc.classList.remove('hidden');
 }
 
 // DEV-ONLY hints preview helpers. Surfaces the hint values the popup
@@ -1128,6 +1153,12 @@ async function resolveOpenScreen(apiKey, name) {
   }
   if (!tab || !tab.url) {
     showConnected(name);
+    return;
+  }
+  // CC #2: if the active tab is Career Caddy itself, never show the capture
+  // form — surface the on-Career-Caddy dialogue instead.
+  if (isCareerCaddyFrontendUrl(tab.url)) {
+    showOnCareerCaddy();
     return;
   }
   try {

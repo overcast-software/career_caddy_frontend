@@ -834,6 +834,28 @@
       </div>
     </div>
 
+    <!-- CC #2: shown when the active tab is Career Caddy itself (the user
+         arrived from careercaddy, e.g. browsing job-posts). The capture form
+         is meaningless here, so surface a contextual dialogue instead. -->
+    <div id="screen-on-cc" class="hidden">
+      <h1>You're on Career Caddy</h1>
+      <p class="helper" style="margin-top: 0; margin-bottom: 14px;">
+        The Sender captures job postings from <em>other</em> sites — there's
+        nothing to send from a Career Caddy page.
+      </p>
+      <a
+        id="on-cc-open"
+        class="tracked-open"
+        href="#"
+        target="_blank"
+        rel="noopener"
+      >Browse your job posts</a>
+      <p class="helper">
+        Open a job listing on another site, then click the Sender to capture
+        it.
+      </p>
+    </div>
+
     <div id="screen-tools" class="hidden">
       <h1>Staff tools</h1>
 
