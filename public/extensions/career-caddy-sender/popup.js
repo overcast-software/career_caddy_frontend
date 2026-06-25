@@ -1963,6 +1963,7 @@ sendBtn.addEventListener('click', async () => {
           data: {
             type: 'scrape',
             attributes: {
+              url: payload.url,
               link: payload.url,
               source_mode: 'extension-direct',
               captured_payload: capturedPayload,
@@ -2232,6 +2233,7 @@ async function createFromProposed() {
         data: {
           type: 'scrape',
           attributes: {
+            url: payload.url,
             link: payload.url,
             source_mode: 'extension-direct',
             captured_payload: capturedPayload,
