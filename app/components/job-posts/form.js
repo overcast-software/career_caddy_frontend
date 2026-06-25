@@ -262,7 +262,8 @@ export default class JobPostsFormComponent extends Component {
     if (this.dupSubmitting) return;
     this.dupSubmitting = true;
     this.args.jobPost
-      .markDuplicateOf({ target_id: parseInt(target.id, 10) })
+      // JobPost ids are opaque NanoID strings (CC-77 #79) — send as-is.
+      .markDuplicateOf({ target_id: target.id })
       .then(() => {
         this.flashMessages.success(`Marked as duplicate of #${target.id}.`);
         this.selectedDupTarget = null;
