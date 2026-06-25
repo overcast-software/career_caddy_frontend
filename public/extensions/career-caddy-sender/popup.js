@@ -68,6 +68,8 @@ const screenTracked = $('screen-tracked');
 const screenLoading = $('screen-loading');
 const screenOnCc = $('screen-on-cc'); // CC #2: on-careercaddy dialogue
 const onCcOpenEl = $('on-cc-open');
+const profileCardEl = $('profile-card'); // CC #1: quick-copy profile fields
+const profileFieldsEl = $('profile-fields');
 const versionEl = $('version');
 
 const openSigninBtn = $('open-signin');
@@ -171,7 +173,10 @@ let activeTab = 'send';
 let currentSendScreenEl = null; // screenConnected | screenTracked
 let connectedName = '';
 
-async function fetchStaffFlag(apiKey) {
+// CC #1: fetch the authenticated user's /me attributes once on popup open.
+// Returns the full JSON:API attributes object (or null) so the same response
+// drives BOTH the staff-tab gate (is_staff) and the quick-copy profile card.
+async function fetchMe(apiKey) {
   try {
     const resp = await fetch(`${ORIGIN}/api/v1/me/`, {
       headers: {
@@ -179,16 +184,17 @@ async function fetchStaffFlag(apiKey) {
         Authorization: `Bearer ${apiKey}`,
       },
     });
-    if (!resp.ok) return false;
+    if (!resp.ok) return null;
     const body = await resp.json();
-    return body?.data?.attributes?.is_staff === true;
+    return body?.data?.attributes || null;
   } catch {
-    return false;
+    return null;
   }
 }
 
 async function refreshStaffFlag(apiKey) {
-  const staff = await fetchStaffFlag(apiKey);
+  const attrs = await fetchMe(apiKey);
+  const staff = attrs?.is_staff === true;
   isStaff = staff;
   try {
     await api.storage.local.set({ ccIsStaff: staff });
@@ -196,7 +202,95 @@ async function refreshStaffFlag(apiKey) {
     // best-effort cache; the live flag is authoritative this session
   }
   maybeShowTabBar();
+  renderProfileCard(attrs); // CC #1: hydrate the quick-copy card from /me
   return staff;
+}
+
+// CC #1: populate the quick-copy profile card from the /me attributes. Only
+// non-empty fields render a row; the card stays hidden when nothing's set.
+// Values are written with textContent (never innerHTML) so a stray '<' in a
+// profile field can't inject markup.
+function renderProfileCard(attrs) {
+  if (!profileCardEl || !profileFieldsEl) return;
+  profileFieldsEl.replaceChildren();
+  if (!attrs) {
+    profileCardEl.classList.add('hidden');
+    return;
+  }
+  const rows = [];
+  const singles = [
+    ['First name', attrs.first_name],
+    ['Last name', attrs.last_name],
+    ['Email', attrs.email],
+    ['Phone', attrs.phone],
+    ['Address', attrs.address],
+    ['LinkedIn', attrs.linkedin],
+    ['GitHub', attrs.github],
+  ];
+  for (const [label, value] of singles) {
+    if (value && String(value).trim()) rows.push([label, String(value)]);
+  }
+  // `links` is an array of { name, url } objects (see the Ember profile page).
+  if (Array.isArray(attrs.links)) {
+    for (const link of attrs.links) {
+      if (!link) continue;
+      const url = typeof link === 'string' ? link : link.url;
+      const name = typeof link === 'string' ? '' : link.name;
+      if (url && String(url).trim()) {
+        const label = name && String(name).trim() ? String(name) : 'Link';
+        rows.push([label, String(url)]);
+      }
+    }
+  }
+  if (rows.length === 0) {
+    profileCardEl.classList.add('hidden');
+    return;
+  }
+  for (const [label, value] of rows) {
+    profileFieldsEl.appendChild(buildProfileRow(label, value));
+  }
+  profileCardEl.classList.remove('hidden');
+}
+
+function buildProfileRow(label, value) {
+  const row = document.createElement('div');
+  row.className = 'profile-row';
+  const labelEl = document.createElement('span');
+  labelEl.className = 'profile-label';
+  labelEl.textContent = label;
+  const valueEl = document.createElement('span');
+  valueEl.className = 'profile-value';
+  valueEl.textContent = value;
+  valueEl.title = value;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'profile-copy';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', () => copyProfileValue(btn, value));
+  row.append(labelEl, valueEl, btn);
+  return row;
+}
+
+// CC #1: copy a profile value to the clipboard with a brief affordance. The
+// write happens from a user gesture in the popup, so no clipboard permission
+// is needed. Uses .then/.catch (not async/await) per the extension idiom.
+function copyProfileValue(btn, value) {
+  navigator.clipboard
+    .writeText(value)
+    .then(() => {
+      btn.textContent = 'Copied';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1200);
+    })
+    .catch(() => {
+      btn.textContent = 'Failed';
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+      }, 1200);
+    });
 }
 
 function hideTabBar() {
