@@ -160,6 +160,109 @@ module('Acceptance | public profile page', function (hooks) {
       .exists('a posted/created date renders as a <time> element');
   });
 
+  test('the rich card renders a Vetted Good verdict, score bucket, and applied badge (FRON-121)', async function (assert) {
+    // The owner-opted-in RICH federated projection inlines verdict (via
+    // meta.triage), score (0-100), and applied onto each public job-post. The
+    // read-only <Profile::PostCard> renders them as null-safe pills.
+    this.store.page1 = [
+      {
+        id: 'aB3dEf7gH9',
+        title: 'Staff Engineer',
+        companyName: 'Acme Corp',
+        location: 'Remote',
+        link: 'https://example.com/jobs/7',
+        triage: { status: 'Vetted Good', reason_code: null, note: null },
+        score: 87,
+        applied: true,
+      },
+    ];
+    await invalidateSession();
+    await visit('/dough');
+
+    assert
+      .dom('[data-test-verdict]')
+      .includesText('Vetted good', 'a Vetted Good verdict pill renders');
+    assert
+      .dom('[data-test-verdict]')
+      .includesText('✅', 'the good verdict carries the ✅ marker');
+    assert
+      .dom('[data-test-score]')
+      .hasText(
+        'Strong match (87)',
+        'a score of 87 renders the Strong-match bucket label + raw number',
+      );
+    assert
+      .dom('[data-test-applied]')
+      .hasText('Applied', 'the applied badge renders when applied is true');
+  });
+
+  test('a Vetted Bad verdict shows the reason label but never the free-text note (FRON-121)', async function (assert) {
+    this.store.page1 = [
+      {
+        id: 'Zy9Xw8Vu7T',
+        title: 'Backend Role',
+        link: 'https://example.com/jobs/8',
+        // note must NEVER reach a public surface — the projection nulls it,
+        // and the card reads reason_code (label) only.
+        triage: {
+          status: 'Vetted Bad',
+          reason_code: 'compensation',
+          note: 'lowball offer, recruiter was rude',
+        },
+        score: 55,
+        applied: false,
+      },
+    ];
+    await invalidateSession();
+    await visit('/dough');
+
+    assert
+      .dom('[data-test-verdict]')
+      .includesText(
+        'Vetted bad (Compensation)',
+        'the Vetted Bad pill shows the reason LABEL',
+      );
+    assert
+      .dom('[data-test-verdict]')
+      .includesText('❌', 'the bad verdict carries the ❌ marker');
+    assert
+      .dom('[data-test-score]')
+      .hasText('Long shot (55)', 'a sub-60 score renders the Long-shot bucket');
+    assert
+      .dom('[data-test-applied]')
+      .doesNotExist('no applied badge when applied is false');
+    assert
+      .dom('li')
+      .doesNotIncludeText(
+        'lowball offer',
+        'the free-text vetting note never leaks onto the public card',
+      );
+  });
+
+  test('the rich pills drop entirely when verdict/score/applied are absent (null-safe, FRON-121)', async function (assert) {
+    // A public post with none of the rich signals must show fewer pills, never
+    // a "None" placeholder. The title + link still render.
+    this.store.page1 = [
+      {
+        id: 'Qw3Er5Ty7U',
+        title: 'Plain Posting',
+        link: 'https://example.com/jobs/9',
+      },
+    ];
+    await invalidateSession();
+    await visit('/dough');
+
+    assert
+      .dom('[data-test-post-link]')
+      .hasText('Plain Posting', 'the title still renders as an outbound link');
+    assert.dom('[data-test-verdict]').doesNotExist('no verdict pill');
+    assert.dom('[data-test-score]').doesNotExist('no score pill');
+    assert.dom('[data-test-applied]').doesNotExist('no applied pill');
+    assert
+      .dom('li')
+      .doesNotIncludeText('None', 'absent signals drop — never render "None"');
+  });
+
   test('a known user with no public posts shows the empty state', async function (assert) {
     this.store.page1 = [];
     await invalidateSession();

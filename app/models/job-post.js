@@ -122,6 +122,31 @@ export default class JobPostModel extends Model {
   // relationship the federated endpoint won't emit (see frontend memory
   // fe-aliases-hasmany-runaway-fetch).
   @attr('string') companyName;
+  // ── Public federated projection — RICH /@dough card (FRON-121) ──────────
+  // Emitted ONLY by GET /users/:username/job-posts/federated/ when the
+  // profile owner has opted into the RICH personalized projection. They are
+  // denormalized, PUBLIC-SAFE, and OWNER-SCOPED (computed for the profile
+  // owner, never the logged-out viewer). All three are ABSENT on the
+  // authenticated app payload — those surfaces carry the same signals via the
+  // real `scores` / `jobApplications` relationships and `meta.triage`. The
+  // <Profile::PostCard> getters read every one null-safe (a missing value
+  // drops its pill, never renders "None"). Mirrors the `companyName`
+  // denormalization precedent (frontend memory fe-aliases-hasmany-runaway-fetch).
+  //
+  // `score`: the owner's overall match score (0-100) for THIS post — the
+  // public twin of `topScore.score`. NOT the `scores` hasMany / `topScore`
+  // belongsTo (both empty on the public projection). Null on authed payloads;
+  // do not consume it outside the public card.
+  @attr('number') score;
+  // `applied`: whether the owner has actually applied (JobApplication.applied_at
+  // is non-null) — a bare triage-created JobApplication row does NOT count.
+  @attr('boolean') applied;
+  // `verdict`: optional flat fallback for the vetting verdict when cc-api emits
+  // it as a top-level attribute rather than reusing the `meta.triage` channel
+  // (which lands on the `triage` attr above). Shape: a 'Vetted Good'/'Vetted
+  // Bad' string OR { status, reason_code }. The free-text vetting note is NEVER
+  // emitted on the public projection. The card reads `triage` first, then this.
+  @attr() verdict;
   @hasMany('score', { async: true, inverse: 'jobPost' }) scores;
   @hasMany('scrape', { async: true, inverse: 'jobPost' }) scrapes;
   @hasMany('cover-letter', { async: true, inverse: 'jobPost' }) coverLetters;

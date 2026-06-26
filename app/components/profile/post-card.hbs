@@ -1,0 +1,93 @@
+{{! Rich, read-only public card for one published job-post on /@dough
+    (FRON-121). Title links OUT to the original posting (never the internal
+    show route); a meta row carries company · location · date; a pill row
+    carries the owner's verdict / score / applied signals. Each pill is fully
+    null-safe — it renders only when its datum is present, so a post with no
+    verdict/score/application simply shows fewer pills (never "None").
+    Tailwind/HyperUI utilities only, every color paired with a dark: sibling. }}
+<div
+  class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+>
+  {{#if this.externalUrl}}
+    <a
+      href={{this.externalUrl}}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-test-post-link
+      class="text-lg font-medium text-gray-900 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
+    >
+      {{this.post.title}}
+    </a>
+  {{else}}
+    <span
+      class="text-lg font-medium text-gray-900 dark:text-gray-100"
+    >{{this.post.title}}</span>
+  {{/if}}
+
+  {{! role meta — company · location · date, middot-separated, each optional }}
+  <div
+    class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500 dark:text-gray-400"
+  >
+    {{#if this.post.companyName}}
+      <span>{{this.post.companyName}}</span>
+    {{/if}}
+    {{#if this.post.location}}
+      {{#if this.post.companyName}}
+        <span aria-hidden="true">&middot;</span>
+      {{/if}}
+      <span>{{this.post.location}}</span>
+    {{/if}}
+    {{#if this.postedAt}}
+      {{#if (or this.post.companyName this.post.location)}}
+        <span aria-hidden="true">&middot;</span>
+      {{/if}}
+      <time datetime={{this.postedAt}}>
+        {{format-date this.postedAt "MMM D, YYYY"}}
+      </time>
+    {{/if}}
+  </div>
+
+  {{! verdict · score · applied — the rich personalized signals. The whole
+      row drops when all three are absent. }}
+  {{#if (or this.verdictLabel this.hasScore this.applied)}}
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      {{#if this.isVettedGood}}
+        <span
+          data-test-verdict
+          class="inline-flex items-center gap-x-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-500/15 dark:text-green-300 dark:ring-green-500/30"
+        >✅ {{this.verdictLabel}}</span>
+      {{else if this.isVettedBad}}
+        <span
+          data-test-verdict
+          class="inline-flex items-center gap-x-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-500/30"
+        >❌ {{this.verdictLabel}}</span>
+      {{/if}}
+
+      {{#if this.hasScore}}
+        <span
+          data-test-score
+          class="inline-flex items-center gap-x-1 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset
+            {{if
+              (eq this.scoreTier 'strong')
+              'bg-green-100 text-green-700 ring-green-600/20 dark:bg-green-500/15 dark:text-green-300 dark:ring-green-500/30'
+            }}
+            {{if
+              (eq this.scoreTier 'reasonable')
+              'bg-amber-100 text-amber-700 ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-500/30'
+            }}
+            {{if
+              (eq this.scoreTier 'stretch')
+              'bg-gray-100 text-gray-600 ring-gray-500/20 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600/40'
+            }}"
+        >{{this.scoreLabel}}</span>
+      {{/if}}
+
+      {{#if this.applied}}
+        <span
+          data-test-applied
+          class="inline-flex items-center gap-x-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-500/30"
+        >Applied</span>
+      {{/if}}
+    </div>
+  {{/if}}
+</div>
