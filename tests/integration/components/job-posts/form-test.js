@@ -44,6 +44,12 @@ module('Integration | Component | job-posts/form', function (hooks) {
       'service:current-user',
       class extends Service {
         user = { id: 1, username: 'tester', isStaff: false };
+        // Mirror the real service: the publish/visibility capability derives
+        // from is_staff (FRON-123). Default user is non-staff, so the
+        // operator-gated Visibility section + PublishToggle stay hidden here.
+        get canPublishToFediverse() {
+          return this.user?.isStaff ?? false;
+        }
       },
     );
   });
@@ -248,7 +254,19 @@ module('Integration | Component | job-posts/form', function (hooks) {
   // publish()/unpublish(), the optimistic flip + revert — is covered in
   // job-posts/publish-toggle-test.js. Here we only assert the form wires
   // @jobPost through so the right label renders per audience.
-  test('visibility section renders the publish toggle for a public post', async function (assert) {
+  test('visibility section renders the publish toggle for a public post (operator)', async function (assert) {
+    // FRON-123: the Visibility section + toggle are operator-gated. Register a
+    // staff (publishing-capable) user so the section renders.
+    this.owner.unregister('service:current-user');
+    this.owner.register(
+      'service:current-user',
+      class extends Service {
+        user = { id: 1, username: 'tester', isStaff: true };
+        get canPublishToFediverse() {
+          return this.user?.isStaff ?? false;
+        }
+      },
+    );
     const store = this.owner.lookup('service:store');
     this.jobPost = store.createRecord('job-post', {
       title: 'Engineer',
@@ -257,13 +275,23 @@ module('Integration | Component | job-posts/form', function (hooks) {
     await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
     assert
       .dom('[data-test-visibility]')
-      .exists('Visibility section renders on the edit form');
+      .exists('Visibility section renders on the edit form for an operator');
     assert
       .dom('[data-test-publish-toggle]')
       .hasText('Unpublish', 'a public post offers an Unpublish action');
   });
 
-  test('visibility section reflects a private post', async function (assert) {
+  test('visibility section reflects a private post (operator)', async function (assert) {
+    this.owner.unregister('service:current-user');
+    this.owner.register(
+      'service:current-user',
+      class extends Service {
+        user = { id: 1, username: 'tester', isStaff: true };
+        get canPublishToFediverse() {
+          return this.user?.isStaff ?? false;
+        }
+      },
+    );
     const store = this.owner.lookup('service:store');
     this.jobPost = store.createRecord('job-post', {
       title: 'Engineer',
@@ -272,10 +300,26 @@ module('Integration | Component | job-posts/form', function (hooks) {
     await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
     assert
       .dom('[data-test-publish-toggle]')
-      .hasText(
-        'Publish to my public feed',
-        'a private post offers a Publish action',
+      .hasText('Publish', 'a private post offers a Publish action');
+  });
+
+  test('non-staff users do not see the Visibility section (operator gate)', async function (assert) {
+    // Default beforeEach stub is non-staff → the operator-gated federation
+    // Visibility section is hidden entirely (FRON-123).
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', {
+      title: 'Engineer',
+      audience: [],
+    });
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+    assert
+      .dom('[data-test-visibility]')
+      .doesNotExist(
+        'non-staff users never see the federation Visibility section',
       );
+    assert
+      .dom('[data-test-publish-toggle]')
+      .doesNotExist('non-staff users never see the publish toggle');
   });
 
   // Regression: deleting a job-post used to make jp.index "freak out"

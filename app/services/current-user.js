@@ -24,6 +24,20 @@ export default class CurrentUserService extends Service {
     return this.user?.isGuest ?? false;
   }
 
+  // Single seam for the per-post Publish/Unpublish affordance (FRON-123): may
+  // THIS user broadcast a job-post to the fediverse? v1 gate = is_staff, which
+  // mirrors the staff-gated extension Tools tab (plan-extension-staff-tools-tab)
+  // — the operator (Doug) is staff and sees the toggle; ordinary users are not
+  // and never do. When cc-api lands the `federation_publish_ui` instance
+  // capability ({off, operator_only, all_users}, surfaced on /me/ or
+  // /healthcheck/), swap the body to read THAT capability so a self-hoster can
+  // widen publishing to their own users. This getter is the ONE place to change
+  // — every consumer (JobPosts::PublishToggle and any future list-row action)
+  // gates on it.
+  get canPublishToFediverse() {
+    return this.user?.isStaff ?? false;
+  }
+
   async load() {
     this.user = null;
     this.onboarding = null;
