@@ -31,6 +31,14 @@ export default class JobPostsFormComponent extends Component {
     return this.currentUser.user?.isStaff;
   }
 
+  // FRON-123: the federation Visibility/publish control is operator-only. Gate
+  // the whole Visibility section on the same single-seam capability the
+  // <JobPosts::PublishToggle> uses (currentUser.canPublishToFediverse) so
+  // non-staff users see neither the toggle nor an orphaned section header.
+  get canPublishToFediverse() {
+    return this.currentUser.canPublishToFediverse;
+  }
+
   // Visibility is now driven by <JobPosts::PublishToggle> in the template,
   // which calls the model's publish()/unpublish() verbs directly (immediate
   // effect, not Save-gated). The old isPublic getter + updateVisibility

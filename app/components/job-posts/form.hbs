@@ -103,20 +103,26 @@
     >{{@jobPost.description}}</textarea>
   </div>
 
-  <div
-    class="field-full mt-2 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
-    data-test-visibility
-  >
-    <label class="field-label">Visibility</label>
-    <p class="mt-1 mb-3 text-sm text-gray-600 dark:text-gray-400">
-      Controls who can see this post in federated contexts. Public posts are
-      addressed to the ActivityStreams public collection; Private posts have no
-      audience and stay local. Publishing takes effect immediately — it doesn't
-      wait for Save. Single-user instance today — future granularity (Followers
-      / Unlisted) will appear here without changing the stored shape.
-    </p>
-    <JobPosts::PublishToggle @jobPost={{@jobPost}} />
-  </div>
+  {{! Operator-gated (FRON-123): the federation Visibility/publish control is
+      operator-only, so the whole section is hidden from non-staff users
+      rather than leaving an orphaned header above a self-hiding toggle. }}
+  {{#if this.canPublishToFediverse}}
+    <div
+      class="field-full mt-2 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+      data-test-visibility
+    >
+      <label class="field-label">Visibility</label>
+      <p class="mt-1 mb-3 text-sm text-gray-600 dark:text-gray-400">
+        Controls who can see this post in federated contexts. Public posts are
+        addressed to the ActivityStreams public collection; Private posts have
+        no audience and stay local. Publishing takes effect immediately — it
+        doesn't wait for Save. Single-user instance today — future granularity
+        (Followers / Unlisted) will appear here without changing the stored
+        shape.
+      </p>
+      <JobPosts::PublishToggle @jobPost={{@jobPost}} />
+    </div>
+  {{/if}}
 
   <div
     class="field-full mt-2 rounded-lg border border-gray-200 dark:border-gray-700 p-4"

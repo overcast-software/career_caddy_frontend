@@ -6,12 +6,17 @@
   verb is in flight. The label is driven purely by `isPublic`, which flips
   optimistically on click.
 }}
-<button
-  type="button"
-  data-test-publish-toggle
-  class="btn small {{unless @jobPost.isPublic 'primary'}}"
-  disabled={{this.submitting}}
-  {{on "click" this.toggle}}
->
-  {{this.label}}
-</button>
+{{! Operator-gated (FRON-123): only rendered when the current user may publish
+    to the fediverse (currentUser.canPublishToFediverse — v1 is_staff). Doug's
+    ordinary users never see it. }}
+{{#if this.visible}}
+  <button
+    type="button"
+    data-test-publish-toggle
+    class="btn small {{unless @jobPost.isPublic 'primary'}}"
+    disabled={{this.submitting}}
+    {{on "click" this.toggle}}
+  >
+    {{this.label}}
+  </button>
+{{/if}}

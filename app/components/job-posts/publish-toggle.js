@@ -15,14 +15,25 @@ import { AS2_PUBLIC } from 'career-caddy-frontend/models/job-post';
 // shape (no async/await for the action, no .slice()/.toArray()).
 export default class JobPostsPublishToggleComponent extends Component {
   @service flashMessages;
+  @service currentUser;
   @tracked submitting = false;
+
+  // Operator gate (FRON-123): the toggle self-hides for anyone who can't
+  // publish to the fediverse, so Doug's ordinary users never see it. The
+  // capability decision lives in ONE place — currentUser.canPublishToFediverse
+  // (v1 = is_staff; swaps to the api `federation_publish_ui` capability later).
+  get visible() {
+    return this.currentUser.canPublishToFediverse;
+  }
 
   get isPublic() {
     return this.args.jobPost?.isPublic;
   }
 
+  // Label reflects the post's published state: Publish when private, Unpublish
+  // when public (FRON-123).
   get label() {
-    return this.isPublic ? 'Unpublish' : 'Publish to my public feed';
+    return this.isPublic ? 'Unpublish' : 'Publish';
   }
 
   @action
@@ -30,6 +41,18 @@ export default class JobPostsPublishToggleComponent extends Component {
     if (this.submitting) return;
     const jobPost = this.args.jobPost;
     const wasPublic = jobPost.isPublic;
+    // Confirm before unpublishing. Unpublishing removes the post from the
+    // public profile but does NOT retract it from peers that already received
+    // it — V1 emits no ActivityPub Withdraw (caveat from #101). Publishing
+    // needs no confirm (it's additive and reversible).
+    if (wasPublic) {
+      const ok = window.confirm(
+        'Unpublish this post from your public feed? It will be removed from ' +
+          'your public profile. Note: any fediverse servers that already ' +
+          'received it are not retracted (no Withdraw is sent).',
+      );
+      if (!ok) return;
+    }
     // Capture the exact prior array so a failure restores it verbatim — a
     // legacy audience may carry more entries than just AS2_PUBLIC.
     const prevAudience = jobPost.audience;
