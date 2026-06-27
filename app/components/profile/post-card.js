@@ -34,10 +34,13 @@ export default class ProfilePostCardComponent extends Component {
   }
 
   // ── Verdict ────────────────────────────────────────────────────────────
-  // Sourced from `meta.triage` (the owner-scoped triage on the public
-  // projection — same channel the authed app uses) with a flat `verdict`
-  // attribute fallback. Returns the human status string or null.
+  // Primary source is `meta.federation.verdict` (the rich public projection,
+  // CC-104) — a 'Vetted Good'/'Vetted Bad' string or null. Falls back to
+  // `meta.triage` (the owner-scoped triage channel the authed app uses) and
+  // then a flat `verdict` attribute. Returns the human status string or null.
   get verdictStatus() {
+    const fedVerdict = this.post?.federation?.verdict;
+    if (typeof fedVerdict === 'string' && fedVerdict) return fedVerdict;
     const triage = this.post?.triage;
     if (triage?.status) return triage.status;
     const verdict = this.post?.verdict;
@@ -55,9 +58,14 @@ export default class ProfilePostCardComponent extends Component {
 
   // Reason code accompanies a Vetted Bad verdict. We render the LABEL only —
   // never the free-text note (which the public projection does not emit).
+  // Prefers `meta.federation.verdict_reason_code` (CC-104), then the existing
+  // triage / flat-verdict fallbacks.
   get verdictReasonCode() {
     return (
-      this.post?.triage?.reason_code || this.post?.verdict?.reason_code || null
+      this.post?.federation?.verdict_reason_code ||
+      this.post?.triage?.reason_code ||
+      this.post?.verdict?.reason_code ||
+      null
     );
   }
 
@@ -73,8 +81,11 @@ export default class ProfilePostCardComponent extends Component {
   }
 
   // ── Score ──────────────────────────────────────────────────────────────
-  // typeof guard so a legitimate 0 isn't swallowed by falsiness.
+  // Prefers `meta.federation.score` (CC-104), then the flat `score` attr.
+  // typeof guard on each so a legitimate 0 isn't swallowed by falsiness.
   get score() {
+    const fedScore = this.post?.federation?.score;
+    if (typeof fedScore === 'number') return fedScore;
     const s = this.post?.score;
     return typeof s === 'number' ? s : null;
   }
@@ -106,7 +117,9 @@ export default class ProfilePostCardComponent extends Component {
   }
 
   // ── Applied ────────────────────────────────────────────────────────────
+  // Prefers `meta.federation.applied` (CC-104), then the flat `applied` attr.
   get applied() {
+    if (this.post?.federation?.applied === true) return true;
     return this.post?.applied === true;
   }
 }

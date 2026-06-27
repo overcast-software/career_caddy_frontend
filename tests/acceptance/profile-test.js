@@ -263,6 +263,83 @@ module('Acceptance | public profile page', function (hooks) {
       .doesNotIncludeText('None', 'absent signals drop — never render "None"');
   });
 
+  test('the rich pills render from per-resource meta.federation (CC-104)', async function (assert) {
+    // The api emits the owner's signals under per-resource `meta.federation`
+    // (frozen wire contract: { verdict, verdict_reason_code, score, applied }).
+    // The application serializer lifts per-resource meta onto attributes, so it
+    // arrives as a `federation` object; the card reads it FIRST. Here there is
+    // no flat triage/score/applied — only `federation` — proving the new path.
+    this.store.page1 = [
+      {
+        id: 'Fe3dRa7Te9',
+        title: 'Staff Engineer',
+        companyName: 'Acme Corp',
+        location: 'Remote',
+        link: 'https://example.com/jobs/10',
+        federation: {
+          verdict: 'Vetted Good',
+          verdict_reason_code: null,
+          score: 87,
+          applied: true,
+        },
+      },
+    ];
+    await invalidateSession();
+    await visit('/dough');
+
+    assert
+      .dom('[data-test-verdict]')
+      .includesText(
+        'Vetted good',
+        'verdict pill renders from meta.federation.verdict',
+      );
+    assert
+      .dom('[data-test-score]')
+      .hasText(
+        'Strong match (87)',
+        'score pill renders from meta.federation.score',
+      );
+    assert
+      .dom('[data-test-applied]')
+      .hasText(
+        'Applied',
+        'applied pill renders from meta.federation.applied === true',
+      );
+  });
+
+  test('meta.federation Vetted Bad surfaces the reason label, never the note (CC-104)', async function (assert) {
+    // verdict_reason_code drives the label; the projection never emits the
+    // free-text note, and the card has no channel to render it.
+    this.store.page1 = [
+      {
+        id: 'Fe5dBa8Du7',
+        title: 'Backend Role',
+        link: 'https://example.com/jobs/11',
+        federation: {
+          verdict: 'Vetted Bad',
+          verdict_reason_code: 'compensation',
+          score: 55,
+          applied: false,
+        },
+      },
+    ];
+    await invalidateSession();
+    await visit('/dough');
+
+    assert
+      .dom('[data-test-verdict]')
+      .includesText(
+        'Vetted bad (Compensation)',
+        'the reason LABEL comes from meta.federation.verdict_reason_code',
+      );
+    assert
+      .dom('[data-test-score]')
+      .hasText('Long shot (55)', 'a sub-60 federation score buckets Long shot');
+    assert
+      .dom('[data-test-applied]')
+      .doesNotExist('no applied pill when meta.federation.applied is false');
+  });
+
   test('a known user with no public posts shows the empty state', async function (assert) {
     this.store.page1 = [];
     await invalidateSession();
