@@ -147,6 +147,20 @@ export default class JobPostModel extends Model {
   // Bad' string OR { status, reason_code }. The free-text vetting note is NEVER
   // emitted on the public projection. The card reads `triage` first, then this.
   @attr() verdict;
+  // `federation`: the owner's federation annotations from the public
+  // projection's per-resource `meta.federation` (CC-104 / BACK-103). Emitted by
+  // GET /users/:username/job-posts/federated/ when the profile owner has
+  // `federate_rich=True` (or the requester IS the owner). The application
+  // serializer lifts per-resource `meta` onto attributes
+  // (app/serializers/application.js), so `meta.federation` lands here as a
+  // plain object — the PRIMARY rich-card source, preferred over the flat
+  // `score`/`applied`/`verdict`/`triage` fallbacks above. Shape (frozen wire
+  // contract): { verdict: 'Vetted Good'|'Vetted Bad'|null,
+  // verdict_reason_code: string|null, score: number|null, applied: boolean }.
+  // ABSENT on the authenticated app payload (those surfaces use the real
+  // relationships + `meta.triage`). <Profile::PostCard> reads every field
+  // null-safe so a missing value drops its pill rather than rendering "None".
+  @attr() federation;
   @hasMany('score', { async: true, inverse: 'jobPost' }) scores;
   @hasMany('scrape', { async: true, inverse: 'jobPost' }) scrapes;
   @hasMany('cover-letter', { async: true, inverse: 'jobPost' }) coverLetters;
