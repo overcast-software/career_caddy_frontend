@@ -44,7 +44,16 @@ export default class ApplicationFlowSankeyComponent extends Component {
   // inline error instead.
   @tracked layoutError = null;
 
+  // Whether nodes drill through to the authed job-posts list. Defaults to true
+  // so the authed reports page keeps its click-through; the public profile
+  // (CC-105) passes @interactive={{false}} to stay public-safe — no links into
+  // authed app routes, no tabindex/role link affordances, no drill hint.
+  get interactive() {
+    return this.args.interactive ?? true;
+  }
+
   _goToNode(d) {
+    if (!this.interactive) return;
     const params = NODE_LINK_PARAMS[d.id];
     if (!params) return;
     this.router.transitionTo('job-posts.index', {
@@ -189,11 +198,14 @@ export default class ApplicationFlowSankeyComponent extends Component {
             .attr('y', (d) => (d.y0 + d.y1) / 2 + 10)
             .attr('opacity', 0);
           g.append('title');
-          g.attr('class', (d) =>
-            NODE_LINK_PARAMS[d.id] ? 'node cursor-pointer' : 'node',
-          )
-            .attr('tabindex', (d) => (NODE_LINK_PARAMS[d.id] ? 0 : null))
-            .attr('role', (d) => (NODE_LINK_PARAMS[d.id] ? 'link' : null))
+          // Only wire the link affordances (pointer cursor, focusability, role,
+          // click/keyboard activation) when interactive. On the public profile
+          // (CC-105) interactive is false, so nodes are inert — no path into
+          // authed app routes for a logged-out visitor.
+          const linkable = (d) => self.interactive && NODE_LINK_PARAMS[d.id];
+          g.attr('class', (d) => (linkable(d) ? 'node cursor-pointer' : 'node'))
+            .attr('tabindex', (d) => (linkable(d) ? 0 : null))
+            .attr('role', (d) => (linkable(d) ? 'link' : null))
             .on('click', (_event, d) => self._goToNode(d))
             .on('keydown', (event, d) => {
               if (event.key === 'Enter' || event.key === ' ') {
@@ -271,9 +283,10 @@ export default class ApplicationFlowSankeyComponent extends Component {
     ng.select('title').text((d) => {
       const label = NODE_LABELS[d.id] || d.id;
       const desc = NODE_DESCRIPTIONS[d.id] || '';
-      const drill = NODE_LINK_PARAMS[d.id]
-        ? ' — click to view these job posts'
-        : '';
+      const drill =
+        this.interactive && NODE_LINK_PARAMS[d.id]
+          ? ' — click to view these job posts'
+          : '';
       return desc ? `${label}: ${desc} (${d.value})${drill}` : label;
     });
   }
