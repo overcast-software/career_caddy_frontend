@@ -77,6 +77,48 @@ module('Acceptance | public profile page', function (hooks) {
     this.owner.unregister('service:store');
     this.owner.register('service:store', StoreStub);
     this.store = this.owner.lookup('service:store');
+
+    // CC-105 — the application-flow funnel is a bucket-4 report fetched via
+    // reportFetch → globalThis.fetch (NOT Ember Data), so we mock at the
+    // network boundary here, not the store. This drives the REAL data path:
+    // reportFetch parses `payload.data.attributes` and the controller/template
+    // render it — no normalization is faked (the trap an earlier StoreStub-POJO
+    // approach fell into). `flowAttributes` defaults to an EMPTY flow (the
+    // non-rich steady state) so the pre-existing feed tests show no chart; a
+    // test overrides it to exercise the populated chart. Non-funnel requests
+    // (healthcheck, session) pass through to the real fetch unchanged.
+    this.flowAttributes = {
+      nodes: [],
+      links: [],
+      total_job_posts: 0,
+      total_applications: 0,
+      scope: 'public_profile',
+    };
+    this.lastFlowRequest = null;
+    this.origFetch = window.fetch;
+    const self = this;
+    window.fetch = function (url, opts) {
+      if (typeof url === 'string' && url.includes('/application-flow/')) {
+        self.lastFlowRequest = { url, opts: opts || {} };
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              data: {
+                type: 'report',
+                id: 'application-flow',
+                attributes: self.flowAttributes,
+              },
+            }),
+        });
+      }
+      return self.origFetch.call(this, url, opts);
+    };
+  });
+
+  hooks.afterEach(function () {
+    window.fetch = this.origFetch;
   });
 
   test('a logged-out visitor can load /dough without an auth redirect, chromeless', async function (assert) {
@@ -394,5 +436,105 @@ module('Acceptance | public profile page', function (hooks) {
         'Post Two',
         'page-2 post appended after the cursor advance',
       );
+  });
+
+  test('a rich profile renders the application-flow Sankey above the post cards (CC-105)', async function (assert) {
+    // The AllowAny funnel endpoint returns a populated flow for an opted-in
+    // (federate_rich) profile. The route reads it via reportFetch (the
+    // window.fetch stub above returns this `type:report` envelope); the
+    // controller feeds data.attributes nodes/links to the read-only Sankey,
+    // rendered at the top of the page.
+    this.flowAttributes = {
+      nodes: [
+        { id: 'job_posts' },
+        { id: 'applications' },
+        { id: 'applied' },
+        { id: 'interview' },
+      ],
+      links: [
+        { source: 0, target: 1, value: 5 },
+        { source: 1, target: 2, value: 5 },
+        { source: 2, target: 3, value: 3 },
+      ],
+      total_job_posts: 7,
+      total_applications: 5,
+      scope: 'public_profile',
+    };
+    this.store.page1 = [
+      { id: '1', title: 'Staff Engineer', link: 'https://example.com/jobs/1' },
+    ];
+    await invalidateSession();
+    await visit('/dough');
+
+    assert
+      .dom('[data-test-profile-flow]')
+      .exists('the public funnel section renders for a rich profile');
+    assert
+      .dom('[data-test-profile-flow] svg .sankey-nodes')
+      .exists('the Sankey chart renders inside the funnel section');
+    assert
+      .dom('[data-test-sankey-error]')
+      .doesNotExist('the clean DAG payload renders without an error banner');
+    assert.dom('li').exists('the post cards still render below the chart');
+
+    // The funnel fetch went to the AllowAny endpoint for this username.
+    assert.ok(
+      this.lastFlowRequest?.url.includes('/users/dough/application-flow/'),
+      'the funnel was fetched from /users/dough/application-flow/',
+    );
+
+    // DOM order: the funnel section precedes the post list.
+    const flowEl = this.element.querySelector('[data-test-profile-flow]');
+    const listEl = this.element.querySelector('ul');
+    assert.ok(
+      flowEl.compareDocumentPosition(listEl) & Node.DOCUMENT_POSITION_FOLLOWING,
+      'the Sankey is rendered ABOVE the post cards',
+    );
+  });
+
+  test('an empty flow payload renders NO chart — just the cards (CC-105)', async function (assert) {
+    // A non-rich profile (or one with no published posts) gets an empty flow
+    // (nodes:[]) with HTTP 200, not an error. The chart is hidden entirely —
+    // no empty frame, no "no data" box — mirroring the cards' null-safe drop.
+    // (this.flowAttributes defaults to the empty flow set in beforeEach.)
+    this.store.page1 = [
+      { id: '1', title: 'Staff Engineer', link: 'https://example.com/jobs/1' },
+    ];
+    await invalidateSession();
+    await visit('/dough');
+
+    assert
+      .dom('[data-test-profile-flow]')
+      .doesNotExist('no funnel section when the flow payload is empty');
+    assert
+      .dom('svg .sankey-nodes')
+      .doesNotExist('no Sankey chart frame renders for an empty flow');
+    assert
+      .dom('li a')
+      .hasText('Staff Engineer', 'the post cards still render without a chart');
+  });
+
+  test('the funnel fetch goes out ANONYMOUS — no Authorization header (CC-105)', async function (assert) {
+    // The endpoint is AllowAny; a logged-out visitor must reach it. reportFetch
+    // builds its headers from api.headers(), which emits {} with no session, so
+    // the request carries no Authorization. This is the real public-safety
+    // invariant — asserted at the fetch boundary, where the header actually
+    // lives, not on a hand-normalized store record.
+    this.flowAttributes = {
+      nodes: [{ id: 'job_posts' }, { id: 'applications' }],
+      links: [{ source: 0, target: 1, value: 3 }],
+      total_job_posts: 3,
+      total_applications: 3,
+      scope: 'public_profile',
+    };
+    await invalidateSession();
+    await visit('/dough');
+
+    assert.ok(this.lastFlowRequest, 'the funnel endpoint was fetched');
+    const headers = this.lastFlowRequest.opts.headers || {};
+    assert.notOk(
+      headers.Authorization,
+      'no Authorization header — the AllowAny funnel read is sent anonymous',
+    );
   });
 });

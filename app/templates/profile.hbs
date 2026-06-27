@@ -27,6 +27,23 @@
       </div>
     </header>
 
+    {{#if this.hasFlow}}
+      {{! Public application-flow funnel (CC-105) — rendered above the cards from
+          the same PUBLISHED queryset that backs the feed below, gated on
+          `federate_rich` server-side. Read-only + public-safe: @interactive is
+          false, so the Sankey nodes carry no click-through into authed app
+          routes. Hidden entirely when the payload is empty (non-rich profile /
+          no published posts) — no empty frame, mirroring the cards' null-safe
+          drop discipline. }}
+      <section class="mb-8" data-test-profile-flow>
+        <Reports::ApplicationFlowSankey
+          @nodes={{this.flowNodes}}
+          @links={{this.flowLinks}}
+          @interactive={{false}}
+        />
+      </section>
+    {{/if}}
+
     {{#if this.posts.length}}
       {{! Each published post renders the rich, read-only personalized card
           (FRON-121): title (links OUT to the original posting), company ·

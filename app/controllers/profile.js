@@ -42,6 +42,31 @@ export default class ProfileController extends Controller {
     return this.cursor !== null;
   }
 
+  // Public application-flow funnel (CC-105). Read straight off the route model
+  // (like `user`/`username`) — it's static per navigation, not paginated, so it
+  // needs no @tracked seeding. `flow` is the report's JSON:API attributes object
+  // (`{ nodes, links, total_job_posts, … }`) the route's reportFetch resolved,
+  // or null when the funnel fetch failed / the profile isn't rich; `nodes`/
+  // `links` are fed verbatim to Reports::ApplicationFlowSankey.
+  get flow() {
+    return this.model.flow;
+  }
+
+  get flowNodes() {
+    return this.flow?.nodes || [];
+  }
+
+  get flowLinks() {
+    return this.flow?.links || [];
+  }
+
+  // The api returns an EMPTY flow (nodes:[]) for non-rich profiles / no
+  // published posts. Hide the chart entirely in that case — a non-rich profile
+  // shows just the cards, no empty chart frame.
+  get hasFlow() {
+    return this.flowNodes.length > 0;
+  }
+
   // Reset tracked state from the route model. Called by the route's
   // setupController on every entry/param change.
   seed(model) {
