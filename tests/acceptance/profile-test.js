@@ -236,6 +236,25 @@ module('Acceptance | public profile page', function (hooks) {
     assert
       .dom('[data-test-applied]')
       .hasText('Applied', 'the applied badge renders when applied is true');
+    // CC-108 — an explicit "View original ↗" link sits last in the pill row,
+    // pointing at the SAME outbound URL the title resolves to (externalUrl:
+    // resolved apply_url → canonical_link → link). Here only `link` is set.
+    assert
+      .dom('[data-test-view-original]')
+      .exists('an explicit View original link renders in the pill row');
+    assert
+      .dom('[data-test-view-original]')
+      .includesText(
+        'View original ↗',
+        'the secondary link carries the View original label + ↗ marker',
+      );
+    assert
+      .dom('[data-test-view-original]')
+      .hasAttribute(
+        'href',
+        'https://example.com/jobs/7',
+        'View original points at the same outbound URL as the title link',
+      );
   });
 
   test('a Vetted Bad verdict shows the reason label but never the free-text note (FRON-121)', async function (assert) {
@@ -303,6 +322,33 @@ module('Acceptance | public profile page', function (hooks) {
     assert
       .dom('li')
       .doesNotIncludeText('None', 'absent signals drop — never render "None"');
+  });
+
+  test('the View original link drops when a post carries no outbound URL (CC-108)', async function (assert) {
+    // A score makes the pill row render, but with no link/canonicalLink/applyUrl
+    // the externalUrl getter resolves null — the inner guard must suppress the
+    // "View original" link so a card never renders an empty <a>.
+    this.store.page1 = [
+      {
+        id: 'No0Ut7Ur1L',
+        title: 'No Link Posting',
+        score: 87,
+      },
+    ];
+    await invalidateSession();
+    await visit('/dough');
+
+    assert
+      .dom('[data-test-score]')
+      .exists('the score pill renders, so the pill row is present');
+    assert
+      .dom('[data-test-view-original]')
+      .doesNotExist('no View original link when there is no outbound URL');
+    assert
+      .dom('[data-test-post-link]')
+      .doesNotExist(
+        'the title is plain text (not a link) with no outbound URL',
+      );
   });
 
   test('the rich pills render from per-resource meta.federation (CC-104)', async function (assert) {
