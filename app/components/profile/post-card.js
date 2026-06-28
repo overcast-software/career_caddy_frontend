@@ -122,17 +122,4 @@ export default class ProfilePostCardComponent extends Component {
     if (this.post?.federation?.applied === true) return true;
     return this.post?.applied === true;
   }
-
-  // ── Application-status timeline (CC-106 #3) ──────────────────────────────
-  // The owner's JobApplication status history for THIS post, from the rich
-  // public projection's `meta.federation.timeline` (lifted onto `federation`
-  // by app/serializers/application.js). Frozen wire contract: an ASCENDING
-  // PLAIN array of { status: <name>, at: <ISO logged_at> }, present only on
-  // federate_rich profiles and possibly empty/absent. A plain array (NOT a
-  // RecordArray), so coercing/passing it straight through is safe. The
-  // <Reports::JaTimeline> child renders nothing for an empty/absent timeline.
-  get statusTimeline() {
-    const tl = this.post?.federation?.timeline;
-    return Array.isArray(tl) ? tl : [];
-  }
 }

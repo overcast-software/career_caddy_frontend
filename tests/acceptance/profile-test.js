@@ -584,13 +584,12 @@ module('Acceptance | public profile page', function (hooks) {
     );
   });
 
-  test('a rich card with a multi-point meta.federation.timeline renders the JA status line-chart (CC-106 #3)', async function (assert) {
-    // The rich projection inlines the owner's JobApplication status history for
-    // THIS post under per-resource `meta.federation.timeline` (frozen contract:
-    // an ASCENDING plain array of { status, at:<ISO logged_at> }). The serializer
-    // lifts it onto `federation`; <Profile::PostCard> hands it to the inline
-    // <Reports::JaTimeline> line-chart. Three events → one connecting line + a
-    // dot per event.
+  test('a rich card with a timeline renders NO progression viz — just the pill row (CC-117 revert)', async function (assert) {
+    // CC-117 reverted the public card back to the pill: the per-post application
+    // progression visualization (the CC-113 <Reports::JaTimeline> line-chart) was
+    // removed entirely. Even a card whose rich projection carries a full
+    // multi-point meta.federation.timeline must render NO chart — the pill row
+    // (verdict / score / applied) carries the signal on its own.
     this.store.page1 = [
       {
         id: 'Ti3meL9ne0',
@@ -614,75 +613,15 @@ module('Acceptance | public profile page', function (hooks) {
 
     assert
       .dom('[data-test-ja-timeline]')
-      .exists('the JA status line-chart renders for a timeline-bearing card');
-    assert
-      .dom('[data-test-ja-timeline] .ja-timeline-line')
-      .exists(
-        { count: 1 },
-        'a single connecting line is drawn through the events',
+      .doesNotExist(
+        'no application-progression viz on the public card — reverted to the pill (CC-117)',
       );
-    assert
-      .dom('[data-test-ja-timeline] .ja-timeline-dot')
-      .exists({ count: 3 }, 'one event dot renders per timeline point');
-  });
-
-  test('a single-status timeline renders the labeled dot, not a line (CC-106 #3)', async function (assert) {
-    // One event → a labeled dot variant: a single point, no degenerate time
-    // axis and no connecting line.
-    this.store.page1 = [
-      {
-        id: 'Do7tOnly1X',
-        title: 'Backend Role',
-        link: 'https://example.com/jobs/13',
-        federation: {
-          score: 70,
-          applied: true,
-          timeline: [{ status: 'Applied', at: '2026-05-01T12:00:00Z' }],
-        },
-      },
-    ];
-    await invalidateSession();
-    await visit('/dough');
-
-    assert
-      .dom('[data-test-ja-timeline]')
-      .exists('the chart still renders for a single-status timeline');
-    assert
-      .dom('[data-test-ja-timeline] .ja-timeline-dot')
-      .exists({ count: 1 }, 'a single labeled dot renders');
-    assert
-      .dom('[data-test-ja-timeline] .ja-timeline-line')
-      .doesNotExist('no connecting line for a single point — just the dot');
-  });
-
-  test('a card with no timeline renders no chart (CC-106 #3, null-safe drop)', async function (assert) {
-    // A rich card whose federation block carries no `timeline` (or a non-rich
-    // card with no federation at all) must drop the chart entirely — no empty
-    // axis frame — while the rest of the card still renders.
-    this.store.page1 = [
-      {
-        id: 'NoT1meLi9e',
-        title: 'Plain Posting',
-        link: 'https://example.com/jobs/14',
-        federation: {
-          verdict: 'Vetted Good',
-          verdict_reason_code: null,
-          score: 87,
-          applied: true,
-        },
-      },
-    ];
-    await invalidateSession();
-    await visit('/dough');
-
+    // The pill row still carries the full signal.
     assert
       .dom('[data-test-post-link]')
-      .hasText('Plain Posting', 'the card still renders its title');
-    assert
-      .dom('[data-test-verdict]')
-      .exists('the rich pills still render for the card');
-    assert
-      .dom('[data-test-ja-timeline]')
-      .doesNotExist('no chart block when the timeline is absent');
+      .hasText('Staff Engineer', 'the card title still renders');
+    assert.dom('[data-test-verdict]').exists('the verdict pill still renders');
+    assert.dom('[data-test-score]').exists('the score pill still renders');
+    assert.dom('[data-test-applied]').exists('the applied pill still renders');
   });
 });
