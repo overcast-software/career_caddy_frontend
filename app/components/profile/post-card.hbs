@@ -90,4 +90,10 @@
       {{/if}}
     </div>
   {{/if}}
+
+  {{! JobApplication status over time — inline line-chart driven by the rich
+      projection's meta.federation.timeline (CC-106 #3). The child self-gates:
+      it renders nothing for an absent/empty timeline (non-rich profiles or
+      posts with no applications), so the card simply shows no chart. }}
+  <Reports::JaTimeline @timeline={{this.statusTimeline}} />
 </div>
