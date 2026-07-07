@@ -211,53 +211,25 @@ async function refreshStaffFlag(apiKey) {
   return staff;
 }
 
-// CC #1: populate the quick-copy profile card from the /me attributes. Only
-// non-empty fields render a row; the card stays hidden when nothing's set.
-// Values are written with textContent (never innerHTML) so a stray '<' in a
-// profile field can't inject markup.
+// CC #1 / CCEXT-1: the quick-copy card renders a single LinkedIn row sourced
+// from the /me `linkedin` attribute. The whole card stays hidden when the user
+// has no LinkedIn on file. The value is written with textContent (never
+// innerHTML) so a stray '<' can't inject markup.
 function renderProfileCard(attrs) {
   if (!profileCardEl || !profileFieldsEl) return;
   profileFieldsEl.replaceChildren();
-  if (!attrs) {
+  const linkedin = attrs && attrs.linkedin ? String(attrs.linkedin).trim() : '';
+  if (!linkedin) {
     profileCardEl.classList.add('hidden');
     return;
   }
-  const rows = [];
-  const singles = [
-    ['First name', attrs.first_name],
-    ['Last name', attrs.last_name],
-    ['Email', attrs.email],
-    ['Phone', attrs.phone],
-    ['Address', attrs.address],
-    ['LinkedIn', attrs.linkedin],
-    ['GitHub', attrs.github],
-  ];
-  for (const [label, value] of singles) {
-    if (value && String(value).trim()) rows.push([label, String(value)]);
-  }
-  // `links` is an array of { name, url } objects (see the Ember profile page).
-  if (Array.isArray(attrs.links)) {
-    for (const link of attrs.links) {
-      if (!link) continue;
-      const url = typeof link === 'string' ? link : link.url;
-      const name = typeof link === 'string' ? '' : link.name;
-      if (url && String(url).trim()) {
-        const label = name && String(name).trim() ? String(name) : 'Link';
-        rows.push([label, String(url)]);
-      }
-    }
-  }
-  if (rows.length === 0) {
-    profileCardEl.classList.add('hidden');
-    return;
-  }
-  for (const [label, value] of rows) {
-    profileFieldsEl.appendChild(buildProfileRow(label, value));
-  }
+  profileFieldsEl.appendChild(
+    buildProfileRow('LinkedIn', linkedin, 'Copy LinkedIn'),
+  );
   profileCardEl.classList.remove('hidden');
 }
 
-function buildProfileRow(label, value) {
+function buildProfileRow(label, value, copyLabel = 'Copy') {
   const row = document.createElement('div');
   row.className = 'profile-row';
   const labelEl = document.createElement('span');
@@ -270,8 +242,8 @@ function buildProfileRow(label, value) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'profile-copy';
-  btn.textContent = 'Copy';
-  btn.addEventListener('click', () => copyProfileValue(btn, value));
+  btn.textContent = copyLabel;
+  btn.addEventListener('click', () => copyProfileValue(btn, value, copyLabel));
   row.append(labelEl, valueEl, btn);
   return row;
 }
@@ -279,21 +251,21 @@ function buildProfileRow(label, value) {
 // CC #1: copy a profile value to the clipboard with a brief affordance. The
 // write happens from a user gesture in the popup, so no clipboard permission
 // is needed. Uses .then/.catch (not async/await) per the extension idiom.
-function copyProfileValue(btn, value) {
+function copyProfileValue(btn, value, copyLabel = 'Copy') {
   navigator.clipboard
     .writeText(value)
     .then(() => {
       btn.textContent = 'Copied';
       btn.classList.add('copied');
       setTimeout(() => {
-        btn.textContent = 'Copy';
+        btn.textContent = copyLabel;
         btn.classList.remove('copied');
       }, 1200);
     })
     .catch(() => {
       btn.textContent = 'Failed';
       setTimeout(() => {
-        btn.textContent = 'Copy';
+        btn.textContent = copyLabel;
       }, 1200);
     });
 }
