@@ -1,9 +1,32 @@
-# Career Caddy Sender — v1.4.0
+# Career Caddy Sender — v1.8.0
 
 A browser extension that captures the active page's URL + visible text and
 POSTs it directly to your Career Caddy instance. The popup shows a one-time
 **Connect** screen for first-run auth, after which clicking the toolbar icon
 fires the page off and an OS-level system notification announces the result.
+
+## Store release notes (resubmission — since published 1.1.x)
+
+The published listings are far behind the code: **Chrome Web Store 1.1.0**,
+**Firefox AMO 1.1.1**. This resubmission (**1.8.0**) catches both up. Paste-ready
+"What's new" copy — highlights since 1.1.x:
+
+- **Faster, cleaner capture.** Cross-platform dedup hints (apply URL, canonical
+  link, referrer) plus a direct-POST fast path on known-good domains, so the
+  post lands on the clean canonical link with less server work (1.2.0–1.4.0).
+- **Track applications from the popup.** Mark a tracked JobPost as applied
+  without leaving the page (1.7.0).
+- **Quick-copy profile fields** for pasting into application forms (1.7.4).
+- **Answer the selected text** — highlight a screening question on any page and
+  generate/save an Answer straight from the popup (1.7.5).
+- Opaque-id (NanoID) hardening and assorted fixes (1.7.1–1.7.6).
+
+> ⚠️ **Permission re-consent on update.** The published 1.1.x only requested
+> `notifications`; this build adds `activeTab`, `scripting`, `storage`, and
+> `alarms` (all justified in `store-assets/cws-justifications.txt`). Existing
+> users will see a permission prompt on update and the add-on may sit disabled
+> until they re-accept. Expected given the feature growth — call it out in the
+> store "What's new" copy so it isn't a surprise.
 
 ## What changed in 0.3.0
 
@@ -28,6 +51,29 @@ fires the page off and an OS-level system notification announces the result.
 
 ## Version history
 
+- **1.8.0** — Store resubmission. No functional change since 1.7.6; bumps the
+  version so the far-behind Chrome (1.1.0) and Firefox (1.1.1) listings can be
+  updated to the current build. See "Store release notes" above — this update
+  adds permissions vs 1.1.x and will prompt users to re-consent.
+- **1.7.6** — NanoID id audit (CC-77). Every resource id is treated as an opaque
+  10-char string end-to-end — no `parseInt`/numeric assumptions in POST
+  relationship ids or `filter[...]` params. No user-visible change.
+- **1.7.5** — Ad-hoc **Answer the selected text**. Select text on any page and
+  generate + save a Career Caddy Answer straight from the popup.
+- **1.7.4** — **Quick-copy profile fields** card in the popup for fast pasting
+  into application forms.
+- **1.7.3** — When you're already on a Career Caddy page, the popup shows an
+  on-Career-Caddy dialogue instead of the capture form (nothing external to send).
+- **1.7.2** — Send the page URL on `extension-direct` scrape payloads (CCEXT #12).
+- **1.7.1** — Relabel the staff **Enrich → Sharpen** action; **Re-check** now
+  busts the per-host selector cache so a fresh profile is fetched.
+- **1.7.0** — **Track an application** directly from a tracked JobPost in the
+  popup (mark applied without leaving the page).
+- **1.6.0** — Staff **Proposed job-post validator** in the Tools tab: validate
+  the per-host extraction selectors against the live DOM before trusting them.
+- **1.5.0** — Staff-only **Tools tab** (gated on `/me` `is_staff`): "Sharpen
+  profile for this domain" + an extracted `job_data` preview, folding the old
+  always-on dev hints into a gated, store-shippable panel.
 - **1.4.0** — Server-gated direct-POST fast path. The extension-direct
   fast path is now gated on the api's per-domain **known-good** signal
   rather than purely on client-side presence. The
@@ -175,10 +221,12 @@ Removed on Firefox restart.
 
 ## Use
 
-1. Open the popup. First time you see a **Connect** screen — enter your
-   Career Caddy username and password. Click **Connect**. The extension
-   authenticates against `https://careercaddy.online`, mints a dedicated
-   API key, and immediately discards the password.
+1. Open the popup. First time you see a **Connect** screen. As long as you're
+   signed in to Career Caddy in a browser tab, click **Connect** — the extension
+   reads your `careercaddy.online` session (no username/password re-entry since
+   1.1.0), mints a dedicated revocable API key, and stores only that key. If
+   you're not signed in, the popup links you to `careercaddy.online/login`; sign
+   in, reopen the popup, and connect.
 2. After connecting, the popup shows a **Send this page** button and the
    email you connected as.
 3. Visit any job posting and click the toolbar icon → **Send this page**.
