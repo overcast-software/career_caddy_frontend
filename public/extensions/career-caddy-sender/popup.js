@@ -73,6 +73,8 @@ const profileFieldsEl = $('profile-fields');
 const answerCardEl = $('answer-card'); // CC #47: answer-the-selection tool
 const answerBtn = $('answer-btn');
 const answerStatus = $('answer-status');
+const answerPromptEl = $('answer-prompt'); // CCEXT-10: echo the highlighted text
+const answerPromptTextEl = $('answer-prompt-text');
 const answerTextEl = $('answer-text');
 const answerCopyBtn = $('answer-copy');
 const versionEl = $('version');
@@ -2989,6 +2991,27 @@ function resetAnswerResult() {
     answerTextEl.classList.add('hidden');
   }
   if (answerCopyBtn) answerCopyBtn.classList.add('hidden');
+  hideAnswerPrompt();
+}
+
+// CCEXT-10: echo the captured selection (the question prompt) above the
+// answer so the user can see WHAT is being answered — on both the fresh
+// path and the resume-from-stash path.
+function showAnswerPrompt(prompt) {
+  if (!answerPromptEl || !answerPromptTextEl) return;
+  const text = (prompt || '').trim();
+  if (!text) {
+    hideAnswerPrompt();
+    return;
+  }
+  answerPromptTextEl.textContent = text;
+  answerPromptEl.classList.remove('hidden');
+}
+
+function hideAnswerPrompt() {
+  if (!answerPromptEl || !answerPromptTextEl) return;
+  answerPromptTextEl.textContent = '';
+  answerPromptEl.classList.add('hidden');
 }
 
 function showAnswerResult(content, message) {
@@ -3059,9 +3082,26 @@ async function findExistingAnswer(selection, apiKey) {
   }
 }
 
-// 2a. Mint the Question (POST /questions/ {content}). Returns the new id.
-async function mintQuestion(content, apiKey) {
+// 2a. Mint the Question (POST /questions/ {content} + relationships).
+// CCEXT-10: attach the Question to the tracked JobPost (and its application,
+// if one exists) so it's recorded against the post AND the api feeds the JD
+// into the answer prompt (QuestionSerializer accepts `job-post`/`application`
+// relationship keys). Returns the new id.
+async function mintQuestion(content, apiKey, jobPostId, applicationId) {
   try {
+    const relationships = {};
+    if (jobPostId) {
+      relationships['job-post'] = {
+        data: { type: 'job-post', id: String(jobPostId) },
+      };
+    }
+    if (applicationId) {
+      relationships['application'] = {
+        data: { type: 'job-application', id: String(applicationId) },
+      };
+    }
+    const data = { type: 'question', attributes: { content } };
+    if (Object.keys(relationships).length > 0) data.relationships = relationships;
     const resp = await fetch(`${ORIGIN}/api/v1/questions/`, {
       method: 'POST',
       headers: {
@@ -3069,9 +3109,7 @@ async function mintQuestion(content, apiKey) {
         Accept: 'application/vnd.api+json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        data: { type: 'question', attributes: { content } },
-      }),
+      body: JSON.stringify({ data }),
     });
     if (!resp.ok) return null;
     const body = await resp.json();
@@ -3156,6 +3194,17 @@ async function pollAnswerUntilTerminal(answerId, apiKey) {
 
 async function handleAnswerSelected() {
   if (answerPolling) return;
+  // CCEXT-10: Answer is only offered for a tracked JobPost — the Question
+  // must attach to a post to be recorded + answered with the JD in context.
+  const jobPostId = trackedJobPostId;
+  if (!jobPostId) {
+    setStatus(
+      answerStatus,
+      'Open this on a tracked job post to answer its questions.',
+      'error',
+    );
+    return;
+  }
   const saved = await api.storage.local.get(['ccApiKey']);
   if (!saved.ccApiKey) {
     setStatus(answerStatus, 'Not connected.', 'error');
@@ -3171,6 +3220,7 @@ async function handleAnswerSelected() {
     return;
   }
   resetAnswerResult();
+  showAnswerPrompt(selection); // CCEXT-10: echo the highlighted text
   setAnswerBusy(true);
   setStatus(answerStatus, 'Looking for a saved answer…');
   const match = await findExistingAnswer(selection, saved.ccApiKey);
@@ -3179,8 +3229,18 @@ async function handleAnswerSelected() {
     setAnswerBusy(false);
     return;
   }
+  // Tie the Question to the tracked post's application when one exists, so
+  // the answer is recorded in the application's Q&A context too.
+  let applicationId = null;
+  const appLookup = await findExistingApplication(jobPostId, saved.ccApiKey);
+  if (appLookup && appLookup.appId) applicationId = appLookup.appId;
   setStatus(answerStatus, 'Generating an answer…');
-  const questionId = await mintQuestion(selection, saved.ccApiKey);
+  const questionId = await mintQuestion(
+    selection,
+    saved.ccApiKey,
+    jobPostId,
+    applicationId,
+  );
   if (!questionId) {
     setStatus(answerStatus, 'Could not create the question.', 'error');
     setAnswerBusy(false);
@@ -3225,6 +3285,7 @@ async function maybeResumeAnswer() {
     return;
   }
   answerCardEl.open = true;
+  showAnswerPrompt(pending.prompt); // CCEXT-10: echo the stashed selection
   setAnswerBusy(true);
   setStatus(answerStatus, 'Resuming a pending answer…');
   await pollAnswerUntilTerminal(pending.answerId, apiKey);
