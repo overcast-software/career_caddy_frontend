@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import { action } from '@ember/object';
 
 export default class JobPostsShowRoute extends Route {
   @service store;
@@ -33,6 +34,7 @@ export default class JobPostsShowRoute extends Route {
     }
   }
 
+  @action
   error() {
     this.flashMessages.danger('Job post not found.');
     this.router.transitionTo('job-posts.index');

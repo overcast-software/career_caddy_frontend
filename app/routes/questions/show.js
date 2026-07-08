@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import { action } from '@ember/object';
 export default class QuestionsShowRoute extends Route {
   @service store;
   @service router;
@@ -12,6 +13,7 @@ export default class QuestionsShowRoute extends Route {
 
   // Matches routes/job-posts/show.js pattern — surface a soft flash
   // and land the user back on the list rather than the raw error page.
+  @action
   error() {
     this.flashMessages.danger('Question not found.');
     this.router.transitionTo('questions.index');
