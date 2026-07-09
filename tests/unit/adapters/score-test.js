@@ -26,7 +26,9 @@ module('Unit | Adapter | score', function (hooks) {
 
   test('urlForQuery falls back to the flat collection when no jobPostId', function (assert) {
     const adapter = this.owner.lookup('adapter:score');
-    const url = adapter.urlForQuery({});
+    // urlForQuery(query, modelName) — Ember Data always passes modelName;
+    // without it the super fallback builds only the namespace root.
+    const url = adapter.urlForQuery({}, 'score');
     assert.true(
       url.endsWith('/scores/'),
       `URL ${url} falls back to the flat scores collection`,
