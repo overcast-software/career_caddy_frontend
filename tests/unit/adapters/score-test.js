@@ -29,8 +29,10 @@ module('Unit | Adapter | score', function (hooks) {
     // urlForQuery(query, modelName) — Ember Data always passes modelName;
     // without it the super fallback builds only the namespace root.
     const url = adapter.urlForQuery({}, 'score');
+    // The stock JSONAPIAdapter builds the flat URL without a trailing
+    // slash (the api router accepts both forms).
     assert.true(
-      url.endsWith('/scores/'),
+      url.endsWith('/scores'),
       `URL ${url} falls back to the flat scores collection`,
     );
     assert.notOk(
