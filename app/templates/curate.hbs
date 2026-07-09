@@ -1,0 +1,128 @@
+{{page-title "Curate"}}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <div class="controls">
+      {{#if this.currentUser.user.username}}
+        <LinkTo
+          @route="profile"
+          @model={{this.currentUser.user.username}}
+          class="btn small"
+          data-test-preview-profile
+        >
+          Preview @{{this.currentUser.user.username}}
+        </LinkTo>
+      {{/if}}
+    </div>
+  </:subnav>
+  <:main>
+    <div class="mb-4">
+      <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        Share my journey
+      </h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Vetted posts ready to publish to your public feed. Publishing a post
+        adds it to
+        {{#if this.currentUser.user.username}}
+          <span class="font-medium">@{{this.currentUser.user.username}}</span>
+        {{else}}
+          your public profile
+        {{/if}}
+        and removes it from this queue.
+      </p>
+    </div>
+
+    {{#if this.candidates.length}}
+      <div
+        class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+      >
+        <table class="min-w-full text-sm">
+          <thead
+            class="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40"
+          >
+            <tr>
+              <th
+                class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+              >Title</th>
+              <th
+                class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+              >Company</th>
+              <th
+                class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+              >Score</th>
+              <th
+                class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
+              >Signals</th>
+              <th
+                class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
+              >Publish</th>
+            </tr>
+          </thead>
+          <tbody
+            class="divide-y divide-gray-100 dark:divide-gray-700 stagger-rows"
+          >
+            {{#each this.candidates as |jobPost|}}
+              <tr
+                class="hover:bg-gray-50 dark:hover:bg-gray-700/40"
+                data-test-curate-row
+              >
+                <td
+                  class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100"
+                >
+                  <LinkTo @route="job-posts.show" @model={{jobPost}}>
+                    {{jobPost.title}}
+                  </LinkTo>
+                </td>
+                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                  {{~#if jobPost.company.name~}}
+                    {{jobPost.company.name}}
+                  {{~else~}}
+                    <span class="italic text-amber-500">missing</span>
+                  {{~/if~}}
+                </td>
+                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                  {{#if jobPost.topScore.score}}
+                    <span class="font-medium text-accent-600">
+                      <LinkTo @route="job-posts.show.scores" @model={{jobPost}}>
+                        {{jobPost.topScore.score}}
+                      </LinkTo>
+                    </span>
+                  {{else}}
+                    <span class="text-gray-300 dark:text-gray-600">—</span>
+                  {{/if}}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    {{#if jobPost.hasQuestions}}
+                      <span
+                        class="inline-flex items-center rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-200"
+                      >Questions</span>
+                    {{/if}}
+                    {{#if jobPost.hasJobApplications}}
+                      <span
+                        class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/30"
+                      >Applied</span>
+                    {{/if}}
+                    {{#unless
+                      (or jobPost.hasQuestions jobPost.hasJobApplications)
+                    }}
+                      <span
+                        class="text-gray-300 dark:text-gray-600"
+                      >—</span>
+                    {{/unless}}
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <JobPosts::PublishToggle @jobPost={{jobPost}} />
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{else}}
+      <EmptyState
+        @message="No posts ready to publish. Vet and score posts to fill your queue."
+      />
+    {{/if}}
+  </:main>
+</RouteLayout>

@@ -298,6 +298,11 @@ Router.map(function () {
   });
   this.route('favorites');
   this.route('caddy');
+  // Operator curation view (CC-64) — authed; lists publishable-candidate
+  // posts and publishes them deliberately to fill out the public @dough
+  // feed. NOT registered in app/services/public-routes.js, so the
+  // application-route auth guard bounces logged-out visitors to /login.
+  this.route('curate');
   // Public profile page (CC #51) — /<username>, e.g. /dough. Single dynamic
   // segment; route-recognizer ranks static routes above it and the /*path
   // not-found glob below it, so existing top-level routes are unaffected.

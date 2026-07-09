@@ -286,6 +286,26 @@ export default class JobPostModel extends Model {
     return (scores?.length || 0) > 0;
   }
 
+  // Presence of at least one JobApplication for this post — a "peek"
+  // signal for the /curate row (CC-64). Reads the live ManyArray
+  // (no .slice()/.toArray()); falls back to false when the relationship
+  // hasn't materialized (mid-load proxy). Mirrors hasAnyScore. The
+  // curate route include=job-applications so the count is real on first
+  // paint; absent the include it reads as "none", the correct unknown
+  // presentation.
+  get hasJobApplications() {
+    const applications = this.hasMany('jobApplications').value();
+    return (applications?.length || 0) > 0;
+  }
+
+  // Presence of at least one Question for this post — the "vetted / has
+  // prep" peek signal for the /curate row (CC-64). Same live-array,
+  // null-safe shape as hasAnyScore / hasJobApplications.
+  get hasQuestions() {
+    const questions = this.hasMany('questions').value();
+    return (questions?.length || 0) > 0;
+  }
+
   resolveAndDedupe() {
     return apiAction(this, { method: 'POST', path: 'resolve-and-dedupe' });
   }
