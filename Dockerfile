@@ -17,6 +17,13 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Env-gated same-origin reverse proxy (API_UPSTREAM/EVENTS_UPSTREAM/MCP_UPSTREAM).
+# Empty include dir by default → no-op (SPA-only; omarchy/prod-behind-Caddy
+# path). The entrypoint script fills it only when API_UPSTREAM is set (GCP dev
+# env); runs via nginx's /docker-entrypoint.d hook.
+RUN mkdir -p /etc/nginx/api-proxy.d
+COPY docker-entrypoint.d/10-api-proxy.sh /docker-entrypoint.d/10-api-proxy.sh
+RUN chmod +x /docker-entrypoint.d/10-api-proxy.sh
 # Env-gated search-indexing block (ROBOTS_NOINDEX). Empty include dir by
 # default → no-op (prod stays indexable). The entrypoint script fills it
 # only when ROBOTS_NOINDEX=true; runs via nginx's /docker-entrypoint.d hook.
