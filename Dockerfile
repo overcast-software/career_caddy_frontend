@@ -17,6 +17,12 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Env-gated search-indexing block (ROBOTS_NOINDEX). Empty include dir by
+# default → no-op (prod stays indexable). The entrypoint script fills it
+# only when ROBOTS_NOINDEX=true; runs via nginx's /docker-entrypoint.d hook.
+RUN mkdir -p /etc/nginx/robots-noindex.d /etc/nginx/robots-noindex-header.d
+COPY docker-entrypoint.d/20-robots-noindex.sh /docker-entrypoint.d/20-robots-noindex.sh
+RUN chmod +x /docker-entrypoint.d/20-robots-noindex.sh
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
     CMD wget -qO- http://127.0.0.1/ || exit 1

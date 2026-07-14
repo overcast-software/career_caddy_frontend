@@ -20,6 +20,9 @@
 .tool-versions
 notes.org
 *.sh
+# ...but the prod nginx image's entrypoint scripts must ship (Dockerfile COPYs them).
+!docker-entrypoint.d/
+!docker-entrypoint.d/*.sh
 # CI/CD needs package-lock.json
 
 # Docker overrides
