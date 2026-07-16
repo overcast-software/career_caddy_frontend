@@ -83,6 +83,9 @@ worker that may go idle.
 ------------------------------------------------------------
 host permission — justification
 ------------------------------------------------------------
+(NOTE: apex-corrected for the 2.0.0 build; the full store-listing
+justification pass is deferred to actual publish time.)
+
 host_permissions is intentionally narrow — a single host:
 
   https://careercaddy.online/*
@@ -90,14 +93,15 @@ host_permissions is intentionally narrow — a single host:
 This does NOT include <all_urls>. It is the minimum needed to
 operate, and it serves two same-origin needs:
 
-  1. The popup and the service worker fetch the Career Caddy API
-     (/api/v1/token/, /api/v1/api-keys/, /api/v1/scrapes/,
-     /api/v1/scores/, and /api/v1/job-posts/) on the user's behalf.
-     The API is served same-origin under https://careercaddy.online/api/v1/.
-  2. The popup reads theme-palette from a Career Caddy tab's
-     localStorage (via a small scripting.executeScript injection on a
-     careercaddy.online tab) so the popup's accent color matches the
-     user's chosen palette in the web app.
+  1. careercaddy.online/api/v1/ — required so the popup and the service
+     worker can fetch /api/v1/token/, /api/v1/api-keys/,
+     /api/v1/scrapes/, /api/v1/scores/, and /api/v1/job-posts/ on
+     the user's behalf (the API is served same-origin under the apex).
+  2. careercaddy.online — required so the popup can read
+     theme-palette from a Career Caddy tab's localStorage (via a
+     small scripting.executeScript injection on a CC-origin tab)
+     so the popup's accent color matches the user's chosen palette
+     in the web app.
 
 The activeTab permission (separately declared) covers reading
 job-posting page content on the user's Send click. host_permissions
