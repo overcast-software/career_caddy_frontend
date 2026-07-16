@@ -27,11 +27,19 @@ const TERMINAL_SCRAPE = new Set([
 const SUCCESS_SCRAPE = new Set(['completed']);
 const TERMINAL_SCORE = new Set(['completed', 'failed']);
 const SUCCESS_SCORE = new Set(['completed']);
+// CC-135 (1.8.12): match-application terminal statuses (JA.match_context.status).
+const TERMINAL_MATCH_APP = new Set(['done', 'failed']);
 
 const api = typeof browser !== 'undefined' ? browser : chrome;
 const SCRAPE_PREFIX = 'cc-scrape-poll-';
 const SCORE_PREFIX = 'cc-score-poll-';
+const MATCH_APP_PREFIX = 'cc-match-app-poll-';
 const NOTIFY_LINKS_KEY = 'cc-notify-links';
+// CC-135 (1.8.12): the popup reads this url-keyed stash on open to surface a
+// match-application result that landed while the popup was closed. Mirrors the
+// popup's ccMatchApps shape ({ url -> { jaId, ts, ... } }).
+const MATCH_APP_STASH_KEY = 'ccMatchApps';
+const MATCH_APP_STASH_TTL_MS = 30 * 60 * 1000; // 30m — matches the popup TTL
 
 // Notifications can survive the popup closing and even the service worker
 // going idle; the click-target URL has to be persisted, not held in memory.
@@ -148,6 +156,34 @@ api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (typeof sendResponse === 'function') sendResponse({ ok: true });
     return false;
   }
+  if (msg.type === 'cc-match-app-queued') {
+    // CC-135 (1.8.12): the popup polls the JA while it's open; this alarm is
+    // the fallback for when it closes before the matcher finishes. On terminal
+    // match_context.status we stash the result to the url-keyed ccMatchApps
+    // (so the next open renders it) and fire a single notification on a hit.
+    const ctx = {
+      jaId: String(msg.jaId),
+      url: msg.url,
+      origin: msg.origin,
+      apiKey: msg.apiKey,
+      frontendOrigin: msg.frontendOrigin || 'https://careercaddy.online',
+      pollCount: 0,
+    };
+    const key = `match-app-${ctx.jaId}`;
+    api.storage.session
+      .set({ [key]: ctx })
+      .then(() =>
+        api.alarms.create(`${MATCH_APP_PREFIX}${ctx.jaId}`, {
+          periodInMinutes: POLL_INTERVAL_MIN,
+          when: Date.now() + 3000,
+        }),
+      )
+      .catch((err) => {
+        console.warn('[cc-sender bg] match-app queue failed', err);
+      });
+    if (typeof sendResponse === 'function') sendResponse({ ok: true });
+    return false;
+  }
   return false;
 });
 
@@ -163,6 +199,13 @@ api.alarms.onAlarm.addListener((alarm) => {
     const scoreId = alarm.name.slice(SCORE_PREFIX.length);
     pollScoreOnce(scoreId).catch((err) => {
       console.warn('[cc-sender bg] pollScoreOnce threw', err);
+    });
+    return;
+  }
+  if (alarm.name.startsWith(MATCH_APP_PREFIX)) {
+    const jaId = alarm.name.slice(MATCH_APP_PREFIX.length);
+    pollMatchAppOnce(jaId).catch((err) => {
+      console.warn('[cc-sender bg] pollMatchAppOnce threw', err);
     });
   }
 });
@@ -240,6 +283,48 @@ async function pollScrapeOnce(scrapeId) {
         ctx.url || 'See Career Caddy for details.',
       );
       return;
+    }
+
+    // CCEXT reopen-memory: promote the popup's just-sent marker to a
+    // tracked-page entry so the next popup open on this URL renders the
+    // Tracked screen instantly instead of re-offering "Send this page".
+    // Mirrors the popup's ccTrackedPages/ccSentPages shape (url-keyed, ts).
+    if (jobPostId && ctx.url) {
+      try {
+        const got = await api.storage.local.get([
+          'ccTrackedPages',
+          'ccSentPages',
+        ]);
+        const tracked =
+          got.ccTrackedPages && typeof got.ccTrackedPages === 'object'
+            ? got.ccTrackedPages
+            : {};
+        tracked[ctx.url] = {
+          found: {
+            id: String(jobPostId),
+            title: jobTitle,
+            company: null,
+            companyId: null,
+            applyUrl: null,
+            link: ctx.url,
+            topScore: null,
+            hasPendingScore: !!ctx.autoScore,
+            complete: true,
+          },
+          ts: Date.now(),
+        };
+        const sent =
+          got.ccSentPages && typeof got.ccSentPages === 'object'
+            ? got.ccSentPages
+            : {};
+        delete sent[ctx.url];
+        await api.storage.local.set({
+          ccTrackedPages: tracked,
+          ccSentPages: sent,
+        });
+      } catch (err) {
+        console.warn('[cc-sender bg] tracked-stash promote failed', err);
+      }
     }
 
     const postUrl = jobPostUrl(
@@ -391,6 +476,134 @@ async function pollScoreOnce(scoreId) {
         'Career Caddy — added ✓ (score failed)',
         ctx.jobTitle,
         scoreUrl,
+      );
+    }
+    return;
+  }
+
+  await api.storage.session.set({
+    [key]: { ...ctx, pollCount: ctx.pollCount + 1 },
+  });
+}
+
+// CC-135 (1.8.12): mark a match-application stash entry terminal so the next
+// popup open for this url renders the result instead of resuming a poll. Prunes
+// expired entries on write (TTL mirrors the popup).
+async function markMatchAppStashResult(url, jaId, result) {
+  if (!url) return;
+  try {
+    const got = await api.storage.local.get([MATCH_APP_STASH_KEY]);
+    const raw =
+      got[MATCH_APP_STASH_KEY] && typeof got[MATCH_APP_STASH_KEY] === 'object'
+        ? got[MATCH_APP_STASH_KEY]
+        : {};
+    const now = Date.now();
+    const map = {};
+    for (const [u, entry] of Object.entries(raw)) {
+      if (entry && entry.ts && now - entry.ts <= MATCH_APP_STASH_TTL_MS) {
+        map[u] = entry;
+      }
+    }
+    map[url] = { jaId: String(jaId), result, ts: now };
+    await api.storage.local.set({ [MATCH_APP_STASH_KEY]: map });
+  } catch (err) {
+    console.warn('[cc-sender bg] match-app stash write failed', err);
+  }
+}
+
+// Poll a JA's match_context from the background alarm — the fallback for when
+// the popup closed before the matcher finished. On terminal status: stash the
+// result (for the next open) and, on a hit, fire one notification linking to
+// the matched post. A miss / failure updates the stash quietly (no nag) — the
+// application is already tracked either way.
+async function pollMatchAppOnce(jaId) {
+  const key = `match-app-${jaId}`;
+  const stored = await api.storage.session.get(key);
+  const ctx = stored[key];
+  if (!ctx) {
+    await api.alarms.clear(`${MATCH_APP_PREFIX}${jaId}`);
+    return;
+  }
+
+  if (ctx.pollCount >= MAX_POLLS) {
+    await api.alarms.clear(`${MATCH_APP_PREFIX}${jaId}`);
+    await api.storage.session.remove(key);
+    return;
+  }
+
+  let resp;
+  try {
+    resp = await fetch(
+      `${ctx.origin}/api/v1/job-applications/${jaId}/?include=job-post,company`,
+      { headers: { Authorization: `Bearer ${ctx.apiKey}` } },
+    );
+  } catch (err) {
+    console.warn('[cc-sender bg] match-app poll fetch failed', err);
+    await api.storage.session.set({
+      [key]: { ...ctx, pollCount: ctx.pollCount + 1 },
+    });
+    return;
+  }
+
+  if (resp.status === 401 || resp.status === 403 || resp.status === 404) {
+    await api.alarms.clear(`${MATCH_APP_PREFIX}${jaId}`);
+    await api.storage.session.remove(key);
+    return;
+  }
+
+  if (!resp.ok) {
+    await api.storage.session.set({
+      [key]: { ...ctx, pollCount: ctx.pollCount + 1 },
+    });
+    return;
+  }
+
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    body = null;
+  }
+  const attrs = body?.data?.attributes || {};
+  const matchCtx =
+    attrs.match_context && typeof attrs.match_context === 'object'
+      ? attrs.match_context
+      : {};
+  const status = matchCtx.status;
+
+  if (status && TERMINAL_MATCH_APP.has(status)) {
+    await api.alarms.clear(`${MATCH_APP_PREFIX}${jaId}`);
+    await api.storage.session.remove(key);
+
+    const jpId = body?.data?.relationships?.['job-post']?.data?.id || null;
+    const included = Array.isArray(body?.included) ? body.included : [];
+    const jp = jpId
+      ? included.find(
+          (r) => r && r.type === 'job-post' && String(r.id) === String(jpId),
+        )
+      : null;
+    const jpTitle = jp?.attributes?.title || null;
+
+    // Stash the terminal result so the next popup open renders it directly
+    // (the popup's maybeResumeMatchApplication reads this url-keyed stash).
+    await markMatchAppStashResult(ctx.url, jaId, {
+      status,
+      jobPostId: jpId,
+      title: jpTitle,
+      confidence:
+        typeof matchCtx.confidence === 'number' ? matchCtx.confidence : null,
+      rationale: matchCtx.rationale || '',
+    });
+
+    // A hit is worth a single notification (closed-popup result). A miss /
+    // failure stays quiet — the application is already tracked; nagging on
+    // "no match" is noise.
+    if (status === 'done' && jpId) {
+      const linkUrl = jobPostUrl(ctx.frontendOrigin, jpId, false);
+      notify(
+        'Career Caddy — found the job post',
+        jpTitle || 'Open the extension to see the matched post.',
+        linkUrl,
       );
     }
     return;

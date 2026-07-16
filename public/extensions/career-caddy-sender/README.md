@@ -1,4 +1,4 @@
-# Career Caddy Sender — v1.8.0
+# Career Caddy Sender — v2.0.0
 
 A browser extension that captures the active page's URL + visible text and
 POSTs it directly to your Career Caddy instance. The popup shows a one-time
@@ -8,25 +8,39 @@ fires the page off and an OS-level system notification announces the result.
 ## Store release notes (resubmission — since published 1.1.x)
 
 The published listings are far behind the code: **Chrome Web Store 1.1.0**,
-**Firefox AMO 1.1.1**. This resubmission (**1.8.0**) catches both up. Paste-ready
-"What's new" copy — highlights since 1.1.x:
+**Firefox AMO 1.1.1**. This major release (**2.0.0**) catches both up and
+repoints the extension to the current apex host. Paste-ready "What's new"
+copy — highlights since 1.1.x:
 
+- **Three-tab application suite.** The popup is now organized into **Posts** /
+  **Applications** / **Staff** tabs (Staff shown only for staff accounts). Posts
+  holds send/track + the "Link this page to a job post" tool; Applications holds
+  Mark-applied, open-application, and Answer-the-selected-text; the extension
+  lands you on the right tab based on page state.
 - **Faster, cleaner capture.** Cross-platform dedup hints (apply URL, canonical
   link, referrer) plus a direct-POST fast path on known-good domains, so the
-  post lands on the clean canonical link with less server work (1.2.0–1.4.0).
+  post lands on the clean canonical link with less server work.
 - **Track applications from the popup.** Mark a tracked JobPost as applied
-  without leaving the page (1.7.0).
-- **Quick-copy profile fields** for pasting into application forms (1.7.4).
+  without leaving the page, with a background poll that surfaces the result
+  even if the popup closes.
+- **Quick-copy profile fields** for pasting into application forms.
 - **Answer the selected text** — highlight a screening question on any page and
-  generate/save an Answer straight from the popup (1.7.5).
-- Opaque-id (NanoID) hardening and assorted fixes (1.7.1–1.7.6).
+  generate/save an Answer straight from the popup.
+- **Apex repoint.** All API traffic now targets `https://careercaddy.online`
+  (same-origin API under `/api/v1/`). The retired `api.careercaddy.online`
+  subdomain is dropped from the code and from host permissions — a permission
+  **reduction**.
 
 > ⚠️ **Permission re-consent on update.** The published 1.1.x only requested
-> `notifications`; this build adds `activeTab`, `scripting`, `storage`, and
-> `alarms` (all justified in `store-assets/cws-justifications.txt`). Existing
-> users will see a permission prompt on update and the add-on may sit disabled
-> until they re-accept. Expected given the feature growth — call it out in the
-> store "What's new" copy so it isn't a surprise.
+> `notifications`; this build declares `activeTab`, `scripting`, `storage`, and
+> `alarms` (all justified in `store-assets/cws-justifications.txt`), plus an
+> **optional** `tabs` permission the user opts into. The added required
+> permissions will prompt existing users to re-consent on update, and the
+> add-on may sit disabled until they re-accept — expected given six-plus minor
+> versions of feature growth; call it out in the store "What's new" copy so it
+> isn't a surprise. The **host** change is the opposite direction: dropping
+> `api.careercaddy.online/*` narrows host access to the single
+> `careercaddy.online/*` origin.
 
 ## What changed in 0.3.0
 
@@ -51,6 +65,21 @@ The published listings are far behind the code: **Chrome Web Store 1.1.0**,
 
 ## Version history
 
+- **2.0.0** — Major release: three-tab IA + apex repoint. Consolidates the
+  1.8.x iterations into a single store-ready build. The popup is reorganized
+  into **Posts | Applications | Staff** tabs (Staff gated on `/me` `is_staff`),
+  with lazy per-tab fetches and a state-based default-tab landing (a resolved
+  JP with an application, or a pending-apply page, opens on Applications; else
+  Posts). Adds staff-only agentic match-application (POST `/job-applications/`
+  with a `match_context`; the popup + a background alarm poll the JA for the
+  async matcher result) and a signal ladder (opener / open-tabs / referrer /
+  id-token / title / viewed-trail) gated behind an **optional** `tabs`
+  permission the user opts into. **Apex repoint:** the API `ORIGIN` moves from
+  the retired `api.careercaddy.online` to `https://careercaddy.online` (API
+  served same-origin under `/api/v1/`), and that subdomain is dropped from
+  `host_permissions` — a host-access **reduction**. See "Store release notes"
+  above for the re-consent note (the added required permissions vs the
+  published 1.1.x prompt a one-time re-consent).
 - **1.8.0** — Store resubmission. No functional change since 1.7.6; bumps the
   version so the far-behind Chrome (1.1.0) and Firefox (1.1.1) listings can be
   updated to the current build. See "Store release notes" above — this update

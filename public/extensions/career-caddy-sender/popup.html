@@ -282,7 +282,11 @@
         height: 14px;
       }
       .hidden {
-        display: none;
+        /* !important so later same-specificity display rules (.result-link's
+           inline-block at one point defeated this, leaving "Open application"
+           visible with its placeholder href="#") can never resurrect a hidden
+           element. */
+        display: none !important;
       }
 
       .skel {
@@ -527,6 +531,61 @@
         word-break: break-all;
       }
 
+      /* Selected-text readout + Sharpen step-trace (staff Tools tab).
+         Introspection surfaces — echo exactly what the extension reads from
+         the page selection, and log each step of a Sharpen run so a staff
+         user can SEE what happened. Reuse theme vars for free dark mode. */
+      .sel-readout {
+        margin-top: 8px;
+        max-height: 120px;
+        overflow-y: auto;
+        padding: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--text);
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      .sel-readout.empty {
+        color: var(--text-faint);
+        font-style: italic;
+      }
+      .sel-meta {
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--text-faint);
+        font-variant-numeric: tabular-nums;
+      }
+      .sel-jp {
+        margin-top: 8px;
+        font-size: 11px;
+        line-height: 1.45;
+        color: var(--text-muted);
+      }
+      .sel-jp a {
+        color: var(--accent-600);
+        text-decoration: underline;
+      }
+      .enrich-trace {
+        margin: 10px 0 0;
+        padding-left: 16px;
+        font-size: 11px;
+        line-height: 1.5;
+        color: var(--text-muted);
+      }
+      .enrich-trace li {
+        margin-top: 2px;
+      }
+      .enrich-trace li.ok {
+        color: var(--success);
+      }
+      .enrich-trace li.bad {
+        color: var(--error);
+      }
+
       /* "Proposed job-post" validator (staff Tools tab). Renders what the
          host's job_data selectors extract from the live DOM, shaped as a
          JobPost, with per-field validation + the server known-good verdict.
@@ -748,6 +807,45 @@
         border-color: var(--success);
       }
 
+      /* CCEXT: manual link-to-tracked-job picker rows. */
+      .link-job-row {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 6px 8px;
+        font-size: 12px;
+        color: var(--text);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .link-job-row:hover {
+        background: var(--bg-soft);
+        border-color: var(--accent-500);
+      }
+      .link-job-row .ljr-title {
+        font-weight: 600;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .link-job-row .ljr-company {
+        color: var(--text-muted);
+        font-size: 11px;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .link-job-empty {
+        font-size: 11px;
+        color: var(--text-faint);
+        font-style: italic;
+        padding: 2px 0;
+      }
+
       /* CC #47: "Answer the selected text" card body + editable result. */
       .answer-body {
         padding: 8px 12px 10px;
@@ -791,9 +889,13 @@
   <body>
     <span id="version" class="version"></span>
 
+    <!-- CC-132 three-tab IA: Posts (the JP interface — find/create/send),
+         Applications (the JA interface — mark applied, answers), Staff
+         (is_staff-only cards; the button itself renders only for staff). -->
     <div id="tab-bar" class="tab-bar hidden">
-      <button id="tab-send" class="tab-btn active" type="button">Send</button>
-      <button id="tab-tools" class="tab-btn" type="button">Tools</button>
+      <button id="tab-send" class="tab-btn active" type="button">Posts</button>
+      <button id="tab-applications" class="tab-btn" type="button">Applications</button>
+      <button id="tab-tools" class="tab-btn hidden" type="button">Staff</button>
     </div>
 
     <div id="screen-loading" class="hidden">
@@ -828,26 +930,6 @@
         <div class="incomplete-banner-title" id="incomplete-banner-title"></div>
         <div class="incomplete-banner-company" id="incomplete-banner-company"></div>
       </div>
-      <!-- CC #46: apply-attribution prompt — shown only when this page is an
-           ATS apply page matching a stashed "Apply & track" from the source
-           post. Hidden by default. -->
-      <div id="apply-attr-card" class="tracked-card hidden" style="margin-bottom: 12px;">
-        <div class="tracked-company">Track your application for</div>
-        <div class="tracked-title" id="apply-attr-title"></div>
-        <div class="tracked-company" id="apply-attr-company"></div>
-        <button id="apply-attr-btn" class="primary" type="button" style="margin-top: 10px;">
-          <span class="btn-label">Track application</span>
-          <span class="spinner" aria-hidden="true"></span>
-        </button>
-        <div class="status" id="apply-attr-status"></div>
-        <a
-          id="apply-attr-link"
-          class="result-link hidden"
-          href="#"
-          target="_blank"
-          rel="noopener"
-        >Open application</a>
-      </div>
       <button id="send" class="primary">
         <span class="btn-label">Send this page</span>
         <span class="spinner" aria-hidden="true"></span>
@@ -870,6 +952,9 @@
       </button>
       <div class="status" id="post-send-score-status"></div>
       <button id="dismiss" class="linkbtn hidden" type="button" style="margin-top: 10px;">Dismiss</button>
+      <!-- CCEXT reopen-memory: shown only on the "Sent — processing…" state
+           (async extraction in flight) for a manual status re-check. -->
+      <button id="recheck" class="linkbtn hidden" type="button" style="margin-top: 10px;">Re-check</button>
 
       <!-- CC #1: quick-copy profile fields, sourced from /api/v1/me on popup
            open. Collapsed by default; hidden until at least one field loads.
@@ -877,6 +962,26 @@
       <details id="profile-card" class="profile-card hidden">
         <summary class="profile-summary">Copy profile details</summary>
         <div id="profile-fields" class="profile-fields"></div>
+      </details>
+
+      <!-- "Link this page to a job post" — the FIND half of find-or-create,
+           for pages the library doesn't resolve (ATS apply flows,
+           cross-domain applies). Collapsed + lazy-populated: no roundtrip
+           until the user expands it. Zero heuristics by design. -->
+      <details id="link-job-card" class="profile-card">
+        <summary class="profile-summary">Link this page to a job post</summary>
+        <div class="tool-desc">
+          On an application page? Find the job post it belongs to — linking
+          saves this page as that post's apply link.
+        </div>
+        <input
+          type="text"
+          id="link-job-search"
+          placeholder="Search your job posts…"
+          autocomplete="off"
+        />
+        <div id="link-job-list" class="profile-fields" style="padding: 8px 0 0;"></div>
+        <div class="status" id="link-job-status"></div>
       </details>
 
       <div class="footer">
@@ -913,53 +1018,6 @@
         <span class="spinner" aria-hidden="true"></span>
       </button>
       <div class="status" id="tracked-score-status"></div>
-
-      <!-- CC #46: Track application (jp -> ja). Label becomes "Apply &
-           track" when the post has an apply_url; swaps to "Open application"
-           once an application exists (dedupe). -->
-      <button id="track-apply-btn" class="primary" type="button" style="margin-top: 10px;">
-        <span class="btn-label">Track application</span>
-        <span class="spinner" aria-hidden="true"></span>
-      </button>
-      <div class="status" id="track-apply-status"></div>
-      <a
-        id="track-apply-link"
-        class="result-link hidden"
-        href="#"
-        target="_blank"
-        rel="noopener"
-      >Open application</a>
-
-      <!-- CC #47 / CCEXT-10: ad-hoc "Answer the selected text". Lives under
-           the tracked-JP screen so the Question attaches to this post and the
-           api answers it with the job description in context. Echoes the
-           highlighted selection above the generated/matched answer. -->
-      <details id="answer-card" class="profile-card" style="margin-top: 12px;">
-        <summary class="profile-summary">Answer the selected text</summary>
-        <div class="answer-body">
-          <button id="answer-btn" class="primary" type="button">
-            <span class="btn-label">Answer the selected text</span>
-            <span class="spinner" aria-hidden="true"></span>
-          </button>
-          <div class="status" id="answer-status"></div>
-          <div id="answer-prompt" class="answer-prompt hidden">
-            <div class="answer-prompt-label">Selected question</div>
-            <div class="answer-prompt-text" id="answer-prompt-text"></div>
-          </div>
-          <textarea
-            id="answer-text"
-            class="answer-text hidden"
-            rows="5"
-            spellcheck="true"
-          ></textarea>
-          <button
-            id="answer-copy"
-            class="primary hidden"
-            type="button"
-            style="margin-top: 8px;"
-          >Copy answer</button>
-        </div>
-      </details>
 
       <p class="helper">
         This page is already in your Career Caddy library. To re-scrape, open
@@ -1003,8 +1061,190 @@
       </p>
     </div>
 
+    <!-- CC-132: Applications tab — the JA interface. Mark applied for the
+         resolved post, jump to the application (nested jp/show/ja/show
+         route), answer the selected text. The apply-attribution recovery
+         card also lives here. -->
+    <div id="screen-applications" class="hidden">
+      <h1>Applications</h1>
+
+      <p id="applications-empty" class="helper hidden">
+        No job post is linked to this page yet. Find it (or send it) on the
+        Posts tab first — then track your application here.
+      </p>
+
+      <!-- CC-138: tabs opt-in affordance. Shown in the empty state when the
+           optional "tabs" permission is absent, so the signal ladder can look
+           across your open tabs (opener/other-tabs) to find the matching post.
+           Hidden once granted or once dismissed (remembered). -->
+      <div id="tabs-optin" class="helper hidden" style="margin-top: 10px;">
+        <button id="tabs-optin-btn" class="linkbtn" type="button">
+          Enable tab matching
+        </button>
+      </div>
+
+      <!-- CC-135 (1.8.12): staff-only agentic lookup. Shown in the empty/miss
+           state when the free ladder (T1-T6) found nothing and the user is
+           staff. Clicking TRACKS the application immediately (the user did
+           apply) AND asks Career Caddy to find its job post: POST
+           /job-applications/ with a match_context; the JA is created up front,
+           the async matcher backfills its job_post. Result renders in the
+           #match-result card below. May show alongside the tabs-optin
+           affordance. -->
+      <div id="ask-agent" class="hidden" style="margin-top: 12px;">
+        <button id="ask-agent-btn" class="primary" type="button">
+          <span class="btn-label">Track application &amp; find its job post</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+        <div class="status" id="ask-agent-status"></div>
+      </div>
+
+      <!-- CC-135 (1.8.12): match-result card. The JA already exists (tracked on
+           click); this renders the matcher's OUTCOME — a matched post (title +
+           company + confidence + rationale) in a Tracked state with an
+           Open-application link, an honest "no matching post found" when the
+           pick was null (pointing at the manual link tool on the Posts tab), or
+           an error. No confirm-to-create step: the application is already
+           tracked. Hidden until a result lands. -->
+      <div id="match-result" class="tracked-card hidden" style="margin-top: 12px;">
+        <div class="tracked-company" id="match-result-lead">Tracked</div>
+        <div class="tracked-title" id="match-result-title"></div>
+        <div class="tracked-company" id="match-result-company"></div>
+        <div class="status" id="match-result-status"></div>
+        <a
+          id="match-result-link"
+          class="result-link hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >Open application</a>
+      </div>
+
+      <div id="applications-body" class="hidden">
+        <div class="tracked-card">
+          <div class="tracked-title" id="app-jp-title"></div>
+          <div class="tracked-company" id="app-jp-company"></div>
+        </div>
+
+        <!-- CC #46: Track application (jp -> ja). Creates the JobApplication
+             in-place and confirms inline — never opens a tab; swaps to an
+             optional "Open application" link once one exists (dedupe). -->
+        <button id="track-apply-btn" class="primary" type="button" style="margin-top: 10px;">
+          <span class="btn-label">Track application</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+        <div class="status" id="track-apply-status"></div>
+        <a
+          id="track-apply-link"
+          class="result-link hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >Open application</a>
+
+        <!-- CC #47 / CCEXT-10: ad-hoc "Answer the selected text". Lives on
+             the Applications tab so the Question attaches to this post and
+             the api answers it with the job description in context. Echoes
+             the highlighted selection above the generated/matched answer. -->
+        <details id="answer-card" class="profile-card" style="margin-top: 12px;">
+          <summary class="profile-summary">Answer the selected text</summary>
+          <div class="answer-body">
+            <button id="answer-btn" class="primary" type="button">
+              <span class="btn-label">Answer the selected text</span>
+              <span class="spinner" aria-hidden="true"></span>
+            </button>
+            <div class="status" id="answer-status"></div>
+            <div id="answer-prompt" class="answer-prompt hidden">
+              <div class="answer-prompt-label">Selected question</div>
+              <div class="answer-prompt-text" id="answer-prompt-text"></div>
+            </div>
+            <textarea
+              id="answer-text"
+              class="answer-text hidden"
+              rows="5"
+              spellcheck="true"
+            ></textarea>
+            <button
+              id="answer-copy"
+              class="primary hidden"
+              type="button"
+              style="margin-top: 8px;"
+            >Copy answer</button>
+          </div>
+        </details>
+      </div>
+
+      <!-- CC #46: apply-attribution prompt — this page is an ATS apply page
+           matching a stashed "Apply & track" from the source post. Hidden
+           unless the stash matches. -->
+      <div id="apply-attr-card" class="tracked-card hidden" style="margin-top: 12px;">
+        <div class="tracked-company">Track your application for</div>
+        <div class="tracked-title" id="apply-attr-title"></div>
+        <div class="tracked-company" id="apply-attr-company"></div>
+        <button id="apply-attr-btn" class="primary" type="button" style="margin-top: 10px;">
+          <span class="btn-label">Track application</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+        <div class="status" id="apply-attr-status"></div>
+        <a
+          id="apply-attr-link"
+          class="result-link hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >Open application</a>
+      </div>
+
+      <!-- CC-138: signal-ladder offer. The active tab has no direct JobPost
+           match, but the ladder (opener/open-tabs/referrer/id-token/title/
+           viewed-trail) found a verified post the user is likely applying to.
+           Confirm creates the JobApplication (tracking_url = this page) AND
+           backfills the post's apply_url when empty. Hidden unless a tier
+           yields a match. -->
+      <div id="ladder-offer-card" class="tracked-card hidden" style="margin-top: 12px;">
+        <div class="tracked-company" id="ladder-offer-lead">Applying to</div>
+        <div class="tracked-title" id="ladder-offer-title"></div>
+        <div class="tracked-company" id="ladder-offer-company"></div>
+        <button id="ladder-offer-btn" class="primary" type="button" style="margin-top: 10px;">
+          <span class="btn-label">Track application</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+        <button id="ladder-offer-dismiss" class="linkbtn" type="button" style="margin-top: 6px;">
+          Not this one
+        </button>
+        <div class="status" id="ladder-offer-status"></div>
+        <a
+          id="ladder-offer-link"
+          class="result-link hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >Open application</a>
+      </div>
+    </div>
+
     <div id="screen-tools" class="hidden">
       <h1>Staff tools</h1>
+
+      <!-- STAFF tools — the tab button renders only for staff; this section
+           gate (toggled by showToolsScreen) is defense in depth. -->
+      <div id="staff-tools-section" class="hidden">
+
+      <!-- Selection introspection — echoes the exact text the extension reads
+           from the active page's highlight, so you can verify the selection is
+           picked up, and see whether this page maps to a job post an AI answer
+           could reference. Populated on open + on Re-check. -->
+      <div class="tool-card">
+        <div class="pp-head">
+          <p class="tool-title">Selected text</p>
+          <button id="sel-reread" class="linkbtn" type="button">Re-read</button>
+        </div>
+        <div id="sel-readout" class="sel-readout empty">
+          (nothing highlighted — select text on the page, then Re-read)
+        </div>
+        <div id="sel-meta" class="sel-meta hidden"></div>
+        <div id="sel-jp" class="sel-jp"></div>
+      </div>
 
       <div class="tool-card">
         <p class="tool-title">Sharpen ScrapeProfile</p>
@@ -1021,6 +1261,7 @@
           target="_blank"
           rel="noopener"
         ></a>
+        <ol id="enrich-trace" class="enrich-trace hidden"></ol>
       </div>
 
       <!-- "Proposed job-post" validator. Applies the host's job_data
@@ -1091,6 +1332,9 @@
           <span class="dev-hint-val empty" id="dev-hint-referrer">—</span>
         </div>
       </div>
+
+      </div>
+      <!-- /staff-tools-section -->
 
       <div class="footer">
         <button
