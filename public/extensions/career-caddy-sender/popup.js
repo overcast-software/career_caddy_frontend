@@ -1,4 +1,7 @@
-const ORIGIN = 'https://api.careercaddy.online';
+// CC-6 apex repoint (2026-07-15): api.careercaddy.online was retired in the
+// domain swap; production serves /api/* same-origin off the apex. ORIGIN is
+// the API host every ${ORIGIN}/api/... call targets; it is now the apex.
+const ORIGIN = 'https://careercaddy.online';
 const FRONTEND_ORIGIN = 'https://careercaddy.online';
 const STORAGE_KEYS = ['ccApiKey', 'ccKeyId', 'ccUsername', 'ccAutoScore', 'ccPending', 'ccIsStaff'];
 const PENDING_MAX_AGE_MS = 30_000;

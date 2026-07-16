@@ -51,6 +51,11 @@ The published listings are far behind the code: **Chrome Web Store 1.1.0**,
 
 ## Version history
 
+- **1.8.1** — Apex repoint (CC-6). `api.careercaddy.online` was retired in the
+  2026-07-14 domain swap; production now serves `/api/*` same-origin off the
+  apex. The extension's API `ORIGIN` moves to `https://careercaddy.online` and
+  `host_permissions` drops the retired `api.` host (the apex already covered
+  the palette-read), so it's now a single Career Caddy origin.
 - **1.8.0** — Store resubmission. No functional change since 1.7.6; bumps the
   version so the far-behind Chrome (1.1.0) and Firefox (1.1.1) listings can be
   updated to the current build. See "Store release notes" above — this update

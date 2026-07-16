@@ -7,7 +7,7 @@ Single purpose
 ------------------------------------------------------------
 Career Caddy Sender has a single purpose: capture the active tab's
 job posting (URL, title, and full page text) and send it to the
-user's Career Caddy account at https://api.careercaddy.online when
+user's Career Caddy account at https://careercaddy.online when
 the user clicks the Send button in the popup. The extension does
 not perform any other function.
 
@@ -85,21 +85,19 @@ host permission — justification
 ------------------------------------------------------------
 host_permissions is intentionally narrow:
 
-  https://api.careercaddy.online/*
   https://careercaddy.online/*
 
 This does NOT include <all_urls>. It is the minimum needed to
-operate:
+operate. The single Career Caddy origin serves both the API and the
+web app (same-origin /api/*), so one host covers everything:
 
-  1. api.careercaddy.online — required so the popup and the service
-     worker can fetch /api/v1/token/, /api/v1/api-keys/,
-     /api/v1/scrapes/, /api/v1/scores/, and /api/v1/job-posts/ on
-     the user's behalf.
-  2. careercaddy.online — required so the popup can read
-     theme-palette from a Career Caddy tab's localStorage (via a
-     small scripting.executeScript injection on a CC-origin tab)
-     so the popup's accent color matches the user's chosen palette
-     in the web app.
+  1. required so the popup and the service worker can fetch
+     /api/v1/token/, /api/v1/api-keys/, /api/v1/scrapes/,
+     /api/v1/scores/, and /api/v1/job-posts/ on the user's behalf.
+  2. required so the popup can read theme-palette from a Career Caddy
+     tab's localStorage (via a small scripting.executeScript
+     injection on a CC-origin tab) so the popup's accent color
+     matches the user's chosen palette in the web app.
 
 The activeTab permission (separately declared) covers reading
 job-posting page content on the user's Send click. host_permissions
@@ -115,7 +113,7 @@ JavaScript is bundled in the published .zip and runs in the popup
 or service worker. Network activity is limited to:
 
   1. fetch() calls (JSON request/response) to the user's Career
-     Caddy account at https://api.careercaddy.online,
+     Caddy account at https://careercaddy.online,
   2. chrome.scripting.executeScript calls that inject an inline
      `func` (bundled in popup.js, NOT a remote-code string) into
      the active tab's frames on the user's Send click.
