@@ -16,34 +16,34 @@ module('Unit | Service | api', function (hooks) {
   });
 
   test('url() prepends the configured API host to absolute paths', function (assert) {
-    config.APP.API_HOST = 'https://api.careercaddy.online';
+    config.APP.API_HOST = 'https://careercaddy.online';
     const api = this.owner.lookup('service:api');
 
     assert.strictEqual(
       api.url('/api/v1/scrapes/162/graph-trace/'),
-      'https://api.careercaddy.online/api/v1/scrapes/162/graph-trace/',
+      'https://careercaddy.online/api/v1/scrapes/162/graph-trace/',
     );
     assert.strictEqual(
       api.url('/api/v1/admin/graph-structure/'),
-      'https://api.careercaddy.online/api/v1/admin/graph-structure/',
+      'https://careercaddy.online/api/v1/admin/graph-structure/',
     );
   });
 
   test('url() inserts a separator for paths without leading slash', function (assert) {
-    config.APP.API_HOST = 'https://api.careercaddy.online';
+    config.APP.API_HOST = 'https://careercaddy.online';
     const api = this.owner.lookup('service:api');
     assert.strictEqual(
       api.url('api/v1/scrapes/'),
-      'https://api.careercaddy.online/api/v1/scrapes/',
+      'https://careercaddy.online/api/v1/scrapes/',
     );
   });
 
   test('url() trims trailing slashes off the configured host', function (assert) {
-    config.APP.API_HOST = 'https://api.careercaddy.online///';
+    config.APP.API_HOST = 'https://careercaddy.online///';
     const api = this.owner.lookup('service:api');
     assert.strictEqual(
       api.url('/api/v1/x/'),
-      'https://api.careercaddy.online/api/v1/x/',
+      'https://careercaddy.online/api/v1/x/',
     );
   });
 
