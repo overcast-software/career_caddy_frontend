@@ -19,7 +19,7 @@
 #   https://api-z5a55nqjfa-uc.a.run.app):
 #   API_UPSTREAM    -> location /api/          (JSON:API)
 #   EVENTS_UPSTREAM -> location /api/v1/events (SSE stream)
-#   MCP_UPSTREAM    -> location /mcp/          (MCP server)
+#   MCP_UPSTREAM    -> location /mcp           (MCP server)
 #
 # API_UPSTREAM is the master switch. When it's empty/unset the whole proxy
 # stays off (omarchy/prod-behind-Caddy path). EVENTS_UPSTREAM / MCP_UPSTREAM
@@ -98,8 +98,13 @@ location /api/ {
     proxy_set_header X-Real-IP \$remote_addr;
 }
 
-# MCP server
-location /mcp/ {
+# MCP server. Match the bare /mcp the client sends (no trailing slash) so
+# nginx does NOT append-slash-301 /mcp -> /mcp/; behind Cloud Run's TLS
+# terminator that redirect Location is built as http://, and the downgrade
+# strips the Authorization: Bearer header -> upstream 401. absolute_redirect
+# off keeps any future redirect relative (https-preserving) as defense.
+location /mcp {
+    absolute_redirect off;
     proxy_pass ${MCP_UPSTREAM};
     proxy_ssl_server_name on;
     proxy_set_header Host ${MCP_HOST};
@@ -113,4 +118,4 @@ EOF
 echo "10-api-proxy.sh: API_UPSTREAM set -> reverse proxy enabled"
 echo "  /api/v1/events -> ${EVENTS_UPSTREAM} (Host ${EVENTS_HOST})"
 echo "  /api/          -> ${API_UPSTREAM} (Host ${API_HOST})"
-echo "  /mcp/          -> ${MCP_UPSTREAM} (Host ${MCP_HOST})"
+echo "  /mcp           -> ${MCP_UPSTREAM} (Host ${MCP_HOST})"
