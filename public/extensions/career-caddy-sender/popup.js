@@ -1,4 +1,4 @@
-const ORIGIN = 'https://api.careercaddy.online';
+const ORIGIN = 'https://careercaddy.online';
 const FRONTEND_ORIGIN = 'https://careercaddy.online';
 const STORAGE_KEYS = ['ccApiKey', 'ccKeyId', 'ccUsername', 'ccAutoScore', 'ccPending'];
 const PENDING_MAX_AGE_MS = 30_000;
