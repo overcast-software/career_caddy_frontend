@@ -2508,54 +2508,53 @@ sendBtn.addEventListener('click', async () => {
   const directTitle = hints.structured_prefill?.title || '';
   const directCompany = hints.structured_prefill?.company_name || '';
   const directDescription = payload.text || '';
+  // curatedComplete: the per-host selectors extracted BOTH title AND
+  // company from the live DOM. Still tracked — a complete curated
+  // extraction is the best case and lets the server skip re-extraction —
+  // but its ABSENCE no longer downgrades the request off the
+  // extension-direct path (see the gate below).
   const curatedComplete =
     directTitle.trim().length > 0 &&
     directCompany.trim().length > 0 &&
     directDescription.trim().length > 0;
 
-  // The fast path is now gated on the SERVER's per-domain known-good
-  // signal (api PR #185, top-level `known_good` on the extension-selectors
-  // response) rather than purely on client-side presence.
+  // The captured page innerText IS the scrape's payload. When it's
+  // present the extension has already handed the server everything a
+  // JobPost write needs — the server LLM-extracts title/company from the
+  // description when the per-host selectors miss (api CC-122 persist).
+  const hasCapturedText = directDescription.trim().length > 0;
+
+  // GATE (CC-176): the captured DOM must ALWAYS go extension-direct when
+  // we have the page text. NEVER fall to /scrapes/from-text/, which
+  // creates a source_mode=browser status=pending scrape that waits for a
+  // Camoufox runner. On auth-walled pages (LinkedIn, Toptal) the runner
+  // can never load the logged-in page, so those scrapes hang forever with
+  // no JobPost. Doug: "the extension gives the scrape all the info it
+  // needs. this is not a camoufox workflow."
   //
-  //  - known_good === true → the api vouches that this domain's
-  //    ScrapeProfile is complete. Trust the curated job_data_selectors:
-  //    a complete curated extraction takes the extension-direct fast
-  //    path. This is the behavior meant to land once the ScrapeProfile is
-  //    complete for the invoked domain.
+  // Prior behavior (the bug): useDirectPost = curatedComplete, so an
+  // auth-walled page whose selectors missed title/company dropped to the
+  // browser-hold path. Now: presence of the captured innerText alone
+  // takes the extension-direct path. Title/company still ride in
+  // captured_payload WHEN the selectors matched (it saves the server a
+  // re-extraction), but their absence does not downgrade the request.
   //
-  //  - known_good false / absent (an api without #185) / selectors fetch
-  //    failed → fall back to v1.3.0 behavior UNCHANGED: the client-side
-  //    presence heuristic still drives a direct-POST when all three are
-  //    present, else /scrapes/from-text/. No regression for
-  //    non-known-good domains, and the extension stays correct deployed
-  //    ahead of #185 (missing known_good is treated as false — see
-  //    grabHints / loadExtensionSelectors defaults).
-  //
-  // Both arms currently admit the same hosts (the no-regression mandate
-  // keeps the not-known-good arm on the presence heuristic), so each
-  // resolves the decision to `curatedComplete`. They are kept distinct so
-  // the gate decision is observable while dogfooding the unpacked build,
-  // and so the not-known-good arm can later be tightened to from-text-only
-  // once #185 is universally deployed — without touching the wiring.
-  // Trust presence, iterate — no validator threshold at v1 (Doug's baked
-  // decision on the plan node).
+  // The `known_good` server signal (api PR #185) no longer branches the
+  // path — it only annotates the debug log. Both known-good and
+  // not-known-good hosts go extension-direct when text is present. The
+  // only from-text fallback left is the pathological no-text case (an
+  // empty-body page), which shouldn't produce a browser-hold scrape
+  // anyway; it's the degenerate tail, not the auth-walled main case.
   const serverVouched = hints.known_good === true;
-  let useDirectPost;
-  if (serverVouched) {
-    useDirectPost = curatedComplete;
-    console.debug('[cc-sender] known-good fast-path gate', {
-      tier: hints.tier,
-      curatedComplete,
-      useDirectPost,
-    });
-  } else {
-    useDirectPost = curatedComplete;
-    console.debug('[cc-sender] fallback presence gate (not known-good)', {
-      knownGood: hints.known_good,
-      curatedComplete,
-      useDirectPost,
-    });
-  }
+  const useDirectPost = hasCapturedText;
+  console.debug('[cc-sender] send gate', {
+    tier: hints.tier,
+    knownGood: hints.known_good,
+    serverVouched,
+    curatedComplete,
+    hasCapturedText,
+    useDirectPost,
+  });
 
   let resp;
   try {
@@ -2567,11 +2566,19 @@ sendBtn.addEventListener('click', async () => {
       // and ship the remaining dedup hints (canonical_link_hint,
       // referrer_url, structured_prefill) under extraction_hints so
       // the graph can reuse them on the bias-toward-canonical merge.
+      // description is always present here (hasCapturedText gates this
+      // branch). title/company ride along ONLY when the per-host
+      // selectors matched — omit them when empty so the server knows to
+      // LLM-extract from the description rather than persisting a blank
+      // title/company (api CC-122). Their absence must never downgrade
+      // this request to the browser-hold path.
       const capturedPayload = {
-        title: directTitle,
-        company: directCompany,
         description: directDescription,
       };
+      if (directTitle.trim().length > 0) capturedPayload.title = directTitle;
+      if (directCompany.trim().length > 0) {
+        capturedPayload.company = directCompany;
+      }
       if (hints.apply_url) capturedPayload.apply_url = hints.apply_url;
       // location: structured_prefill doesn't carry location at v1 —
       // when the per-host selectors start shipping a `location` key,
@@ -2874,11 +2881,18 @@ async function createFromProposed() {
   }
 
   const prefill = latestProposed.prefill || {};
+  // Omit title/company when the proposed prefill didn't carry them, so
+  // the server LLM-extracts from the description (api CC-122) rather than
+  // persisting a blank title/company. Same contract as the Send path.
   const capturedPayload = {
-    title: prefill.title || '',
-    company: prefill.company_name || '',
     description: payload.text,
   };
+  if ((prefill.title || '').trim().length > 0) {
+    capturedPayload.title = prefill.title;
+  }
+  if ((prefill.company_name || '').trim().length > 0) {
+    capturedPayload.company = prefill.company_name;
+  }
   if (latestProposed.applyUrl) {
     capturedPayload.apply_url = latestProposed.applyUrl;
   }
