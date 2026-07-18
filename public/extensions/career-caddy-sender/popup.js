@@ -1,4 +1,4 @@
-const ORIGIN = 'https://api.careercaddy.online';
+const ORIGIN = 'https://careercaddy.online';
 const FRONTEND_ORIGIN = 'https://careercaddy.online';
 const STORAGE_KEYS = ['ccApiKey', 'ccKeyId', 'ccUsername', 'ccAutoScore', 'ccPending', 'ccIsStaff'];
 const PENDING_MAX_AGE_MS = 30_000;
@@ -13,6 +13,68 @@ const PENDING_MAX_AGE_MS = 30_000;
 const CC_PENDING_APPLIES_KEY = 'ccPendingApplies';
 const APPLY_STASH_MAX = 5;
 const APPLY_STASH_TTL_MS = 6 * 60 * 60 * 1000; // 6h
+
+// CCEXT — reopen memory. The popup used to re-run the library lookup on
+// EVERY open and optimistically show "Send this page" until it resolved —
+// wrong and jarring on a page you just sent/tracked (the highlight→answer
+// workflow reopens the popup many times on the same URL).
+//   ccTrackedPages: url -> last successful library lookup, so reopen renders
+//     Tracked INSTANTLY from the stash, then re-verifies quietly.
+//   ccSentPages: url -> just-sent marker bridging the ASYNC extraction gap
+//     (CC-122: from-text parses async; the JP may not exist for a while), so
+//     reopen shows "Sent — processing…" instead of re-offering Send.
+const CC_TRACKED_PAGES_KEY = 'ccTrackedPages';
+const TRACKED_STASH_MAX = 50;
+const TRACKED_STASH_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7d
+// Freshness window: a stash entry (JP lookup / JA check) younger than this is
+// trusted outright — no quiet background re-verify. The highlight→answer loop
+// reopens the popup many times in a few minutes; without this, every reopen
+// re-fired the lookup + application-check roundtrips.
+const STASH_FRESH_MS = 10 * 60 * 1000; // 10m
+// /me is near-static (staff flag ~never changes, profile fields rarely) —
+// serve it from storage and refresh at most daily.
+const ME_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+const CC_SENT_PAGES_KEY = 'ccSentPages';
+const SENT_STASH_MAX = 10;
+const SENT_STASH_TTL_MS = 15 * 60 * 1000; // 15m
+
+// CC-138 — signal ladder. On a lookup miss the popup walks a ladder of
+// weaker-but-cheaper signals to find the JobPost the user is likely
+// applying to (opener tab → open tabs → referrer → id token → page title
+// → viewed-JP trail), and offers to track the application on the
+// Applications tab. Two supporting stashes / flags:
+//   ccViewedPosts: a short rolling trail of JobPosts the user just viewed
+//     as Tracked (T6 fallback). Cap 5, TTL 30m.
+//   ccTabsOptinDismissed: the user declined the optional "tabs" permission —
+//     don't re-prompt on every open.
+const CC_VIEWED_POSTS_KEY = 'ccViewedPosts';
+const VIEWED_POSTS_MAX = 5;
+const VIEWED_POSTS_TTL_MS = 30 * 60 * 1000; // 30m
+const CC_TABS_OPTIN_DISMISSED_KEY = 'ccTabsOptinDismissed';
+// Cap the ladder's server round-trips per popup-open (roundtrip diet).
+const LADDER_MAX_LOOKUPS = 8;
+// An opaque token from a URL query/fragment that could be a JobPost id (T4).
+const ID_TOKEN_RE = /^[A-Za-z0-9_-]{16,}$/;
+
+// CC-135 (1.8.12) — agentic JP lookup, folded into JobApplication. When the
+// free ladder (T1-T6) misses AND the user is staff, the Applications tab
+// offers to TRACK the application (the user did apply) and ask Career Caddy to
+// find its job post. The trigger is a normal JA create carrying a
+// match_context {referrer, page_title, text_excerpt}; the api gates it to
+// staff, creates the JA up front (status pending), and an async matcher
+// backfills the JA's job_post FK. We poll the JA and render the outcome.
+// Stash is keyed by the tab URL -> { jaId } so a result that lands after the
+// popup closes surfaces on the next open for that URL.
+const CC_MATCH_APPS_KEY = 'ccMatchApps';
+const MATCH_APP_STASH_MAX = 10;
+const MATCH_APP_STASH_TTL_MS = 30 * 60 * 1000; // 30m
+// Popup-side poll: short setInterval while the popup lives, then hand to the
+// background alarm (popup lifetime is short). Cap ~24 polls * 2.5s ≈ 60s.
+const MATCH_APP_POLL_INTERVAL_MS = 2500;
+const MATCH_APP_POLL_MAX = 24;
+// Client-side excerpt cap. The api re-truncates to 8000 at write; we cap here
+// too so the POST body stays small.
+const MATCH_APP_EXCERPT_MAX = 8000;
 const THEME_KEYS = ['ccTheme', 'ccPalette'];
 const VALID_MODES = new Set(['system', 'light', 'dark']);
 const VALID_PALETTES = new Set([
@@ -62,6 +124,17 @@ function classifyUrl(rawUrl) {
 
 const $ = (id) => document.getElementById(id);
 
+// Result-link anchors ship with a placeholder href="#" until JS assigns the
+// real URL. Clicking a placeholder with target="_blank" resolves "#" against
+// the popup's own document — duplicating popup.html into a new tab. Swallow
+// any click on an anchor whose href hasn't been assigned yet.
+document.addEventListener('click', (event) => {
+  const anchor = event.target && event.target.closest('a');
+  if (!anchor) return;
+  const href = anchor.getAttribute('href');
+  if (!href || href === '#') event.preventDefault();
+});
+
 const screenConnect = $('screen-connect');
 const screenConnected = $('screen-connected');
 const screenTracked = $('screen-tracked');
@@ -86,6 +159,15 @@ const sendBtn = $('send');
 const sendStatus = $('send-status');
 const resultLinkEl = $('result-link');
 const dismissBtn = $('dismiss');
+const recheckBtn = $('recheck'); // CCEXT: sent-processing manual re-check
+
+// "Link this page to a job post" (collapsed card on the Posts/send screen).
+// Zero heuristics — no auto-suggestion; the user expands, searches (empty
+// query = recent posts), and picks. Lazy: no roundtrip until expanded.
+const linkJobCardEl = $('link-job-card');
+const linkJobSearchEl = $('link-job-search');
+const linkJobListEl = $('link-job-list');
+const linkJobStatusEl = $('link-job-status');
 const autoScoreBox = $('auto-score');
 const autoScoreRow = $('auto-score-row');
 const postSendScoreBtn = $('post-send-score-btn');
@@ -126,15 +208,64 @@ const applyAttrLinkEl = $('apply-attr-link');
 // clear). Null when no offer is showing.
 let pendingApplyOffer = null;
 
+// --- CC-138: signal-ladder offer (Applications screen) -------------
+const ladderOfferCard = $('ladder-offer-card');
+const ladderOfferLeadEl = $('ladder-offer-lead');
+const ladderOfferTitleEl = $('ladder-offer-title');
+const ladderOfferCompanyEl = $('ladder-offer-company');
+const ladderOfferBtn = $('ladder-offer-btn');
+const ladderOfferDismissBtn = $('ladder-offer-dismiss');
+const ladderOfferStatus = $('ladder-offer-status');
+const ladderOfferLinkEl = $('ladder-offer-link');
+const tabsOptinEl = $('tabs-optin');
+const tabsOptinBtn = $('tabs-optin-btn');
+
+// --- CC-135 (1.8.12): agentic-lookup button + result card (staff only) ---
+const askAgentEl = $('ask-agent');
+const askAgentBtn = $('ask-agent-btn');
+const askAgentStatus = $('ask-agent-status');
+const matchResultCard = $('match-result');
+const matchResultLeadEl = $('match-result-lead');
+const matchResultTitleEl = $('match-result-title');
+const matchResultCompanyEl = $('match-result-company');
+const matchResultStatus = $('match-result-status');
+const matchResultLinkEl = $('match-result-link');
+// True while a match-application POST/poll is in flight, so a second click
+// can't fire a second POST and the visibility gate stays quiet.
+let matchAppInFlight = false;
+// The setInterval handle for the popup-side poll loop; cleared on terminal
+// status (a closed popup hands off to the background alarm).
+let matchAppPollTimer = null;
+
+// The ladder result currently surfaced on the offer card: the verified
+// JobPost, the tab URL to track against, and whether the copy is tentative
+// (T6 viewed-trail only). Null when no offer is showing.
+let pendingLadderOffer = null;
+// URLs dismissed via "Not this one" this popup session — don't re-offer.
+const dismissedLadderUrls = new Set();
+
 // --- Staff Tools tab (is_staff only) -------------------------------
 const tabBar = $('tab-bar');
 const tabSendBtn = $('tab-send');
+const tabApplicationsBtn = $('tab-applications');
 const tabToolsBtn = $('tab-tools');
 const screenTools = $('screen-tools');
+const staffToolsSection = $('staff-tools-section');
+// CC-132: Applications tab (the JA interface).
+const screenApplications = $('screen-applications');
+const applicationsEmptyEl = $('applications-empty');
+const applicationsBodyEl = $('applications-body');
+const appJpTitleEl = $('app-jp-title');
+const appJpCompanyEl = $('app-jp-company');
 const toolHostEl = $('tool-host');
 const enrichBtn = $('enrich-btn');
 const enrichStatus = $('enrich-status');
 const enrichLinkEl = $('enrich-link');
+const enrichTraceEl = $('enrich-trace');
+const selReadoutEl = $('sel-readout');
+const selMetaEl = $('sel-meta');
+const selJpEl = $('sel-jp');
+const selRereadBtn = $('sel-reread');
 const whoToolsEl = $('who-tools');
 const disconnectToolsBtn = $('disconnect-tools');
 const themeToggleToolsBtn = $('theme-toggle-tools');
@@ -200,11 +331,35 @@ async function fetchMe(apiKey) {
 }
 
 async function refreshStaffFlag(apiKey) {
+  // Serve /me from the storage cache when fresh — one fewer roundtrip on
+  // every popup open. A failed fetch is never cached, so the next open
+  // retries.
+  let cachedMe = null;
+  try {
+    const got = await api.storage.local.get(['ccMe']);
+    cachedMe = got.ccMe || null;
+  } catch {
+    cachedMe = null;
+  }
+  if (
+    cachedMe &&
+    cachedMe.attrs &&
+    cachedMe.ts &&
+    Date.now() - cachedMe.ts < ME_CACHE_TTL_MS
+  ) {
+    isStaff = cachedMe.attrs.is_staff === true;
+    maybeShowTabBar();
+    renderProfileCard(cachedMe.attrs);
+    return isStaff;
+  }
   const attrs = await fetchMe(apiKey);
   const staff = attrs?.is_staff === true;
   isStaff = staff;
   try {
-    await api.storage.local.set({ ccIsStaff: staff });
+    await api.storage.local.set({
+      ccIsStaff: staff,
+      ...(attrs ? { ccMe: { attrs, ts: Date.now() } } : {}),
+    });
   } catch {
     // best-effort cache; the live flag is authoritative this session
   }
@@ -276,14 +431,18 @@ function hideTabBar() {
   if (tabBar) tabBar.classList.add('hidden');
 }
 
-// The tab bar only appears for staff and only on a connected/tracked
-// screen — never on connect/loading.
+// The tab bar appears for EVERY connected user on a connected/tracked
+// screen — never on connect/loading. (Was staff-only; the Tools tab now
+// carries user tools — staff-only cards are gated INSIDE the tab by
+// showToolsScreen.)
 function maybeShowTabBar() {
   if (!tabBar) return;
+  // The Staff tab button exists only for staff accounts.
+  if (tabToolsBtn) tabToolsBtn.classList.toggle('hidden', !isStaff);
   const onSendableScreen =
     currentSendScreenEl === screenConnected ||
     currentSendScreenEl === screenTracked;
-  if (isStaff && onSendableScreen) {
+  if (onSendableScreen) {
     tabBar.classList.remove('hidden');
   } else {
     tabBar.classList.add('hidden');
@@ -295,46 +454,101 @@ function maybeShowTabBar() {
 function syncTabState() {
   activeTab = 'send';
   if (tabSendBtn) tabSendBtn.classList.add('active');
+  if (tabApplicationsBtn) tabApplicationsBtn.classList.remove('active');
   if (tabToolsBtn) tabToolsBtn.classList.remove('active');
   maybeShowTabBar();
 }
 
 function setActiveTab(tab) {
   activeTab = tab;
+  // Hide EVERY screen region first (incl. the loading skeleton — it bleeds
+  // through otherwise, since currentSendScreenEl is null until the
+  // popup-open lookup resolves), then reveal the active tab's own.
+  screenLoading.classList.add('hidden');
+  screenConnect.classList.add('hidden');
+  screenConnected.classList.add('hidden');
+  screenTracked.classList.add('hidden');
+  if (screenTools) screenTools.classList.add('hidden');
+  if (screenApplications) screenApplications.classList.add('hidden');
   if (tab === 'tools') {
-    // Hide EVERY send-area screen (incl. the loading skeleton) — not just
-    // currentSendScreenEl, which is null until the popup-open lookup
-    // resolves. Otherwise the skeleton bleeds through above the Tools panel.
-    screenLoading.classList.add('hidden');
-    screenConnect.classList.add('hidden');
-    screenConnected.classList.add('hidden');
-    screenTracked.classList.add('hidden');
     if (screenTools) screenTools.classList.remove('hidden');
-    if (tabToolsBtn) tabToolsBtn.classList.add('active');
-    if (tabSendBtn) tabSendBtn.classList.remove('active');
     showToolsScreen();
+  } else if (tab === 'applications') {
+    if (screenApplications) screenApplications.classList.remove('hidden');
+    showApplicationsScreen();
   } else {
-    if (screenTools) screenTools.classList.add('hidden');
-    // Back to Send: show whatever the lookup resolved to, or the skeleton
-    // if it's still in flight.
+    // Posts: show whatever the lookup resolved to, or the skeleton if it's
+    // still in flight.
     if (currentSendScreenEl) {
       currentSendScreenEl.classList.remove('hidden');
     } else {
       screenLoading.classList.remove('hidden');
     }
-    if (tabSendBtn) tabSendBtn.classList.add('active');
-    if (tabToolsBtn) tabToolsBtn.classList.remove('active');
   }
+  if (tabSendBtn) tabSendBtn.classList.toggle('active', tab === 'send');
+  if (tabApplicationsBtn)
+    tabApplicationsBtn.classList.toggle('active', tab === 'applications');
+  if (tabToolsBtn) tabToolsBtn.classList.toggle('active', tab === 'tools');
 }
 
 if (tabSendBtn)
   tabSendBtn.addEventListener('click', () => setActiveTab('send'));
+if (tabApplicationsBtn)
+  tabApplicationsBtn.addEventListener('click', () => setActiveTab('applications'));
 if (tabToolsBtn)
   tabToolsBtn.addEventListener('click', () => setActiveTab('tools'));
 
-// Populate the Tools tab when it opens: current host, who, page hints.
+// CC-132: populate the Applications tab. Everything renders off state the
+// popup already holds (trackedJobPost + the JA cache on its stash entry) —
+// the only network call is refreshApplicationState's dedupe check, and only
+// when that cache is cold.
+function showApplicationsScreen() {
+  const hasJp = !!(trackedJobPost && trackedJobPostId);
+  // Any offer (apply-attribution stash or CC-138 ladder) suppresses the
+  // empty-state helper — the offer card carries the message.
+  const matchResultActive =
+    !!(matchResultCard && !matchResultCard.classList.contains('hidden'));
+  const offerActive =
+    !!pendingApplyOffer || !!pendingLadderOffer || matchResultActive;
+  if (applicationsBodyEl) {
+    applicationsBodyEl.classList.toggle('hidden', !hasJp);
+  }
+  if (applicationsEmptyEl) {
+    applicationsEmptyEl.classList.toggle('hidden', hasJp || offerActive);
+  }
+  // CC-135: the ask-agent affordance + match-result card are miss-state
+  // surfaces — hide them once a JobPost is directly matched, otherwise let
+  // refreshAskAgentButton govern the button (staff-gated, suppressed by an
+  // active offer, kept up while a request is in flight).
+  if (hasJp) {
+    if (askAgentEl) askAgentEl.classList.add('hidden');
+    resetMatchResultCard();
+  } else {
+    refreshAskAgentButton();
+  }
+  if (!hasJp) return;
+  if (appJpTitleEl) {
+    appJpTitleEl.textContent = trackedJobPost.title || '(untitled job post)';
+  }
+  if (appJpCompanyEl) {
+    appJpCompanyEl.textContent = trackedJobPost.company || '';
+  }
+  refreshApplicationState();
+  // Echo the current page selection so a highlighted question is ready to
+  // answer without expanding + clicking.
+  primeAnswerSelection();
+}
+
+// Populate the Staff tab when it opens (selection readout, Sharpen,
+// proposed-post validator, dedup hints). The tab button renders only for
+// staff; the section toggle is defense in depth. The api enforces staff
+// server-side on every tool call — this gate only governs visibility.
 async function showToolsScreen() {
   if (whoToolsEl) whoToolsEl.textContent = connectedName || '';
+  if (staffToolsSection) {
+    staffToolsSection.classList.toggle('hidden', !isStaff);
+  }
+  if (!isStaff) return;
   let host = '';
   try {
     const [tab] = await api.tabs.query({ active: true, currentWindow: true });
@@ -345,11 +559,13 @@ async function showToolsScreen() {
   if (toolHostEl) toolHostEl.textContent = host || '(no active tab)';
   setStatus(enrichStatus, '');
   hideEnrichLink();
+  resetEnrichTrace();
   if (enrichBtn) {
     delete enrichBtn.dataset.state;
     enrichBtn.disabled = !host;
   }
   populateDevHints();
+  populateSelectionReadout();
 }
 
 function hideEnrichLink() {
@@ -369,6 +585,130 @@ function setEnrichSending(sending) {
     enrichBtn.disabled = false;
   }
 }
+
+// --- Sharpen step-trace (staff introspection) ----------------------
+// The Sharpen button used to leave you guessing. These append a visible,
+// numbered log of each step (resolve host -> match profile -> POST -> queued)
+// so a staff user can SEE exactly what happened and where it stopped.
+function resetEnrichTrace() {
+  if (!enrichTraceEl) return;
+  enrichTraceEl.textContent = '';
+  enrichTraceEl.classList.add('hidden');
+}
+
+function pushEnrichTrace(msg, kind) {
+  if (!enrichTraceEl) return;
+  const li = document.createElement('li');
+  li.textContent = msg;
+  if (kind) li.classList.add(kind);
+  enrichTraceEl.appendChild(li);
+  enrichTraceEl.classList.remove('hidden');
+}
+
+// --- Selection readout (staff introspection) -----------------------
+// Echo the EXACT text the extension reads from the active page's highlight,
+// how many frames it came from, and whether this page maps to a job post an
+// AI answer could use as context. This is the "prove it can see my
+// selection" surface.
+async function readSelectionDetails() {
+  let tab;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    return { text: '', frames: 0, hitFrames: 0 };
+  }
+  if (!tab || tab.id == null) return { text: '', frames: 0, hitFrames: 0 };
+  try {
+    const results = await api.scripting.executeScript({
+      target: { tabId: tab.id, allFrames: true },
+      func: () => (window.getSelection ? window.getSelection().toString() : ''),
+    });
+    const arr = Array.isArray(results) ? results : [];
+    let text = '';
+    let hitFrames = 0;
+    for (const r of arr) {
+      const s = r && r.result ? String(r.result).trim() : '';
+      if (s) {
+        hitFrames++;
+        if (!text) text = s; // first non-empty frame wins (matches the answer path)
+      }
+    }
+    return { text, frames: arr.length, hitFrames };
+  } catch {
+    return { text: '', frames: 0, hitFrames: 0 };
+  }
+}
+
+async function populateSelectionReadout() {
+  if (!selReadoutEl) return;
+  selReadoutEl.textContent = 'Reading the page selection…';
+  selReadoutEl.classList.remove('empty');
+  if (selMetaEl) selMetaEl.classList.add('hidden');
+  const { text, frames, hitFrames } = await readSelectionDetails();
+  if (!text) {
+    selReadoutEl.textContent =
+      '(nothing highlighted — select text on the page, then Re-read)';
+    selReadoutEl.classList.add('empty');
+    if (selMetaEl) selMetaEl.classList.add('hidden');
+  } else {
+    selReadoutEl.textContent = text;
+    selReadoutEl.classList.remove('empty');
+    if (selMetaEl) {
+      selMetaEl.textContent = `${text.length.toLocaleString()} chars · read from ${hitFrames} of ${frames} frame(s)`;
+      selMetaEl.classList.remove('hidden');
+    }
+  }
+  populateSelectionJpStatus();
+}
+
+// Independent library lookup for the active URL (the Tools tab discards the
+// Send-path lookup, so we run our own) — reports whether an AI answer here
+// would have a job post as context. Server-provided strings only, set via
+// textContent, so page/JP data can never inject markup.
+async function populateSelectionJpStatus() {
+  if (!selJpEl) return;
+  selJpEl.textContent = 'Checking your library…';
+  let saved;
+  let tab;
+  try {
+    saved = await api.storage.local.get(['ccApiKey']);
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    selJpEl.textContent = '';
+    return;
+  }
+  if (!saved.ccApiKey || !tab || !tab.url) {
+    selJpEl.textContent = '';
+    return;
+  }
+  let found = null;
+  try {
+    found = await lookupExistingJobPost(tab.url, saved.ccApiKey);
+  } catch {
+    found = null;
+  }
+  selJpEl.textContent = '';
+  if (found && found.id) {
+    selJpEl.appendChild(
+      document.createTextNode(
+        `In your library: “${found.title || 'untitled post'}” (#${found.id}). An AI answer here references this post — `,
+      ),
+    );
+    const link = document.createElement('a');
+    link.href = `${FRONTEND_ORIGIN}/job-posts/${found.id}`;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'view it';
+    selJpEl.appendChild(link);
+    selJpEl.appendChild(document.createTextNode('.'));
+  } else {
+    selJpEl.textContent =
+      'Not in your library yet — Send this page first so an AI answer can use this job as context.';
+  }
+}
+
+if (selRereadBtn)
+  selRereadBtn.addEventListener('click', populateSelectionReadout);
 
 // Resolve the active host (and parent-domain fallbacks) to a
 // ScrapeProfile id via the staff-only list filter. Mirrors the api's
@@ -428,11 +768,13 @@ async function resolveProfileId(host, apiKey) {
 // profile rather than polling to completion.
 async function handleEnrich() {
   hideEnrichLink();
+  resetEnrichTrace();
   setEnrichSending(true);
   setStatus(enrichStatus, 'Resolving profile…');
 
   const saved = await api.storage.local.get(['ccApiKey']);
   if (!saved.ccApiKey) {
+    pushEnrichTrace('Not connected — no API key stored.', 'bad');
     setStatus(enrichStatus, 'Not connected.', 'error');
     setEnrichSending(false);
     return;
@@ -446,18 +788,25 @@ async function handleEnrich() {
     // fall through to the no-host guard
   }
   if (!host) {
+    pushEnrichTrace('No active tab to read a host from.', 'bad');
     setStatus(enrichStatus, 'No active tab to sharpen.', 'error');
     setEnrichSending(false);
     return;
   }
+  pushEnrichTrace(`1. Resolving a ScrapeProfile for ${normalizeHostname(host)}…`);
 
   const resolved = await resolveProfileId(host, saved.ccApiKey);
   if (resolved && resolved.forbidden) {
+    pushEnrichTrace('The API refused the lookup — staff access required.', 'bad');
     setStatus(enrichStatus, 'Staff access required.', 'error');
     setEnrichSending(false);
     return;
   }
   if (!resolved) {
+    pushEnrichTrace(
+      `No ScrapeProfile matches ${normalizeHostname(host)}. Nothing to sharpen — Send this page first to create one.`,
+      'bad',
+    );
     setStatus(
       enrichStatus,
       `No ScrapeProfile for ${normalizeHostname(host)} yet — capture a scrape for this domain first.`,
@@ -466,7 +815,12 @@ async function handleEnrich() {
     setEnrichSending(false);
     return;
   }
+  pushEnrichTrace(
+    `2. Matched profile #${resolved.id} (${resolved.hostname}).`,
+    'ok',
+  );
 
+  pushEnrichTrace(`3. POST /scrape-profiles/${resolved.id}/sharpen/ …`);
   setStatus(enrichStatus, 'Queuing sharpen…');
   let resp;
   try {
@@ -484,6 +838,7 @@ async function handleEnrich() {
       },
     );
   } catch (err) {
+    pushEnrichTrace(`Network error: ${err.message}`, 'bad');
     setStatus(enrichStatus, `Network error: ${err.message}`, 'error');
     setEnrichSending(false);
     return;
@@ -497,11 +852,19 @@ async function handleEnrich() {
   }
 
   if (resp.status === 401 || resp.status === 403) {
+    pushEnrichTrace(
+      `Rejected (HTTP ${resp.status}) — staff access required.`,
+      'bad',
+    );
     setStatus(enrichStatus, 'Staff access required.', 'error');
     setEnrichSending(false);
     return;
   }
   if (resp.status === 422) {
+    pushEnrichTrace(
+      `HTTP 422 — no completed scrape for ${resolved.hostname} yet. Send this page, then Sharpen.`,
+      'bad',
+    );
     setStatus(
       enrichStatus,
       `No completed scrape for ${resolved.hostname} yet — use "Send this page", then sharpen once it's captured.`,
@@ -512,12 +875,17 @@ async function handleEnrich() {
   }
   if (!resp.ok) {
     const detail = body?.errors?.[0]?.detail || `HTTP ${resp.status}`;
+    pushEnrichTrace(`Failed: ${detail}`, 'bad');
     setStatus(enrichStatus, `Error: ${detail}`, 'error');
     setEnrichSending(false);
     return;
   }
 
   const jobId = body?.meta?.job_id;
+  pushEnrichTrace(
+    `4. Queued${jobId ? ` — sharpen job #${jobId}` : ''}. The offline enhancer runs it; re-open the profile shortly to see the changes.`,
+    'ok',
+  );
   setStatus(
     enrichStatus,
     `Sharpen queued for ${resolved.hostname}${jobId ? ` (job ${jobId})` : ''}.`,
@@ -678,6 +1046,7 @@ function hideAllScreens() {
   screenTracked.classList.add('hidden');
   if (screenOnCc) screenOnCc.classList.add('hidden');
   if (screenTools) screenTools.classList.add('hidden');
+  if (screenApplications) screenApplications.classList.add('hidden');
 }
 
 function showLoading() {
@@ -802,12 +1171,34 @@ function renderVerdict(hints) {
   }
 }
 
+// Introspection: turn the last selector-lookup outcome into an HONEST note —
+// a genuine 404 ("no profile") vs a masked failure (429 throttle / 5xx /
+// network) that only LOOKS like "no profile". Answers "no scrape profile,
+// really?" truthfully instead of collapsing every miss to one line.
+function profileLookupNote(host) {
+  const label = host || 'this host';
+  const f = lastSelectorFetch;
+  if (!f) return `No ScrapeProfile for ${label}.`;
+  if (f.status === 404) {
+    return `No ScrapeProfile for ${label} — the API returned 404 (confirmed absent${f.from === 'cache' ? ', cached' : ''}).`;
+  }
+  if (f.ok) {
+    return `A ScrapeProfile exists for ${label}, but it has no extension selectors configured.`;
+  }
+  if (f.status === 429) {
+    return `Profile lookup was THROTTLED (HTTP 429) — this is NOT a confirmed absence. Re-check after the rate limit clears.`;
+  }
+  if (f.status === 0) {
+    return `Profile lookup couldn't reach the API${f.error ? ` (${f.error})` : ''} — NOT a confirmed absence. Re-check.`;
+  }
+  return `Profile lookup failed (HTTP ${f.status}) — NOT a confirmed absence. Re-check.`;
+}
+
 function renderProposedPost(hints, host) {
-  // No ScrapeProfile resolved for this host (404 / parent-domain miss).
+  // No selectors resolved: could be a genuine 404, or a masked 429/5xx/network
+  // failure. profileLookupNote() reads the lookup's real outcome and says which.
   if (!hints || !hints.has_selectors) {
-    resetProposedPost(
-      host ? `No ScrapeProfile for ${host}.` : 'No ScrapeProfile for this host.',
-    );
+    resetProposedPost(profileLookupNote(host));
     return;
   }
 
@@ -1004,6 +1395,9 @@ async function populateDevHints() {
 // staff Tools tab (where the hints are now displayed).
 async function maybeBackfillApplyUrl() {
   if (!trackedJobPostId) return;
+  // The JP already carries an apply link — nothing to backfill. Skips the
+  // hints fetch + PATCH that used to fire on every tracked-screen render.
+  if (trackedJobPost && trackedJobPost.applyUrl) return;
   let saved;
   try {
     saved = await api.storage.local.get(['ccApiKey']);
@@ -1032,7 +1426,7 @@ async function maybeBackfillApplyUrl() {
   }
   if (!hints.apply_url) return;
   try {
-    await fetch(`${ORIGIN}/api/v1/job-posts/${trackedJobPostId}`, {
+    const resp = await fetch(`${ORIGIN}/api/v1/job-posts/${trackedJobPostId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/vnd.api+json',
@@ -1047,6 +1441,12 @@ async function maybeBackfillApplyUrl() {
         },
       }),
     });
+    if (resp.ok && trackedJobPost) {
+      // Memo the backfilled value in-session and on the stash entry so
+      // neither this open nor stashed reopens repeat the PATCH.
+      trackedJobPost.applyUrl = hints.apply_url;
+      stashTrackedPage(tab.url, trackedJobPost);
+    }
   } catch (err) {
     console.warn('[cc-sender] apply_url backfill PATCH failed', err);
   }
@@ -1061,7 +1461,12 @@ function showConnected(name, incompleteTarget = null) {
   hideResultLink();
   setSendingState(false);
   setStatus(sendStatus, '');
+  // Reset any sent-processing residue (same popup lifetime).
+  sendBtn.classList.remove('hidden');
+  if (autoScoreRow) autoScoreRow.classList.remove('hidden');
+  if (recheckBtn) recheckBtn.classList.add('hidden');
   resetApplyAttributionCard(); // CC #46: hidden unless a stash match offers it
+  resetLadderOfferCard(); // CC-138: hidden unless the signal ladder offers it
   syncTabState();
 
   // Resend mode: an existing JobPost was found at this URL but is
@@ -1101,7 +1506,9 @@ function showTracked(found, name) {
   connectedName = name || '';
   currentSendScreenEl = screenTracked;
   maybeBackfillApplyUrl();
-  refreshApplicationState(); // CC #46: dedupe-on-render (Track vs Open)
+  // CC-138 T6: remember this viewed post so a later apply-page miss can offer
+  // it from the viewed-JP trail. Fire-and-forget; the stash is best-effort.
+  pushViewedPost(found);
   trackedTitleEl.textContent = title || '(untitled job post)';
   trackedCompanyEl.textContent = company || '';
   const hasScore = topScore !== null && topScore !== undefined;
@@ -1247,6 +1654,81 @@ async function resolveOpenScreen(apiKey, name) {
   } catch {
     // fall through to the optimistic Send UI
   }
+  // CCEXT reopen-memory: tracked stash first — a page we already know maps
+  // to a JobPost renders its final screen INSTANTLY (no wrong "Send this
+  // page" flash), then re-verifies quietly in the background.
+  const trackedMap = await readPageStash(
+    CC_TRACKED_PAGES_KEY,
+    TRACKED_STASH_TTL_MS,
+  );
+  const cached = trackedMap[tab.url];
+  if (cached && cached.found && cached.found.id) {
+    if (cached.found.complete === false) {
+      showConnected(name, cached.found);
+    } else {
+      showTracked(cached.found, name);
+      // v0 tab landing (state-based): a cached application means the user
+      // is past "find the post" — open straight onto the Applications tab.
+      if (cached.found.appId) setActiveTab('applications');
+    }
+    // Fresh stash = trusted: skip the quiet background re-verify roundtrip
+    // entirely. It only re-runs once the entry ages past the window.
+    if (cached.ts && Date.now() - cached.ts < STASH_FRESH_MS) return;
+    lookupExistingJobPost(tab.url, apiKey)
+      .then((found) => {
+        if (!found) {
+          // Ambiguous: a miss OR a network/throttle blip — the lookup
+          // collapses both to null. Never demote a known-tracked page on
+          // ambiguity; a truly deleted JP surfaces on the next action.
+          return;
+        }
+        // Same post → merge over the cached record so the JA discovery
+        // (appId / appCheckedTs) survives the refresh; a plain overwrite
+        // would wipe it and re-trigger the application check next open.
+        stashTrackedPage(
+          tab.url,
+          String(found.id) === String(cached.found.id)
+            ? { ...cached.found, ...found }
+            : found,
+        );
+        if (activeTab !== 'send') return;
+        // Correct the screen only when the fresh truth materially differs
+        // and we wouldn't yank the user mid-answer.
+        if (found.complete === false && !answerPolling) {
+          showConnected(name, found);
+        } else if (
+          found.complete !== false &&
+          String(found.id) !== String(cached.found.id)
+        ) {
+          showTracked(found, name);
+        }
+      })
+      .catch(() => {});
+    return;
+  }
+
+  // CCEXT reopen-memory: just-sent marker — extraction is async (CC-122),
+  // so the JP may not exist yet. Show "Sent — processing…" (never the Send
+  // form) and upgrade to Tracked when the lookup starts hitting.
+  const sentMap = await readPageStash(CC_SENT_PAGES_KEY, SENT_STASH_TTL_MS);
+  if (sentMap[tab.url]) {
+    showSentProcessing(name);
+    lookupExistingJobPost(tab.url, apiKey)
+      .then(async (found) => {
+        if (!found) return; // still extracting — Re-check or reopen later
+        await removePageStash(CC_SENT_PAGES_KEY, tab.url);
+        stashTrackedPage(tab.url, found);
+        if (activeTab !== 'send') return;
+        if (found.complete) {
+          showTracked(found, name);
+        } else {
+          showConnected(name, found);
+        }
+      })
+      .catch(() => {});
+    return;
+  }
+
   // Show the Send UI IMMEDIATELY rather than blocking the popup on the
   // library lookup, which can take several seconds. Run the lookup in the
   // background and upgrade to the Tracked / resend screen when it returns —
@@ -1255,12 +1737,17 @@ async function resolveOpenScreen(apiKey, name) {
   showConnected(name);
   lookupExistingJobPost(tab.url, apiKey)
     .then((found) => {
+      if (found) stashTrackedPage(tab.url, found); // remember for next open
       if (activeTab !== 'send') return;
       if (!found) {
         // No direct JobPost match. CC #46 bonus: the active tab may be an
         // ATS apply page opened via "Apply & track" on the source post —
         // consult the apply-attribution stash and offer to track it.
-        maybeOfferApplyAttribution(tab.url, name);
+        maybeOfferApplyAttribution(tab.url, name).then((offered) => {
+          // CC-138: the origin-match stash yielded nothing — walk the signal
+          // ladder (opener/open-tabs/referrer/id-token/title/viewed-trail).
+          if (!offered) maybeOfferFromLadder(tab, apiKey);
+        });
         return;
       }
       if (found.complete) {
@@ -1282,6 +1769,36 @@ function showSending(name) {
   setStatus(sendStatus, 'Send in progress — close and reopen for status.');
   if (dismissBtn) dismissBtn.classList.remove('hidden');
 }
+
+// CCEXT reopen-memory: this page was sent moments ago and the async
+// extraction hasn't produced the JobPost yet. NEVER re-offer "Send this
+// page" here — show a processing state with a manual Re-check.
+function showSentProcessing(name) {
+  showConnected(name);
+  const headingEl = document.getElementById('connected-heading');
+  if (headingEl) headingEl.textContent = 'Sent to Career Caddy';
+  sendBtn.classList.add('hidden');
+  if (autoScoreRow) autoScoreRow.classList.add('hidden');
+  setStatus(
+    sendStatus,
+    'Processing — extracting this job post. It will appear as tracked shortly.',
+  );
+  if (recheckBtn) recheckBtn.classList.remove('hidden');
+}
+
+async function handleRecheck() {
+  let saved;
+  try {
+    saved = await api.storage.local.get(['ccApiKey', 'ccUsername']);
+  } catch {
+    return;
+  }
+  if (!saved.ccApiKey) return;
+  showLoading();
+  resolveOpenScreen(saved.ccApiKey, saved.ccUsername);
+}
+
+if (recheckBtn) recheckBtn.addEventListener('click', handleRecheck);
 
 function loadSaved() {
   return api.storage.local.get(STORAGE_KEYS).then(async (saved) => {
@@ -1491,7 +2008,10 @@ async function handleDisconnect() {
     'ccKeyId',
     'ccUsername',
     'ccIsStaff',
+    'ccMe',
     'ccExtensionSelectorCache',
+    CC_TRACKED_PAGES_KEY,
+    CC_SENT_PAGES_KEY,
   ]);
   isStaff = false;
   if (disconnectBtn) disconnectBtn.disabled = false;
@@ -1614,6 +2134,13 @@ const DECODERS = {
 const SELECTOR_CACHE_TTL_MS = 60 * 60 * 1000; // 1h
 const SELECTOR_CACHE_KEY = 'ccExtensionSelectorCache';
 
+// Introspection side-channel: the outcome of the most recent
+// loadExtensionSelectors() call, so the Proposed-job-post card can tell a
+// genuine 404 ("no profile") apart from a MASKED failure (429 throttle, 5xx,
+// network) that merely looks like "no profile". Does not change
+// loadExtensionSelectors' return contract.
+let lastSelectorFetch = null;
+
 function normalizeHostname(host) {
   if (!host) return '';
   const lower = host.toLowerCase();
@@ -1647,6 +2174,9 @@ async function loadExtensionSelectors(host, apiKey) {
   if (!norm) return null;
   const cached = await readSelectorCache(norm);
   if (cached) {
+    lastSelectorFetch = cached.missing
+      ? { host: norm, ok: false, status: 404, from: 'cache' }
+      : { host: norm, ok: true, status: 200, from: 'cache' };
     return cached.missing ? null : cached.selectors;
   }
   let resp;
@@ -1664,6 +2194,7 @@ async function loadExtensionSelectors(host, apiKey) {
     );
   } catch (err) {
     console.warn('[cc-sender] selector fetch failed', err);
+    lastSelectorFetch = { host: norm, ok: false, status: 0, error: err.message };
     // Network failure — try baked default but don't cache the miss so
     // we retry next time.
     return BAKED_EXTENSION_SELECTORS[norm] || null;
@@ -1671,14 +2202,19 @@ async function loadExtensionSelectors(host, apiKey) {
   if (resp.status === 404) {
     // No api-side profile for this host; baked default if we have one,
     // else nothing. Cache the miss so we don't refetch every send.
+    lastSelectorFetch = { host: norm, ok: false, status: 404 };
     const baked = BAKED_EXTENSION_SELECTORS[norm] || null;
     await writeSelectorCache(norm, baked ? { selectors: baked } : { missing: true });
     return baked;
   }
   if (!resp.ok) {
+    // 429 throttle / 5xx / etc. — NOT a confirmed absence. Record the real
+    // status so the Proposed-post card can say so instead of "no profile".
     console.warn('[cc-sender] selector fetch non-200', resp.status);
+    lastSelectorFetch = { host: norm, ok: false, status: resp.status };
     return BAKED_EXTENSION_SELECTORS[norm] || null;
   }
+  lastSelectorFetch = { host: norm, ok: true, status: resp.status };
   let body;
   try {
     body = await resp.json();
@@ -1972,54 +2508,53 @@ sendBtn.addEventListener('click', async () => {
   const directTitle = hints.structured_prefill?.title || '';
   const directCompany = hints.structured_prefill?.company_name || '';
   const directDescription = payload.text || '';
+  // curatedComplete: the per-host selectors extracted BOTH title AND
+  // company from the live DOM. Still tracked — a complete curated
+  // extraction is the best case and lets the server skip re-extraction —
+  // but its ABSENCE no longer downgrades the request off the
+  // extension-direct path (see the gate below).
   const curatedComplete =
     directTitle.trim().length > 0 &&
     directCompany.trim().length > 0 &&
     directDescription.trim().length > 0;
 
-  // The fast path is now gated on the SERVER's per-domain known-good
-  // signal (api PR #185, top-level `known_good` on the extension-selectors
-  // response) rather than purely on client-side presence.
+  // The captured page innerText IS the scrape's payload. When it's
+  // present the extension has already handed the server everything a
+  // JobPost write needs — the server LLM-extracts title/company from the
+  // description when the per-host selectors miss (api CC-122 persist).
+  const hasCapturedText = directDescription.trim().length > 0;
+
+  // GATE (CC-176): the captured DOM must ALWAYS go extension-direct when
+  // we have the page text. NEVER fall to /scrapes/from-text/, which
+  // creates a source_mode=browser status=pending scrape that waits for a
+  // Camoufox runner. On auth-walled pages (LinkedIn, Toptal) the runner
+  // can never load the logged-in page, so those scrapes hang forever with
+  // no JobPost. Doug: "the extension gives the scrape all the info it
+  // needs. this is not a camoufox workflow."
   //
-  //  - known_good === true → the api vouches that this domain's
-  //    ScrapeProfile is complete. Trust the curated job_data_selectors:
-  //    a complete curated extraction takes the extension-direct fast
-  //    path. This is the behavior meant to land once the ScrapeProfile is
-  //    complete for the invoked domain.
+  // Prior behavior (the bug): useDirectPost = curatedComplete, so an
+  // auth-walled page whose selectors missed title/company dropped to the
+  // browser-hold path. Now: presence of the captured innerText alone
+  // takes the extension-direct path. Title/company still ride in
+  // captured_payload WHEN the selectors matched (it saves the server a
+  // re-extraction), but their absence does not downgrade the request.
   //
-  //  - known_good false / absent (an api without #185) / selectors fetch
-  //    failed → fall back to v1.3.0 behavior UNCHANGED: the client-side
-  //    presence heuristic still drives a direct-POST when all three are
-  //    present, else /scrapes/from-text/. No regression for
-  //    non-known-good domains, and the extension stays correct deployed
-  //    ahead of #185 (missing known_good is treated as false — see
-  //    grabHints / loadExtensionSelectors defaults).
-  //
-  // Both arms currently admit the same hosts (the no-regression mandate
-  // keeps the not-known-good arm on the presence heuristic), so each
-  // resolves the decision to `curatedComplete`. They are kept distinct so
-  // the gate decision is observable while dogfooding the unpacked build,
-  // and so the not-known-good arm can later be tightened to from-text-only
-  // once #185 is universally deployed — without touching the wiring.
-  // Trust presence, iterate — no validator threshold at v1 (Doug's baked
-  // decision on the plan node).
+  // The `known_good` server signal (api PR #185) no longer branches the
+  // path — it only annotates the debug log. Both known-good and
+  // not-known-good hosts go extension-direct when text is present. The
+  // only from-text fallback left is the pathological no-text case (an
+  // empty-body page), which shouldn't produce a browser-hold scrape
+  // anyway; it's the degenerate tail, not the auth-walled main case.
   const serverVouched = hints.known_good === true;
-  let useDirectPost;
-  if (serverVouched) {
-    useDirectPost = curatedComplete;
-    console.debug('[cc-sender] known-good fast-path gate', {
-      tier: hints.tier,
-      curatedComplete,
-      useDirectPost,
-    });
-  } else {
-    useDirectPost = curatedComplete;
-    console.debug('[cc-sender] fallback presence gate (not known-good)', {
-      knownGood: hints.known_good,
-      curatedComplete,
-      useDirectPost,
-    });
-  }
+  const useDirectPost = hasCapturedText;
+  console.debug('[cc-sender] send gate', {
+    tier: hints.tier,
+    knownGood: hints.known_good,
+    serverVouched,
+    curatedComplete,
+    hasCapturedText,
+    useDirectPost,
+  });
 
   let resp;
   try {
@@ -2031,11 +2566,19 @@ sendBtn.addEventListener('click', async () => {
       // and ship the remaining dedup hints (canonical_link_hint,
       // referrer_url, structured_prefill) under extraction_hints so
       // the graph can reuse them on the bias-toward-canonical merge.
+      // description is always present here (hasCapturedText gates this
+      // branch). title/company ride along ONLY when the per-host
+      // selectors matched — omit them when empty so the server knows to
+      // LLM-extract from the description rather than persisting a blank
+      // title/company (api CC-122). Their absence must never downgrade
+      // this request to the browser-hold path.
       const capturedPayload = {
-        title: directTitle,
-        company: directCompany,
         description: directDescription,
       };
+      if (directTitle.trim().length > 0) capturedPayload.title = directTitle;
+      if (directCompany.trim().length > 0) {
+        capturedPayload.company = directCompany;
+      }
       if (hints.apply_url) capturedPayload.apply_url = hints.apply_url;
       // location: structured_prefill doesn't carry location at v1 —
       // when the per-host selectors start shipping a `location` key,
@@ -2126,6 +2669,18 @@ sendBtn.addEventListener('click', async () => {
       // 409 = duplicate; existing post may have a prior score. Don't
       // assume the user wants /scores — link to the post page itself.
       showResultLink(existingJobPostId, { withScores: false });
+      // CCEXT reopen-memory: the page maps to an existing JP — remember it.
+      await stashTrackedPage(payload.url, {
+        id: String(existingJobPostId),
+        title: meta.title || null,
+        company: meta.company_name || null,
+        companyId: null,
+        applyUrl: null,
+        link: payload.url,
+        topScore: null,
+        hasPendingScore: false,
+        complete: true,
+      });
     }
     api.runtime
       .sendMessage({
@@ -2163,12 +2718,11 @@ sendBtn.addEventListener('click', async () => {
     return;
   }
 
-  // The from-text endpoint runs parse_scrape synchronously, so the scrape
-  // already has a job_post_id by the time the response returns. Surface
-  // the link immediately and fire the "added" OS notification now —
-  // don't wait for the bg poll. The bg path still polls for the score
-  // result when auto-score is on; that's the SECOND, score-aware
-  // notification.
+  // CC-122: from-text extraction is ASYNC — the job-post relationship may
+  // or may not be on the response yet. When it is, surface the link and
+  // fire the "added" notification now; when it isn't, the bg poll picks it
+  // up. The bg path still polls for the score result when auto-score is on;
+  // that's the SECOND, score-aware notification.
   const newJobPostId =
     body?.data?.relationships?.['job-post']?.data?.id || null;
   const includedJobPost = (body?.included || []).find(
@@ -2179,6 +2733,32 @@ sendBtn.addEventListener('click', async () => {
   );
   const newJobTitle =
     includedJobPost?.attributes?.title || payload.url;
+
+  // CCEXT reopen-memory: remember this URL so a reopen NEVER re-offers
+  // "Send this page". JP already known → tracked stash (instant Tracked
+  // screen); still extracting → sent marker ("Sent — processing…" until the
+  // lookup or bg poll promotes it).
+  if (newJobPostId) {
+    await stashTrackedPage(payload.url, {
+      id: String(newJobPostId),
+      title: newJobTitle,
+      company: null,
+      companyId: null,
+      applyUrl: null,
+      link: payload.url,
+      topScore: null,
+      hasPendingScore: !!wantsScore,
+      complete: true,
+    });
+  } else {
+    await writePageStash(
+      CC_SENT_PAGES_KEY,
+      SENT_STASH_TTL_MS,
+      SENT_STASH_MAX,
+      payload.url,
+      { scrapeId: String(scrapeId) },
+    );
+  }
   // canonical_redirect (from response meta) tells us where the user
   // should actually land — when LinkedIn is submitted with apply_url
   // pointing at an ATS JP, the ATS JP is the canonical record and the
@@ -2301,11 +2881,18 @@ async function createFromProposed() {
   }
 
   const prefill = latestProposed.prefill || {};
+  // Omit title/company when the proposed prefill didn't carry them, so
+  // the server LLM-extracts from the description (api CC-122) rather than
+  // persisting a blank title/company. Same contract as the Send path.
   const capturedPayload = {
-    title: prefill.title || '',
-    company: prefill.company_name || '',
     description: payload.text,
   };
+  if ((prefill.title || '').trim().length > 0) {
+    capturedPayload.title = prefill.title;
+  }
+  if ((prefill.company_name || '').trim().length > 0) {
+    capturedPayload.company = prefill.company_name;
+  }
   if (latestProposed.applyUrl) {
     capturedPayload.apply_url = latestProposed.applyUrl;
   }
@@ -2601,12 +3188,10 @@ async function postJobApplication({ jobPostId, trackingUrl, apiKey }) {
 function setTrackApplyLabel() {
   if (!trackApplyBtn) return;
   const lbl = trackApplyBtn.querySelector('.btn-label');
-  if (lbl) {
-    lbl.textContent =
-      trackedJobPost && trackedJobPost.applyUrl
-        ? 'Apply & track'
-        : 'Track application';
-  }
+  // The button creates the JobApplication in-place and confirms inline — it
+  // never navigates — so the label is always "Track application" regardless
+  // of whether the post carries an apply_url.
+  if (lbl) lbl.textContent = 'Track application';
 }
 
 function setTrackApplySending(sending) {
@@ -2629,31 +3214,71 @@ function resetTrackApplyCard() {
 function showTrackApplyOpenLink(appId, label) {
   if (trackApplyBtn) trackApplyBtn.classList.add('hidden');
   if (trackApplyLinkEl && appId) {
-    trackApplyLinkEl.href = `${FRONTEND_ORIGIN}/job-applications/${appId}`;
+    // Canonical nested route (jp/show/ja/show) — skips the flat-route
+    // redirect hop.
+    trackApplyLinkEl.href = trackedJobPostId
+      ? `${FRONTEND_ORIGIN}/job-posts/${trackedJobPostId}/job-applications/${appId}`
+      : `${FRONTEND_ORIGIN}/job-applications/${appId}`;
     trackApplyLinkEl.classList.remove('hidden');
   }
   if (trackApplyStatus) setStatus(trackApplyStatus, label || '', 'success');
 }
 
 // Dedupe-on-render: when the tracked screen shows, default to the Track
-// button, then in the background check whether an application already
-// exists for this post and swap to the Open-application link if so.
+// button, then check whether an application already exists for this post
+// and swap to the Open-application link if so. The discovery is cached on
+// the tracked-page stash entry (appId, or a timestamped negative check) so
+// reopening a page costs zero application roundtrips until the cache ages.
 async function refreshApplicationState() {
   if (!trackApplyBtn) return;
   resetTrackApplyCard();
   setTrackApplyLabel();
   if (!trackedJobPostId) return;
+  if (trackedJobPost && trackedJobPost.appId) {
+    showTrackApplyOpenLink(trackedJobPost.appId, 'Already tracked');
+    return;
+  }
+  if (
+    trackedJobPost &&
+    trackedJobPost.appCheckedTs &&
+    Date.now() - trackedJobPost.appCheckedTs < STASH_FRESH_MS
+  ) {
+    return; // recently confirmed no application — the Track button stands
+  }
   const saved = await api.storage.local.get(['ccApiKey']);
   if (!saved.ccApiKey) return;
   const jpId = trackedJobPostId;
   const existing = await findExistingApplication(jpId, saved.ccApiKey);
-  // Bail if the user moved off this post / screen while we were waiting.
-  if (trackedJobPostId !== jpId || currentSendScreenEl !== screenTracked) {
+  // Bail if the user moved off this post / tab while we were waiting.
+  if (trackedJobPostId !== jpId || activeTab !== 'applications') {
     return;
   }
   if (existing && existing.appId) {
     showTrackApplyOpenLink(existing.appId, 'Already tracked');
+    rememberApplicationState(existing.appId);
+  } else if (existing && !existing.error) {
+    rememberApplicationState(null); // confirmed absent — stamp the check
   }
+}
+
+// Persist the JA discovery onto the tracked-page stash entry so the next
+// popup open renders application state without a roundtrip. appId = found;
+// null = confirmed absent (timestamped so the check re-runs once stale).
+async function rememberApplicationState(appId) {
+  if (!trackedJobPost) return;
+  if (appId) {
+    trackedJobPost.appId = String(appId);
+    delete trackedJobPost.appCheckedTs;
+  } else {
+    trackedJobPost.appCheckedTs = Date.now();
+  }
+  let tab;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    return;
+  }
+  if (tab && tab.url) await stashTrackedPage(tab.url, trackedJobPost);
 }
 
 async function trackApplication() {
@@ -2675,6 +3300,7 @@ async function trackApplication() {
   const existing = await findExistingApplication(jpId, saved.ccApiKey);
   if (existing && existing.appId) {
     showTrackApplyOpenLink(existing.appId, 'Already tracked');
+    rememberApplicationState(existing.appId);
     return;
   }
   if (existing && existing.error) {
@@ -2706,10 +3332,13 @@ async function trackApplication() {
     return;
   }
   showTrackApplyOpenLink(res.appId, 'Tracked ✓');
+  rememberApplicationState(res.appId);
 
-  // "Apply & track": stash the source post for attribution, then open the
-  // apply page. If the user reopens the popup on that apply page (no direct
-  // JobPost match), the stash lets us resurface this application.
+  // Create-in-place: the JobApplication is recorded and confirmed inline. We
+  // do NOT open the apply page in a new tab. When the post carries an
+  // apply_url we still stash the source post for attribution, so if the user
+  // navigates to that apply page themselves the popup can resurface this
+  // application (the apply-attribution recovery card).
   if (applyUrl) {
     await stashPendingApply({
       jobPostId: String(jpId),
@@ -2720,15 +3349,306 @@ async function trackApplication() {
       company: post.company || null,
       ts: Date.now(),
     });
-    try {
-      api.tabs.create({ url: applyUrl });
-    } catch {
-      // best-effort; the application is already tracked
-    }
   }
 }
 
 if (trackApplyBtn) trackApplyBtn.addEventListener('click', trackApplication);
+
+// --- Reopen-memory stashes (chrome.storage.local) ------------------
+// Generic url-keyed map with TTL + size cap; used by ccTrackedPages and
+// ccSentPages. Prunes expired/malformed entries on every read.
+
+async function readPageStash(storageKey, ttlMs) {
+  let raw;
+  try {
+    const got = await api.storage.local.get([storageKey]);
+    raw = got[storageKey];
+  } catch {
+    return {};
+  }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const now = Date.now();
+  const pruned = {};
+  for (const [url, entry] of Object.entries(raw)) {
+    if (entry && entry.ts && now - entry.ts <= ttlMs) pruned[url] = entry;
+  }
+  return pruned;
+}
+
+async function writePageStash(storageKey, ttlMs, max, url, entry) {
+  if (!url) return;
+  const map = await readPageStash(storageKey, ttlMs);
+  map[url] = { ...entry, ts: Date.now() };
+  const urls = Object.keys(map);
+  if (urls.length > max) {
+    urls.sort((a, b) => map[a].ts - map[b].ts); // oldest first
+    while (urls.length > max) delete map[urls.shift()];
+  }
+  try {
+    await api.storage.local.set({ [storageKey]: map });
+  } catch {
+    // best-effort cache
+  }
+}
+
+async function removePageStash(storageKey, url) {
+  let raw;
+  try {
+    const got = await api.storage.local.get([storageKey]);
+    raw = got[storageKey];
+  } catch {
+    return;
+  }
+  if (!raw || typeof raw !== 'object' || !(url in raw)) return;
+  delete raw[url];
+  try {
+    await api.storage.local.set({ [storageKey]: raw });
+  } catch {
+    // best-effort cache
+  }
+}
+
+function stashTrackedPage(url, found) {
+  return writePageStash(
+    CC_TRACKED_PAGES_KEY,
+    TRACKED_STASH_TTL_MS,
+    TRACKED_STASH_MAX,
+    url,
+    { found },
+  );
+}
+
+// --- "Link this page to a job post" (user Tools tab) -----------------
+// A "job" isn't one URL — ATS flows walk /confirm -> /application, and the
+// capture site vs apply site can be different domains entirely. ZERO
+// heuristics by design (Doug 2026-07-08, after an origin-match suggestion
+// misfired on a single-origin portal): no auto-suggestion, no URL matching.
+// The user searches their posts (empty query = recent) and picks; picking
+// PATCHes this page's URL onto the post's apply_url — a leg of the
+// popup-open lookup, so the link resolves cross-device — and stashes it
+// locally for instant resolution on reopen.
+
+async function fetchPosts(apiKey, { query = '', limit = 10 } = {}) {
+  const params = new URLSearchParams({
+    sort: '-created_at',
+    'page[size]': String(limit),
+    include: 'company',
+  });
+  if (query) params.set('filter[query]', query);
+  let resp;
+  try {
+    resp = await fetch(
+      `${ORIGIN}/api/v1/job-posts/?${params.toString()}`,
+      {
+        headers: {
+          Accept: 'application/vnd.api+json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+      },
+    );
+  } catch {
+    return null;
+  }
+  if (!resp.ok) return null;
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    return null;
+  }
+  const rows = Array.isArray(body?.data) ? body.data : [];
+  return rows.map((item) => {
+    const attrs = item.attributes || {};
+    let company = null;
+    const companyRel = item.relationships?.company?.data;
+    if (companyRel && Array.isArray(body.included)) {
+      const inc = body.included.find(
+        (r) =>
+          r &&
+          (r.type === 'company' || r.type === 'companies') &&
+          String(r.id) === String(companyRel.id),
+      );
+      company = inc?.attributes?.name || null;
+    }
+    return {
+      id: item.id,
+      title: attrs.title,
+      company,
+      companyId: companyRel ? String(companyRel.id) : null,
+      applyUrl: attrs.apply_url || null,
+      link: attrs.link || null,
+      topScore: typeof attrs.top_score === 'number' ? attrs.top_score : null,
+      hasPendingScore: false,
+      complete: attrs.complete === false ? false : true,
+    };
+  });
+}
+
+function linkJobEmptyRow(msg) {
+  const div = document.createElement('div');
+  div.className = 'link-job-empty';
+  div.textContent = msg;
+  return div;
+}
+
+let linkJobRenderSeq = 0; // drops stale async renders under fast typing
+let pendingOverwriteId = null; // two-click confirm for an occupied apply_url
+
+async function renderLinkJobList(query = '') {
+  if (!linkJobListEl) return;
+  const seq = ++linkJobRenderSeq;
+  pendingOverwriteId = null;
+  setStatus(linkJobStatusEl, '');
+  linkJobListEl.replaceChildren(
+    linkJobEmptyRow(query ? 'Searching…' : 'Loading recent posts…'),
+  );
+  let saved;
+  try {
+    saved = await api.storage.local.get(['ccApiKey']);
+  } catch {
+    saved = null;
+  }
+  if (!saved || !saved.ccApiKey) {
+    if (seq !== linkJobRenderSeq) return;
+    linkJobListEl.replaceChildren(linkJobEmptyRow('Not connected.'));
+    return;
+  }
+  const posts = await fetchPosts(saved.ccApiKey, { query });
+  if (seq !== linkJobRenderSeq) return; // superseded by a newer keystroke
+  if (!posts) {
+    linkJobListEl.replaceChildren(
+      linkJobEmptyRow("Couldn't load your posts — try again."),
+    );
+    return;
+  }
+  if (!posts.length) {
+    linkJobListEl.replaceChildren(
+      linkJobEmptyRow(
+        query ? 'No posts match that search.' : 'No tracked jobs yet.',
+      ),
+    );
+    return;
+  }
+  linkJobListEl.replaceChildren();
+  for (const found of posts) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'link-job-row';
+    const title = document.createElement('span');
+    title.className = 'ljr-title';
+    title.textContent = found.title || '(untitled job post)';
+    btn.appendChild(title);
+    if (found.company) {
+      const company = document.createElement('span');
+      company.className = 'ljr-company';
+      company.textContent = found.company;
+      btn.appendChild(company);
+    }
+    btn.addEventListener('click', () => linkCurrentPageTo(found));
+    linkJobListEl.appendChild(btn);
+  }
+}
+
+async function linkCurrentPageTo(found) {
+  let tab;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    tab = null;
+  }
+  if (!tab || !tab.url) {
+    setStatus(linkJobStatusEl, 'No linkable page in the active tab.', 'error');
+    return;
+  }
+  const verdict = classifyUrl(tab.url);
+  if (!verdict.ok) {
+    setStatus(linkJobStatusEl, verdict.message, 'error');
+    return;
+  }
+  // Replacing a different, already-set apply link takes a second click —
+  // the first warns instead of silently clobbering it.
+  if (
+    found.applyUrl &&
+    found.applyUrl !== tab.url &&
+    pendingOverwriteId !== found.id
+  ) {
+    pendingOverwriteId = found.id;
+    setStatus(
+      linkJobStatusEl,
+      'That post already has an apply link — click again to replace it.',
+      'error',
+    );
+    return;
+  }
+  pendingOverwriteId = null;
+  setStatus(linkJobStatusEl, 'Linking…');
+  let saved;
+  try {
+    saved = await api.storage.local.get(['ccApiKey']);
+  } catch {
+    saved = null;
+  }
+  let patched = false;
+  if (saved && saved.ccApiKey) {
+    try {
+      const resp = await fetch(`${ORIGIN}/api/v1/job-posts/${found.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'application/vnd.api+json',
+          Authorization: `Bearer ${saved.ccApiKey}`,
+        },
+        body: JSON.stringify({
+          data: {
+            type: 'job-post',
+            id: String(found.id),
+            attributes: { apply_url: tab.url },
+          },
+        }),
+      });
+      patched = resp.ok;
+    } catch {
+      patched = false;
+    }
+  }
+  const linked = patched ? { ...found, applyUrl: tab.url } : found;
+  await stashTrackedPage(tab.url, linked);
+  if (!patched) {
+    // Honest status: the server didn't take the apply link, so it lives
+    // only in this browser's stash — other devices won't resolve it.
+    setStatus(
+      linkJobStatusEl,
+      "Couldn't save the apply link to the server — linked on this device only.",
+      'error',
+    );
+    return;
+  }
+  setStatus(linkJobStatusEl, '');
+  setActiveTab('send');
+  if (linked.complete === false) {
+    showConnected(connectedName, linked);
+  } else {
+    showTracked(linked, connectedName);
+  }
+}
+
+if (linkJobCardEl) {
+  linkJobCardEl.addEventListener('toggle', () => {
+    if (linkJobCardEl.open) {
+      renderLinkJobList(linkJobSearchEl ? linkJobSearchEl.value.trim() : '');
+    }
+  });
+}
+
+if (linkJobSearchEl) {
+  let linkJobSearchTimer = null;
+  linkJobSearchEl.addEventListener('input', () => {
+    if (linkJobSearchTimer) clearTimeout(linkJobSearchTimer);
+    linkJobSearchTimer = setTimeout(() => {
+      renderLinkJobList(linkJobSearchEl.value.trim());
+    }, 300);
+  });
+}
 
 // --- Apply-attribution stash (chrome.storage.local) ----------------
 
@@ -2825,10 +3745,14 @@ function resetApplyAttributionCard() {
   if (applyAttrStatus) setStatus(applyAttrStatus, '');
 }
 
-function showApplyAttrOpenLink(appId, label) {
+function showApplyAttrOpenLink(appId, label, jobPostId) {
   if (applyAttrBtn) applyAttrBtn.classList.add('hidden');
   if (applyAttrLinkEl && appId) {
-    applyAttrLinkEl.href = `${FRONTEND_ORIGIN}/job-applications/${appId}`;
+    // Canonical nested route (jp/show/ja/show) — skips the flat-route
+    // redirect hop.
+    applyAttrLinkEl.href = jobPostId
+      ? `${FRONTEND_ORIGIN}/job-posts/${jobPostId}/job-applications/${appId}`
+      : `${FRONTEND_ORIGIN}/job-applications/${appId}`;
     applyAttrLinkEl.classList.remove('hidden');
   }
   if (applyAttrStatus) setStatus(applyAttrStatus, label || '', 'success');
@@ -2837,13 +3761,17 @@ function showApplyAttrOpenLink(appId, label) {
 // Bonus path: the active tab has no direct JobPost match but its origin
 // matches a stashed "Apply & track". Offer to track an application
 // attributed to the original post (dedupe-on-render → Open application).
+// Returns true when it renders an offer (or resolves to an existing app),
+// false on any miss — so the caller can fall through to the CC-138 ladder.
 async function maybeOfferApplyAttribution(tabUrl, name) {
-  if (!applyAttrCard) return;
+  if (!applyAttrCard) return false;
   const match = await findFreshApplyStash(tabUrl);
-  if (!match) return;
+  if (!match) return false;
   // A late stash check must not yank the user off the Tools tab or a screen
   // that changed meanwhile.
-  if (activeTab !== 'send' || currentSendScreenEl !== screenConnected) return;
+  if (activeTab !== 'send' || currentSendScreenEl !== screenConnected) {
+    return false;
+  }
   void name;
   pendingApplyOffer = match;
   if (applyAttrTitleEl) {
@@ -2851,17 +3779,23 @@ async function maybeOfferApplyAttribution(tabUrl, name) {
   }
   if (applyAttrCompanyEl) applyAttrCompanyEl.textContent = match.company || '';
   applyAttrCard.classList.remove('hidden');
+  // v0 tab landing (state-based): a pending-apply match means the user is
+  // mid-application — land on the Applications tab, where the card lives.
+  setActiveTab('applications');
 
+  // The card is already showing — this path resolves either way, so the
+  // caller must NOT fall through to the ladder.
   // Dedupe-on-render: if an application already exists for the stashed post,
   // skip straight to Open application and drop the stash entry.
   const saved = await api.storage.local.get(['ccApiKey']);
-  if (!saved.ccApiKey) return;
+  if (!saved.ccApiKey) return true;
   const existing = await findExistingApplication(match.jobPostId, saved.ccApiKey);
-  if (pendingApplyOffer !== match) return; // card was reset/replaced
+  if (pendingApplyOffer !== match) return true; // card was reset/replaced
   if (existing && existing.appId) {
-    showApplyAttrOpenLink(existing.appId, 'Already tracked');
+    showApplyAttrOpenLink(existing.appId, 'Already tracked', match.jobPostId);
     await clearApplyStashForJobPost(match.jobPostId);
   }
+  return true;
 }
 
 async function confirmApplyAttribution() {
@@ -2886,7 +3820,7 @@ async function confirmApplyAttribution() {
   // Dedupe first.
   const existing = await findExistingApplication(offer.jobPostId, saved.ccApiKey);
   if (existing && existing.appId) {
-    showApplyAttrOpenLink(existing.appId, 'Already tracked');
+    showApplyAttrOpenLink(existing.appId, 'Already tracked', offer.jobPostId);
     await clearApplyStashForJobPost(offer.jobPostId);
     return;
   }
@@ -2924,12 +3858,1087 @@ async function confirmApplyAttribution() {
     }
     return;
   }
-  showApplyAttrOpenLink(res.appId, 'Tracked ✓');
+  showApplyAttrOpenLink(res.appId, 'Tracked ✓', offer.jobPostId);
   await clearApplyStashForJobPost(offer.jobPostId);
 }
 
 if (applyAttrBtn) {
   applyAttrBtn.addEventListener('click', confirmApplyAttribution);
+}
+
+// ===================================================================
+// CC-138 — signal ladder + Applications-tab offer
+// On a lookup miss (no JobPost at the exact tab URL, and no
+// apply-attribution stash), walk a ladder of weaker signals to find the
+// post the user is likely applying to. The first tier yielding a VERIFIED
+// JobPost renders the offer card and stops the ladder. The whole thing is
+// wrapped so any failure degrades to the current miss behavior (Send UI).
+// ===================================================================
+
+// --- Viewed-JP trail stash (T6) ------------------------------------
+// Push a JobPost the user just saw as Tracked. Newest first, capped, TTL'd.
+async function loadViewedPosts() {
+  let raw;
+  try {
+    const got = await api.storage.local.get([CC_VIEWED_POSTS_KEY]);
+    raw = got[CC_VIEWED_POSTS_KEY];
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(raw)) return [];
+  const now = Date.now();
+  return raw.filter(
+    (r) => r && r.id && r.ts && now - r.ts <= VIEWED_POSTS_TTL_MS,
+  );
+}
+
+async function pushViewedPost(found) {
+  if (!found || !found.id) return;
+  const list = await loadViewedPosts();
+  const rec = {
+    id: String(found.id),
+    title: found.title || null,
+    company: found.company || null,
+    companyId: found.companyId || null,
+    link: found.link || null,
+    applyUrl: found.applyUrl || null,
+    ts: Date.now(),
+  };
+  const deduped = list.filter((r) => String(r.id) !== rec.id);
+  deduped.unshift(rec);
+  try {
+    await api.storage.local.set({
+      [CC_VIEWED_POSTS_KEY]: deduped.slice(0, VIEWED_POSTS_MAX),
+    });
+  } catch {
+    // best-effort cache
+  }
+}
+
+// --- Optional "tabs" permission ------------------------------------
+function hasTabsPermission() {
+  try {
+    return new Promise((resolve) => {
+      if (!api.permissions || !api.permissions.contains) {
+        resolve(false);
+        return;
+      }
+      const maybe = api.permissions.contains(
+        { permissions: ['tabs'] },
+        (granted) => resolve(!!granted),
+      );
+      // Firefox returns a Promise; Chrome uses the callback.
+      if (maybe && typeof maybe.then === 'function') {
+        maybe.then((granted) => resolve(!!granted)).catch(() => resolve(false));
+      }
+    });
+  } catch {
+    return Promise.resolve(false);
+  }
+}
+
+function requestTabsPermission() {
+  try {
+    return new Promise((resolve) => {
+      if (!api.permissions || !api.permissions.request) {
+        resolve(false);
+        return;
+      }
+      const maybe = api.permissions.request(
+        { permissions: ['tabs'] },
+        (granted) => resolve(!!granted),
+      );
+      if (maybe && typeof maybe.then === 'function') {
+        maybe.then((granted) => resolve(!!granted)).catch(() => resolve(false));
+      }
+    });
+  } catch {
+    return Promise.resolve(false);
+  }
+}
+
+// --- Ladder verification helpers -----------------------------------
+
+// Host of a URL, www-stripped and lowercased. null on parse failure.
+function bareHost(url) {
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
+// A JobPost's link (or applyUrl) host must equal a known referrer host when
+// one is in play — the referrer-host constraint that keeps T4/T5 honest.
+function hostAgrees(found, constraintHost) {
+  if (!constraintHost) return true;
+  const linkHost = found.link ? bareHost(found.link) : null;
+  const applyHost = found.applyUrl ? bareHost(found.applyUrl) : null;
+  return linkHost === constraintHost || applyHost === constraintHost;
+}
+
+// Normalize a title for the T5 fuzzy compare: lowercase, punctuation → space,
+// collapse whitespace.
+function normalizeTitle(t) {
+  return (t || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+// Strict-ish title containment: one normalized title contains the other, or
+// they share > ~80% of their tokens. Deliberately simple and conservative.
+function titlesMatch(a, b) {
+  const na = normalizeTitle(a);
+  const nb = normalizeTitle(b);
+  if (!na || !nb) return false;
+  if (na.includes(nb) || nb.includes(na)) return true;
+  const sa = new Set(na.split(' '));
+  const sb = new Set(nb.split(' '));
+  let shared = 0;
+  for (const tok of sa) if (sb.has(tok)) shared++;
+  const denom = Math.min(sa.size, sb.size) || 1;
+  return shared / denom >= 0.8;
+}
+
+// Run the active-tab executeScript once to read document.referrer (UNGATED —
+// full URL, no allowlist), the h1 text, and og:title. Best-effort; returns
+// nulls on a restricted page.
+async function grabLadderSignals(tabId) {
+  const empty = { referrer: null, h1: null, ogTitle: null };
+  try {
+    const results = await api.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        const h1El = document.querySelector('h1');
+        const ogEl = document.querySelector('meta[property="og:title"]');
+        return {
+          referrer: document.referrer || null,
+          h1: h1El ? (h1El.innerText || h1El.textContent || '').trim() : null,
+          ogTitle: ogEl ? ogEl.getAttribute('content') : null,
+        };
+      },
+    });
+    const raw = results && results[0] && results[0].result;
+    return raw || empty;
+  } catch {
+    return empty;
+  }
+}
+
+// Collect candidate id-tokens from a tab URL's query params + fragment (T4).
+// Values matching ID_TOKEN_RE, capped at 3, de-duplicated.
+function collectIdTokens(tabUrl) {
+  let parsed;
+  try {
+    parsed = new URL(tabUrl);
+  } catch {
+    return [];
+  }
+  const out = [];
+  const seen = new Set();
+  const consider = (val) => {
+    if (out.length >= 3) return;
+    if (val && ID_TOKEN_RE.test(val) && !seen.has(val)) {
+      seen.add(val);
+      out.push(val);
+    }
+  };
+  for (const [, val] of parsed.searchParams) consider(val);
+  // The fragment can carry `#/apply?jobId=...` or `#token` — scan its params
+  // and its bare tail.
+  const frag = parsed.hash ? parsed.hash.replace(/^#/, '') : '';
+  if (frag) {
+    const qIdx = frag.indexOf('?');
+    if (qIdx >= 0) {
+      const fragParams = new URLSearchParams(frag.slice(qIdx + 1));
+      for (const [, val] of fragParams) consider(val);
+    }
+    for (const part of frag.split(/[/?&=#]/)) consider(part);
+  }
+  return out;
+}
+
+// The signal ladder. Returns { found, tentative } for the first verified tier,
+// or null. `budget` bounds server lookups (roundtrip diet). Never throws.
+async function runSignalLadder(tab, apiKey) {
+  const budget = { left: LADDER_MAX_LOOKUPS };
+  const lookup = async (url) => {
+    if (budget.left <= 0) return null;
+    budget.left -= 1;
+    return lookupExistingJobPost(url, apiKey);
+  };
+  const search = async (query) => {
+    if (budget.left <= 0) return null;
+    budget.left -= 1;
+    return fetchPosts(apiKey, { query, limit: 10 });
+  };
+
+  let referrerHost = null; // set by T3 when the referrer is origin-only
+
+  try {
+    const tabsGranted = await hasTabsPermission();
+
+    // T1 — opener tab. The page that spawned this apply tab is usually the
+    // job listing itself.
+    if (tabsGranted && tab.openerTabId != null) {
+      try {
+        const opener = await api.tabs.get(tab.openerTabId);
+        if (opener && opener.url && classifyUrl(opener.url).ok) {
+          const found = await lookup(opener.url);
+          if (found && found.id) return { found, tentative: false };
+        }
+      } catch {
+        // opener gone / restricted — fall through
+      }
+    }
+
+    // T2 — open-tabs scan. Check the stash (free) first, then the server for
+    // a bounded set of same-origin-deduped candidates.
+    if (tabsGranted) {
+      let openTabs = [];
+      try {
+        openTabs = await api.tabs.query({});
+      } catch {
+        openTabs = [];
+      }
+      const trackedMap = await readPageStash(
+        CC_TRACKED_PAGES_KEY,
+        TRACKED_STASH_TTL_MS,
+      );
+      const candidates = [];
+      const seenOrigins = new Set();
+      // Prefer same-window tabs first.
+      openTabs.sort((a, b) => {
+        const aw = a.windowId === tab.windowId ? 0 : 1;
+        const bw = b.windowId === tab.windowId ? 0 : 1;
+        return aw - bw;
+      });
+      for (const t of openTabs) {
+        if (!t.url || t.id === tab.id) continue;
+        const verdict = classifyUrl(t.url);
+        if (!verdict.ok) continue; // excludes CC self-hosts + non-http(s)
+        // Stash hit is free — take it immediately.
+        const cached = trackedMap[t.url];
+        if (cached && cached.found && cached.found.id) {
+          return { found: cached.found, tentative: false };
+        }
+        const origin = originOf(t.url);
+        if (origin && seenOrigins.has(origin)) continue;
+        if (origin) seenOrigins.add(origin);
+        candidates.push(t.url);
+        if (candidates.length >= 6) break;
+      }
+      for (const url of candidates) {
+        const found = await lookup(url);
+        if (found && found.id) return { found, tentative: false };
+      }
+    }
+
+    // Read referrer + title signals once (used by T3/T5) — UNGATED referrer.
+    const signals = tab.id != null ? await grabLadderSignals(tab.id) : {};
+
+    // T3 — referrer. A full referrer URL (with a path) is a standalone
+    // trigger; an origin-only referrer only constrains T4/T5.
+    if (signals.referrer) {
+      let refParsed = null;
+      try {
+        refParsed = new URL(signals.referrer);
+      } catch {
+        refParsed = null;
+      }
+      if (refParsed && classifyUrl(signals.referrer).ok) {
+        const hasPath = refParsed.pathname && refParsed.pathname !== '/';
+        if (hasPath) {
+          const found = await lookup(signals.referrer);
+          if (found && found.id) return { found, tentative: false };
+        }
+        // Retain the referrer host to constrain the fuzzy tiers below.
+        referrerHost = bareHost(signals.referrer);
+      }
+    }
+
+    // T4 — id tokens from the tab URL. Search each; accept only a row whose
+    // link actually contains the token (and agrees with the referrer host).
+    const tokens = collectIdTokens(tab.url);
+    for (const token of tokens) {
+      const rows = await search(token);
+      if (!rows) continue;
+      const verified = rows.filter(
+        (r) =>
+          r &&
+          r.id &&
+          r.link &&
+          r.link.includes(token) &&
+          hostAgrees(r, referrerHost),
+      );
+      if (verified.length === 1) {
+        return { found: verified[0], tentative: false };
+      }
+    }
+
+    // T5 — title on page. Prefer og:title; fall back to a non-generic h1.
+    const pageTitle = pickPageTitle(signals.h1, signals.ogTitle);
+    if (pageTitle) {
+      const rows = await search(pageTitle);
+      if (rows) {
+        const matches = rows.filter(
+          (r) =>
+            r &&
+            r.id &&
+            titlesMatch(r.title, pageTitle) &&
+            hostAgrees(r, referrerHost),
+        );
+        if (matches.length === 1) {
+          return { found: matches[0], tentative: false };
+        }
+      }
+    }
+
+    // T6 — viewed-JP trail. Offer the most recent viewed post (tentatively),
+    // preferring one whose link host matches the referrer host.
+    //
+    // CROSS-ORIGIN ONLY: the trail models the apply-flow signature — view a
+    // posting on site A, land on ATS site B. A candidate whose link host
+    // equals the CURRENT page's host means we're still browsing that same
+    // portal, where a lookup miss just means a different job — offering the
+    // last-viewed one is the single-origin-portal trap (toptal hosts every
+    // job on one origin; live misfire 2026-07-08 on /portal/eligible-jobs,
+    // same failure family as the reverted 1.8.3 origin-match suggestion).
+    const tabHost = bareHost(tab.url);
+    const viewed = (await loadViewedPosts()).filter(
+      (v) => bareHost(v.link) !== tabHost,
+    );
+    if (viewed.length) {
+      let pick = viewed[0];
+      if (referrerHost) {
+        const hostMatch = viewed.find((v) => bareHost(v.link) === referrerHost);
+        if (hostMatch) pick = hostMatch;
+      }
+      return { found: pick, tentative: true };
+    }
+  } catch (err) {
+    console.warn('[cc-sender] signal ladder failed', err);
+    return null;
+  }
+  return null;
+}
+
+// Choose the more job-title-looking of h1 / og:title. og:title wins when the
+// h1 is empty or looks generic (very short, or a bare site/section name).
+function pickPageTitle(h1, ogTitle) {
+  const h = (h1 || '').trim();
+  const og = (ogTitle || '').trim();
+  const generic = !h || h.length < 4 || /^(jobs?|careers?|apply)$/i.test(h);
+  if (og && generic) return og;
+  return h || og || null;
+}
+
+// --- Ladder offer card ---------------------------------------------
+
+function resetLadderOfferCard() {
+  pendingLadderOffer = null;
+  if (ladderOfferCard) ladderOfferCard.classList.add('hidden');
+  if (ladderOfferBtn) {
+    ladderOfferBtn.classList.remove('hidden');
+    ladderOfferBtn.disabled = false;
+    delete ladderOfferBtn.dataset.state;
+  }
+  if (ladderOfferDismissBtn) ladderOfferDismissBtn.classList.remove('hidden');
+  if (ladderOfferLinkEl) ladderOfferLinkEl.classList.add('hidden');
+  if (ladderOfferStatus) setStatus(ladderOfferStatus, '');
+}
+
+function showLadderOfferOpenLink(appId, label, jobPostId) {
+  if (ladderOfferBtn) ladderOfferBtn.classList.add('hidden');
+  if (ladderOfferDismissBtn) ladderOfferDismissBtn.classList.add('hidden');
+  if (ladderOfferLinkEl && appId) {
+    ladderOfferLinkEl.href = jobPostId
+      ? `${FRONTEND_ORIGIN}/job-posts/${jobPostId}/job-applications/${appId}`
+      : `${FRONTEND_ORIGIN}/job-applications/${appId}`;
+    ladderOfferLinkEl.classList.remove('hidden');
+  }
+  if (ladderOfferStatus) setStatus(ladderOfferStatus, label || '', 'success');
+}
+
+// Render the ladder offer on the Applications tab. `offer` is the ladder
+// result { found, tentative }; `tabUrl` is the page to track against.
+function renderLadderOffer(offer, tabUrl) {
+  if (!ladderOfferCard || !offer || !offer.found) return;
+  pendingLadderOffer = { ...offer, tabUrl };
+  const found = offer.found;
+  if (ladderOfferLeadEl) {
+    ladderOfferLeadEl.textContent = offer.tentative
+      ? 'Were you applying to'
+      : 'Applying to';
+  }
+  if (ladderOfferTitleEl) {
+    ladderOfferTitleEl.textContent = found.title || '(untitled job post)';
+  }
+  if (ladderOfferCompanyEl) {
+    ladderOfferCompanyEl.textContent = found.company || '';
+  }
+  ladderOfferCard.classList.remove('hidden');
+  // An application moment — land on the Applications tab where the card lives.
+  setActiveTab('applications');
+}
+
+// Confirm: create the JobApplication (tracking_url = tab.url) AND backfill
+// the post's apply_url when it's empty (two-click overwrite when occupied +
+// different). Dedupe first, mirroring confirmApplyAttribution.
+async function confirmLadderOffer() {
+  const offer = pendingLadderOffer;
+  if (!offer || !offer.found) return;
+  const found = offer.found;
+  if (ladderOfferBtn) {
+    ladderOfferBtn.disabled = true;
+    ladderOfferBtn.dataset.state = 'sending';
+  }
+  if (ladderOfferStatus) setStatus(ladderOfferStatus, 'Checking…');
+
+  const saved = await api.storage.local.get(['ccApiKey']);
+  if (!saved.ccApiKey) {
+    if (ladderOfferStatus) setStatus(ladderOfferStatus, 'Not connected.', 'error');
+    if (ladderOfferBtn) {
+      ladderOfferBtn.disabled = false;
+      delete ladderOfferBtn.dataset.state;
+    }
+    return;
+  }
+
+  // Dedupe first.
+  const existing = await findExistingApplication(found.id, saved.ccApiKey);
+  if (existing && existing.appId) {
+    showLadderOfferOpenLink(existing.appId, 'Already tracked', found.id);
+    await backfillApplyUrlFor(found, offer.tabUrl, saved.ccApiKey);
+    return;
+  }
+  if (existing && existing.error) {
+    if (ladderOfferStatus) {
+      setStatus(ladderOfferStatus, 'Could not reach Career Caddy.', 'error');
+    }
+    if (ladderOfferBtn) {
+      ladderOfferBtn.disabled = false;
+      delete ladderOfferBtn.dataset.state;
+    }
+    return;
+  }
+
+  if (ladderOfferStatus) setStatus(ladderOfferStatus, 'Tracking…');
+  const res = await postJobApplication({
+    jobPostId: found.id,
+    trackingUrl: offer.tabUrl,
+    apiKey: saved.ccApiKey,
+  });
+  if (!res.ok) {
+    if (ladderOfferStatus) setStatus(ladderOfferStatus, res.error, 'error');
+    if (ladderOfferBtn) {
+      ladderOfferBtn.disabled = false;
+      delete ladderOfferBtn.dataset.state;
+    }
+    return;
+  }
+  showLadderOfferOpenLink(res.appId, 'Tracked ✓', found.id);
+  await backfillApplyUrlFor(found, offer.tabUrl, saved.ccApiKey);
+}
+
+// Backfill JP.apply_url = tabUrl. The JA has already been created (this runs
+// after tracking succeeds), so this is a secondary convenience write:
+//   - apply_url empty      → PATCH it to this page.
+//   - apply_url == tabUrl   → no-op (already this page).
+//   - apply_url different   → DON'T clobber. The manual two-click overwrite
+//     lives on the Posts-tab "Link this page" flow (linkCurrentPageTo), where
+//     the button stays live; forcing it here — after the confirm button is
+//     already gone — would leave a dead instruction. Leave the existing link
+//     and note it, so the user knows nothing was silently overwritten.
+async function backfillApplyUrlFor(found, tabUrl, apiKey) {
+  if (!found || !found.id || !tabUrl) return;
+  if (found.applyUrl === tabUrl) return; // already set to this page
+  if (found.applyUrl) {
+    // Occupied + different — respect it. (Posts tab can replace it manually.)
+    return;
+  }
+  try {
+    await fetch(`${ORIGIN}/api/v1/job-posts/${found.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'job-post',
+          id: String(found.id),
+          attributes: { apply_url: tabUrl },
+        },
+      }),
+    });
+    // Memo locally so a T6 viewed-trail re-offer knows the link is set.
+    found.applyUrl = tabUrl;
+  } catch (err) {
+    console.warn('[cc-sender] ladder apply_url backfill failed', err);
+  }
+}
+
+if (ladderOfferBtn) {
+  ladderOfferBtn.addEventListener('click', confirmLadderOffer);
+}
+if (ladderOfferDismissBtn) {
+  ladderOfferDismissBtn.addEventListener('click', () => {
+    if (pendingLadderOffer && pendingLadderOffer.tabUrl) {
+      dismissedLadderUrls.add(pendingLadderOffer.tabUrl);
+    }
+    resetLadderOfferCard();
+  });
+}
+
+// Entry point invoked from the lookup miss branch. Runs the ladder, renders
+// the offer on a hit. Wrapped so any failure degrades to the miss behavior.
+// Skips URLs the user dismissed this session; if tabs isn't granted, still
+// runs the ungated tiers (referrer/id-token/title/viewed-trail).
+async function maybeOfferFromLadder(tab, apiKey) {
+  if (!tab || !tab.url) return;
+  if (dismissedLadderUrls.has(tab.url)) return;
+
+  // CC-135 (1.8.12): an agentic match-application for THIS url may already be
+  // in flight (or done) from a prior popup session. Consult the stash first —
+  // a resumed result surfaces on the match-result card instead of re-walking
+  // the ladder.
+  if (await maybeResumeMatchApplication(tab, apiKey)) {
+    if (activeTab === 'tools') return;
+    await refreshTabsOptin(tab, apiKey);
+    refreshAskAgentButton();
+    return;
+  }
+
+  let offer = null;
+  try {
+    offer = await runSignalLadder(tab, apiKey);
+  } catch {
+    offer = null;
+  }
+  // A late result must not yank the user off another tab.
+  if (activeTab === 'tools') return;
+  if (offer && offer.found) {
+    renderLadderOffer(offer, tab.url);
+  }
+  // Refresh the tabs opt-in affordance regardless — a miss with tabs absent
+  // is exactly when we want to invite the broader scan.
+  await refreshTabsOptin(tab, apiKey);
+  // CC-135: with the free ladder missed and the user staff, offer the paid
+  // agentic lookup. refreshAskAgentButton no-ops for non-staff / with an
+  // offer already on screen.
+  refreshAskAgentButton();
+}
+
+// Show / hide the "Enable tab matching" affordance in the Applications empty
+// state. Shown only when: tabs is NOT granted, the user hasn't dismissed the
+// prompt, and there's no offer already on screen.
+async function refreshTabsOptin(tab, apiKey) {
+  if (!tabsOptinEl) return;
+  const granted = await hasTabsPermission();
+  let dismissed = false;
+  try {
+    const got = await api.storage.local.get([CC_TABS_OPTIN_DISMISSED_KEY]);
+    dismissed = got[CC_TABS_OPTIN_DISMISSED_KEY] === true;
+  } catch {
+    dismissed = false;
+  }
+  const show = !granted && !dismissed && !pendingLadderOffer;
+  tabsOptinEl.classList.toggle('hidden', !show);
+  // Stash the current tab so the grant handler can re-run the ladder.
+  if (show) {
+    tabsOptinEl.dataset.tabId = tab && tab.id != null ? String(tab.id) : '';
+  }
+}
+
+if (tabsOptinBtn) {
+  tabsOptinBtn.addEventListener('click', async () => {
+    const granted = await requestTabsPermission();
+    if (!granted) {
+      // Remember the decline so we don't nag on every open.
+      try {
+        await api.storage.local.set({ [CC_TABS_OPTIN_DISMISSED_KEY]: true });
+      } catch {
+        // best-effort
+      }
+      if (tabsOptinEl) tabsOptinEl.classList.add('hidden');
+      return;
+    }
+    if (tabsOptinEl) tabsOptinEl.classList.add('hidden');
+    // Re-run the ladder now that the broader tiers are available.
+    let saved;
+    try {
+      saved = await api.storage.local.get(['ccApiKey']);
+    } catch {
+      saved = null;
+    }
+    if (!saved || !saved.ccApiKey) return;
+    let tab;
+    try {
+      [tab] = await api.tabs.query({ active: true, currentWindow: true });
+    } catch {
+      tab = null;
+    }
+    if (tab && tab.url) maybeOfferFromLadder(tab, saved.ccApiKey);
+  });
+}
+
+// --- CC-135 (1.8.12): agentic JP lookup, folded into JobApplication ----
+//
+// The free ladder (T1-T6) missed and the user is staff. The user DID apply, so
+// clicking TRACKS the application up front (POST /job-applications/ carrying a
+// match_context) and asks Career Caddy to find its job post. The api creates
+// the JA (status pending), an async matcher backfills the JA's job_post FK, and
+// we poll the JA for the outcome. Result renders in the #match-result card:
+//   - done + matched post -> Tracked state, JP title/company/confidence/
+//     rationale, Open-application link, apply_url backfill when empty.
+//   - done + null pick    -> honest "Tracked — no matching post found; link it
+//     manually" pointing at the Posts-tab link tool.
+//   - failed              -> honest error; the JA still exists.
+// A background alarm fallback (see background.js cc-match-app-* handling) plus a
+// url-keyed { jaId } stash carry a closed-popup result to the next open.
+
+// Grab the top frame's visible text (the application context), truncated
+// client-side. Reuses the executeScript idiom of grabPayload; top frame only —
+// the excerpt is a matching hint, not the full multi-frame capture the send
+// path needs. Never throws.
+async function grabPageExcerpt(tabId) {
+  try {
+    const results = await api.scripting.executeScript({
+      target: { tabId },
+      func: () => (document.body ? document.body.innerText : ''),
+    });
+    const text = results && results[0] && results[0].result;
+    return typeof text === 'string' ? text.slice(0, MATCH_APP_EXCERPT_MAX) : '';
+  } catch {
+    return '';
+  }
+}
+
+// POST a match-application (a JA create carrying a match_context trigger). Flat
+// body — the api accepts flat or a JSON:API envelope. tracking_url = the ATS
+// page (server-validated). The matcher backfills job_post, so we send NO
+// job-post relationship here. Returns { ok, jaId } or { ok:false, error }.
+async function postMatchApplication({
+  trackingUrl,
+  referrer,
+  pageTitle,
+  excerpt,
+  apiKey,
+}) {
+  let resp;
+  try {
+    resp = await fetch(`${ORIGIN}/api/v1/job-applications/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'application/vnd.api+json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        tracking_url: trackingUrl,
+        status: 'Applied',
+        match_context: {
+          referrer: referrer || '',
+          page_title: pageTitle || '',
+          text_excerpt: excerpt || '',
+        },
+      }),
+    });
+  } catch (err) {
+    return { ok: false, error: `Network error: ${err.message}` };
+  }
+  if (resp.status === 401 || resp.status === 403) {
+    return { ok: false, error: 'Not entitled — staff only.' };
+  }
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    body = null;
+  }
+  if (!resp.ok) {
+    return {
+      ok: false,
+      error: body?.errors?.[0]?.detail || `HTTP ${resp.status}`,
+    };
+  }
+  const jaId = body?.data?.id || null;
+  return jaId ? { ok: true, jaId } : { ok: false, error: 'No application id returned.' };
+}
+
+// GET a JA (with the matched JobPost + its company sideloaded) and read its
+// match_context. Returns { status, confidence, rationale, jpId, found } —
+// `found` is the offer-card JobPost shape (see fetchPosts) or null. Null on a
+// transport/parse failure so the poller just retries.
+async function pollMatchApplicationOnce(jaId, apiKey) {
+  let resp;
+  try {
+    resp = await fetch(
+      `${ORIGIN}/api/v1/job-applications/${jaId}/?include=job-post,company`,
+      {
+        headers: {
+          Accept: 'application/vnd.api+json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+      },
+    );
+  } catch {
+    return null;
+  }
+  if (resp.status === 401 || resp.status === 403 || resp.status === 404) {
+    return { status: 'failed', confidence: null, rationale: '', jpId: null, found: null };
+  }
+  if (!resp.ok) return null;
+  let body;
+  try {
+    body = await resp.json();
+  } catch {
+    return null;
+  }
+  const attrs = body?.data?.attributes || {};
+  const ctx = (attrs.match_context && typeof attrs.match_context === 'object')
+    ? attrs.match_context
+    : {};
+  const jpId = body?.data?.relationships?.['job-post']?.data?.id || null;
+  const found = jpId ? buildJpFromIncluded(jpId, body.included) : null;
+  return {
+    status: ctx.status || null,
+    confidence: typeof ctx.confidence === 'number' ? ctx.confidence : null,
+    rationale: ctx.rationale || '',
+    jpId,
+    found,
+  };
+}
+
+// Build the offer-card JobPost shape from a sideloaded `included` array, so the
+// Tracked-state render + apply_url backfill reuse the existing idioms.
+function buildJpFromIncluded(jpId, included) {
+  const arr = Array.isArray(included) ? included : [];
+  const jp = arr.find(
+    (r) => r && r.type === 'job-post' && String(r.id) === String(jpId),
+  );
+  if (!jp) return null;
+  const attrs = jp.attributes || {};
+  const companyRel = jp.relationships?.company?.data;
+  let company = null;
+  if (companyRel) {
+    const inc = arr.find(
+      (r) =>
+        r &&
+        (r.type === 'company' || r.type === 'companies') &&
+        String(r.id) === String(companyRel.id),
+    );
+    company = inc?.attributes?.name || null;
+  }
+  return {
+    id: jp.id,
+    title: attrs.title,
+    company,
+    companyId: companyRel ? String(companyRel.id) : null,
+    applyUrl: attrs.apply_url || null,
+    link: attrs.link || null,
+    topScore: typeof attrs.top_score === 'number' ? attrs.top_score : null,
+    hasPendingScore: false,
+    complete: attrs.complete === false ? false : true,
+  };
+}
+
+function resetMatchResultCard() {
+  if (matchResultCard) matchResultCard.classList.add('hidden');
+  if (matchResultLinkEl) matchResultLinkEl.classList.add('hidden');
+  if (matchResultStatus) setStatus(matchResultStatus, '');
+  if (matchResultTitleEl) matchResultTitleEl.textContent = '';
+  if (matchResultCompanyEl) matchResultCompanyEl.textContent = '';
+}
+
+// Render the matcher outcome into the #match-result card. The JA already
+// exists (tracked on click) — this is an OUTCOME, not a confirm step. `jaId` is
+// the created application; `tabUrl` the tracked page.
+async function renderMatchResult(result, jaId, tabUrl, apiKey) {
+  matchAppInFlight = false;
+  if (!matchResultCard) return;
+  matchResultCard.classList.remove('hidden');
+  // The card owns the screen now — retire the ask-agent affordance.
+  resetAskAgentButton();
+  if (askAgentEl) askAgentEl.classList.add('hidden');
+  // An application moment — land on the Applications tab where the card lives.
+  if (activeTab !== 'tools') setActiveTab('applications');
+
+  const jaOpenHref = (jpId) =>
+    jpId
+      ? `${FRONTEND_ORIGIN}/job-posts/${jpId}/job-applications/${jaId}`
+      : `${FRONTEND_ORIGIN}/job-applications/${jaId}`;
+
+  if (result && result.status === 'done' && result.found && result.found.id) {
+    const found = result.found;
+    if (matchResultLeadEl) {
+      const pct =
+        typeof result.confidence === 'number'
+          ? ` · ${Math.round(result.confidence * 100)}% match`
+          : '';
+      matchResultLeadEl.textContent = `Tracked — Career Caddy found${pct}`;
+    }
+    if (matchResultTitleEl) {
+      matchResultTitleEl.textContent = found.title || '(untitled job post)';
+    }
+    if (matchResultCompanyEl) matchResultCompanyEl.textContent = found.company || '';
+    if (matchResultLinkEl) {
+      matchResultLinkEl.href = jaOpenHref(found.id);
+      matchResultLinkEl.classList.remove('hidden');
+    }
+    if (matchResultStatus && result.rationale) {
+      setStatus(matchResultStatus, result.rationale, 'success');
+    }
+    // Backfill JP.apply_url = tabUrl when empty (reuses the ladder idiom;
+    // occupied/different links are respected, not clobbered).
+    await backfillApplyUrlFor(found, tabUrl, apiKey);
+    return;
+  }
+
+  if (result && result.status === 'done') {
+    // Null pick — the JA stays honestly unlinked. Point at the manual tool.
+    if (matchResultLeadEl) matchResultLeadEl.textContent = 'Tracked';
+    if (matchResultTitleEl) matchResultTitleEl.textContent = 'No matching job post found';
+    if (matchResultCompanyEl) matchResultCompanyEl.textContent = '';
+    if (matchResultLinkEl) {
+      matchResultLinkEl.href = jaOpenHref(null);
+      matchResultLinkEl.classList.remove('hidden');
+    }
+    if (matchResultStatus) {
+      setStatus(
+        matchResultStatus,
+        result.rationale
+          ? `${result.rationale} — link it manually from the Posts tab.`
+          : 'Link it manually from the Posts tab.',
+      );
+    }
+    return;
+  }
+
+  // failed — the JA still exists; be honest.
+  if (matchResultLeadEl) matchResultLeadEl.textContent = 'Tracked';
+  if (matchResultTitleEl) matchResultTitleEl.textContent = 'Lookup failed';
+  if (matchResultCompanyEl) matchResultCompanyEl.textContent = '';
+  if (matchResultLinkEl) {
+    matchResultLinkEl.href = jaOpenHref(null);
+    matchResultLinkEl.classList.remove('hidden');
+  }
+  if (matchResultStatus) {
+    setStatus(
+      matchResultStatus,
+      'The application is tracked, but finding its job post failed. Link it manually from the Posts tab.',
+      'error',
+    );
+  }
+}
+
+// Poll the JA from the open popup. On terminal match_context.status render the
+// result; if the popup outlives the budget without a terminal status, the
+// background alarm (registered at POST time) carries it to the next open.
+function startMatchAppPolling(jaId, tabUrl, apiKey) {
+  stopMatchAppPolling();
+  let polls = 0;
+  matchAppPollTimer = setInterval(async () => {
+    polls += 1;
+    if (polls > MATCH_APP_POLL_MAX) {
+      stopMatchAppPolling();
+      // Hand off to the background alarm — leave the button in its Searching…
+      // state; the stash + alarm surface the result on the next open.
+      return;
+    }
+    let result;
+    try {
+      result = await pollMatchApplicationOnce(jaId, apiKey);
+    } catch {
+      result = null;
+    }
+    if (!result || !result.status) return; // transient — keep polling
+    if (result.status === 'pending') return;
+    // done / failed — terminal.
+    stopMatchAppPolling();
+    await removePageStash(CC_MATCH_APPS_KEY, tabUrl);
+    if (activeTab === 'tools') return; // don't yank the user off the Tools tab
+    await renderMatchResult(result, jaId, tabUrl, apiKey);
+  }, MATCH_APP_POLL_INTERVAL_MS);
+}
+
+function stopMatchAppPolling() {
+  if (matchAppPollTimer != null) {
+    clearInterval(matchAppPollTimer);
+    matchAppPollTimer = null;
+  }
+}
+
+// Register the background alarm fallback for a match-application. background.js
+// polls the JA on its own alarm cadence and surfaces the result (stash +
+// notification on a hit) even after the popup closes.
+function armMatchAppBackground(jaId, tabUrl, apiKey) {
+  try {
+    api.runtime.sendMessage({
+      type: 'cc-match-app-queued',
+      jaId: String(jaId),
+      url: tabUrl,
+      origin: ORIGIN,
+      apiKey,
+      frontendOrigin: FRONTEND_ORIGIN,
+    });
+  } catch {
+    // best-effort — the popup-side poll is the primary channel
+  }
+}
+
+// Click handler: one POST per click. Track the application (create the JA with
+// a match_context), flip the button to Searching…, stash + arm the background
+// fallback, then poll the JA for the matcher outcome.
+async function handleAskAgent() {
+  if (matchAppInFlight) return;
+  let tab;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    tab = null;
+  }
+  if (!tab || !tab.url) return;
+  const verdict = classifyUrl(tab.url);
+  if (!verdict.ok) {
+    if (askAgentStatus) setStatus(askAgentStatus, verdict.message, 'error');
+    return;
+  }
+  let saved;
+  try {
+    saved = await api.storage.local.get(['ccApiKey']);
+  } catch {
+    saved = null;
+  }
+  if (!saved || !saved.ccApiKey) {
+    if (askAgentStatus) setStatus(askAgentStatus, 'Not connected.', 'error');
+    return;
+  }
+
+  matchAppInFlight = true;
+  if (askAgentBtn) {
+    askAgentBtn.disabled = true;
+    askAgentBtn.dataset.state = 'sending';
+    const lbl = askAgentBtn.querySelector('.btn-label');
+    if (lbl) lbl.textContent = 'Tracking & searching…';
+  }
+  if (askAgentStatus) setStatus(askAgentStatus, 'Tracking your application…');
+
+  // Reuse the ladder signal grab (referrer + og:title/h1) + the page excerpt.
+  const signals = tab.id != null ? await grabLadderSignals(tab.id) : {};
+  const pageTitle = pickPageTitle(signals.h1, signals.ogTitle) || tab.title || '';
+  const excerpt = tab.id != null ? await grabPageExcerpt(tab.id) : '';
+
+  const res = await postMatchApplication({
+    trackingUrl: tab.url,
+    referrer: signals.referrer || '',
+    pageTitle,
+    excerpt,
+    apiKey: saved.ccApiKey,
+  });
+  if (!res.ok) {
+    matchAppInFlight = false;
+    if (askAgentBtn) {
+      askAgentBtn.disabled = false;
+      delete askAgentBtn.dataset.state;
+      const lbl = askAgentBtn.querySelector('.btn-label');
+      if (lbl) lbl.textContent = 'Track application & find its job post';
+    }
+    if (askAgentStatus) setStatus(askAgentStatus, res.error, 'error');
+    return;
+  }
+
+  if (askAgentStatus) {
+    setStatus(askAgentStatus, 'Tracked ✓ — finding its job post…');
+  }
+  await writePageStash(
+    CC_MATCH_APPS_KEY,
+    MATCH_APP_STASH_TTL_MS,
+    MATCH_APP_STASH_MAX,
+    tab.url,
+    { jaId: String(res.jaId) },
+  );
+  armMatchAppBackground(res.jaId, tab.url, saved.ccApiKey);
+  startMatchAppPolling(res.jaId, tab.url, saved.ccApiKey);
+}
+
+// On popup-open (from maybeOfferFromLadder), resume a stashed match-application
+// for this url: if the matcher already finished, render it; if it's still
+// pending, restore the Searching… state and resume popup-side polling. Returns
+// true when it took ownership of the offer surface.
+async function maybeResumeMatchApplication(tab, apiKey) {
+  if (!tab || !tab.url) return false;
+  const stash = await readPageStash(CC_MATCH_APPS_KEY, MATCH_APP_STASH_TTL_MS);
+  const entry = stash[tab.url];
+  if (!entry || !entry.jaId) return false;
+
+  let result;
+  try {
+    result = await pollMatchApplicationOnce(entry.jaId, apiKey);
+  } catch {
+    result = null;
+  }
+  if (!result) return false; // transport hiccup — fall through to the ladder
+
+  if (result.status === 'pending') {
+    // Still working — show Searching… and resume the popup-side poll.
+    matchAppInFlight = true;
+    showAskAgentSearching();
+    startMatchAppPolling(entry.jaId, tab.url, apiKey);
+    return true;
+  }
+  // Terminal — render and clear the stash.
+  await removePageStash(CC_MATCH_APPS_KEY, tab.url);
+  await renderMatchResult(result, entry.jaId, tab.url, apiKey);
+  return true;
+}
+
+// Show / hide the "Track application & find its job post" affordance in the
+// Applications empty state. Shown only when: the user is staff and no offer
+// (apply / ladder / match-result) is already on screen. A request in flight
+// keeps the affordance up (it carries the Searching… state).
+function refreshAskAgentButton() {
+  if (!askAgentEl) return;
+  if (matchAppInFlight) {
+    askAgentEl.classList.remove('hidden');
+    return;
+  }
+  const matchResultActive =
+    !!(matchResultCard && !matchResultCard.classList.contains('hidden'));
+  const offerActive =
+    !!pendingApplyOffer || !!pendingLadderOffer || matchResultActive;
+  const show = isStaff && !offerActive;
+  askAgentEl.classList.toggle('hidden', !show);
+}
+
+function resetAskAgentButton() {
+  matchAppInFlight = false;
+  stopMatchAppPolling();
+  if (askAgentBtn) {
+    askAgentBtn.disabled = false;
+    delete askAgentBtn.dataset.state;
+    const lbl = askAgentBtn.querySelector('.btn-label');
+    if (lbl) lbl.textContent = 'Track application & find its job post';
+  }
+  if (askAgentStatus) setStatus(askAgentStatus, '');
+}
+
+function showAskAgentSearching() {
+  if (askAgentEl) askAgentEl.classList.remove('hidden');
+  if (askAgentBtn) {
+    askAgentBtn.disabled = true;
+    askAgentBtn.dataset.state = 'sending';
+    const lbl = askAgentBtn.querySelector('.btn-label');
+    if (lbl) lbl.textContent = 'Tracking & searching…';
+  }
+  if (askAgentStatus) setStatus(askAgentStatus, 'Tracked ✓ — finding its job post…');
+}
+
+if (askAgentBtn) {
+  askAgentBtn.addEventListener('click', handleAskAgent);
 }
 
 // ===================================================================
@@ -3235,6 +5244,53 @@ async function handleAnswerSelected() {
     })
     .catch(() => {});
   await pollAnswerUntilTerminal(answerId, saved.ccApiKey);
+}
+
+// CCEXT: on popup-open over a tracked job post, proactively read the page
+// selection and echo it in the answer card so the highlighted question is
+// visible IMMEDIATELY — no expanding a collapsed card, no click-just-to-see.
+// Answering itself stays a deliberate click (handleAnswerSelected re-reads
+// the same, still-live selection), so the user can eyeball the question
+// before generating. Skips the resume path (maybeResumeAnswer owns a pending
+// generation) and no-ops when there's no selection.
+async function primeAnswerSelection() {
+  if (!answerCardEl || !answerBtn || answerPolling) return;
+  let saved;
+  try {
+    saved = await api.storage.local.get(['ccApiKey', ANSWER_PENDING_KEY]);
+  } catch {
+    saved = null;
+  }
+  // Don't fight the resume path — if a pending answer is stashed, let
+  // maybeResumeAnswer drive the card instead.
+  if (saved && saved[ANSWER_PENDING_KEY] && saved[ANSWER_PENDING_KEY].answerId) {
+    return;
+  }
+  const selection = await readSelectionFromActiveTab();
+  if (!selection) return;
+  // The selection read is async; bail if the user has since moved off the
+  // tracked screen (or the post cleared) so we never prime a stale card.
+  if (currentSendScreenEl !== screenTracked || !trackedJobPostId) return;
+  if (answerPolling) return;
+  answerCardEl.open = true;
+  resetAnswerResult();
+  showAnswerPrompt(selection);
+  // Free saved-answer match on open: if you've answered this exact question
+  // before, surface it instantly (copy-ready) — no AI call, no writes. Novel
+  // questions fall through to the click-to-generate path (handleAnswerSelected).
+  const apiKey = saved && saved.ccApiKey;
+  if (apiKey) {
+    setStatus(answerStatus, 'Looking for a saved answer…');
+    const match = await findExistingAnswer(selection, apiKey);
+    // Bail if the user moved off this screen or a generation began while we
+    // waited on the lookup.
+    if (currentSendScreenEl !== screenTracked || answerPolling) return;
+    if (match && match.content) {
+      showAnswerResult(match.content, 'Matched a saved answer — copy it below.');
+      return;
+    }
+  }
+  setStatus(answerStatus, 'Highlighted — click Answer to respond.');
 }
 
 // Resume a pending generation after a popup close/reopen. Reads the stash;

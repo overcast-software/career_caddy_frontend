@@ -7,7 +7,7 @@ Single purpose
 ------------------------------------------------------------
 Career Caddy Sender has a single purpose: capture the active tab's
 job posting (URL, title, and full page text) and send it to the
-user's Career Caddy account at https://api.careercaddy.online when
+user's Career Caddy account at https://careercaddy.online when
 the user clicks the Send button in the popup. The extension does
 not perform any other function.
 
@@ -83,18 +83,20 @@ worker that may go idle.
 ------------------------------------------------------------
 host permission — justification
 ------------------------------------------------------------
-host_permissions is intentionally narrow:
+(NOTE: apex-corrected for the 2.0.0 build; the full store-listing
+justification pass is deferred to actual publish time.)
 
-  https://api.careercaddy.online/*
+host_permissions is intentionally narrow — a single host:
+
   https://careercaddy.online/*
 
 This does NOT include <all_urls>. It is the minimum needed to
-operate:
+operate, and it serves two same-origin needs:
 
-  1. api.careercaddy.online — required so the popup and the service
+  1. careercaddy.online/api/v1/ — required so the popup and the service
      worker can fetch /api/v1/token/, /api/v1/api-keys/,
      /api/v1/scrapes/, /api/v1/scores/, and /api/v1/job-posts/ on
-     the user's behalf.
+     the user's behalf (the API is served same-origin under the apex).
   2. careercaddy.online — required so the popup can read
      theme-palette from a Career Caddy tab's localStorage (via a
      small scripting.executeScript injection on a CC-origin tab)
@@ -115,7 +117,7 @@ JavaScript is bundled in the published .zip and runs in the popup
 or service worker. Network activity is limited to:
 
   1. fetch() calls (JSON request/response) to the user's Career
-     Caddy account at https://api.careercaddy.online,
+     Caddy account at https://careercaddy.online,
   2. chrome.scripting.executeScript calls that inject an inline
      `func` (bundled in popup.js, NOT a remote-code string) into
      the active tab's frames on the user's Send click.

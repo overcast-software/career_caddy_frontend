@@ -1,32 +1,20 @@
-# Career Caddy Sender — v1.8.0
+# Career Caddy Sender — v2.0.0
 
 A browser extension that captures the active page's URL + visible text and
 POSTs it directly to your Career Caddy instance. The popup shows a one-time
 **Connect** screen for first-run auth, after which clicking the toolbar icon
 fires the page off and an OS-level system notification announces the result.
 
-## Store release notes (resubmission — since published 1.1.x)
+## 2.0.0 — dogfood build (apex-repointed)
 
-The published listings are far behind the code: **Chrome Web Store 1.1.0**,
-**Firefox AMO 1.1.1**. This resubmission (**1.8.0**) catches both up. Paste-ready
-"What's new" copy — highlights since 1.1.x:
-
-- **Faster, cleaner capture.** Cross-platform dedup hints (apply URL, canonical
-  link, referrer) plus a direct-POST fast path on known-good domains, so the
-  post lands on the clean canonical link with less server work (1.2.0–1.4.0).
-- **Track applications from the popup.** Mark a tracked JobPost as applied
-  without leaving the page (1.7.0).
-- **Quick-copy profile fields** for pasting into application forms (1.7.4).
-- **Answer the selected text** — highlight a screening question on any page and
-  generate/save an Answer straight from the popup (1.7.5).
-- Opaque-id (NanoID) hardening and assorted fixes (1.7.1–1.7.6).
-
-> ⚠️ **Permission re-consent on update.** The published 1.1.x only requested
-> `notifications`; this build adds `activeTab`, `scripting`, `storage`, and
-> `alarms` (all justified in `store-assets/cws-justifications.txt`). Existing
-> users will see a permission prompt on update and the add-on may sit disabled
-> until they re-accept. Expected given the feature growth — call it out in the
-> store "What's new" copy so it isn't a surprise.
+This is a working **2.0.0** build for loading + iterating against real prod,
+not a frozen store release. It consolidates the 1.8.x iterations (three-tab
+IA + roundtrip diet) and repoints every runtime file off the retired
+`api.careercaddy.online` subdomain to the apex `https://careercaddy.online`
+(the API is served same-origin under `/api/v1/`); `host_permissions` is the
+single apex host. The store-assets (`cws-justifications.txt`, descriptions)
+carry only a light apex correction — the full store-listing / privacy
+justification pass is **deferred to actual publish time**.
 
 ## What changed in 0.3.0
 
@@ -51,6 +39,15 @@ The published listings are far behind the code: **Chrome Web Store 1.1.0**,
 
 ## Version history
 
+- **2.0.0** — Three-tab IA + apex repoint. Consolidates the 1.8.x iterations:
+  the popup is reorganized into **Posts | Applications | Staff** tabs (Staff
+  gated on `/me` `is_staff`) with lazy per-tab fetches and a state-based
+  default-tab landing; adds staff-only agentic match-application (async matcher
+  polled via popup + a background alarm) and a signal ladder behind an optional
+  `tabs` opt-in. Repoints the API `ORIGIN` off the retired
+  `api.careercaddy.online` to the apex `https://careercaddy.online` (served
+  same-origin under `/api/v1/`) and reduces `host_permissions` to that single
+  host.
 - **1.8.0** — Store resubmission. No functional change since 1.7.6; bumps the
   version so the far-behind Chrome (1.1.0) and Firefox (1.1.1) listings can be
   updated to the current build. See "Store release notes" above — this update
