@@ -286,6 +286,37 @@ export default class JobPostModel extends Model {
     return (scores?.length || 0) > 0;
   }
 
+  // Best completed score, derived from the live `scores` ManyArray. This
+  // is the REACTIVE twin of the `topScore` belongsTo (line 113): the
+  // belongsTo's linkage (`relationships.top-score.data`) is only set when
+  // the JobPost resource itself is serialized, so a score that completes
+  // AFTER the JobPost was loaded — via the SSE events service, which
+  // reloads the Score record but never the parent JobPost — never wires
+  // itself into `topScore`. The /job-posts index Score column reads this
+  // getter so it live-updates on score completion the same way jp.show's
+  // scores table does (both now flow off the `scores` hasMany, which the
+  // SSE score-reload keeps fresh through the score record's jobPost
+  // inverse). Returns the highest-scoring COMPLETED score, or null when
+  // none have completed yet — mirrors the belongsTo's null-until-scored
+  // presentation so the column shows '—' while scoring is in flight.
+  //
+  // Reads the ManyArray via .value() + for...of (no .slice()/.toArray(),
+  // which would sever reactivity). null-safe against the mid-load proxy.
+  get topScoreValue() {
+    const scores = this.hasMany('scores').value();
+    if (!scores) return null;
+    let best = null;
+    for (const s of scores) {
+      // Only completed scores carry a trustworthy number; a pending row
+      // has status='pending' and a null/stale score. 'done'/'completed'
+      // are the success-terminal states (failed/error carry no score).
+      const done = s?.status === 'completed' || s?.status === 'done';
+      if (!done || s.score == null) continue;
+      if (best == null || s.score > best) best = s.score;
+    }
+    return best;
+  }
+
   resolveAndDedupe() {
     return apiAction(this, { method: 'POST', path: 'resolve-and-dedupe' });
   }
