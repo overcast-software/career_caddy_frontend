@@ -9,7 +9,7 @@ export default class ScrapesShowController extends Controller {
   @service flashMessages;
 
   startPollingIfPending() {
-    this.model.pollIfPending({
+    this.model.scrape.pollIfPending({
       label: 'Scraping…',
       successMessage: 'Scrape completed.',
       failedMessage: 'Scrape failed.',

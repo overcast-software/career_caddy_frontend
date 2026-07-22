@@ -37,6 +37,15 @@ export default class ScrapesItemComponent extends Component {
     return STATE_MAP[raw] ?? this.args.scrape?.status ?? '';
   }
 
+  // When the requested scrape is a tracker URL that forwarded to a
+  // canonical child, the JobPost and Company live on the child — see
+  // routes/scrapes/show.js _walkToCanonical. Prefer that record for the
+  // Company / JobPost rows so the show page surfaces the curated record
+  // instead of the empty tracker.
+  get displayScrape() {
+    return this.args.canonicalScrape ?? this.args.scrape;
+  }
+
   get isStaff() {
     return this.currentUser.user?.isStaff;
   }
