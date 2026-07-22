@@ -85,10 +85,14 @@
               </span>
             </td>
             <td class="px-4 py-3 text-gray-600">
-              {{#if jobPost.topScore.score}}
+              {{! Reads the derived `topScoreValue` (off the live `scores`
+                  hasMany) rather than the `topScore` belongsTo so the cell
+                  live-updates when a score completes via SSE — the belongsTo
+                  linkage only refreshes on a full JobPost reload. }}
+              {{#if jobPost.topScoreValue}}
                 <span class="font-medium text-accent-600">
                   <LinkTo @route="job-posts.show.scores" @model={{jobPost}}>
-                    {{jobPost.topScore.score}}
+                    {{jobPost.topScoreValue}}
                   </LinkTo>
                 </span>
               {{else}}

@@ -84,6 +84,129 @@ module('Unit | Model | job post', function (hooks) {
     });
   });
 
+  module('topScoreValue', function () {
+    test('returns null when no scores are loaded', function (assert) {
+      const store = this.owner.lookup('service:store');
+      const jp = store.createRecord('job-post', {});
+      assert.strictEqual(jp.topScoreValue, null);
+    });
+
+    test('ignores pending scores — column stays "—" while scoring', function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: [
+          {
+            type: 'job-post',
+            id: '200',
+            attributes: {},
+            relationships: {
+              scores: { data: [{ type: 'score', id: 's1' }] },
+            },
+          },
+          {
+            type: 'score',
+            id: 's1',
+            attributes: { status: 'pending', score: null },
+            relationships: {
+              jobPost: { data: { type: 'job-post', id: '200' } },
+            },
+          },
+        ],
+      });
+      const jp = store.peekRecord('job-post', '200');
+      assert.strictEqual(
+        jp.topScoreValue,
+        null,
+        'a pending score contributes no value',
+      );
+    });
+
+    test('returns the highest completed score', function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: [
+          {
+            type: 'job-post',
+            id: '201',
+            attributes: {},
+            relationships: {
+              scores: {
+                data: [
+                  { type: 'score', id: 's2' },
+                  { type: 'score', id: 's3' },
+                ],
+              },
+            },
+          },
+          {
+            type: 'score',
+            id: 's2',
+            attributes: { status: 'completed', score: 71 },
+            relationships: {
+              jobPost: { data: { type: 'job-post', id: '201' } },
+            },
+          },
+          {
+            type: 'score',
+            id: 's3',
+            attributes: { status: 'completed', score: 88 },
+            relationships: {
+              jobPost: { data: { type: 'job-post', id: '201' } },
+            },
+          },
+        ],
+      });
+      const jp = store.peekRecord('job-post', '201');
+      assert.strictEqual(jp.topScoreValue, 88, 'picks the max completed score');
+    });
+
+    // The regression this fix targets: a score that completes AFTER the
+    // JobPost was loaded (the SSE events service reloads the Score record,
+    // never the parent JobPost, so `topScore` belongsTo linkage never
+    // updates). Deriving off the `scores` hasMany makes the index cell
+    // live-update the same way jp.show's scores table does.
+    test('live-updates when a pending score flips to completed (SSE path)', function (assert) {
+      const store = this.owner.lookup('service:store');
+      store.push({
+        data: [
+          {
+            type: 'job-post',
+            id: '202',
+            attributes: {},
+            relationships: {
+              scores: { data: [{ type: 'score', id: 's4' }] },
+            },
+          },
+          {
+            type: 'score',
+            id: 's4',
+            attributes: { status: 'pending', score: null },
+            relationships: {
+              jobPost: { data: { type: 'job-post', id: '202' } },
+            },
+          },
+        ],
+      });
+      const jp = store.peekRecord('job-post', '202');
+      assert.strictEqual(jp.topScoreValue, null, 'starts unscored');
+
+      // Simulate the SSE score-completion reload: the Score record's
+      // attributes update in place (no JobPost reload, no topScore relink).
+      store.push({
+        data: {
+          type: 'score',
+          id: 's4',
+          attributes: { status: 'completed', score: 93 },
+        },
+      });
+      assert.strictEqual(
+        jp.topScoreValue,
+        93,
+        'derived value tracks the in-place score reload',
+      );
+    });
+  });
+
   module('apiAction verbs', function (hooks) {
     hooks.beforeEach(function () {
       const store = this.owner.lookup('service:store');
