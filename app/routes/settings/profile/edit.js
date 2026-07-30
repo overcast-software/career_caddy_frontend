@@ -19,8 +19,14 @@ export default class SettingsProfileEditRoute extends Route {
     // always present so they stay editable even when blank; their edits mirror
     // back on save. Everything in `links` is normalized (legacy {name,url} →
     // {name,value,icon,pinned}) and appended so nothing disappears.
+    //
+    // Each row gets a STABLE `key` (never the array index) so the up/down
+    // reorder animates via {{#animated-each key="key"}} — seeds use fixed keys,
+    // normalized links use the controller's monotonic key minter.
+    controller._keySeq = 0;
     controller.items = [
       {
+        key: 'seed:linkedin',
         name: 'LinkedIn',
         value: model.linkedin ?? '',
         icon: 'linkedin',
@@ -28,13 +34,18 @@ export default class SettingsProfileEditRoute extends Route {
         seed: 'linkedin',
       },
       {
+        key: 'seed:github',
         name: 'GitHub',
         value: model.github ?? '',
         icon: 'github',
         pinned: true,
         seed: 'github',
       },
-      ...normalizeItems(model.links).map((item) => ({ ...item, seed: null })),
+      ...normalizeItems(model.links).map((item) => ({
+        ...item,
+        key: controller.nextItemKey(),
+        seed: null,
+      })),
     ];
 
     const onboarding = model.onboarding || {};

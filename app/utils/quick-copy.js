@@ -30,7 +30,8 @@ export function inferIcon(value) {
 // Normalize the raw `Profile.links` array into the item contract. Tolerant of
 // the legacy `{ name, url }` shape (url → value) and of a missing/blank icon.
 // Returns a fresh plain array of fresh plain objects (safe to feed to tracked
-// state and to mutate for drag-to-order without touching the model attr).
+// state and to reorder via up/down move buttons without touching the model
+// attr).
 export function normalizeItems(links) {
   const list = Array.isArray(links) ? links : [];
   const items = [];

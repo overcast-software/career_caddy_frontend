@@ -69,103 +69,140 @@
             <p class="text-xs text-gray-400 mt-1 mb-1">One-click copy buttons —
               on the web and in the extension. LinkedIn and GitHub are seeded
               from your profile; add a portfolio link, reusable prompts,
-              taglines, etc. Drag the handle to reorder.</p>
+              taglines, etc. Use the up/down arrows to reorder.</p>
           </div>
-          {{#each this.items as |item index|}}
-            <div
-              draggable="true"
-              class="col-span-full min-w-0 flex gap-3 items-start pb-3
-                {{unless
-                  (eq index 0)
-                  'border-t border-gray-200 dark:border-gray-600 pt-4'
-                }}
-                {{if (eq this.dragIndex index) 'opacity-50'}}"
-              {{on "dragstart" (fn this.onDragStart index)}}
-              {{on "dragover" this.allowDrop}}
-              {{on "drop" (fn this.onDrop index)}}
-              {{on "dragend" this.onDragEnd}}
-            >
-              <span
-                class="mt-2 shrink-0 cursor-grab text-gray-400 dark:text-gray-500"
-                aria-label="Drag to reorder"
-                title="Drag to reorder"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="size-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="1.5"
+          <div class="col-span-full min-w-0">
+            <AnimatedContainer>
+              {{#animated-each
+                this.items key="key" duration=220 use=this.reorderTransition
+                as |item index|
+              }}
+                <div
+                  class="min-w-0 flex gap-3 items-start pb-3
+                    {{unless
+                      (eq index 0)
+                      'border-t border-gray-200 dark:border-gray-600 pt-4'
+                    }}"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3.75 9h16.5m-16.5 6.75h16.5"
-                  />
-                </svg>
-              </span>
-              <div class="w-1/3 min-w-0 flex flex-col gap-2">
-                <input
-                  type="text"
-                  value={{item.name}}
-                  placeholder="Label"
-                  aria-label="Item label"
-                  disabled={{if item.seed true false}}
-                  class="w-full min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 px-3 py-2 text-sm"
-                  {{on "input" (fn this.updateItemField index "name")}}
-                />
-                {{! icon picker — locked for the seeded linkedin/github rows }}
-                {{#unless item.seed}}
-                  <div class="flex gap-1" role="group" aria-label="Icon">
-                    {{#each this.iconChoices as |choice|}}
+                  {{! reorder via house up/down buttons (sortable-move-btn) —
+                      hidden for the pinned LinkedIn/GitHub seeds }}
+                  {{#unless item.seed}}
+                    <div class="flex flex-col pt-2 shrink-0">
                       <button
                         type="button"
-                        aria-label={{choice}}
-                        aria-pressed={{if (eq item.icon choice) "true" "false"}}
-                        class="p-1.5 rounded border
-                          {{if
-                            (eq item.icon choice)
-                            'border-blue-500 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300'
-                            'border-transparent text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }}"
-                        {{on "click" (fn this.setItemIcon index choice)}}
+                        class="sortable-move-btn"
+                        title="Move up"
+                        aria-label="Move item up"
+                        disabled={{eq index this.firstMovableIndex}}
+                        {{on "click" (fn this.moveUp index)}}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="size-4"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="m4.5 15.75 7.5-7.5 7.5 7.5"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="sortable-move-btn"
+                        title="Move down"
+                        aria-label="Move item down"
+                        disabled={{eq index this.lastIndex}}
+                        {{on "click" (fn this.moveDown index)}}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="size-4"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  {{/unless}}
+                  <div class="w-1/3 min-w-0 flex flex-col gap-2">
+                    <input
+                      type="text"
+                      value={{item.name}}
+                      placeholder="Label"
+                      aria-label="Item label"
+                      disabled={{if item.seed true false}}
+                      class="w-full min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 px-3 py-2 text-sm"
+                      {{on "input" (fn this.updateItemField index "name")}}
+                    />
+                    {{! icon picker — locked for the seeded linkedin/github rows }}
+                    {{#unless item.seed}}
+                      <div class="flex gap-1" role="group" aria-label="Icon">
+                        {{#each this.iconChoices as |choice|}}
+                          <button
+                            type="button"
+                            aria-label={{choice}}
+                            aria-pressed={{if
+                              (eq item.icon choice)
+                              "true"
+                              "false"
+                            }}
+                            class="p-1.5 rounded border
+                              {{if
+                                (eq item.icon choice)
+                                'border-blue-500 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300'
+                                'border-transparent text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+                              }}"
+                            {{on "click" (fn this.setItemIcon index choice)}}
+                          >
+                            <QuickCopyIcon
+                              @icon={{choice}}
+                              @class="size-4 shrink-0"
+                            />
+                          </button>
+                        {{/each}}
+                      </div>
+                    {{/unless}}
+                    {{#if item.seed}}
+                      <span
+                        class="inline-flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500"
                       >
                         <QuickCopyIcon
-                          @icon={{choice}}
+                          @icon={{item.icon}}
                           @class="size-4 shrink-0"
                         />
-                      </button>
-                    {{/each}}
+                        Pinned
+                      </span>
+                    {{else}}
+                      <button
+                        type="button"
+                        class="self-start px-2 py-1 text-xs rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                        {{on "click" (fn this.removeItem index)}}
+                      >Remove</button>
+                    {{/if}}
                   </div>
-                {{/unless}}
-                {{#if item.seed}}
-                  <span
-                    class="inline-flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500"
-                  >
-                    <QuickCopyIcon
-                      @icon={{item.icon}}
-                      @class="size-4 shrink-0"
-                    />
-                    Pinned
-                  </span>
-                {{else}}
-                  <button
-                    type="button"
-                    class="self-start px-2 py-1 text-xs rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
-                    {{on "click" (fn this.removeItem index)}}
-                  >Remove</button>
-                {{/if}}
-              </div>
-              <textarea
-                placeholder="Content to copy"
-                aria-label="Item content"
-                rows="3"
-                class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm resize-y"
-                {{on "input" (fn this.updateItemField index "value")}}
-              >{{item.value}}</textarea>
-            </div>
-          {{/each}}
+                  <textarea
+                    placeholder="Content to copy"
+                    aria-label="Item content"
+                    rows="3"
+                    class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm resize-y"
+                    {{on "input" (fn this.updateItemField index "value")}}
+                  >{{item.value}}</textarea>
+                </div>
+              {{/animated-each}}
+            </AnimatedContainer>
+          </div>
           <div class="field-row col-span-full">
             <button
               type="button"
