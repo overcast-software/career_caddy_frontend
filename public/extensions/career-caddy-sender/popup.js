@@ -147,11 +147,11 @@ const onCcOpenEl = $('on-cc-open');
 const quickCopyCardEl = $('quick-copy-card');
 const quickCopyFieldsEl = $('quick-copy-fields');
 const quickCopyEditEl = $('quick-copy-edit');
-// CCEXT-21: point the Applications-tab "Edit" anchor at the CC settings edit
-// page (opens in a new tab). Set from FRONTEND_ORIGIN so it follows the origin
-// repoint, matching the onCcOpenEl / result-link anchor pattern.
+// CCEXT-21: point the Applications-tab "Edit" anchor at the CC quick-copy
+// settings page (opens in a new tab). Set from FRONTEND_ORIGIN so it follows
+// the origin repoint, matching the onCcOpenEl / result-link anchor pattern.
 if (quickCopyEditEl) {
-  quickCopyEditEl.href = `${FRONTEND_ORIGIN}/settings/profile/edit`;
+  quickCopyEditEl.href = `${FRONTEND_ORIGIN}/settings/quick-copy`;
 }
 const answerCardEl = $('answer-card'); // CC #47: answer-the-selection tool
 const answerBtn = $('answer-btn');
@@ -385,22 +385,36 @@ async function refreshStaffFlag(apiKey) {
   return staff;
 }
 
-// CCEXT-21 — the shared quick-copy item contract, ported verbatim from the web
+// CCEXT-21 — the shared quick-copy item contract, kept IDENTICAL to the web
 // app's app/utils/quick-copy.js so both surfaces agree. An item is
 // { name, value, icon, pinned }. `attrs` is the snake-cased /me payload.
 //
-// Back-compat: legacy snippets are { name, url } where `url` held the copy
-// text — read `url` as a fallback for `value` and infer a missing icon (globe
-// for a URL, text for prose) so nothing disappears from an existing list.
-const QC_ICONS = ['linkedin', 'github', 'globe', 'text'];
-const QC_URL_RE = /^(https?:\/\/|www\.)/i;
+// Hybrid icon vocab (Doug's review): BRAND keys linkedin/github (seeds only,
+// SVG marks) + GOLF keys flag/golfer/trophy/target/finish (custom items, color
+// emoji). Back-compat: legacy { name, url } → read url as a fallback for value;
+// legacy icon values map to a golf key (globe → flag, text → golfer) so nothing
+// looks broken.
+const QC_BRAND_ICONS = ['linkedin', 'github'];
+const QC_CUSTOM_ICONS = ['flag', 'golfer', 'trophy', 'target', 'finish'];
+const QC_ICON_EMOJI = {
+  flag: '⛳',
+  golfer: '🏌️',
+  trophy: '🏆',
+  target: '🎯',
+  finish: '🏁',
+};
+const QC_DEFAULT_CUSTOM_ICON = 'flag';
+const QC_LEGACY_ICON_MAP = { globe: 'flag', text: 'golfer' };
 
-function qcInferIcon(value) {
-  const v = (value == null ? '' : String(value)).trim();
-  return QC_URL_RE.test(v) ? 'globe' : 'text';
+// Coerce any stored icon into a valid golf key for a custom item.
+function qcNormalizeCustomIcon(icon) {
+  if (QC_CUSTOM_ICONS.includes(icon)) return icon;
+  if (QC_LEGACY_ICON_MAP[icon]) return QC_LEGACY_ICON_MAP[icon];
+  return QC_DEFAULT_CUSTOM_ICON;
 }
 
-// LinkedIn + GitHub (seeded, pinned) followed by the normalized `links` items.
+// LinkedIn + GitHub (seeded, pinned, brand marks) followed by the normalized
+// `links` items (golf icons).
 function composeQuickCopyItems(attrs) {
   if (!attrs) return [];
   const items = [];
@@ -420,59 +434,50 @@ function composeQuickCopyItems(attrs) {
   const links = Array.isArray(attrs.links) ? attrs.links : [];
   for (const raw of links) {
     if (!raw) continue;
+    // Skip any links item carrying a brand icon — LI/GH come from the
+    // dedicated fields, so a stored brand-iconed link would double up.
+    if (QC_BRAND_ICONS.includes(raw.icon)) continue;
     const value = String(raw.value != null ? raw.value : (raw.url ?? '')).trim();
     if (!value) continue;
-    const icon = QC_ICONS.includes(raw.icon) ? raw.icon : qcInferIcon(value);
-    // Skip seeded linkedin/github icons so the dedicated fields don't double up.
-    if (icon === 'linkedin' || icon === 'github') continue;
+    const icon = qcNormalizeCustomIcon(raw.icon);
     const name = String(raw.name ?? '');
     items.push({ name: name || value, value, icon, pinned: Boolean(raw.pinned) });
   }
   return items;
 }
 
-// Inline-SVG glyph matching the web QuickCopyIcon vocabulary. currentColor so
-// it inherits the row's text color across the light/dark theme.
+// Hybrid glyph matching the web <QuickCopyIcon>: brand keys → inline SVG mark
+// (currentColor so it inherits the row's theme text color); golf keys → a
+// native COLOR emoji span.
 function buildQuickCopyIcon(icon) {
-  const NS = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('class', 'qc-icon');
-  svg.setAttribute('aria-hidden', 'true');
-  const path = document.createElementNS(NS, 'path');
-  if (icon === 'linkedin') {
+  if (icon === 'linkedin' || icon === 'github') {
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('class', 'qc-icon');
     svg.setAttribute('fill', 'currentColor');
-    path.setAttribute(
-      'd',
-      'M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.75V21H19v-5.5c0-1.3-.02-3-1.85-3-1.85 0-2.13 1.44-2.13 2.9V21H10V9z',
-    );
-  } else if (icon === 'github') {
-    svg.setAttribute('fill', 'currentColor');
-    path.setAttribute(
-      'd',
-      'M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.32 9.32 0 015 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0022 12.25C22 6.58 17.52 2 12 2z',
-    );
-  } else if (icon === 'globe') {
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor');
-    svg.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    path.setAttribute(
-      'd',
-      'M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418',
-    );
-  } else {
-    // text
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor');
-    svg.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    path.setAttribute('d', 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12');
+    svg.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS(NS, 'path');
+    if (icon === 'linkedin') {
+      path.setAttribute(
+        'd',
+        'M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.75V21H19v-5.5c0-1.3-.02-3-1.85-3-1.85 0-2.13 1.44-2.13 2.9V21H10V9z',
+      );
+    } else {
+      path.setAttribute(
+        'd',
+        'M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.32 9.32 0 015 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0022 12.25C22 6.58 17.52 2 12 2z',
+      );
+    }
+    svg.appendChild(path);
+    return svg;
   }
-  svg.appendChild(path);
-  return svg;
+  // Golf emoji span (native color).
+  const span = document.createElement('span');
+  span.className = 'qc-icon qc-emoji';
+  span.setAttribute('aria-hidden', 'true');
+  span.textContent = QC_ICON_EMOJI[icon] ?? QC_ICON_EMOJI.flag;
+  return span;
 }
 
 // CCEXT-21: render the unified quick-copy list into the Applications tab. Seeds
