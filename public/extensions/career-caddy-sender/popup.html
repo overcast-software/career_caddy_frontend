@@ -807,6 +807,43 @@
         border-color: var(--success);
       }
 
+      /* CCEXT-21: Applications-tab quick-copy list (LinkedIn/GitHub + saved
+         links/prompts). Same visual family as .profile-card, with a header row
+         carrying the "Edit" anchor and per-row icons. */
+      .quick-copy-card {
+        margin-bottom: 12px;
+        background: var(--bg-soft);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      .quick-copy-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .quick-copy-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .quick-copy-edit {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent-500);
+        text-decoration: none;
+      }
+      .quick-copy-edit:hover {
+        text-decoration: underline;
+      }
+      .qc-icon {
+        flex: 0 0 auto;
+        width: 16px;
+        height: 16px;
+        color: var(--text-muted);
+      }
+
       /* CCEXT: manual link-to-tracked-job picker rows. */
       .link-job-row {
         display: block;
@@ -956,13 +993,8 @@
            (async extraction in flight) for a manual status re-check. -->
       <button id="recheck" class="linkbtn hidden" type="button" style="margin-top: 10px;">Re-check</button>
 
-      <!-- CC #1: quick-copy profile fields, sourced from /api/v1/me on popup
-           open. Collapsed by default; hidden until at least one field loads.
-           Rows are built in JS (renderProfileCard). -->
-      <details id="profile-card" class="profile-card hidden">
-        <summary class="profile-summary">Copy profile details</summary>
-        <div id="profile-fields" class="profile-fields"></div>
-      </details>
+      <!-- CCEXT-21: the quick-copy list moved off the Send screen to the
+           Applications tab (#quick-copy-card there). Nothing renders here now. -->
 
       <!-- "Link this page to a job post" — the FIND half of find-or-create,
            for pages the library doesn't resolve (ATS apply flows,
@@ -1067,6 +1099,24 @@
          card also lives here. -->
     <div id="screen-applications" class="hidden">
       <h1>Applications</h1>
+
+      <!-- CCEXT-21: user-global quick-copy list (LinkedIn + GitHub + saved
+           links/prompts). Always shown on this tab, independent of any matched
+           JobPost. Rows are built in JS (renderQuickCopy). Hidden until at
+           least one item loads. Edit opens the CC settings page in a new tab. -->
+      <div id="quick-copy-card" class="quick-copy-card hidden">
+        <div class="quick-copy-head">
+          <span class="quick-copy-title">Quick copy</span>
+          <a
+            id="quick-copy-edit"
+            class="quick-copy-edit"
+            href="https://careercaddy.online/settings/profile/edit"
+            target="_blank"
+            rel="noopener"
+          >Edit</a>
+        </div>
+        <div id="quick-copy-fields" class="profile-fields"></div>
+      </div>
 
       <p id="applications-empty" class="helper hidden">
         No job post is linked to this page yet. Find it (or send it) on the

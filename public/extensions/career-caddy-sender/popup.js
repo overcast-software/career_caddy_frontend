@@ -141,8 +141,18 @@ const screenTracked = $('screen-tracked');
 const screenLoading = $('screen-loading');
 const screenOnCc = $('screen-on-cc'); // CC #2: on-careercaddy dialogue
 const onCcOpenEl = $('on-cc-open');
-const profileCardEl = $('profile-card'); // CC #1: quick-copy profile fields
-const profileFieldsEl = $('profile-fields');
+// CCEXT-21: quick-copy list on the Applications tab (was the Send-screen
+// #profile-card in <=2.0.1). #quick-copy-fields holds the rendered rows;
+// #quick-copy-card wraps them so the whole block hides when the list is empty.
+const quickCopyCardEl = $('quick-copy-card');
+const quickCopyFieldsEl = $('quick-copy-fields');
+const quickCopyEditEl = $('quick-copy-edit');
+// CCEXT-21: point the Applications-tab "Edit" anchor at the CC settings edit
+// page (opens in a new tab). Set from FRONTEND_ORIGIN so it follows the origin
+// repoint, matching the onCcOpenEl / result-link anchor pattern.
+if (quickCopyEditEl) {
+  quickCopyEditEl.href = `${FRONTEND_ORIGIN}/settings/profile/edit`;
+}
 const answerCardEl = $('answer-card'); // CC #47: answer-the-selection tool
 const answerBtn = $('answer-btn');
 const answerStatus = $('answer-status');
@@ -310,6 +320,11 @@ let isStaff = false;
 let activeTab = 'send';
 let currentSendScreenEl = null; // screenConnected | screenTracked
 let connectedName = '';
+// CCEXT-21: the latest /me attributes, cached module-side so the Applications
+// tab's quick-copy list can (re)render on tab activation without another
+// roundtrip. Set by refreshStaffFlag (cache-hit and fetch paths). Null until
+// the first /me resolves.
+let lastMeAttrs = null;
 
 // CC #1: fetch the authenticated user's /me attributes once on popup open.
 // Returns the full JSON:API attributes object (or null) so the same response
@@ -348,13 +363,15 @@ async function refreshStaffFlag(apiKey) {
     Date.now() - cachedMe.ts < ME_CACHE_TTL_MS
   ) {
     isStaff = cachedMe.attrs.is_staff === true;
+    lastMeAttrs = cachedMe.attrs; // CCEXT-21: feed the Applications quick-copy list
     maybeShowTabBar();
-    renderProfileCard(cachedMe.attrs);
+    renderQuickCopy(cachedMe.attrs);
     return isStaff;
   }
   const attrs = await fetchMe(apiKey);
   const staff = attrs?.is_staff === true;
   isStaff = staff;
+  lastMeAttrs = attrs; // CCEXT-21: feed the Applications quick-copy list
   try {
     await api.storage.local.set({
       ccIsStaff: staff,
@@ -364,34 +381,131 @@ async function refreshStaffFlag(apiKey) {
     // best-effort cache; the live flag is authoritative this session
   }
   maybeShowTabBar();
-  renderProfileCard(attrs); // CC #1: hydrate the quick-copy card from /me
+  renderQuickCopy(attrs); // CCEXT-21: hydrate the Applications quick-copy list
   return staff;
 }
 
-// CC #1 / CCEXT-1: the quick-copy card renders a single LinkedIn row sourced
-// from the /me `linkedin` attribute. The whole card stays hidden when the user
-// has no LinkedIn on file. The value is written with textContent (never
-// innerHTML) so a stray '<' can't inject markup.
-function renderProfileCard(attrs) {
-  if (!profileCardEl || !profileFieldsEl) return;
-  profileFieldsEl.replaceChildren();
-  const linkedin = attrs && attrs.linkedin ? String(attrs.linkedin).trim() : '';
-  if (!linkedin) {
-    profileCardEl.classList.add('hidden');
-    return;
-  }
-  profileFieldsEl.appendChild(
-    buildProfileRow('LinkedIn', linkedin, 'Copy LinkedIn'),
-  );
-  profileCardEl.classList.remove('hidden');
+// CCEXT-21 — the shared quick-copy item contract, ported verbatim from the web
+// app's app/utils/quick-copy.js so both surfaces agree. An item is
+// { name, value, icon, pinned }. `attrs` is the snake-cased /me payload.
+//
+// Back-compat: legacy snippets are { name, url } where `url` held the copy
+// text — read `url` as a fallback for `value` and infer a missing icon (globe
+// for a URL, text for prose) so nothing disappears from an existing list.
+const QC_ICONS = ['linkedin', 'github', 'globe', 'text'];
+const QC_URL_RE = /^(https?:\/\/|www\.)/i;
+
+function qcInferIcon(value) {
+  const v = (value == null ? '' : String(value)).trim();
+  return QC_URL_RE.test(v) ? 'globe' : 'text';
 }
 
-function buildProfileRow(label, value, copyLabel = 'Copy') {
+// LinkedIn + GitHub (seeded, pinned) followed by the normalized `links` items.
+function composeQuickCopyItems(attrs) {
+  if (!attrs) return [];
+  const items = [];
+  const linkedin = attrs.linkedin ? String(attrs.linkedin).trim() : '';
+  const github = attrs.github ? String(attrs.github).trim() : '';
+  if (linkedin) {
+    items.push({
+      name: 'LinkedIn',
+      value: linkedin,
+      icon: 'linkedin',
+      pinned: true,
+    });
+  }
+  if (github) {
+    items.push({ name: 'GitHub', value: github, icon: 'github', pinned: true });
+  }
+  const links = Array.isArray(attrs.links) ? attrs.links : [];
+  for (const raw of links) {
+    if (!raw) continue;
+    const value = String(raw.value != null ? raw.value : (raw.url ?? '')).trim();
+    if (!value) continue;
+    const icon = QC_ICONS.includes(raw.icon) ? raw.icon : qcInferIcon(value);
+    // Skip seeded linkedin/github icons so the dedicated fields don't double up.
+    if (icon === 'linkedin' || icon === 'github') continue;
+    const name = String(raw.name ?? '');
+    items.push({ name: name || value, value, icon, pinned: Boolean(raw.pinned) });
+  }
+  return items;
+}
+
+// Inline-SVG glyph matching the web QuickCopyIcon vocabulary. currentColor so
+// it inherits the row's text color across the light/dark theme.
+function buildQuickCopyIcon(icon) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('class', 'qc-icon');
+  svg.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS(NS, 'path');
+  if (icon === 'linkedin') {
+    svg.setAttribute('fill', 'currentColor');
+    path.setAttribute(
+      'd',
+      'M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.75V21H19v-5.5c0-1.3-.02-3-1.85-3-1.85 0-2.13 1.44-2.13 2.9V21H10V9z',
+    );
+  } else if (icon === 'github') {
+    svg.setAttribute('fill', 'currentColor');
+    path.setAttribute(
+      'd',
+      'M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.32 9.32 0 015 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.02 10.02 0 0022 12.25C22 6.58 17.52 2 12 2z',
+    );
+  } else if (icon === 'globe') {
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.5');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute(
+      'd',
+      'M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418',
+    );
+  } else {
+    // text
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.5');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('d', 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12');
+  }
+  svg.appendChild(path);
+  return svg;
+}
+
+// CCEXT-21: render the unified quick-copy list into the Applications tab. Seeds
+// LinkedIn + GitHub from /me, then appends the user's `links` items — one-click
+// copy buttons with icons. Visible in BOTH the empty and matched states (items
+// are user-global, not JobPost-specific). The whole card hides when the list is
+// empty. Values are written with textContent (never innerHTML) so a stray '<'
+// can't inject markup. An "Edit" anchor opens the settings edit page in a tab.
+function renderQuickCopy(attrs) {
+  if (!quickCopyCardEl || !quickCopyFieldsEl) return;
+  quickCopyFieldsEl.replaceChildren();
+  const items = composeQuickCopyItems(attrs);
+  if (!items.length) {
+    quickCopyCardEl.classList.add('hidden');
+    return;
+  }
+  for (const item of items) {
+    quickCopyFieldsEl.appendChild(buildProfileRow(item));
+  }
+  quickCopyCardEl.classList.remove('hidden');
+}
+
+// One quick-copy row: icon + label + truncated value + a Copy button.
+function buildProfileRow(item) {
+  const { name, value, icon } = item;
+  const copyLabel = 'Copy';
   const row = document.createElement('div');
   row.className = 'profile-row';
+  row.appendChild(buildQuickCopyIcon(icon));
   const labelEl = document.createElement('span');
   labelEl.className = 'profile-label';
-  labelEl.textContent = label;
+  labelEl.textContent = name;
+  labelEl.title = name;
   const valueEl = document.createElement('span');
   valueEl.className = 'profile-value';
   valueEl.textContent = value;
@@ -503,6 +617,11 @@ if (tabToolsBtn)
 // the only network call is refreshApplicationState's dedupe check, and only
 // when that cache is cold.
 function showApplicationsScreen() {
+  // CCEXT-21: the quick-copy list is user-global — render it whenever the tab
+  // opens, in both the empty and matched states. lastMeAttrs is set by
+  // refreshStaffFlag on popup open; a null (pre-/me) keeps the card hidden and
+  // the next refresh re-renders it.
+  renderQuickCopy(lastMeAttrs);
   const hasJp = !!(trackedJobPost && trackedJobPostId);
   // Any offer (apply-attribution stash or CC-138 ladder) suppresses the
   // empty-state helper — the offer card carries the message.
