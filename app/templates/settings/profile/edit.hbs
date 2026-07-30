@@ -54,28 +54,6 @@
             />
           </div>
 
-          <div class="field">
-            <label class="field-label" for="settings-linkedin">LinkedIn</label>
-            <input
-              id="settings-linkedin"
-              type="url"
-              value={{this.linkedin}}
-              placeholder="https://linkedin.com/in/..."
-              {{on "input" (fn this.updateField "linkedin")}}
-            />
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="settings-github">GitHub</label>
-            <input
-              id="settings-github"
-              type="url"
-              value={{this.github}}
-              placeholder="https://github.com/..."
-              {{on "input" (fn this.updateField "github")}}
-            />
-          </div>
-
           <div class="field-full">
             <label class="field-label" for="settings-address">Address</label>
             <textarea
@@ -87,60 +65,114 @@
           </div>
 
           <div class="col-span-full">
-            <label class="field-label">Snippets</label>
-            <p class="text-xs text-gray-400 mt-1 mb-1">Reusable text you can
-              copy with one click — prompts, URLs, taglines, etc.</p>
+            <label class="field-label">Quick-copy items</label>
+            <p class="text-xs text-gray-400 mt-1 mb-1">One-click copy buttons —
+              on the web and in the extension. LinkedIn and GitHub are seeded
+              from your profile; add a portfolio link, reusable prompts,
+              taglines, etc. Drag the handle to reorder.</p>
           </div>
-          {{#each this.links as |link index|}}
+          {{#each this.items as |item index|}}
             <div
-              class="col-span-full min-w-0 flex gap-3 pb-3
+              draggable="true"
+              class="col-span-full min-w-0 flex gap-3 items-start pb-3
                 {{unless
                   (eq index 0)
                   'border-t border-gray-200 dark:border-gray-600 pt-4'
-                }}"
+                }}
+                {{if (eq this.dragIndex index) 'opacity-50'}}"
+              {{on "dragstart" (fn this.onDragStart index)}}
+              {{on "dragover" this.allowDrop}}
+              {{on "drop" (fn this.onDrop index)}}
+              {{on "dragend" this.onDragEnd}}
             >
-              <div class="w-1/4 min-w-0 flex flex-col gap-2">
+              <span
+                class="mt-2 shrink-0 cursor-grab text-gray-400 dark:text-gray-500"
+                aria-label="Drag to reorder"
+                title="Drag to reorder"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="size-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3.75 9h16.5m-16.5 6.75h16.5"
+                  />
+                </svg>
+              </span>
+              <div class="w-1/3 min-w-0 flex flex-col gap-2">
                 <input
                   type="text"
-                  value={{link.name}}
+                  value={{item.name}}
                   placeholder="Label"
-                  aria-label="Snippet label"
-                  class="w-full min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm"
-                  {{on "change" (fn this.updateLinkField index "name")}}
+                  aria-label="Item label"
+                  disabled={{if item.seed true false}}
+                  class="w-full min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 px-3 py-2 text-sm"
+                  {{on "input" (fn this.updateItemField index "name")}}
                 />
-                <div class="flex gap-2">
+                {{! icon picker — locked for the seeded linkedin/github rows }}
+                {{#unless item.seed}}
+                  <div class="flex gap-1" role="group" aria-label="Icon">
+                    {{#each this.iconChoices as |choice|}}
+                      <button
+                        type="button"
+                        aria-label={{choice}}
+                        aria-pressed={{if (eq item.icon choice) "true" "false"}}
+                        class="p-1.5 rounded border
+                          {{if
+                            (eq item.icon choice)
+                            'border-blue-500 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300'
+                            'border-transparent text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }}"
+                        {{on "click" (fn this.setItemIcon index choice)}}
+                      >
+                        <QuickCopyIcon
+                          @icon={{choice}}
+                          @class="size-4 shrink-0"
+                        />
+                      </button>
+                    {{/each}}
+                  </div>
+                {{/unless}}
+                {{#if item.seed}}
+                  <span
+                    class="inline-flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500"
+                  >
+                    <QuickCopyIcon
+                      @icon={{item.icon}}
+                      @class="size-4 shrink-0"
+                    />
+                    Pinned
+                  </span>
+                {{else}}
                   <button
                     type="button"
-                    class="px-2 py-1 text-xs rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
-                    {{on "click" (fn this.removeLink index)}}
+                    class="self-start px-2 py-1 text-xs rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                    {{on "click" (fn this.removeItem index)}}
                   >Remove</button>
-                  {{#if (eq index this.lastLinkIndex)}}
-                    <button
-                      type="button"
-                      class="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      {{on "click" this.addLink}}
-                    >+ Add</button>
-                  {{/if}}
-                </div>
+                {{/if}}
               </div>
               <textarea
                 placeholder="Content to copy"
-                aria-label="Snippet content"
+                aria-label="Item content"
                 rows="3"
                 class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm resize-y"
-                {{on "change" (fn this.updateLinkField index "url")}}
-              >{{link.url}}</textarea>
+                {{on "input" (fn this.updateItemField index "value")}}
+              >{{item.value}}</textarea>
             </div>
           {{/each}}
-          {{#unless this.links.length}}
-            <div class="field-row col-span-full">
-              <button
-                type="button"
-                class="btn small"
-                {{on "click" this.addLink}}
-              >+ Add Snippet</button>
-            </div>
-          {{/unless}}
+          <div class="field-row col-span-full">
+            <button
+              type="button"
+              class="btn small"
+              {{on "click" this.addItem}}
+            >+ Add item</button>
+          </div>
 
           <div
             class="col-span-full border-t border-gray-200 dark:border-gray-600 pt-4 mt-2"

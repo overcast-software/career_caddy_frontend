@@ -711,17 +711,44 @@
                   {{! template-lint-disable no-nested-interactive }}
                   <a
                     href="#"
-                    class="w-full text-left block rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 cursor-pointer"
+                    class="w-full text-left flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 cursor-pointer"
                     {{on "click" (fn this.copyToClipboard item)}}
                   >
+                    <QuickCopyIcon
+                      @icon={{item.icon}}
+                      @class="size-4 shrink-0"
+                    />
                     {{#if (eq this.copiedField item.label)}}
                       <span class="text-green-600">Copied!</span>
                     {{else}}
-                      {{item.label}}
+                      <span class="truncate">{{item.label}}</span>
                     {{/if}}
                   </a>
                 </li>
               {{/each}}
+              <li>
+                <LinkTo
+                  @route="settings.profile.edit"
+                  {{on "click" @onClose}}
+                  class="w-full text-left flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="size-4 shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"
+                    />
+                  </svg>
+                  Manage / Edit
+                </LinkTo>
+              </li>
             </ul>
           </details>
         </li>

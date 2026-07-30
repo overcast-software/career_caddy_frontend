@@ -40,78 +40,68 @@
               "—"
             }}</dd>
         </div>
-        <div>
-          <dt class="font-medium text-gray-500 dark:text-gray-400">LinkedIn</dt>
-          <dd class="mt-1 flex items-baseline gap-1 min-w-0">
-            <span class="text-gray-900 dark:text-gray-100 truncate">{{or
-                this.model.linkedin
-                "—"
-              }}</span>
-            {{#if this.model.linkedin}}
-              <button
-                type="button"
-                class="ml-1 px-2 py-0.5 text-xs rounded border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
-                {{on "click" (fn this.copyField "linkedin")}}
-              >{{if (eq this.copiedField "linkedin") "Copied!" "Copy"}}</button>
-            {{/if}}
-          </dd>
-        </div>
-        <div>
-          <dt class="font-medium text-gray-500 dark:text-gray-400">GitHub</dt>
-          <dd class="mt-1 flex items-baseline gap-1 min-w-0">
-            <span class="text-gray-900 dark:text-gray-100 truncate">{{or
-                this.model.github
-                "—"
-              }}</span>
-            {{#if this.model.github}}
-              <button
-                type="button"
-                class="ml-1 px-2 py-0.5 text-xs rounded border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
-                {{on "click" (fn this.copyField "github")}}
-              >{{if (eq this.copiedField "github") "Copied!" "Copy"}}</button>
-            {{/if}}
-          </dd>
-        </div>
         <div class="col-span-2">
           <dt class="font-medium text-gray-500 dark:text-gray-400">Address</dt>
           <dd
             class="mt-1 text-gray-900 dark:text-gray-100 whitespace-pre-line"
           >{{or this.model.address "—"}}</dd>
         </div>
-        {{#if this.model.links.length}}
-          <div class="col-span-2">
-            <dt
-              class="font-medium text-gray-500 dark:text-gray-400"
-            >Snippets</dt>
-            <dd class="mt-1">
-              <ul class="space-y-1">
-                {{#each this.model.links as |link index|}}
-                  <li class="flex items-baseline gap-1 text-sm min-w-0">
-                    <span
-                      class="font-medium text-gray-700 dark:text-gray-300 shrink-0"
-                    >{{link.name}}</span>
-                    {{#if link.url}}
-                      <span class="text-gray-400 shrink-0">—</span>
-                      <span
-                        class="text-gray-500 dark:text-gray-400 truncate min-w-0"
-                      >{{link.url}}</span>
-                      <button
-                        type="button"
-                        class="ml-1 px-2 py-0.5 text-xs rounded border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
-                        {{on "click" (fn this.copySnippet index)}}
-                      >{{if
-                          (eq this.copiedSnippetIndex index)
-                          "Copied!"
-                          "Copy"
-                        }}</button>
-                    {{/if}}
-                  </li>
-                {{/each}}
-              </ul>
-            </dd>
-          </div>
-        {{/if}}
       </dl>
+
+      {{! CCEXT-18: unified one-click quick-copy list — LinkedIn + GitHub
+          (seeded from their dedicated fields) + saved snippets/links, each with
+          an icon. Replaces the old per-field/two-click copy affordances. }}
+      <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Quick copy
+          </h2>
+          <LinkTo
+            @route="settings.profile.edit"
+            class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          >Manage</LinkTo>
+        </div>
+        {{#if this.quickCopyItems.length}}
+          <ul class="space-y-2 stagger-rows">
+            {{#each this.quickCopyItems as |item index|}}
+              <li>
+                <button
+                  type="button"
+                  class="w-full flex items-center gap-3 min-w-0 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-200 dark:focus:ring-blue-800"
+                  {{on "click" (fn this.copyItem index)}}
+                >
+                  <QuickCopyIcon
+                    @icon={{item.icon}}
+                    @class="size-5 shrink-0 text-gray-400 dark:text-gray-500"
+                  />
+                  <span
+                    class="font-medium text-gray-700 dark:text-gray-200 shrink-0"
+                  >{{item.name}}</span>
+                  <span
+                    class="text-gray-400 dark:text-gray-500 truncate min-w-0 flex-1"
+                  >{{item.value}}</span>
+                  <span class="shrink-0 text-xs font-medium">
+                    {{#if (eq this.copiedIndex index)}}
+                      <span class="text-green-600 dark:text-green-400">Copied!</span>
+                    {{else}}
+                      <span class="text-gray-400 dark:text-gray-500">Copy</span>
+                    {{/if}}
+                  </span>
+                </button>
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <p class="text-sm text-gray-400 dark:text-gray-500">
+            No quick-copy items yet.
+            <LinkTo
+              @route="settings.profile.edit"
+              class="text-blue-600 dark:text-blue-400 hover:underline"
+            >Add some</LinkTo>
+            — LinkedIn, a portfolio link, reusable prompts, taglines.
+          </p>
+        {{/if}}
+      </div>
     </div>
   </:main>
 </RouteLayout>
