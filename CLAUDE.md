@@ -1,31 +1,45 @@
 # frontend/CLAUDE.md
 
 Frontend-specific guidance for Claude Code when working in `frontend/`.
-This file is a pointer; the canonical state lives in `frontend/notes.org`.
+This file is a quickstart; durable canon lives in claudex.
 
 ## Source of truth — read FIRST
 
-- **`frontend/notes.org`** (drill via `claude/cf-*`) — style
-  conventions (Tailwind + HyperUI), Ember Data array footguns, async
-  getter / .then-chain pattern, plan-CSS-across-themes audit, polling
-  is a service, no logic in component constructors.
-- **Parent `todo.org`** (drill via `claude/cc-*`) — frontend
-  work-items are filed under the parent `Inbox`; there is no
-  `frontend/todo.org`.
-
-Boot sequence (every cc-frontend session):
+**claudex is the source of truth for priming.** Boot every
+cc-frontend session from it, with an explicit `projectId` (the
+dockerized MCP CWD-detects to a bogus `-app`):
 
 ```
-emacsclient --eval '(claude/cf-help)'
-emacsclient --eval '(claude/cf-notes-toc)'
-emacsclient --eval '(claude/cf-notes-read "Architecture/Style — Tailwind + HyperUI")'
-emacsclient --eval '(claude/cf-notes-read "Architecture/Ember Data array footguns")'
-emacsclient --eval '(claude/cf-notes-read "Architecture/Async getters + .then chains")'
+mcp__claudex__get_project_context  projectId=-home-oldbones-Network-syncthing-Projects-career-caddy-frontend
+mcp__claudex__recall_memory        projectId=-home-oldbones-Network-syncthing-Projects-career-caddy-frontend
 ```
 
-For color or dark-mode work, also read
-`Architecture/Plan CSS across themes` before writing any color
-utility.
+Also recall the parent's `bootstrap` map memory under
+`-home-oldbones-Network-syncthing-Projects-career-caddy` for the
+cross-repo orientation. The frontend canon that used to live in
+`frontend/notes.org Architecture/*` is now claudex memories — style
+conventions (Tailwind + HyperUI), Ember Data array footguns, the
+async-getter / `.then`-chain pattern, plan-CSS-across-themes, polling
+is a service, no logic in component constructors, and
+`frontend-fast-test-recipe` (QUnit does **not** run locally — lint
+in-container, tests via `dagger call test-frontend`).
+
+Work state lives on the **PACA** board (Platform
+`438e9c51-1c71-4cad-b597-8356b0b600ec` prefix `CC`; Frontend `FRON`;
+extension work in CC Extension `f48b1c0f-2535-4afe-865c-66c5d461a02e`
+prefix `CCEXT`), not in an org file.
+
+For color or dark-mode work, recall the plan-CSS-across-themes
+convention and map every background/theme combo _before_ writing any
+color utility.
+
+### RETIRED for agents — do not use
+
+`frontend/notes.org` and the parent `todo.org` are Doug's personal
+emacs surface: no `Read`, no writes, no commits. The `claude/cf-*` /
+`cc-todo-*` emacsclient helpers no longer exist — `~/.config/doom/elisp/`
+was deleted 2026-08-04, so calling one returns a void-function error.
+Do not reintroduce them into a boot sequence.
 
 ## Stack
 
