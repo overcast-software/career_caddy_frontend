@@ -1,37 +1,108 @@
 # frontend/CLAUDE.md
 
-Frontend-specific guidance for Claude Code when working in `frontend/`.
-This file is a quickstart; durable canon lives in claudex.
+Guidance for working in `frontend/` — the Ember SPA **and** the
+`career-caddy-sender` browser extension. New to the project? Start with the
+repo-root [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-## Source of truth — read FIRST
+## The rules that bite
 
-**claudex is the source of truth for priming.** Boot every
-cc-frontend session from it, with an explicit `projectId` (the
-dockerized MCP CWD-detects to a bogus `-app`):
+### Don't break Ember Data reactivity
+
+Calling `.slice()` or `.toArray()` on a relationship returns a plain array and
+**kills reactivity** — the template stops updating and it looks like a data
+bug, not a rendering one. Iterate the `ManyArray` directly. This has been
+diagnosed from scratch more than once.
+
+### Tracked intermediaries on text inputs
+
+Bind inputs to a `@tracked` field, never straight to a model attribute —
+direct binding drops characters on fast typing.
+
+```js
+@tracked title = '';
+// template: value={{this.title}} {{on "input" (fn (mut this.title) …)}}
+```
+
+### Plan colour across every theme before writing any of it
+
+Map every background × theme combination _first_. Retrofitting dark mode one
+utility at a time produces combinations nobody checked, and the misses only
+show up on someone else's screen.
+
+### Other standing rules
+
+- **Tailwind + HyperUI** for styling; Heroicons **outline** for all icons.
+- **`ember-animated`**, not `liquid-fire` (removed 2026-04-22). Don't
+  reintroduce `liquid-outlet` / `liquid-if`. For list entry animations use the
+  existing `stagger-rows` CSS class — no JS needed.
+- **Polling belongs in a service**, not a component.
+- **No logic in component constructors.**
+
+## Testing
+
+**QUnit does not run locally** — the compose frontend container ships no
+browser launcher. The path is:
 
 ```
-mcp__claudex__get_project_context  projectId=-home-oldbones-Network-syncthing-Projects-career-caddy-frontend
-mcp__claudex__recall_memory        projectId=-home-oldbones-Network-syncthing-Projects-career-caddy-frontend
+docker compose exec -T frontend npm run lint:format -- --check <files>   # lint in-container
+dagger -m ./dagger call test-frontend                                    # the authoritative QUnit run
 ```
 
-Also recall the parent's `bootstrap` map memory under
-`-home-oldbones-Network-syncthing-Projects-career-caddy` for the
-cross-repo orientation. The frontend canon that used to live in
-`frontend/notes.org Architecture/*` is now claudex memories — style
-conventions (Tailwind + HyperUI), Ember Data array footguns, the
-async-getter / `.then`-chain pattern, plan-CSS-across-themes, polling
-is a service, no logic in component constructors, and
-`frontend-fast-test-recipe` (QUnit does **not** run locally — lint
-in-container, tests via `dagger call test-frontend`).
+The Dagger image ships headless Firefox, which is why it's the real gate.
+**Do not build a host-side headless-browser test rig** to force a local run —
+its green isn't the gate, and it's been tried. If the sanctioned path is
+blocked, say so and push with the PR marked unverified rather than inventing
+a parallel one.
 
-Work state lives on the **PACA** board (Platform
-`438e9c51-1c71-4cad-b597-8356b0b600ec` prefix `CC`; Frontend `FRON`;
-extension work in CC Extension `f48b1c0f-2535-4afe-865c-66c5d461a02e`
-prefix `CCEXT`), not in an org file.
+Formatting goes through the repo's own script — `npm run format`, not a
+direct `node_modules/.bin/prettier` invocation, which fails on plugin
+resolution. Note `lint:format` covers `CLAUDE.md` too.
 
-For color or dark-mode work, recall the plan-CSS-across-themes
-convention and map every background/theme combo _before_ writing any
-color utility.
+## The browser extension (`public/extensions/career-caddy-sender/`)
+
+MV3, vanilla JS, no build step. It is **excluded from prettier and eslint and
+has no test suite** — so a green frontend CI says _nothing_ about extension
+changes. The real gate is:
+
+```
+node --check public/extensions/career-caddy-sender/popup.js
+node --check public/extensions/career-caddy-sender/background.js
+```
+
+…plus loading it unpacked (`chrome://extensions` → Load unpacked, or Firefox
+`about:debugging` → Load Temporary Add-on) and clicking through.
+
+Things that will bite you here:
+
+- **The popup is destroyed the moment it loses focus.** Clicking the page —
+  the natural next gesture — tears it down and takes any un-persisted state
+  with it. Anything the user might want after looking at the page must be
+  written to `api.storage.local` **before** it's rendered, with a TTL, and
+  restored on open.
+- **Writing into a page field needs the native setter.** On React/Vue-backed
+  forms (most ATSes) a plain `el.value = x` updates the DOM but not the
+  framework's state — it's reverted on re-render or dropped on submit. It
+  looks like it worked and didn't. Go through
+  `Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set`
+  then dispatch bubbling `input` **and** `change`. For `contenteditable`,
+  `document.execCommand('insertText')` emits the events rich-text editors
+  actually listen for.
+- **`executeScript` only returns JSON** — a DOM node can't cross back to the
+  popup. Do the work in-page and return a handle (this codebase stamps a
+  `data-cc-field` attribute), then target the same `frameId` on the way back
+  so iframe-embedded forms still resolve.
+- **Recognise controls you can't fill; don't skip them.** Excluding
+  `select`/radio/combobox from a scan doesn't make the code avoid them — it
+  makes the code walk _past_ them onto an unrelated text input and fill that
+  instead. Classify and report, don't filter.
+- **Permissions are deliberately minimal**: `activeTab` + `scripting`, with
+  one host permission for the instance origin. `activeTab` grants access only
+  when the user invokes the action, which is why no broad host permission is
+  needed. Adding one triggers re-consent on update — treat it as a real
+  decision, not an implementation detail.
+- **Packaging**: runtime files only, `manifest.json` at the zip root, named
+  `career-caddy-sender-<version>.zip` in `public/extensions/` (gitignored).
+  Exclude `README.md`, `store-assets/`, `.claude/`.
 
 ### RETIRED for agents — do not use
 
