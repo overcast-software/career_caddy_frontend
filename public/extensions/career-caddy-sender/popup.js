@@ -5492,7 +5492,16 @@ async function findExistingAnswer(selection, apiKey) {
 // if one exists) so it's recorded against the post AND the api feeds the JD
 // into the answer prompt (QuestionSerializer accepts `job-post`/`application`
 // relationship keys). Returns the new id.
-async function mintQuestion(content, apiKey, jobPostId, applicationId) {
+//
+// CCEXT-27: also attach the COMPANY explicitly. AnswerService resolves company
+// from question.company_id OR job_post.company_id, and the prompt renders name
+// + display_name + company NOTES — so a company is worth having on the
+// Question in its own right, not only as a hop through the post. Setting it
+// directly means the company survives even if the post relationship is never
+// set or is later cleared. The id is already in hand: lookupExistingJobPost
+// captures it as trackedJobPost.companyId. QuestionSerializer maps the
+// `company` relationship key to company_id, so no api change was needed.
+async function mintQuestion(content, apiKey, jobPostId, applicationId, companyId) {
   try {
     const relationships = {};
     if (jobPostId) {
@@ -5503,6 +5512,11 @@ async function mintQuestion(content, apiKey, jobPostId, applicationId) {
     if (applicationId) {
       relationships['application'] = {
         data: { type: 'job-application', id: String(applicationId) },
+      };
+    }
+    if (companyId) {
+      relationships['company'] = {
+        data: { type: 'company', id: String(companyId) },
       };
     }
     const data = { type: 'question', attributes: { content } };
@@ -5653,11 +5667,16 @@ async function handleAnswerSelected() {
       ? 'Generating from your career data and this job post…'
       : 'Generating from your career data and past answers…',
   );
+  // CCEXT-27: companyId rides from the tracked-post lookup when we have one.
+  // On the no-post path this is null today — resolving a company from the
+  // page domain is CCEXT-28.
+  const companyId = trackedJobPost ? trackedJobPost.companyId : null;
   const questionId = await mintQuestion(
     selection,
     saved.ccApiKey,
     jobPostId,
     applicationId,
+    companyId,
   );
   if (!questionId) {
     setStatus(answerStatus, 'Could not create the question.', 'error');
