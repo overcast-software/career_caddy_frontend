@@ -5640,11 +5640,18 @@ async function handleAnswerSelected() {
     const appLookup = await findExistingApplication(jobPostId, saved.ccApiKey);
     if (appLookup && appLookup.appId) applicationId = appLookup.appId;
   }
+  // The no-post path is NOT a degraded path worth alarming about. The prompt
+  // is assembled from six conditional sections and only two come from the
+  // post (Job Details, Company); Career Profile — derived from
+  // CareerData.for_user — plus your favorited Q&A history and cover letters
+  // are user-scoped and present either way. What's actually lost is
+  // JD-specific tailoring, which barely matters for the repetitive questions
+  // that dominate application forms. Say what IS being used, not what isn't.
   setStatus(
     answerStatus,
     jobPostId
-      ? 'Generating an answer…'
-      : 'Generating — no job post matched, so answering without its description.',
+      ? 'Generating from your career data and this job post…'
+      : 'Generating from your career data and past answers…',
   );
   const questionId = await mintQuestion(
     selection,
