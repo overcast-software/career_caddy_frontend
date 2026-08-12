@@ -160,7 +160,7 @@ const answerPromptEl = $('answer-prompt'); // CCEXT-10: echo the highlighted tex
 const answerPromptTextEl = $('answer-prompt-text');
 const answerTextEl = $('answer-text');
 const answerCopyBtn = $('answer-copy');
-const answerInsertBtn = $('answer-insert'); // CCEXT-25: write into the page field
+const answerInsertBtn = $('answer-insert'); // CCEXT-26: write into the page field
 const answerFieldNoteEl = $('answer-field-note');
 const versionEl = $('version');
 
@@ -5115,7 +5115,7 @@ function resetAnswerResult() {
   hideAnswerPrompt();
 }
 
-// CCEXT-25: the control the current selection resolved to, carried from the
+// CCEXT-26: the control the current selection resolved to, carried from the
 // prime/answer read through to the Insert click. Null when the selection did
 // not land near a writable field (Insert stays hidden and Copy is the path).
 let answerFieldTarget = null;
@@ -5168,7 +5168,7 @@ function showAnswerResult(content, message) {
     answerTextEl.classList.remove('hidden');
   }
   if (answerCopyBtn) answerCopyBtn.classList.remove('hidden');
-  // CCEXT-25: Insert is offered only when the selection actually resolved to
+  // CCEXT-26: Insert is offered only when the selection actually resolved to
   // a writable control. No target -> Copy remains the honest path.
   if (answerInsertBtn && answerFieldTarget && (content || '').trim()) {
     answerInsertBtn.classList.remove('hidden');
@@ -5273,7 +5273,7 @@ async function readSelectionFromActiveTab() {
 }
 
 // ---------------------------------------------------------------------------
-// CCEXT-25 (form-fill M1): selection -> the form control it labels -> write.
+// CCEXT-26 (form-fill M1): selection -> the form control it labels -> write.
 //
 // PERMISSIONS: none new. `activeTab` grants host access to the active tab on
 // user invocation of the action (opening the popup IS that gesture) and
@@ -5622,7 +5622,7 @@ async function findExistingAnswer(selection, apiKey) {
 // into the answer prompt (QuestionSerializer accepts `job-post`/`application`
 // relationship keys). Returns the new id.
 //
-// CCEXT-27: also attach the COMPANY explicitly. AnswerService resolves company
+// CCEXT-28: also attach the COMPANY explicitly. AnswerService resolves company
 // from question.company_id OR job_post.company_id, and the prompt renders name
 // + display_name + company NOTES — so a company is worth having on the
 // Question in its own right, not only as a hop through the post. Setting it
@@ -5808,9 +5808,9 @@ async function handleAnswerSelected() {
       ? 'Generating from your career data and this job post…'
       : 'Generating from your career data and past answers…',
   );
-  // CCEXT-27: companyId rides from the tracked-post lookup when we have one.
+  // CCEXT-28: companyId rides from the tracked-post lookup when we have one.
   // On the no-post path this is null today — resolving a company from the
-  // page domain is CCEXT-28.
+  // page domain is CCEXT-27.
   const companyId = trackedJobPost ? trackedJobPost.companyId : null;
   const questionId = await mintQuestion(
     selection,
@@ -5968,7 +5968,7 @@ function copyAnswerToClipboard() {
     });
 }
 
-// CCEXT-25 (form-fill M1): write the answer straight into the page field the
+// CCEXT-26 (form-fill M1): write the answer straight into the page field the
 // selection came from, in the frame it came from. The user edits the textarea
 // first if they want — we send whatever is in it, not the original generation.
 async function insertAnswerIntoField() {
