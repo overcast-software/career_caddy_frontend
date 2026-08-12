@@ -807,6 +807,52 @@
         border-color: var(--success);
       }
 
+      /* CCEXT-21: Applications-tab quick-copy list (LinkedIn/GitHub + saved
+         links/prompts). Same visual family as .profile-card, with a header row
+         carrying the "Edit" anchor and per-row icons. */
+      .quick-copy-card {
+        margin-bottom: 12px;
+        background: var(--bg-soft);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      .quick-copy-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .quick-copy-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .quick-copy-edit {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent-500);
+        text-decoration: none;
+      }
+      .quick-copy-edit:hover {
+        text-decoration: underline;
+      }
+      .qc-icon {
+        flex: 0 0 auto;
+        width: 16px;
+        height: 16px;
+        color: var(--text-muted);
+      }
+      /* Golf emoji glyph (custom items) — native color, not themed. */
+      .qc-icon.qc-emoji {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+        color: initial;
+      }
+
       /* CCEXT: manual link-to-tracked-job picker rows. */
       .link-job-row {
         display: block;
@@ -956,13 +1002,8 @@
            (async extraction in flight) for a manual status re-check. -->
       <button id="recheck" class="linkbtn hidden" type="button" style="margin-top: 10px;">Re-check</button>
 
-      <!-- CC #1: quick-copy profile fields, sourced from /api/v1/me on popup
-           open. Collapsed by default; hidden until at least one field loads.
-           Rows are built in JS (renderProfileCard). -->
-      <details id="profile-card" class="profile-card hidden">
-        <summary class="profile-summary">Copy profile details</summary>
-        <div id="profile-fields" class="profile-fields"></div>
-      </details>
+      <!-- CCEXT-21: the quick-copy list moved off the Send screen to the
+           Applications tab (#quick-copy-card there). Nothing renders here now. -->
 
       <!-- "Link this page to a job post" — the FIND half of find-or-create,
            for pages the library doesn't resolve (ATS apply flows,
@@ -1068,6 +1109,24 @@
     <div id="screen-applications" class="hidden">
       <h1>Applications</h1>
 
+      <!-- CCEXT-21: user-global quick-copy list (LinkedIn + GitHub + saved
+           links/prompts). Always shown on this tab, independent of any matched
+           JobPost. Rows are built in JS (renderQuickCopy). Hidden until at
+           least one item loads. Edit opens the CC settings page in a new tab. -->
+      <div id="quick-copy-card" class="quick-copy-card hidden">
+        <div class="quick-copy-head">
+          <span class="quick-copy-title">Quick copy</span>
+          <a
+            id="quick-copy-edit"
+            class="quick-copy-edit"
+            href="https://careercaddy.online/settings/quick-copy"
+            target="_blank"
+            rel="noopener"
+          >Edit</a>
+        </div>
+        <div id="quick-copy-fields" class="profile-fields"></div>
+      </div>
+
       <p id="applications-empty" class="helper hidden">
         No job post is linked to this page yet. Find it (or send it) on the
         Posts tab first — then track your application here.
@@ -1142,37 +1201,52 @@
           rel="noopener"
         >Open application</a>
 
-        <!-- CC #47 / CCEXT-10: ad-hoc "Answer the selected text". Lives on
-             the Applications tab so the Question attaches to this post and
-             the api answers it with the job description in context. Echoes
-             the highlighted selection above the generated/matched answer. -->
-        <details id="answer-card" class="profile-card" style="margin-top: 12px;">
-          <summary class="profile-summary">Answer the selected text</summary>
-          <div class="answer-body">
-            <button id="answer-btn" class="primary" type="button">
-              <span class="btn-label">Answer the selected text</span>
-              <span class="spinner" aria-hidden="true"></span>
-            </button>
-            <div class="status" id="answer-status"></div>
-            <div id="answer-prompt" class="answer-prompt hidden">
-              <div class="answer-prompt-label">Selected question</div>
-              <div class="answer-prompt-text" id="answer-prompt-text"></div>
-            </div>
-            <textarea
-              id="answer-text"
-              class="answer-text hidden"
-              rows="5"
-              spellcheck="true"
-            ></textarea>
-            <button
-              id="answer-copy"
-              class="primary hidden"
-              type="button"
-              style="margin-top: 8px;"
-            >Copy answer</button>
-          </div>
-        </details>
       </div>
+
+      <!-- CC #47 / CCEXT-10 / CCEXT-23: ad-hoc "Answer the selected text".
+           HOISTED out of #applications-body (CCEXT-23) — application forms
+           usually live on a different URL than the job description, so
+           trackedJobPost is null exactly when you need this. Visibility is
+           now independent of a match; the JobPost is still passed as context
+           whenever one exists (Question.job_post is nullable server-side). -->
+      <details id="answer-card" class="profile-card" style="margin-top: 12px;">
+        <summary class="profile-summary">Answer the selected text</summary>
+        <div class="answer-body">
+          <button id="answer-btn" class="primary" type="button">
+            <span class="btn-label">Answer the selected text</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+          <div class="status" id="answer-status"></div>
+          <div id="answer-prompt" class="answer-prompt hidden">
+            <div class="answer-prompt-label">Selected question</div>
+            <div class="answer-prompt-text" id="answer-prompt-text"></div>
+          </div>
+          <textarea
+            id="answer-text"
+            class="answer-text hidden"
+            rows="5"
+            spellcheck="true"
+          ></textarea>
+          <!-- CCEXT-25 (form-fill M1): Insert writes the answer straight into
+               the page field the selection came from. Shown only when the
+               selection resolved to a writable control; #answer-field-note
+               reports HOW it matched, so a wrong guess is visible up front
+               rather than after it lands in the wrong box. -->
+          <div id="answer-field-note" class="helper hidden"></div>
+          <button
+            id="answer-insert"
+            class="primary hidden"
+            type="button"
+            style="margin-top: 8px;"
+          >Insert into the field</button>
+          <button
+            id="answer-copy"
+            class="primary hidden"
+            type="button"
+            style="margin-top: 8px;"
+          >Copy answer</button>
+        </div>
+      </details>
 
       <!-- CC #46: apply-attribution prompt — this page is an ATS apply page
            matching a stashed "Apply & track" from the source post. Hidden
