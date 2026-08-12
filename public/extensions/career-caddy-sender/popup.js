@@ -5082,6 +5082,13 @@ const ANSWER_PENDING_KEY = 'ccAnswerPending';
 const ANSWER_POLL_INTERVAL_MS = 2500;
 const ANSWER_MAX_POLLS = 48; // ~2 min ceiling
 const ANSWER_PENDING_MAX_AGE_MS = 10 * 60 * 1000;
+// CCEXT-29: an MV3 popup is DESTROYED the moment it loses focus — clicking
+// the page to look at the field closes it and takes the rendered answer with
+// it. The pending stash only ever covered an IN-FLIGHT generation and was
+// cleared on completion, so a finished answer lived in the DOM and nowhere
+// else. Stash the finished result too, and restore it on the next open.
+const ANSWER_RESULT_KEY = 'ccAnswerResult';
+const ANSWER_RESULT_MAX_AGE_MS = 30 * 60 * 1000;
 let answerPolling = false;
 
 function answerSleep(ms) {
@@ -5114,10 +5121,20 @@ function resetAnswerResult() {
 let answerFieldTarget = null;
 
 function setAnswerFieldTarget(target) {
+  // Only a stamped (writable) target is insertable. A 'choice' result is kept
+  // OUT of answerFieldTarget so Insert can never fire on it, but is still
+  // reported to the user — silence there reads as "the feature is broken".
   answerFieldTarget = target && target.token ? target : null;
   if (!answerFieldNoteEl) return;
   if (answerFieldTarget) {
     answerFieldNoteEl.textContent = `Will fill the ${answerFieldTarget.kind} matched via ${answerFieldTarget.how}.`;
+    answerFieldNoteEl.classList.remove('hidden');
+  } else if (target && target.kind === 'choice') {
+    const opts =
+      target.options && target.options.length
+        ? ` Options: ${target.options.join(' / ')}.`
+        : '';
+    answerFieldNoteEl.textContent = `That's a ${target.control === 'select' ? 'dropdown' : 'choice field'}, not a text box — Insert can't fill it.${opts} Answer below is for reference.`;
     answerFieldNoteEl.classList.remove('hidden');
   } else {
     answerFieldNoteEl.textContent = '';
@@ -5161,6 +5178,72 @@ function showAnswerResult(content, message) {
 
 function clearAnswerPending() {
   return api.storage.local.remove(ANSWER_PENDING_KEY).catch(() => {});
+}
+
+// CCEXT-29: persist a FINISHED answer so it survives the popup being torn
+// down on blur. Carries the resolved field target too, so Insert still works
+// after a reopen — the data-cc-field stamp is left on the page deliberately.
+function saveAnswerResult(prompt, content, target) {
+  if (!content) return Promise.resolve();
+  return api.storage.local
+    .set({
+      [ANSWER_RESULT_KEY]: {
+        prompt: prompt || '',
+        content: content,
+        target: target || null,
+        at: Date.now(),
+      },
+    })
+    .catch(() => {});
+}
+
+function clearAnswerResult() {
+  return api.storage.local.remove(ANSWER_RESULT_KEY).catch(() => {});
+}
+
+// Restore the last finished answer on popup open. Only re-arms Insert when
+// the stashed target belongs to the tab that is active NOW — otherwise the
+// stamp refers to a page the user has navigated away from, and writing into
+// whatever occupies that position on a different page is the worst outcome
+// available. The answer text still comes back either way.
+async function maybeRestoreAnswer() {
+  if (!answerCardEl || answerPolling) return false;
+  let saved;
+  try {
+    saved = await api.storage.local.get([ANSWER_RESULT_KEY, ANSWER_PENDING_KEY]);
+  } catch {
+    return false;
+  }
+  // A pending generation outranks a stale finished one.
+  if (saved && saved[ANSWER_PENDING_KEY] && saved[ANSWER_PENDING_KEY].answerId) {
+    return false;
+  }
+  const stash = saved && saved[ANSWER_RESULT_KEY];
+  if (!stash || !stash.content) return false;
+  if (Date.now() - (stash.at || 0) > ANSWER_RESULT_MAX_AGE_MS) {
+    await clearAnswerResult();
+    return false;
+  }
+
+  let target = stash.target || null;
+  if (target && target.tabId != null) {
+    try {
+      const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+      if (!tab || tab.id !== target.tabId) target = null;
+    } catch {
+      target = null;
+    }
+  }
+
+  answerCardEl.open = true;
+  resetAnswerResult();
+  setAnswerFieldTarget(target);
+  showAnswerPrompt(stash.prompt);
+  showAnswerResult(
+    stash.content,
+    target ? 'Your last answer — still insertable.' : 'Your last answer.',
+  );
+  return true;
 }
 
 // Read the active tab's selection. allFrames so a selection inside an
@@ -5214,28 +5297,52 @@ function ccResolveFieldInPage(attr) {
   const text = String(sel.toString() || '').trim();
   if (!text) return null;
 
+  // Scan for CHOICE controls too, not just writable ones. Skipping them
+  // silently is what made the ladder walk past a Yes/No dropdown and grab an
+  // unrelated text input further up the tree. A choice control must be able to
+  // WIN the match so we can say "this is a dropdown" instead of guessing.
   const WRITABLE =
     'input, textarea, [contenteditable="true"], [contenteditable=""]';
-  const SKIP_TYPES = [
-    'hidden',
-    'submit',
-    'button',
-    'reset',
-    'image',
-    'file',
-    'checkbox',
-    'radio',
-  ];
+  const FIELDS = WRITABLE + ', select, [role="combobox"], [role="listbox"]';
+  const SKIP_TYPES = ['hidden', 'submit', 'button', 'reset', 'image', 'file'];
+  const CHOICE_TYPES = ['checkbox', 'radio'];
+
+  // null = not a field at all. 'choice' = a constrained-value control that
+  // free text cannot be written into. 'text' = writable.
+  function fieldKind(el) {
+    if (!el || el.disabled) return null;
+    const tag = el.tagName;
+    const type = (el.type || '').toLowerCase();
+    if (tag === 'INPUT' && SKIP_TYPES.indexOf(type) !== -1) return null;
+    const r = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+    if (r && r.width === 0 && r.height === 0) return null;
+
+    if (tag === 'SELECT') return 'choice';
+    if (tag === 'INPUT' && CHOICE_TYPES.indexOf(type) !== -1) return 'choice';
+    // Custom comboboxes (react-select, Workday, Ashby) render a real <input>
+    // but only accept values from a popup listbox — typing free text into one
+    // either does nothing or leaves the form in an invalid state.
+    const role = (el.getAttribute && el.getAttribute('role')) || '';
+    if (role === 'combobox' || role === 'listbox') return 'choice';
+    if (el.getAttribute && el.getAttribute('aria-haspopup') === 'listbox') {
+      return 'choice';
+    }
+    if (el.getAttribute && el.getAttribute('aria-autocomplete') === 'list') {
+      return 'choice';
+    }
+    if (el.getAttribute && el.getAttribute('list')) return 'choice'; // <datalist>
+    if (el.closest && el.closest('[role="combobox"], [role="listbox"]')) {
+      return 'choice';
+    }
+    if (el.readOnly) return null;
+
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return 'text';
+    if (el.isContentEditable) return 'text';
+    return null;
+  }
 
   function usable(el) {
-    if (!el || el.disabled || el.readOnly) return false;
-    const tag = el.tagName;
-    if (tag === 'INPUT' && SKIP_TYPES.indexOf((el.type || 'text').toLowerCase()) !== -1) {
-      return false;
-    }
-    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && !el.isContentEditable) return false;
-    const r = el.getBoundingClientRect();
-    return r.width > 0 || r.height > 0;
+    return fieldKind(el) !== null;
   }
 
   function asElement(node) {
@@ -5265,7 +5372,7 @@ function ccResolveFieldInPage(attr) {
   if (!field) {
     const wrap = anchor.closest('label');
     if (wrap) {
-      const target = wrap.querySelector(WRITABLE);
+      const target = wrap.querySelector(FIELDS);
       if (usable(target)) {
         field = target;
         how = 'the wrapping label';
@@ -5300,7 +5407,7 @@ function ccResolveFieldInPage(attr) {
   if (!field) {
     let n = asElement(range.commonAncestorContainer);
     for (let i = 0; n && i < 6 && !field; i++, n = n.parentElement) {
-      const candidates = n.querySelectorAll ? n.querySelectorAll(WRITABLE) : [];
+      const candidates = n.querySelectorAll ? n.querySelectorAll(FIELDS) : [];
       for (let j = 0; j < candidates.length; j++) {
         if (usable(candidates[j])) {
           field = candidates[j];
@@ -5311,9 +5418,9 @@ function ccResolveFieldInPage(attr) {
     }
   }
 
-  // 5. Last resort: the next writable control after the selection.
+  // 5. Last resort: the next control after the selection.
   if (!field) {
-    const all = document.querySelectorAll(WRITABLE);
+    const all = document.querySelectorAll(FIELDS);
     for (let i = 0; i < all.length; i++) {
       const c = all[i];
       if (!usable(c)) continue;
@@ -5328,6 +5435,31 @@ function ccResolveFieldInPage(attr) {
 
   if (!field) return { text: text, token: null, how: '', kind: '', existing: '' };
 
+  // A constrained-value control (select, radio/checkbox, custom combobox)
+  // CANNOT take free text. Report it as such and stamp NOTHING — the caller
+  // hides Insert and says why. Returning a token here is how text ends up in
+  // the wrong box, and falling through to "keep looking" is how the ladder
+  // walks past a Yes/No dropdown onto an unrelated input.
+  const kind = fieldKind(field);
+  if (kind === 'choice') {
+    const options = [];
+    if (field.tagName === 'SELECT' && field.options) {
+      for (let i = 0; i < field.options.length && i < 8; i++) {
+        const label = (field.options[i].label || field.options[i].text || '').trim();
+        if (label) options.push(label);
+      }
+    }
+    return {
+      text: text,
+      token: null,
+      how: how,
+      kind: 'choice',
+      control: field.tagName.toLowerCase(),
+      options: options,
+      existing: '',
+    };
+  }
+
   // One live stamp at a time — clear any leftovers from an earlier resolve.
   const stale = document.querySelectorAll('[' + attr + ']');
   for (let i = 0; i < stale.length; i++) stale[i].removeAttribute(attr);
@@ -5338,9 +5470,6 @@ function ccResolveFieldInPage(attr) {
     Math.floor(performance.now()).toString(36);
   field.setAttribute(attr, token);
 
-  const kind = field.isContentEditable
-    ? 'contenteditable'
-    : field.tagName.toLowerCase();
   const existingRaw = field.isContentEditable
     ? field.textContent || ''
     : field.value || '';
@@ -5349,7 +5478,7 @@ function ccResolveFieldInPage(attr) {
     text: text,
     token: token,
     how: how,
-    kind: kind,
+    kind: field.isContentEditable ? 'contenteditable' : field.tagName.toLowerCase(),
     existing: existingRaw.trim().slice(0, 200),
   };
 }
@@ -5593,6 +5722,13 @@ async function pollAnswerUntilTerminal(answerId, apiKey) {
     if (status === 'completed') {
       answerPolling = false;
       await clearAnswerPending();
+      // CCEXT-29: persist BEFORE rendering — the popup can be torn down at
+      // any moment and the DOM is not storage.
+      await saveAnswerResult(
+        answerPromptTextEl ? answerPromptTextEl.textContent : '',
+        attrs.content || '',
+        answerFieldTarget,
+      );
       showAnswerResult(attrs.content || '', 'Generated.');
       setAnswerBusy(false);
       return;
@@ -5637,11 +5773,16 @@ async function handleAnswerSelected() {
   }
   resetAnswerResult();
   setAnswerFieldTarget(target);
+  // Drop the previous stashed answer — a new request supersedes it, and a
+  // failed generation must not leave the old one to be restored as if it
+  // were this question's.
+  await clearAnswerResult();
   showAnswerPrompt(selection); // CCEXT-10: echo the highlighted text
   setAnswerBusy(true);
   setStatus(answerStatus, 'Looking for a saved answer…');
   const match = await findExistingAnswer(selection, saved.ccApiKey);
   if (match && match.content) {
+    await saveAnswerResult(selection, match.content, answerFieldTarget);
     showAnswerResult(match.content, 'Matched a saved answer.');
     setAnswerBusy(false);
     return;
@@ -5729,10 +5870,39 @@ async function primeAnswerSelection() {
   }
   const target = await resolveSelectionTarget();
   const selection = target && target.text ? target.text : '';
-  if (!selection) return;
+  // CCEXT-29: no live selection usually means the user just clicked into the
+  // page — which is what CLOSED the popup and cleared the highlight. Showing
+  // an empty card here is the bug Doug hit; bring the last answer back.
+  if (!selection) {
+    await maybeRestoreAnswer();
+    return;
+  }
   // The read is async; bail if the user has since left the Applications tab
   // so we never prime a stale card.
   if (activeTab !== 'applications' || answerPolling) return;
+
+  // Same question still highlighted? Restore the stashed answer and re-arm
+  // Insert against the FRESH target, rather than making them regenerate.
+  try {
+    const prior = await api.storage.local.get([ANSWER_RESULT_KEY]);
+    const stash = prior && prior[ANSWER_RESULT_KEY];
+    if (
+      stash &&
+      stash.content &&
+      Date.now() - (stash.at || 0) <= ANSWER_RESULT_MAX_AGE_MS &&
+      (stash.prompt || '').trim() === selection
+    ) {
+      answerCardEl.open = true;
+      resetAnswerResult();
+      setAnswerFieldTarget(target);
+      showAnswerPrompt(selection);
+      showAnswerResult(stash.content, 'Your last answer for this question.');
+      return;
+    }
+  } catch {
+    // fall through to a fresh prime
+  }
+
   answerCardEl.open = true;
   resetAnswerResult();
   setAnswerFieldTarget(target);
@@ -5747,6 +5917,7 @@ async function primeAnswerSelection() {
     // Bail if the user left the tab or a generation began while we waited.
     if (activeTab !== 'applications' || answerPolling) return;
     if (match && match.content) {
+      await saveAnswerResult(selection, match.content, answerFieldTarget);
       showAnswerResult(match.content, 'Matched a saved answer — copy it below.');
       return;
     }
