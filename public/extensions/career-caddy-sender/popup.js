@@ -162,6 +162,7 @@ const answerTextEl = $('answer-text');
 const answerCopyBtn = $('answer-copy');
 const answerInsertBtn = $('answer-insert'); // CCEXT-26: write into the page field
 const answerFieldNoteEl = $('answer-field-note');
+const answerRegenBtn = $('answer-regenerate'); // CCEXT-32: force a fresh answer
 const versionEl = $('version');
 
 const openSigninBtn = $('open-signin');
@@ -5112,6 +5113,7 @@ function resetAnswerResult() {
     answerInsertBtn.classList.add('hidden');
     answerInsertBtn.textContent = 'Insert into the field';
   }
+  if (answerRegenBtn) answerRegenBtn.classList.add('hidden');
   hideAnswerPrompt();
 }
 
@@ -5179,6 +5181,12 @@ function showAnswerResult(content, message) {
   // a writable control. No target -> Copy remains the honest path.
   if (answerInsertBtn && answerFieldTarget && (content || '').trim()) {
     answerInsertBtn.classList.remove('hidden');
+  }
+  // CCEXT-32: once there IS an answer, offer another one. Whether it came
+  // from the AI or matched a saved answer, "this isn't the one I want" is a
+  // normal reaction and needs a way out.
+  if (answerRegenBtn && (content || '').trim()) {
+    answerRegenBtn.classList.remove('hidden');
   }
   setStatus(answerStatus, message || '', 'success');
 }
@@ -5811,7 +5819,18 @@ async function pollAnswerUntilTerminal(answerId, apiKey) {
   setAnswerBusy(false);
 }
 
-async function handleAnswerSelected() {
+// CCEXT-32: the last question we minted, so "Answer again" can hang another
+// Answer off the SAME Question instead of creating a duplicate Question with
+// identical content. One Question with several Answers is the shape the api
+// already expects — it is what makes favouriting the good one meaningful.
+let lastAnswered = { prompt: '', questionId: null };
+
+// `opts.force` skips the saved-answer lookup. Without it there is no way to
+// get a second opinion: findExistingAnswer matches on the selection text, so
+// once any answer exists for this question, clicking Answer returns that same
+// answer forever.
+async function handleAnswerSelected(opts) {
+  const force = !!(opts && opts.force === true);
   if (answerPolling) return;
   // CCEXT-23: a JobPost is CONTEXT, not a precondition. Application forms
   // usually live on a different URL than the job description, so requiring a
@@ -5843,13 +5862,15 @@ async function handleAnswerSelected() {
   await clearAnswerResult();
   showAnswerPrompt(selection); // CCEXT-10: echo the highlighted text
   setAnswerBusy(true);
-  setStatus(answerStatus, 'Looking for a saved answer…');
-  const match = await findExistingAnswer(selection, saved.ccApiKey);
-  if (match && match.content) {
-    await saveAnswerResult(selection, match.content, answerFieldTarget);
-    showAnswerResult(match.content, 'Matched a saved answer.');
-    setAnswerBusy(false);
-    return;
+  if (!force) {
+    setStatus(answerStatus, 'Looking for a saved answer…');
+    const match = await findExistingAnswer(selection, saved.ccApiKey);
+    if (match && match.content) {
+      await saveAnswerResult(selection, match.content, answerFieldTarget);
+      showAnswerResult(match.content, 'Matched a saved answer.');
+      setAnswerBusy(false);
+      return;
+    }
   }
   // Tie the Question to the tracked post's application when one exists, so
   // the answer is recorded in the application's Q&A context too. CCEXT-23:
@@ -5868,26 +5889,37 @@ async function handleAnswerSelected() {
   // that dominate application forms. Say what IS being used, not what isn't.
   setStatus(
     answerStatus,
-    jobPostId
-      ? 'Generating from your career data and this job post…'
-      : 'Generating from your career data and past answers…',
+    force
+      ? 'Writing a fresh answer…'
+      : jobPostId
+        ? 'Generating from your career data and this job post…'
+        : 'Generating from your career data and past answers…',
   );
   // CCEXT-28: companyId rides from the tracked-post lookup when we have one.
   // On the no-post path this is null today — resolving a company from the
   // page domain is CCEXT-27.
   const companyId = trackedJobPost ? trackedJobPost.companyId : null;
-  const questionId = await mintQuestion(
-    selection,
-    saved.ccApiKey,
-    jobPostId,
-    applicationId,
-    companyId,
-  );
+  // CCEXT-32: on a re-answer of the SAME question, reuse the Question we
+  // already minted rather than creating a second one with identical content.
+  let questionId =
+    force && lastAnswered.questionId && lastAnswered.prompt === selection
+      ? lastAnswered.questionId
+      : null;
+  if (!questionId) {
+    questionId = await mintQuestion(
+      selection,
+      saved.ccApiKey,
+      jobPostId,
+      applicationId,
+      companyId,
+    );
+  }
   if (!questionId) {
     setStatus(answerStatus, 'Could not create the question.', 'error');
     setAnswerBusy(false);
     return;
   }
+  lastAnswered = { prompt: selection, questionId: questionId };
   const answerId = await requestAiAnswer(questionId, saved.ccApiKey);
   if (!answerId) {
     setStatus(answerStatus, 'Could not start answer generation.', 'error');
@@ -6078,7 +6110,12 @@ async function insertAnswerIntoField() {
   }
 }
 
-if (answerBtn) answerBtn.addEventListener('click', handleAnswerSelected);
+if (answerBtn)
+  answerBtn.addEventListener('click', () => handleAnswerSelected());
+if (answerRegenBtn)
+  answerRegenBtn.addEventListener('click', () =>
+    handleAnswerSelected({ force: true }),
+  );
 if (answerCopyBtn)
   answerCopyBtn.addEventListener('click', copyAnswerToClipboard);
 if (answerInsertBtn)

@@ -1245,6 +1245,16 @@
             type="button"
             style="margin-top: 8px;"
           >Copy answer</button>
+          <!-- CCEXT-32: regenerate. The normal Answer path checks for a saved
+               answer first and returns it, which means clicking Answer again
+               can never produce anything new. This button skips that lookup
+               and asks for a fresh generation against the same question. -->
+          <button
+            id="answer-regenerate"
+            class="linkbtn hidden"
+            type="button"
+            style="margin-top: 8px;"
+          >Answer again</button>
         </div>
       </details>
 
