@@ -5130,11 +5130,18 @@ function setAnswerFieldTarget(target) {
     answerFieldNoteEl.textContent = `Will fill the ${answerFieldTarget.kind} matched via ${answerFieldTarget.how}.`;
     answerFieldNoteEl.classList.remove('hidden');
   } else if (target && target.kind === 'choice') {
+    const names = {
+      select: 'dropdown',
+      combobox: 'dropdown',
+      radio: 'multiple-choice question',
+      checkbox: 'set of checkboxes',
+    };
+    const what = names[target.control] || 'choice field';
     const opts =
       target.options && target.options.length
-        ? ` Options: ${target.options.join(' / ')}.`
+        ? ` Your options: ${target.options.join(' / ')}.`
         : '';
-    answerFieldNoteEl.textContent = `That's a ${target.control === 'select' ? 'dropdown' : 'choice field'}, not a text box — Insert can't fill it.${opts} Answer below is for reference.`;
+    answerFieldNoteEl.textContent = `That's a ${what}, not a text box — Insert can't fill it.${opts} The answer below is for reference.`;
     answerFieldNoteEl.classList.remove('hidden');
   } else {
     answerFieldNoteEl.textContent = '';
@@ -5314,14 +5321,22 @@ function ccResolveFieldInPage(attr) {
     const tag = el.tagName;
     const type = (el.type || '').toLowerCase();
     if (tag === 'INPUT' && SKIP_TYPES.indexOf(type) !== -1) return null;
-    const r = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
-    if (r && r.width === 0 && r.height === 0) return null;
 
+    // CLASSIFY CHOICE CONTROLS *BEFORE* THE VISIBILITY CHECK. Custom-styled
+    // radios and checkboxes are routinely rendered 0x0 (or opacity:0) with a
+    // styled span painted on top — Rippling's ATS does exactly this. If the
+    // size check ran first they'd come back null, meaning "not a field", and
+    // the ancestor walk would step straight over the question and match an
+    // unrelated textarea further up the tree. That is not a cosmetic miss:
+    // it is how an answer to a Yes/No question gets offered into someone
+    // else's essay box. A hidden choice control still answers the question
+    // "can free text go here?" — and the answer is still no.
     if (tag === 'SELECT') return 'choice';
     if (tag === 'INPUT' && CHOICE_TYPES.indexOf(type) !== -1) return 'choice';
-    // Custom comboboxes (react-select, Workday, Ashby) render a real <input>
-    // but only accept values from a popup listbox — typing free text into one
-    // either does nothing or leaves the form in an invalid state.
+    // Custom comboboxes (react-select, Workday, Ashby, Rippling) render a
+    // real <input> or a div[role=combobox] but only accept values from a
+    // popup listbox — typing free text into one either does nothing or
+    // leaves the form in an invalid state.
     const role = (el.getAttribute && el.getAttribute('role')) || '';
     if (role === 'combobox' || role === 'listbox') return 'choice';
     if (el.getAttribute && el.getAttribute('aria-haspopup') === 'listbox') {
@@ -5334,7 +5349,12 @@ function ccResolveFieldInPage(attr) {
     if (el.closest && el.closest('[role="combobox"], [role="listbox"]')) {
       return 'choice';
     }
+
+    // From here down we're deciding whether free text can actually be typed,
+    // so an invisible or read-only control genuinely is not a candidate.
     if (el.readOnly) return null;
+    const r = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+    if (r && r.width === 0 && r.height === 0) return null;
 
     if (tag === 'INPUT' || tag === 'TEXTAREA') return 'text';
     if (el.isContentEditable) return 'text';
@@ -5443,18 +5463,62 @@ function ccResolveFieldInPage(attr) {
   const kind = fieldKind(field);
   if (kind === 'choice') {
     const options = [];
+    const fieldType = (field.type || '').toLowerCase();
+    let control = field.tagName.toLowerCase();
+
     if (field.tagName === 'SELECT' && field.options) {
+      control = 'select';
       for (let i = 0; i < field.options.length && i < 8; i++) {
         const label = (field.options[i].label || field.options[i].text || '').trim();
         if (label) options.push(label);
       }
+    } else if (fieldType === 'radio' || fieldType === 'checkbox') {
+      control = fieldType;
+      // Radio groups carry the human-readable choices on the `value` of each
+      // sibling sharing the group name — which is where the real answer is
+      // (e.g. "Yes - I currently live in the Bellevue/Seattle area"), not on
+      // any label element. Fall back to the aria-labelledby target's text.
+      if (field.name) {
+        let sibs = [];
+        try {
+          sibs = document.querySelectorAll(
+            field.tagName.toLowerCase() +
+              '[name="' +
+              CSS.escape(field.name) +
+              '"]',
+          );
+        } catch {
+          sibs = [];
+        }
+        for (let i = 0; i < sibs.length && i < 8; i++) {
+          let v = (sibs[i].value || '').trim();
+          if (!v || v === 'on') {
+            const lid = sibs[i].getAttribute('aria-labelledby');
+            const lab = lid ? document.getElementById(lid) : null;
+            v = lab ? (lab.textContent || '').trim() : '';
+          }
+          if (v && options.indexOf(v) === -1) options.push(v);
+        }
+      }
+    } else {
+      const fieldRole =
+        (field.getAttribute && field.getAttribute('role')) || '';
+      if (
+        fieldRole === 'combobox' ||
+        fieldRole === 'listbox' ||
+        (field.getAttribute &&
+          field.getAttribute('aria-haspopup') === 'listbox')
+      ) {
+        control = 'combobox';
+      }
     }
+
     return {
       text: text,
       token: null,
       how: how,
       kind: 'choice',
-      control: field.tagName.toLowerCase(),
+      control: control,
       options: options,
       existing: '',
     };
