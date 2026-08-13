@@ -5708,17 +5708,9 @@ async function resolveSelectionTarget() {
 // else the most recent answer that already has content.
 async function findExistingAnswer(selection, apiKey) {
   try {
-    // NOTE: the api has NO filter[favorite] — AnswerViewSet.list supports only
-    // filter[query] and filter[question_id] (api/.../views/questions.py:270).
-    // So the favorites filter below is CLIENT-SIDE, applied to whatever page
-    // comes back. per_page is passed explicitly rather than leaning on the
-    // server's default of 50: if that default ever shrank, favorites past the
-    // first page would vanish and reuse would silently fall through to
-    // generating — a failure that looks exactly like normal operation.
-    // The api-side filter is the real fix (needs a deploy, so not tonight).
     const url = `${ORIGIN}/api/v1/answers/?filter[query]=${encodeURIComponent(
       selection,
-    )}&include=question&per_page=50`;
+    )}&include=question`;
     const resp = await fetch(url, {
       headers: {
         Accept: 'application/vnd.api+json',
@@ -5728,24 +5720,12 @@ async function findExistingAnswer(selection, apiKey) {
     if (!resp.ok) return null;
     const body = await resp.json();
     const rows = Array.isArray(body?.data) ? body.data : [];
-
-    // CCEXT-34: FAVORITES ONLY. Career data is curated by favoriting the
-    // answers that mean something to you — that is the user's own selection
-    // process, and it is the same signal CareerData.for_user feeds into every
-    // prompt. Reusing ANY saved answer (the old `fav || withContent[0]`)
-    // routed around that: it treated a throwaway draft as equal to one you
-    // deliberately blessed, and then placed it in a form for you.
-    //
-    // Favorites-only makes reuse mean "you already decided this is your
-    // answer", which is the only version worth auto-placing.
     const withContent = rows.filter(
-      (r) =>
-        r?.attributes?.favorite === true &&
-        r?.attributes?.content &&
-        String(r.attributes.content).trim(),
+      (r) => r?.attributes?.content && String(r.attributes.content).trim(),
     );
     if (withContent.length === 0) return null;
-    const chosen = withContent[0];
+    const fav = withContent.find((r) => r?.attributes?.favorite === true);
+    const chosen = fav || withContent[0];
 
     // CCEXT-34: carry the answer's PROVENANCE — which company it was written
     // for. Saved answers are matched on question TEXT, and question text
