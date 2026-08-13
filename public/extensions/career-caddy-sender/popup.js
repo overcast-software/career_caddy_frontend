@@ -151,7 +151,11 @@ const quickCopyEditEl = $('quick-copy-edit');
 // settings page (opens in a new tab). Set from FRONTEND_ORIGIN so it follows
 // the origin repoint, matching the onCcOpenEl / result-link anchor pattern.
 if (quickCopyEditEl) {
-  quickCopyEditEl.href = `${FRONTEND_ORIGIN}/settings/quick-copy`;
+  // CCEXT-36: /settings/quick-copy DOES NOT EXIST on main — router.js:291-298
+  // registers only settings.profile{.edit}/data/appearance/ai-spend, so this
+  // fell through to the not-found glob. The links editor these items come from
+  // lives on settings/profile/edit (templates/settings/profile/edit.hbs:58-135).
+  quickCopyEditEl.href = `${FRONTEND_ORIGIN}/settings/profile/edit`;
 }
 const answerCardEl = $('answer-card'); // CC #47: answer-the-selection tool
 const answerBtn = $('answer-btn');
