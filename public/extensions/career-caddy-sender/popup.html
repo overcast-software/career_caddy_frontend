@@ -1170,6 +1170,16 @@
         <div class="tracked-title" id="match-result-title"></div>
         <div class="tracked-company" id="match-result-company"></div>
         <div class="status" id="match-result-status"></div>
+        <!-- CCEXT-36: the matched post itself must be inspectable — a
+             confident wrong match (CC-240) is only catchable if the user
+             can look at what was matched, not just the application row. -->
+        <a
+          id="match-result-view"
+          class="tracked-open hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >View job post</a>
         <a
           id="match-result-link"
           class="result-link hidden"
@@ -1181,9 +1191,19 @@
 
       <div id="applications-body" class="hidden">
         <div class="tracked-card">
+          <span class="tracked-score hidden" id="app-jp-score"></span>
           <div class="tracked-title" id="app-jp-title"></div>
           <div class="tracked-company" id="app-jp-company"></div>
         </div>
+        <!-- CCEXT-36: the card proposes a post the user must judge — give
+             them a way to actually look at it before acting on it. -->
+        <a
+          id="app-jp-open"
+          class="tracked-open hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >View job post</a>
 
         <!-- CC #46: Track application (jp -> ja). Creates the JobApplication
              in-place and confirms inline — never opens a tab; swaps to an
@@ -1265,6 +1285,14 @@
         <div class="tracked-company">Track your application for</div>
         <div class="tracked-title" id="apply-attr-title"></div>
         <div class="tracked-company" id="apply-attr-company"></div>
+        <!-- CCEXT-36: inspect the proposed post before acting on it. -->
+        <a
+          id="apply-attr-view"
+          class="tracked-open hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >View job post</a>
         <button id="apply-attr-btn" class="primary" type="button" style="margin-top: 10px;">
           <span class="btn-label">Track application</span>
           <span class="spinner" aria-hidden="true"></span>
@@ -1289,6 +1317,14 @@
         <div class="tracked-company" id="ladder-offer-lead">Applying to</div>
         <div class="tracked-title" id="ladder-offer-title"></div>
         <div class="tracked-company" id="ladder-offer-company"></div>
+        <!-- CCEXT-36: inspect the candidate before accepting the offer. -->
+        <a
+          id="ladder-offer-view"
+          class="tracked-open hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >View job post</a>
         <button id="ladder-offer-btn" class="primary" type="button" style="margin-top: 10px;">
           <span class="btn-label">Track application</span>
           <span class="spinner" aria-hidden="true"></span>

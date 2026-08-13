@@ -116,7 +116,6 @@ api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       url: msg.url,
       autoScore: !!msg.autoScore,
       frontendOrigin: msg.frontendOrigin || 'https://careercaddy.online',
-      skipAddedNotification: !!msg.skipAddedNotification,
       pollCount: 0,
     };
     const key = `scrape-${ctx.scrapeId}`;
@@ -371,16 +370,22 @@ async function pollScrapeOnce(scrapeId) {
     //   - autoScore off → fire "added ✓" now (unless popup already did).
     if (ctx.autoScore && jobPostId) {
       const ok = await beginScorePoll(ctx, jobPostId, jobTitle);
-      if (!ok && !ctx.skipAddedNotification) {
-        // Score POST failed (e.g. no career data) — fall back to the
-        // creation notification so the user still hears something.
-        notify('Career Caddy — added ✓', jobTitle, postUrl);
+      if (!ok) {
+        // CCEXT-38: the score POST failed (e.g. no career data), so no poll
+        // exists and no terminal notification will ever fire. The popup
+        // already told the user "added ✓ — scoring…", so silence here leaves
+        // that promise hanging forever. Say scoring didn't start; do NOT
+        // re-fire a bare "added ✓" — they have already heard that one.
+        notify(
+          'Career Caddy — added ✓ (scoring unavailable)',
+          jobTitle,
+          postUrl,
+        );
       }
       return;
     }
-    if (!ctx.skipAddedNotification) {
-      notify('Career Caddy — added ✓', jobTitle, postUrl);
-    }
+    // autoScore off: the popup's cc-notify-created already fired "added ✓"
+    // unconditionally, so there is nothing left to announce here.
     return;
   }
 

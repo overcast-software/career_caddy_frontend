@@ -72,6 +72,44 @@ const MATCH_APP_STASH_TTL_MS = 30 * 60 * 1000; // 30m
 // background alarm (popup lifetime is short). Cap ~24 polls * 2.5s ≈ 60s.
 const MATCH_APP_POLL_INTERVAL_MS = 2500;
 const MATCH_APP_POLL_MAX = 24;
+// CCEXT-37 — which stored keys belong to the SIGNED-IN USER.
+//
+// This knowledge had no home. handleDisconnect hard-coded its own wipe list,
+// so every stash added after it (applies, viewed trail, match apps, and the
+// generated ANSWER TEXT) was never cleared — user A's answer stayed
+// restorable, and autoDeliverAnswer would place it into user B's form on the
+// same page. Adding a key and forgetting the wipe list was the default.
+//
+// Now the list is the definition, and disconnect asks it. A new user-scoped
+// stash gets added HERE, next to nothing else, and disconnect follows.
+//
+// Deliberately EXCLUDED — device preferences, not user data. Clearing these
+// would reset the user's theme on sign-out, which is a regression, not a fix:
+//   ccTheme, ccPalette, ccAutoScore, ccTabsOptinDismissed
+const USER_SCOPED_STORAGE_KEYS = [
+  // identity + credential
+  'ccApiKey',
+  'ccKeyId',
+  'ccUsername',
+  'ccIsStaff',
+  'ccMe',
+  // caches keyed to this user's instance/profile
+  'ccExtensionSelectorCache',
+  'ccPending',
+  // per-user work stashes
+  CC_TRACKED_PAGES_KEY,
+  CC_SENT_PAGES_KEY,
+  CC_PENDING_APPLIES_KEY,
+  CC_VIEWED_POSTS_KEY,
+  CC_MATCH_APPS_KEY,
+  // generated answer text — the most sensitive of the lot. Spelled as
+  // literals, NOT as ANSWER_PENDING_KEY/ANSWER_RESULT_KEY: those consts are
+  // declared far below in the answer section, so naming them here would read
+  // them in their temporal dead zone and throw at load. Values verified equal.
+  'ccAnswerPending',
+  'ccAnswerResult',
+];
+
 // Client-side excerpt cap. The api re-truncates to 8000 at write; we cap here
 // too so the POST body stays small.
 const MATCH_APP_EXCERPT_MAX = 8000;
@@ -222,6 +260,7 @@ const applyAttrCompanyEl = $('apply-attr-company');
 const applyAttrBtn = $('apply-attr-btn');
 const applyAttrStatus = $('apply-attr-status');
 const applyAttrLinkEl = $('apply-attr-link');
+const applyAttrViewEl = $('apply-attr-view'); // CCEXT-36
 // The stash record currently surfaced on the attribution card (so the
 // click handler knows which JobPost to attribute and which stash entry to
 // clear). Null when no offer is showing.
@@ -236,6 +275,7 @@ const ladderOfferBtn = $('ladder-offer-btn');
 const ladderOfferDismissBtn = $('ladder-offer-dismiss');
 const ladderOfferStatus = $('ladder-offer-status');
 const ladderOfferLinkEl = $('ladder-offer-link');
+const ladderOfferViewEl = $('ladder-offer-view'); // CCEXT-36
 const tabsOptinEl = $('tabs-optin');
 const tabsOptinBtn = $('tabs-optin-btn');
 
@@ -249,6 +289,7 @@ const matchResultTitleEl = $('match-result-title');
 const matchResultCompanyEl = $('match-result-company');
 const matchResultStatus = $('match-result-status');
 const matchResultLinkEl = $('match-result-link');
+const matchResultViewEl = $('match-result-view'); // CCEXT-36
 // True while a match-application POST/poll is in flight, so a second click
 // can't fire a second POST and the visibility gate stays quiet.
 let matchAppInFlight = false;
@@ -276,6 +317,8 @@ const applicationsEmptyEl = $('applications-empty');
 const applicationsBodyEl = $('applications-body');
 const appJpTitleEl = $('app-jp-title');
 const appJpCompanyEl = $('app-jp-company');
+const appJpScoreEl = $('app-jp-score'); // CCEXT-36
+const appJpOpenEl = $('app-jp-open'); // CCEXT-36
 const toolHostEl = $('tool-host');
 const enrichBtn = $('enrich-btn');
 const enrichStatus = $('enrich-status');
@@ -669,9 +712,20 @@ function showApplicationsScreen() {
   if (appJpTitleEl) {
     appJpTitleEl.textContent = trackedJobPost.title || '(untitled job post)';
   }
+  // CCEXT-36: identity + a way to inspect. The title alone can't tell the
+  // user whether this is the right post ("this might be the job-post… but
+  // there isn't enough information and no way for me to look at it").
   if (appJpCompanyEl) {
-    appJpCompanyEl.textContent = trackedJobPost.company || '';
+    appJpCompanyEl.textContent =
+      trackedJobPost.company || hostLabel(trackedJobPost.link);
   }
+  if (appJpScoreEl) {
+    const score = trackedJobPost.topScore;
+    const hasScore = typeof score === 'number';
+    appJpScoreEl.textContent = hasScore ? String(score) : '';
+    appJpScoreEl.classList.toggle('hidden', !hasScore);
+  }
+  showJobPostViewLink(appJpOpenEl, trackedJobPostId);
   refreshApplicationState();
 }
 
@@ -1146,6 +1200,33 @@ function jobPostUrl(jobPostId, { withScores = false } = {}) {
   return withScores
     ? `${FRONTEND_ORIGIN}/job-posts/${jobPostId}/scores`
     : `${FRONTEND_ORIGIN}/job-posts/${jobPostId}`;
+}
+
+// CCEXT-36: every card that proposes a job post must let the user LOOK at
+// it before acting on it — "this might be the post" with no way to inspect
+// it forces a blind decision. One populate path for every card's view link.
+function showJobPostViewLink(el, jobPostId) {
+  if (!el) return;
+  const url = jobPostUrl(jobPostId);
+  if (!url) {
+    el.classList.add('hidden');
+    el.removeAttribute('href');
+    return;
+  }
+  el.href = url;
+  el.classList.remove('hidden');
+}
+
+// CCEXT-36: identity fallback for a proposed post whose JobPost carries no
+// company — the posting link's host says WHERE it came from, which beats an
+// empty line for telling two same-title posts apart.
+function hostLabel(url) {
+  if (!url) return '';
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
 }
 
 function hideResultLink() {
@@ -2164,16 +2245,8 @@ async function handleDisconnect() {
       console.warn('[cc-sender] revoke best-effort failed', err);
     }
   }
-  await api.storage.local.remove([
-    'ccApiKey',
-    'ccKeyId',
-    'ccUsername',
-    'ccIsStaff',
-    'ccMe',
-    'ccExtensionSelectorCache',
-    CC_TRACKED_PAGES_KEY,
-    CC_SENT_PAGES_KEY,
-  ]);
+  // CCEXT-37: ask the list, don't restate it — see USER_SCOPED_STORAGE_KEYS.
+  await api.storage.local.remove(USER_SCOPED_STORAGE_KEYS);
   isStaff = false;
   if (disconnectBtn) disconnectBtn.disabled = false;
   if (disconnectTrackedBtn) disconnectTrackedBtn.disabled = false;
@@ -2954,9 +3027,6 @@ sendBtn.addEventListener('click', async () => {
       url: payload.url,
       autoScore: wantsScore,
       frontendOrigin: FRONTEND_ORIGIN,
-      // Popup already fired the "added" notification; bg should only
-      // notify on the score-completion event (or terminal failure).
-      skipAddedNotification: true,
     })
     .catch((err) => {
       console.warn('[cc-sender] background handoff failed', err);
@@ -3364,15 +3434,6 @@ async function postJobApplication({ jobPostId, trackingUrl, apiKey }) {
 
 // --- Track-application card (tracked screen) -----------------------
 
-function setTrackApplyLabel() {
-  if (!trackApplyBtn) return;
-  const lbl = trackApplyBtn.querySelector('.btn-label');
-  // The button creates the JobApplication in-place and confirms inline — it
-  // never navigates — so the label is always "Track application" regardless
-  // of whether the post carries an apply_url.
-  if (lbl) lbl.textContent = 'Track application';
-}
-
 function setTrackApplySending(sending) {
   if (!trackApplyBtn) return;
   trackApplyBtn.disabled = sending;
@@ -3411,7 +3472,6 @@ function showTrackApplyOpenLink(appId, label) {
 async function refreshApplicationState() {
   if (!trackApplyBtn) return;
   resetTrackApplyCard();
-  setTrackApplyLabel();
   if (!trackedJobPostId) return;
   if (trackedJobPost && trackedJobPost.appId) {
     showTrackApplyOpenLink(trackedJobPost.appId, 'Already tracked');
@@ -3921,6 +3981,7 @@ function resetApplyAttributionCard() {
     delete applyAttrBtn.dataset.state;
   }
   if (applyAttrLinkEl) applyAttrLinkEl.classList.add('hidden');
+  if (applyAttrViewEl) applyAttrViewEl.classList.add('hidden'); // CCEXT-36
   if (applyAttrStatus) setStatus(applyAttrStatus, '');
 }
 
@@ -3956,7 +4017,10 @@ async function maybeOfferApplyAttribution(tabUrl, name) {
   if (applyAttrTitleEl) {
     applyAttrTitleEl.textContent = match.jpTitle || '(untitled job post)';
   }
-  if (applyAttrCompanyEl) applyAttrCompanyEl.textContent = match.company || '';
+  if (applyAttrCompanyEl) {
+    applyAttrCompanyEl.textContent = match.company || hostLabel(match.jpLink);
+  }
+  showJobPostViewLink(applyAttrViewEl, match.jobPostId); // CCEXT-36
   applyAttrCard.classList.remove('hidden');
   // v0 tab landing (state-based): a pending-apply match means the user is
   // mid-application — land on the Applications tab, where the card lives.
@@ -4425,6 +4489,7 @@ function resetLadderOfferCard() {
   }
   if (ladderOfferDismissBtn) ladderOfferDismissBtn.classList.remove('hidden');
   if (ladderOfferLinkEl) ladderOfferLinkEl.classList.add('hidden');
+  if (ladderOfferViewEl) ladderOfferViewEl.classList.add('hidden'); // CCEXT-36
   if (ladderOfferStatus) setStatus(ladderOfferStatus, '');
 }
 
@@ -4455,8 +4520,9 @@ function renderLadderOffer(offer, tabUrl) {
     ladderOfferTitleEl.textContent = found.title || '(untitled job post)';
   }
   if (ladderOfferCompanyEl) {
-    ladderOfferCompanyEl.textContent = found.company || '';
+    ladderOfferCompanyEl.textContent = found.company || hostLabel(found.link);
   }
+  showJobPostViewLink(ladderOfferViewEl, found.id); // CCEXT-36
   ladderOfferCard.classList.remove('hidden');
   // An application moment — land on the Applications tab where the card lives.
   setActiveTab('applications');
@@ -4858,6 +4924,7 @@ function buildJpFromIncluded(jpId, included) {
 function resetMatchResultCard() {
   if (matchResultCard) matchResultCard.classList.add('hidden');
   if (matchResultLinkEl) matchResultLinkEl.classList.add('hidden');
+  if (matchResultViewEl) matchResultViewEl.classList.add('hidden'); // CCEXT-36
   if (matchResultStatus) setStatus(matchResultStatus, '');
   if (matchResultTitleEl) matchResultTitleEl.textContent = '';
   if (matchResultCompanyEl) matchResultCompanyEl.textContent = '';
@@ -4893,7 +4960,12 @@ async function renderMatchResult(result, jaId, tabUrl, apiKey) {
     if (matchResultTitleEl) {
       matchResultTitleEl.textContent = found.title || '(untitled job post)';
     }
-    if (matchResultCompanyEl) matchResultCompanyEl.textContent = found.company || '';
+    if (matchResultCompanyEl) {
+      matchResultCompanyEl.textContent = found.company || hostLabel(found.link);
+    }
+    // CCEXT-36: a confident wrong match (CC-240) is only catchable when the
+    // user can inspect the matched POST, not just the application row.
+    showJobPostViewLink(matchResultViewEl, found.id);
     if (matchResultLinkEl) {
       matchResultLinkEl.href = jaOpenHref(found.id);
       matchResultLinkEl.classList.remove('hidden');
@@ -4912,6 +4984,7 @@ async function renderMatchResult(result, jaId, tabUrl, apiKey) {
     if (matchResultLeadEl) matchResultLeadEl.textContent = 'Tracked';
     if (matchResultTitleEl) matchResultTitleEl.textContent = 'No matching job post found';
     if (matchResultCompanyEl) matchResultCompanyEl.textContent = '';
+    if (matchResultViewEl) matchResultViewEl.classList.add('hidden'); // CCEXT-36
     if (matchResultLinkEl) {
       matchResultLinkEl.href = jaOpenHref(null);
       matchResultLinkEl.classList.remove('hidden');
@@ -4931,6 +5004,7 @@ async function renderMatchResult(result, jaId, tabUrl, apiKey) {
   if (matchResultLeadEl) matchResultLeadEl.textContent = 'Tracked';
   if (matchResultTitleEl) matchResultTitleEl.textContent = 'Lookup failed';
   if (matchResultCompanyEl) matchResultCompanyEl.textContent = '';
+  if (matchResultViewEl) matchResultViewEl.classList.add('hidden'); // CCEXT-36
   if (matchResultLinkEl) {
     matchResultLinkEl.href = jaOpenHref(null);
     matchResultLinkEl.classList.remove('hidden');
@@ -5386,32 +5460,6 @@ async function maybeRestoreAnswer() {
     target ? 'Your last answer — still insertable.' : 'Your last answer.',
   );
   return true;
-}
-
-// Read the active tab's selection. allFrames so a selection inside an
-// embedded ATS iframe is captured; first non-empty frame result wins.
-async function readSelectionFromActiveTab() {
-  let tab;
-  try {
-    [tab] = await api.tabs.query({ active: true, currentWindow: true });
-  } catch {
-    return '';
-  }
-  if (!tab || tab.id == null) return '';
-  try {
-    const results = await api.scripting.executeScript({
-      target: { tabId: tab.id, allFrames: true },
-      func: () => (window.getSelection ? window.getSelection().toString() : ''),
-    });
-    if (!Array.isArray(results)) return '';
-    for (const r of results) {
-      const s = r && r.result ? String(r.result).trim() : '';
-      if (s) return s;
-    }
-    return '';
-  } catch {
-    return '';
-  }
 }
 
 // ---------------------------------------------------------------------------
