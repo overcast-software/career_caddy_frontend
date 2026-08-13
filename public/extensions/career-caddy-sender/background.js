@@ -99,11 +99,18 @@ api.notifications.onClicked.addListener((notificationId) => {
   });
 });
 
-function jobPostUrl(frontendOrigin, jobPostId, withScores) {
+// CCEXT-40: go as deep as the id in hand allows. A notification that names a
+// specific result ("scored 87 ✓") and then lands on a LIST makes the user hunt
+// for the thing it just told them — and this builder is the one the user
+// actually clicks, since the notification exists precisely because the popup
+// closed. `/job-posts/:id/scores/:score_id` is a real route (app/router.js:
+// 118-119) and popup.js:3439 already builds it for the same event when the
+// popup happens to be open; this is what stops the two surfaces disagreeing.
+function jobPostUrl(frontendOrigin, jobPostId, withScores, scoreId) {
   if (!jobPostId || !frontendOrigin) return null;
-  return withScores
-    ? `${frontendOrigin}/job-posts/${jobPostId}/scores`
-    : `${frontendOrigin}/job-posts/${jobPostId}`;
+  const base = `${frontendOrigin}/job-posts/${jobPostId}`;
+  if (scoreId) return `${base}/scores/${scoreId}`;
+  return withScores ? `${base}/scores` : base;
 }
 
 api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -461,9 +468,13 @@ async function pollScoreOnce(scoreId) {
   if (ctx.pollCount >= MAX_POLLS) {
     await api.alarms.clear(`${SCORE_PREFIX}${scoreId}`);
     await api.storage.session.remove(key);
+    // CCEXT-40: "check Career Caddy" with nothing to click, while jobPostId is
+    // right here on the context. There is no score to open yet, so the scores
+    // list is the honest destination.
     notify(
       'Career Caddy — score still pending',
       `${ctx.jobTitle} added; score is taking a while. Check Career Caddy.`,
+      jobPostUrl(ctx.frontendOrigin, ctx.jobPostId, true),
     );
     return;
   }
@@ -501,9 +512,21 @@ async function pollScoreOnce(scoreId) {
   if (status && TERMINAL_SCORE.has(status)) {
     await api.alarms.clear(`${SCORE_PREFIX}${scoreId}`);
     await api.storage.session.remove(key);
-    // Score-completion notifications always link to /scores when the
-    // user opted in (UX5) — that's where the meaningful detail lives.
-    const scoreUrl = jobPostUrl(ctx.frontendOrigin, ctx.jobPostId, true);
+    // CCEXT-40: when we announce a specific score, open THAT score. The old
+    // comment here ("always link to /scores — that's where the detail lives")
+    // was written when nothing built the deeper URL; popup.js:3439 has since
+    // made it stale, and the index was making the user find a result they had
+    // just been handed.
+    //
+    // The failure branch deliberately keeps the index: there is no result to
+    // open, and the list is where a retry starts.
+    const scoreUrl = jobPostUrl(
+      ctx.frontendOrigin,
+      ctx.jobPostId,
+      true,
+      ctx.scoreId,
+    );
+    const scoresUrl = jobPostUrl(ctx.frontendOrigin, ctx.jobPostId, true);
     if (SUCCESS_SCORE.has(status) && typeof value === 'number') {
       notify(`Career Caddy — scored ${value} ✓`, ctx.jobTitle, scoreUrl);
     } else if (SUCCESS_SCORE.has(status)) {
@@ -512,7 +535,7 @@ async function pollScoreOnce(scoreId) {
       notify(
         'Career Caddy — added ✓ (score failed)',
         ctx.jobTitle,
-        scoreUrl,
+        scoresUrl,
       );
     }
     return;
