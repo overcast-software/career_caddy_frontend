@@ -3197,6 +3197,24 @@ async function startScore(btn, statusEl) {
   const scoreId = body?.data?.id;
   btn.classList.add('hidden');
   if (scoreId) {
+    // CCEXT-37: hand the scoreId to the background so it polls and notifies,
+    // the same as a send-with-score does. Without this a manual score was
+    // fire-and-forget: no notification, no badge, nothing until the user went
+    // looking. The popup is about to close, so this must be the background's
+    // job, not a poll in here.
+    try {
+      api.runtime.sendMessage({
+        type: 'cc-score-queued',
+        scoreId: String(scoreId),
+        origin: ORIGIN,
+        apiKey: saved.ccApiKey,
+        jobPostId: String(trackedJobPostId),
+        jobTitle: (trackedJobPost && trackedJobPost.title) || '',
+        frontendOrigin: FRONTEND_ORIGIN,
+      });
+    } catch (err) {
+      console.warn('[cc-sender] score poll handoff failed', err);
+    }
     const url = `${FRONTEND_ORIGIN}/job-posts/${trackedJobPostId}/scores/${scoreId}`;
     statusEl.innerHTML = '';
     const label = document.createElement('span');
@@ -5199,8 +5217,17 @@ function showAnswerResult(content, message) {
   if (answerCopyBtn) answerCopyBtn.classList.remove('hidden');
   // CCEXT-26: Insert is offered only when the selection actually resolved to
   // a writable control. No target -> Copy remains the honest path.
-  if (answerInsertBtn && answerFieldTarget && (content || '').trim()) {
-    answerInsertBtn.classList.remove('hidden');
+  const canInsert = !!(answerInsertBtn && answerFieldTarget && (content || '').trim());
+  if (canInsert) answerInsertBtn.classList.remove('hidden');
+  // CCEXT-40: when Insert is available it is THE action — putting the answer
+  // in the box is the whole point. Copy carried the same `primary` styling and
+  // sat beside it with equal weight, quietly presenting the clipboard (the
+  // thesis's own failure mode) as an equal choice. Demote it to a secondary
+  // control when Insert is present; promote it back when Insert is not
+  // possible, because then copying really is the best available action.
+  if (answerCopyBtn) {
+    answerCopyBtn.classList.toggle('primary', !canInsert);
+    answerCopyBtn.classList.toggle('linkbtn', canInsert);
   }
   // CCEXT-32: once there IS an answer, the same button becomes "answer
   // again". Whether it came from the AI or matched a saved answer, "this
@@ -5364,7 +5391,22 @@ function ccResolveFieldInPage(attr) {
   const WRITABLE =
     'input, textarea, [contenteditable="true"], [contenteditable=""]';
   const FIELDS = WRITABLE + ', select, [role="combobox"], [role="listbox"]';
-  const SKIP_TYPES = ['hidden', 'submit', 'button', 'reset', 'image', 'file'];
+  // CCEXT-38: 'password' is in this list deliberately. Nothing tells the
+  // extension it is on a job application — the popup opens on whatever tab is
+  // active — so without this a credential field on any site classifies as a
+  // writable text input. It is not reachable today (the only door is a
+  // deliberate highlight, and nobody highlights their password box), but an
+  // extension that can enumerate and write to password fields is a thing you
+  // do not want to own, and the store filing says it only reads job postings.
+  const SKIP_TYPES = [
+    'hidden',
+    'submit',
+    'button',
+    'reset',
+    'image',
+    'file',
+    'password',
+  ];
   const CHOICE_TYPES = ['checkbox', 'radio'];
 
   // null = not a field at all. 'choice' = a constrained-value control that
@@ -5670,6 +5712,46 @@ function ccWriteFieldInPage(attr, token, value) {
   return { ok: true };
 }
 
+// CCEXT-41: `activeTab` grants a temporary host permission scoped to the
+// ACTIVE TAB'S TOP-LEVEL ORIGIN. A cross-origin subframe is NOT covered, so
+// `allFrames: true` reaches same-origin frames only — the extension's own
+// store filing says exactly this ("same-origin subframes via allFrames").
+//
+// That matters because the classic Greenhouse setup is job-boards.greenhouse.io
+// embedded in company.com/careers. There, the resolver legitimately finds
+// nothing, and the card used to say "Highlight a question on the page" — which
+// reads as "you did it wrong" when the truth is "this form is somewhere I am
+// not allowed to look". Same words for user error and a hard permission
+// boundary is the worst possible diagnostic.
+//
+// We cannot fix the boundary without a broad host permission (re-consent, a
+// scarier install screen, a harder store review). We CAN stop misreporting it.
+// Returns the number of cross-origin frames on the page, or 0.
+async function countUnreachableFrames(tabId) {
+  try {
+    const results = await api.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        let blocked = 0;
+        const frames = document.querySelectorAll('iframe');
+        for (let i = 0; i < frames.length; i++) {
+          try {
+            // Touching contentDocument on a cross-origin frame throws.
+            if (!frames[i].contentDocument) blocked++;
+          } catch {
+            blocked++;
+          }
+        }
+        return blocked;
+      },
+    });
+    const n = results && results[0] ? results[0].result : 0;
+    return typeof n === 'number' ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
 // Popup-side wrapper. Keeps the frameId alongside the token so the write goes
 // back into the SAME frame the selection came from — ATS forms are often
 // embedded (Greenhouse especially) and the main frame has no such field.
@@ -5929,9 +6011,21 @@ async function handleAnswerSelected(opts) {
   const target = await resolveSelectionTarget();
   const selection = target && target.text ? target.text : '';
   if (!selection) {
+    // CCEXT-41: same distinction on the click path — a cross-origin frame is
+    // a permission boundary, not a mistake the user can correct by trying
+    // harder.
+    let blocked = 0;
+    try {
+      const [t] = await api.tabs.query({ active: true, currentWindow: true });
+      if (t && t.id != null) blocked = await countUnreachableFrames(t.id);
+    } catch {
+      blocked = 0;
+    }
     setStatus(
       answerStatus,
-      'Select a question on the page first, then click Answer.',
+      blocked > 0
+        ? "This form is inside an embedded frame the extension can't read. Selecting inside it won't reach me — paste the question into Career Caddy instead."
+        : 'Select a question on the page first, then click Answer.',
       'error',
     );
     return;
@@ -6063,9 +6157,20 @@ async function primeAnswerSelection() {
     if (!restored && answerCardEl) {
       resetAnswerResult();
       setAnswerFieldTarget(null);
+      // CCEXT-41: distinguish "you haven't highlighted anything" from "this
+      // form lives in a frame I'm not permitted to read".
+      let blocked = 0;
+      try {
+        const [t] = await api.tabs.query({ active: true, currentWindow: true });
+        if (t && t.id != null) blocked = await countUnreachableFrames(t.id);
+      } catch {
+        blocked = 0;
+      }
       setStatus(
         answerStatus,
-        'Highlight a question on the page, then reopen this tab.',
+        blocked > 0
+          ? "This form is inside an embedded frame the extension can't read, so highlighting won't reach it. Generate the answer here and copy it across."
+          : 'Highlight a question on the page, then reopen this tab.',
       );
     }
     return;

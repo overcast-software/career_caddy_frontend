@@ -1209,7 +1209,17 @@
            trackedJobPost is null exactly when you need this. Visibility is
            now independent of a match; the JobPost is still passed as context
            whenever one exists (Question.job_post is nullable server-side). -->
-      <details id="answer-card" class="profile-card" style="margin-top: 12px;">
+      <!-- CCEXT-39: open by default. This is the flagship feature, and the
+           only instruction a first-time user gets ("Highlight a question on
+           the page…") is written into #answer-status, which lives INSIDE this
+           body — so collapsed, a new user saw a grey strip and no explanation
+           of what it was for. -->
+      <details
+        id="answer-card"
+        class="profile-card"
+        style="margin-top: 12px;"
+        open
+      >
         <summary class="profile-summary">Answer the selected text</summary>
         <div class="answer-body">
           <button id="answer-btn" class="primary" type="button">

@@ -134,6 +134,38 @@ api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (typeof sendResponse === 'function') sendResponse({ ok: true });
     return false;
   }
+  if (msg.type === 'cc-score-queued') {
+    // CCEXT-37: a score started from the POPUP's "Score this post" button had
+    // no background poll at all — beginScorePoll is only reachable from the
+    // send-with-score path (background.js:341). So a manual score never
+    // notified and never updated; the user watched a link and had to go look
+    // for the result themselves. The score is already POSTed by the popup
+    // here, so we register the poll for an EXISTING scoreId rather than
+    // creating another one.
+    const scoreCtx = {
+      scoreId: String(msg.scoreId),
+      origin: msg.origin,
+      apiKey: msg.apiKey,
+      url: msg.url || '',
+      jobTitle: msg.jobTitle || '',
+      jobPostId: String(msg.jobPostId || ''),
+      frontendOrigin: msg.frontendOrigin || 'https://careercaddy.online',
+      pollCount: 0,
+    };
+    api.storage.session
+      .set({ [`score-${scoreCtx.scoreId}`]: scoreCtx })
+      .then(() =>
+        api.alarms.create(`${SCORE_PREFIX}${scoreCtx.scoreId}`, {
+          periodInMinutes: POLL_INTERVAL_MIN,
+          when: Date.now() + 3000,
+        }),
+      )
+      .catch((err) => {
+        console.warn('[cc-sender bg] manual score poll queue failed', err);
+      });
+    if (typeof sendResponse === 'function') sendResponse({ ok: true });
+    return false;
+  }
   if (msg.type === 'cc-notify-created') {
     // Fired by the popup the moment from-text returns 202 with a
     // job_post_id. Earlier than the bg scrape-poll path, so the user
