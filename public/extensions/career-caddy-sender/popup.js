@@ -162,7 +162,9 @@ const answerTextEl = $('answer-text');
 const answerCopyBtn = $('answer-copy');
 const answerInsertBtn = $('answer-insert'); // CCEXT-26: write into the page field
 const answerFieldNoteEl = $('answer-field-note');
-const answerRegenBtn = $('answer-regenerate'); // CCEXT-32: force a fresh answer
+// CCEXT-32: true once an answer is on screen. The Answer button then means
+// "answer again" — a second button for that was one control too many.
+let answerIsShown = false;
 const versionEl = $('version');
 
 const openSigninBtn = $('open-signin');
@@ -5103,6 +5105,19 @@ function setAnswerBusy(busy) {
   else delete answerBtn.dataset.state;
 }
 
+// CCEXT-32: the single Answer button carries both meanings — generate the
+// first answer, then generate a different one. Relabelling is what makes the
+// second meaning discoverable without adding a control.
+function setAnswerButtonLabel() {
+  if (!answerBtn) return;
+  const label = answerBtn.querySelector('.btn-label');
+  if (label) {
+    label.textContent = answerIsShown
+      ? 'Answer again'
+      : 'Answer the selected text';
+  }
+}
+
 function resetAnswerResult() {
   if (answerTextEl) {
     answerTextEl.value = '';
@@ -5113,7 +5128,8 @@ function resetAnswerResult() {
     answerInsertBtn.classList.add('hidden');
     answerInsertBtn.textContent = 'Insert into the field';
   }
-  if (answerRegenBtn) answerRegenBtn.classList.add('hidden');
+  answerIsShown = false;
+  setAnswerButtonLabel();
   hideAnswerPrompt();
 }
 
@@ -5182,12 +5198,11 @@ function showAnswerResult(content, message) {
   if (answerInsertBtn && answerFieldTarget && (content || '').trim()) {
     answerInsertBtn.classList.remove('hidden');
   }
-  // CCEXT-32: once there IS an answer, offer another one. Whether it came
-  // from the AI or matched a saved answer, "this isn't the one I want" is a
-  // normal reaction and needs a way out.
-  if (answerRegenBtn && (content || '').trim()) {
-    answerRegenBtn.classList.remove('hidden');
-  }
+  // CCEXT-32: once there IS an answer, the same button becomes "answer
+  // again". Whether it came from the AI or matched a saved answer, "this
+  // isn't the one I want" is a normal reaction and needs a way out.
+  answerIsShown = !!(content || '').trim();
+  setAnswerButtonLabel();
   setStatus(answerStatus, message || '', 'success');
 }
 
@@ -5830,7 +5845,10 @@ let lastAnswered = { prompt: '', questionId: null };
 // once any answer exists for this question, clicking Answer returns that same
 // answer forever.
 async function handleAnswerSelected(opts) {
-  const force = !!(opts && opts.force === true);
+  // CCEXT-32: an answer already on screen means this click is "answer again",
+  // so skip the saved-answer lookup that would just hand back what's already
+  // there. `opts.force` stays available for callers that need it explicitly.
+  const force = !!(opts && opts.force === true) || answerIsShown;
   if (answerPolling) return;
   // CCEXT-23: a JobPost is CONTEXT, not a precondition. Application forms
   // usually live on a different URL than the job description, so requiring a
@@ -5868,6 +5886,7 @@ async function handleAnswerSelected(opts) {
     if (match && match.content) {
       await saveAnswerResult(selection, match.content, answerFieldTarget);
       showAnswerResult(match.content, 'Matched a saved answer.');
+      await autoDeliverAnswer(match.content);
       setAnswerBusy(false);
       return;
     }
@@ -5993,6 +6012,7 @@ async function primeAnswerSelection() {
       setAnswerFieldTarget(target);
       showAnswerPrompt(selection);
       showAnswerResult(stash.content, 'Your last answer for this question.');
+      await autoDeliverAnswer(stash.content);
       return;
     }
   } catch {
@@ -6004,8 +6024,8 @@ async function primeAnswerSelection() {
   setAnswerFieldTarget(target);
   showAnswerPrompt(selection);
   // Free saved-answer match on open: if you've answered this exact question
-  // before, surface it instantly (copy-ready) — no AI call, no writes. Novel
-  // questions fall through to the click-to-generate path (handleAnswerSelected).
+  // before, surface it instantly — no AI call. Novel questions fall through
+  // to the click-to-generate path (handleAnswerSelected).
   const apiKey = saved && saved.ccApiKey;
   if (apiKey) {
     setStatus(answerStatus, 'Looking for a saved answer…');
@@ -6014,11 +6034,48 @@ async function primeAnswerSelection() {
     if (activeTab !== 'applications' || answerPolling) return;
     if (match && match.content) {
       await saveAnswerResult(selection, match.content, answerFieldTarget);
-      showAnswerResult(match.content, 'Matched a saved answer — copy it below.');
+      showAnswerResult(match.content, 'Matched a saved answer.');
+      await autoDeliverAnswer(match.content);
       return;
     }
   }
   setStatus(answerStatus, 'Highlighted — click Answer to respond.');
+}
+
+// CCEXT-32: when an answer is ALREADY available for the highlighted question,
+// put it in the box. Making the user click Insert to receive something we
+// already had is a step with no decision in it.
+//
+// Only fires for an answer we already had (a saved match or the restored
+// stash) — never for a freshly generated one, which the user should read
+// before it lands in their application. Guarded per token so re-opening the
+// popup over the same field doesn't write repeatedly.
+let autoDeliveredToken = null;
+
+async function autoDeliverAnswer(content) {
+  const value = (content || '').trim();
+  if (!value) return;
+  if (!answerFieldTarget || !answerFieldTarget.token) {
+    // No writable field — a dropdown, a radio group, or nothing resolved.
+    // Copy is the honest path, and it's already on screen.
+    setStatus(answerStatus, 'Saved answer ready — copy it below.', 'success');
+    return;
+  }
+  // NEVER overwrite something already in the field. It may be your own
+  // typing, or an edit you made to a previous insert — silently replacing
+  // either is unforgivable in a form you're about to submit. A non-empty
+  // field means Insert stays a deliberate click.
+  if (answerFieldTarget.existing) {
+    setStatus(
+      answerStatus,
+      'Saved answer ready — that field already has text, so Insert to replace it.',
+      'success',
+    );
+    return;
+  }
+  if (autoDeliveredToken === answerFieldTarget.token) return;
+  autoDeliveredToken = answerFieldTarget.token;
+  await insertAnswerIntoField({ auto: true });
 }
 
 // Resume a pending generation after a popup close/reopen. Reads the stash;
@@ -6067,7 +6124,8 @@ function copyAnswerToClipboard() {
 // CCEXT-26 (form-fill M1): write the answer straight into the page field the
 // selection came from, in the frame it came from. The user edits the textarea
 // first if they want — we send whatever is in it, not the original generation.
-async function insertAnswerIntoField() {
+async function insertAnswerIntoField(opts) {
+  const auto = !!(opts && opts.auto === true);
   if (!answerTextEl || !answerInsertBtn) return;
   const value = answerTextEl.value || '';
   if (!value.trim()) return;
@@ -6088,7 +6146,13 @@ async function insertAnswerIntoField() {
     const outcome = Array.isArray(results) && results[0] ? results[0].result : null;
     if (outcome && outcome.ok) {
       answerInsertBtn.textContent = 'Inserted ✓';
-      setStatus(answerStatus, 'Inserted into the page.', 'success');
+      setStatus(
+        answerStatus,
+        auto
+          ? 'Your saved answer is in the form — Answer again for a new one.'
+          : 'Inserted into the page.',
+        'success',
+      );
       setTimeout(() => {
         answerInsertBtn.textContent = 'Insert into the field';
       }, 1600);
@@ -6112,10 +6176,6 @@ async function insertAnswerIntoField() {
 
 if (answerBtn)
   answerBtn.addEventListener('click', () => handleAnswerSelected());
-if (answerRegenBtn)
-  answerRegenBtn.addEventListener('click', () =>
-    handleAnswerSelected({ force: true }),
-  );
 if (answerCopyBtn)
   answerCopyBtn.addEventListener('click', copyAnswerToClipboard);
 if (answerInsertBtn)
