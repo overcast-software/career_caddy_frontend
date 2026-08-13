@@ -5720,12 +5720,24 @@ async function findExistingAnswer(selection, apiKey) {
     if (!resp.ok) return null;
     const body = await resp.json();
     const rows = Array.isArray(body?.data) ? body.data : [];
+
+    // CCEXT-34: FAVORITES ONLY. Career data is curated by favoriting the
+    // answers that mean something to you — that is the user's own selection
+    // process, and it is the same signal CareerData.for_user feeds into every
+    // prompt. Reusing ANY saved answer (the old `fav || withContent[0]`)
+    // routed around that: it treated a throwaway draft as equal to one you
+    // deliberately blessed, and then placed it in a form for you.
+    //
+    // Favorites-only makes reuse mean "you already decided this is your
+    // answer", which is the only version worth auto-placing.
     const withContent = rows.filter(
-      (r) => r?.attributes?.content && String(r.attributes.content).trim(),
+      (r) =>
+        r?.attributes?.favorite === true &&
+        r?.attributes?.content &&
+        String(r.attributes.content).trim(),
     );
     if (withContent.length === 0) return null;
-    const fav = withContent.find((r) => r?.attributes?.favorite === true);
-    const chosen = fav || withContent[0];
+    const chosen = withContent[0];
 
     // CCEXT-34: carry the answer's PROVENANCE — which company it was written
     // for. Saved answers are matched on question TEXT, and question text
