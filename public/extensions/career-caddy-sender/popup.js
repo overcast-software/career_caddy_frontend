@@ -1163,12 +1163,33 @@ function showResultLink(jobPostId, { withScores = false, label } = {}) {
     label || (withScores ? 'View score' : 'View job post');
   resultLinkEl.classList.remove('hidden');
   if (dismissBtn) dismissBtn.classList.remove('hidden');
+  // CCEXT-42: a result means this page resolved to a post. Nothing to link.
+  setLinkJobCardVisible(false);
+}
+
+// CCEXT-42: "Link this page to a job post" is the FIND half of find-or-create
+// — it exists for pages the library does NOT resolve (ATS apply flows,
+// cross-domain applies). It was rendered unconditionally on the Send screen
+// and never hidden (its only wiring was a lazy-populate `toggle` listener), so
+// it sat there directly under "Sent ✓ — scoring now."
+//
+// That is the panel contradicting itself: you just turned this page INTO a job
+// post, and the same screen offers to link it to a different one. Doug, seeing
+// it on the Nintendo posting: "it IS a job post."
+//
+// Rule: offer it only while the page is unsent and unresolved. Once a send is
+// in flight or done, this page's identity is settled.
+function setLinkJobCardVisible(visible) {
+  if (!linkJobCardEl) return;
+  linkJobCardEl.classList.toggle('hidden', !visible);
+  if (!visible) linkJobCardEl.open = false; // collapse so it doesn't reopen expanded
 }
 
 function setSendingState(sending) {
   if (sending) {
     sendBtn.dataset.state = 'sending';
     sendBtn.disabled = true;
+    setLinkJobCardVisible(false); // CCEXT-42: this page is becoming a post
   } else {
     delete sendBtn.dataset.state;
     sendBtn.disabled = false;
@@ -1601,6 +1622,7 @@ function showConnected(name, incompleteTarget = null) {
   sendBtn.classList.remove('hidden');
   if (autoScoreRow) autoScoreRow.classList.remove('hidden');
   if (recheckBtn) recheckBtn.classList.add('hidden');
+  setLinkJobCardVisible(true); // CCEXT-42: idle state — offering to link is fair
   resetApplyAttributionCard(); // CC #46: hidden unless a stash match offers it
   resetLadderOfferCard(); // CC-138: hidden unless the signal ladder offers it
   syncTabState();
@@ -1911,6 +1933,9 @@ function showSending(name) {
 // page" here — show a processing state with a manual Re-check.
 function showSentProcessing(name) {
   showConnected(name);
+  // CCEXT-42: same reasoning as the "never re-offer Send" rule below — this
+  // page is already becoming a post, so do not offer to link it to another.
+  setLinkJobCardVisible(false);
   const headingEl = document.getElementById('connected-heading');
   if (headingEl) headingEl.textContent = 'Sent to Career Caddy';
   sendBtn.classList.add('hidden');
