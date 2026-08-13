@@ -5708,9 +5708,17 @@ async function resolveSelectionTarget() {
 // else the most recent answer that already has content.
 async function findExistingAnswer(selection, apiKey) {
   try {
+    // NOTE: the api has NO filter[favorite] — AnswerViewSet.list supports only
+    // filter[query] and filter[question_id] (api/.../views/questions.py:270).
+    // So the favorites filter below is CLIENT-SIDE, applied to whatever page
+    // comes back. per_page is passed explicitly rather than leaning on the
+    // server's default of 50: if that default ever shrank, favorites past the
+    // first page would vanish and reuse would silently fall through to
+    // generating — a failure that looks exactly like normal operation.
+    // The api-side filter is the real fix (needs a deploy, so not tonight).
     const url = `${ORIGIN}/api/v1/answers/?filter[query]=${encodeURIComponent(
       selection,
-    )}&include=question`;
+    )}&include=question&per_page=50`;
     const resp = await fetch(url, {
       headers: {
         Accept: 'application/vnd.api+json',
