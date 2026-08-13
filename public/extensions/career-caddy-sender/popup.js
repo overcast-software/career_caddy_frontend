@@ -5213,18 +5213,31 @@ function clearAnswerPending() {
 // CCEXT-29: persist a FINISHED answer so it survives the popup being torn
 // down on blur. Carries the resolved field target too, so Insert still works
 // after a reopen — the data-cc-field stamp is left on the page deliberately.
-function saveAnswerResult(prompt, content, target) {
-  if (!content) return Promise.resolve();
-  return api.storage.local
-    .set({
+async function saveAnswerResult(prompt, content, target) {
+  if (!content) return;
+  // CCEXT-33: record WHICH PAGE this answer belongs to. Without it the
+  // restore path will happily show an answer captured on one company's
+  // application form while you're reading a different company's posting.
+  let url = '';
+  try {
+    const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+    url = (tab && tab.url) || '';
+  } catch {
+    url = '';
+  }
+  try {
+    await api.storage.local.set({
       [ANSWER_RESULT_KEY]: {
         prompt: prompt || '',
         content: content,
         target: target || null,
+        url: url,
         at: Date.now(),
       },
-    })
-    .catch(() => {});
+    });
+  } catch {
+    /* storage full or unavailable — the answer is still on screen */
+  }
 }
 
 function clearAnswerResult() {
@@ -5255,14 +5268,22 @@ async function maybeRestoreAnswer() {
     return false;
   }
 
+  // CCEXT-33: an answer belongs to the page it was written for. Restoring it
+  // onto a DIFFERENT posting is worse than showing nothing — it puts another
+  // company's answer in front of you on a page where you might paste it.
+  // Only restore on the same URL.
+  let tab = null;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    tab = null;
+  }
+  const here = (tab && tab.url) || '';
+  if (!stash.url || !here || stash.url !== here) return false;
+
   let target = stash.target || null;
-  if (target && target.tabId != null) {
-    try {
-      const [tab] = await api.tabs.query({ active: true, currentWindow: true });
-      if (!tab || tab.id !== target.tabId) target = null;
-    } catch {
-      target = null;
-    }
+  if (target && target.tabId != null && (!tab || tab.id !== target.tabId)) {
+    target = null;
   }
 
   answerCardEl.open = true;
@@ -5664,6 +5685,9 @@ async function resolveSelectionTarget() {
       const hit = Object.assign({}, r.result, {
         tabId: tab.id,
         frameId: r.frameId,
+        // CCEXT-33: carried so an answer can be scoped to the page it was
+        // written for, on both the finished and in-flight stashes.
+        url: tab.url || '',
       });
       if (hit.token) return hit; // a frame that resolved a field wins outright
       if (!selectionOnly) selectionOnly = hit;
@@ -5951,6 +5975,10 @@ async function handleAnswerSelected(opts) {
         answerId,
         questionId,
         prompt: selection,
+        // CCEXT-33: same page-scoping as the finished-answer stash — an
+        // in-flight generation must not surface on a different posting if
+        // the user navigates away while it runs.
+        url: (target && target.url) || '',
         startedAt: Date.now(),
       },
     })
@@ -5989,7 +6017,17 @@ async function primeAnswerSelection() {
   // page — which is what CLOSED the popup and cleared the highlight. Showing
   // an empty card here is the bug Doug hit; bring the last answer back.
   if (!selection) {
-    await maybeRestoreAnswer();
+    const restored = await maybeRestoreAnswer();
+    // Nothing to restore for THIS page (CCEXT-33 keeps answers on the page
+    // they were written for). Say what to do rather than show an empty card.
+    if (!restored && answerCardEl) {
+      resetAnswerResult();
+      setAnswerFieldTarget(null);
+      setStatus(
+        answerStatus,
+        'Highlight a question on the page, then reopen this tab.',
+      );
+    }
     return;
   }
   // The read is async; bail if the user has since left the Applications tab
@@ -6096,6 +6134,17 @@ async function maybeResumeAnswer() {
   if (Date.now() - (pending.startedAt || 0) > ANSWER_PENDING_MAX_AGE_MS) {
     await clearAnswerPending();
     return;
+  }
+  // CCEXT-33: only resume on the page the generation was started from.
+  // Stashes written before this field existed have no url — resume those
+  // rather than stranding an in-flight answer.
+  if (pending.url) {
+    try {
+      const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+      if (!tab || tab.url !== pending.url) return;
+    } catch {
+      return;
+    }
   }
   answerCardEl.open = true;
   showAnswerPrompt(pending.prompt); // CCEXT-10: echo the stashed selection
