@@ -85,7 +85,7 @@ const MATCH_APP_POLL_MAX = 24;
 //
 // Deliberately EXCLUDED — device preferences, not user data. Clearing these
 // would reset the user's theme on sign-out, which is a regression, not a fix:
-//   ccTheme, ccPalette, ccAutoScore, ccTabsOptinDismissed
+//   ccTheme, ccPalette, ccAutoScore, ccTabsOptinDismissed, ccQuickCopyExpanded
 const USER_SCOPED_STORAGE_KEYS = [
   // identity + credential
   'ccApiKey',
@@ -185,6 +185,14 @@ const onCcOpenEl = $('on-cc-open');
 const quickCopyCardEl = $('quick-copy-card');
 const quickCopyFieldsEl = $('quick-copy-fields');
 const quickCopyEditEl = $('quick-copy-edit');
+// CCEXT-38: the collapsed icon bar and the control that swaps it for the
+// labelled rows.
+const quickCopyBarEl = $('quick-copy-bar');
+const quickCopyToggleEl = $('quick-copy-toggle');
+// Device preference, deliberately NOT user-scoped — see the excluded list on
+// USER_SCOPED_STORAGE_KEYS. Default collapsed: the whole point is height.
+const QUICK_COPY_EXPANDED_KEY = 'ccQuickCopyExpanded';
+let quickCopyExpanded = false;
 // CCEXT-21: point the Applications-tab "Edit" anchor at the CC quick-copy
 // settings page (opens in a new tab). Set from FRONTEND_ORIGIN so it follows
 // the origin repoint, matching the onCcOpenEl / result-link anchor pattern.
@@ -541,6 +549,7 @@ function buildQuickCopyIcon(icon) {
 function renderQuickCopy(attrs) {
   if (!quickCopyCardEl || !quickCopyFieldsEl) return;
   quickCopyFieldsEl.replaceChildren();
+  if (quickCopyBarEl) quickCopyBarEl.replaceChildren();
   const items = composeQuickCopyItems(attrs);
   if (!items.length) {
     quickCopyCardEl.classList.add('hidden');
@@ -548,9 +557,95 @@ function renderQuickCopy(attrs) {
   }
   for (const item of items) {
     quickCopyFieldsEl.appendChild(buildProfileRow(item));
+    // CCEXT-38: both views are built from the same items, so they can never
+    // disagree about what you have — only about how much room it takes.
+    if (quickCopyBarEl) quickCopyBarEl.appendChild(buildQuickCopyChip(item));
   }
+  applyQuickCopyExpanded();
   quickCopyCardEl.classList.remove('hidden');
 }
+
+// CCEXT-38: one collapsed-bar button — the item's icon, and nothing else.
+// The name rides on title/aria-label because several custom items can share
+// the same ⛳ glyph; without it the bar is a guessing game for anyone who
+// can't see the value, and Expand is the answer for anyone who can't tell
+// two of them apart at a glance.
+function buildQuickCopyChip(item) {
+  const { name, value, icon } = item;
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'qc-chip';
+  chip.title = `Copy ${name}`;
+  chip.setAttribute('aria-label', `Copy ${name}`);
+  chip.appendChild(buildQuickCopyIcon(icon));
+  chip.addEventListener('click', () => copyQuickCopyChip(chip, name, value));
+  return chip;
+}
+
+// A chip has no label to swap for "Copied", so the confirmation is a badge
+// (CSS .qc-chip.copied) plus the tooltip — same 1.2s beat as the rows.
+function copyQuickCopyChip(chip, name, value) {
+  copyToClipboard(value)
+    .then(() => {
+      chip.classList.add('copied');
+      chip.title = `Copied ${name}`;
+      setTimeout(() => {
+        chip.classList.remove('copied');
+        chip.title = `Copy ${name}`;
+      }, 1200);
+    })
+    .catch(() => {
+      chip.title = `Copy failed — ${name}`;
+      setTimeout(() => {
+        chip.title = `Copy ${name}`;
+      }, 1200);
+    });
+}
+
+// CCEXT-38: the bar and the rows are two views of one list — exactly one is
+// on screen, so the card never shows two ways to copy the same value.
+function applyQuickCopyExpanded() {
+  if (quickCopyBarEl) {
+    quickCopyBarEl.classList.toggle('hidden', quickCopyExpanded);
+  }
+  if (quickCopyFieldsEl) {
+    quickCopyFieldsEl.classList.toggle('hidden', !quickCopyExpanded);
+  }
+  if (quickCopyToggleEl) {
+    quickCopyToggleEl.textContent = quickCopyExpanded ? 'Collapse' : 'Expand';
+    quickCopyToggleEl.setAttribute(
+      'aria-expanded',
+      quickCopyExpanded ? 'true' : 'false',
+    );
+  }
+}
+
+// A layout preference belongs to the DEVICE, not the signed-in user — which is
+// why this key is on the excluded side of USER_SCOPED_STORAGE_KEYS. Collapsed
+// is the default, so a slow read can only ever settle INTO the taller state,
+// never flash out of it.
+function loadQuickCopyExpanded() {
+  return api.storage.local
+    .get([QUICK_COPY_EXPANDED_KEY])
+    .then((saved) => {
+      quickCopyExpanded = saved?.[QUICK_COPY_EXPANDED_KEY] === true;
+      applyQuickCopyExpanded();
+    })
+    .catch(() => {});
+}
+
+function toggleQuickCopyExpanded() {
+  quickCopyExpanded = !quickCopyExpanded;
+  applyQuickCopyExpanded();
+  api.storage.local
+    .set({ [QUICK_COPY_EXPANDED_KEY]: quickCopyExpanded })
+    .catch(() => {});
+}
+
+if (quickCopyToggleEl) {
+  quickCopyToggleEl.addEventListener('click', toggleQuickCopyExpanded);
+}
+loadQuickCopyExpanded();
 
 // One quick-copy row: icon + label + truncated value + a Copy button.
 function buildProfileRow(item) {
@@ -576,12 +671,17 @@ function buildProfileRow(item) {
   return row;
 }
 
-// CC #1: copy a profile value to the clipboard with a brief affordance. The
-// write happens from a user gesture in the popup, so no clipboard permission
-// is needed. Uses .then/.catch (not async/await) per the extension idiom.
+// The one place quick copy touches the clipboard. The write happens from a
+// user gesture in the popup, so no clipboard permission is needed. Kept as a
+// promise (not async/await) per the extension idiom — the two callers differ
+// only in how they confirm, not in how they write.
+function copyToClipboard(value) {
+  return navigator.clipboard.writeText(value);
+}
+
+// CC #1: copy a profile value to the clipboard with a brief affordance.
 function copyProfileValue(btn, value, copyLabel = 'Copy') {
-  navigator.clipboard
-    .writeText(value)
+  copyToClipboard(value)
     .then(() => {
       btn.textContent = 'Copied';
       btn.classList.add('copied');
@@ -848,14 +948,16 @@ async function populateSelectionReadout() {
       selMetaEl.classList.remove('hidden');
     }
   }
-  populateSelectionJpStatus();
+  // CCEXT-37: the selection is what decides whether we can name a QUESTION,
+  // so it has to travel with the lookup rather than be re-read there.
+  populateSelectionJpStatus(text);
 }
 
 // Independent library lookup for the active URL (the Tools tab discards the
 // Send-path lookup, so we run our own) — reports whether an AI answer here
 // would have a job post as context. Server-provided strings only, set via
 // textContent, so page/JP data can never inject markup.
-async function populateSelectionJpStatus() {
+async function populateSelectionJpStatus(selection) {
   if (!selJpEl) return;
   selJpEl.textContent = 'Checking your library…';
   let saved;
@@ -879,16 +981,29 @@ async function populateSelectionJpStatus() {
   }
   selJpEl.textContent = '';
   if (found && found.id) {
+    // CCEXT-37: this readout is where you check that the extension sees what
+    // you highlighted — so its link should land on the Question that text
+    // became, not on the post it hangs off. resolveAnsweredQuestion returns an
+    // id only for a Question minted for THIS post from THIS selection; the
+    // question list is the honest answer for everything else.
+    const questionId = await resolveAnsweredQuestion(
+      found.id,
+      selection,
+      tab.url,
+    );
     selJpEl.appendChild(
       document.createTextNode(
         `In your library: “${found.title || 'untitled post'}” (#${found.id}). An AI answer here references this post — `,
       ),
     );
     const link = document.createElement('a');
-    link.href = `${FRONTEND_ORIGIN}/job-posts/${found.id}`;
+    link.href = jobPostQuestionUrl(found.id, questionId);
     link.target = '_blank';
     link.rel = 'noopener';
-    link.textContent = 'view it';
+    // Say where it goes. "view it" was true of a link to anywhere.
+    link.textContent = questionId
+      ? 'view the question you answered'
+      : 'view its questions';
     selJpEl.appendChild(link);
     selJpEl.appendChild(document.createTextNode('.'));
   } else {
@@ -1200,6 +1315,17 @@ function jobPostUrl(jobPostId, { withScores = false } = {}) {
   return withScores
     ? `${FRONTEND_ORIGIN}/job-posts/${jobPostId}/scores`
     : `${FRONTEND_ORIGIN}/job-posts/${jobPostId}`;
+}
+
+// CCEXT-37 (deep-link the answered question): the post is the wrong landing
+// place when what you want is the question you just answered. Both routes are
+// real — frontend/app/router.js nests `questions` and `questions/:question_id`
+// under `job-posts.show` — so go as deep as the evidence allows and fall back
+// to the post's question list, never past it to a guess.
+function jobPostQuestionUrl(jobPostId, questionId) {
+  const base = jobPostUrl(jobPostId);
+  if (!base) return null;
+  return questionId ? `${base}/questions/${questionId}` : `${base}/questions`;
 }
 
 // CCEXT-36: every card that proposes a job post must let the user LOOK at
@@ -5373,7 +5499,13 @@ function clearAnswerPending() {
 // CCEXT-29: persist a FINISHED answer so it survives the popup being torn
 // down on blur. Carries the resolved field target too, so Insert still works
 // after a reopen — the data-cc-field stamp is left on the page deliberately.
-async function saveAnswerResult(prompt, content, target, source) {
+//
+// CCEXT-37: `question` ({questionId, jobPostId}) is passed ONLY by the
+// generation path, where we minted the Question against the tracked post. The
+// saved-answer match path passes nothing — its Question belongs to whichever
+// post it was originally written for, and stashing it here would let the Tools
+// tab link to it as though it were this post's.
+async function saveAnswerResult(prompt, content, target, source, question) {
   if (!content) return;
   // CCEXT-33: record WHICH PAGE this answer belongs to. Without it the
   // restore path will happily show an answer captured on one company's
@@ -5397,6 +5529,10 @@ async function saveAnswerResult(prompt, content, target, source) {
         // passes no source — it was written for this page by definition.
         sourceCompanyId: (source && source.sourceCompanyId) || null,
         sourceCompany: (source && source.sourceCompany) || null,
+        // CCEXT-37: what this answer was written FOR, so the Tools tab can
+        // link to the question after the popup has been torn down.
+        questionId: (question && question.questionId) || null,
+        jobPostId: (question && question.jobPostId) || null,
         at: Date.now(),
       },
     });
@@ -5407,6 +5543,50 @@ async function saveAnswerResult(prompt, content, target, source) {
 
 function clearAnswerResult() {
   return api.storage.local.remove(ANSWER_RESULT_KEY).catch(() => {});
+}
+
+// CCEXT-37 (deep-link the answered question): which Question, if any, may be
+// named in a link for THIS post and THIS highlighted text.
+//
+// Read from the stashes rather than an in-memory variable on purpose — the
+// popup dies the moment it loses focus, and looking at the page is exactly the
+// gesture that kills it, so anything held only in memory is gone by the time
+// the user comes back to click the link.
+//
+// Three conditions, all load-bearing:
+//   * jobPostId must match — the frontend resolves a question by id alone, so
+//     a wrong id renders someone else's question under this post's URL rather
+//     than 404ing, which is worse than not linking.
+//   * prompt must match the current selection — otherwise the link claims to
+//     point at "the question you answered" while you have different text
+//     highlighted.
+//   * url must match — the CCEXT-33 rule; a stash from another posting is not
+//     evidence about this page.
+// A saved-answer MATCH deliberately stashes no questionId: that Question was
+// written for another post (the CCEXT-34 provenance case), so it must not be
+// linked as if it belonged here.
+async function resolveAnsweredQuestion(jobPostId, selection, here) {
+  if (!jobPostId) return null;
+  const text = (selection || '').trim();
+  if (!text) return null;
+  let saved;
+  try {
+    saved = await api.storage.local.get([ANSWER_PENDING_KEY, ANSWER_RESULT_KEY]);
+  } catch {
+    return null;
+  }
+  // Pending first: a generation in flight is more current than a finished one,
+  // and its Question already exists (it is minted before the answer is asked
+  // for), so it is linkable while the answer is still being written.
+  const stashes = [saved?.[ANSWER_PENDING_KEY], saved?.[ANSWER_RESULT_KEY]];
+  for (const stash of stashes) {
+    if (!stash || !stash.questionId || !stash.jobPostId) continue;
+    if (String(stash.jobPostId) !== String(jobPostId)) continue;
+    if ((stash.prompt || '').trim() !== text) continue;
+    if (stash.url && here && stash.url !== here) continue;
+    return String(stash.questionId);
+  }
+  return null;
 }
 
 // Restore the last finished answer on popup open. Only re-arms Insert when
@@ -6057,6 +6237,20 @@ async function pollAnswerUntilTerminal(answerId, apiKey) {
     const status = attrs?.status || null;
     if (status === 'completed') {
       answerPolling = false;
+      // CCEXT-37: read which Question this generation was for BEFORE clearing
+      // the pending stash. Taking it from storage rather than an in-memory
+      // variable is what makes a RESUMED poll (popup reopened mid-generation)
+      // record the question too — in-memory state did not survive the reopen.
+      let question = null;
+      try {
+        const pend = await api.storage.local.get([ANSWER_PENDING_KEY]);
+        const p = pend && pend[ANSWER_PENDING_KEY];
+        if (p && p.questionId) {
+          question = { questionId: p.questionId, jobPostId: p.jobPostId || null };
+        }
+      } catch {
+        question = null;
+      }
       await clearAnswerPending();
       // CCEXT-29: persist BEFORE rendering — the popup can be torn down at
       // any moment and the DOM is not storage.
@@ -6064,6 +6258,8 @@ async function pollAnswerUntilTerminal(answerId, apiKey) {
         answerPromptTextEl ? answerPromptTextEl.textContent : '',
         attrs.content || '',
         answerFieldTarget,
+        null,
+        question,
       );
       showAnswerResult(attrs.content || '', 'Generated.');
       setAnswerBusy(false);
@@ -6211,6 +6407,10 @@ async function handleAnswerSelected(opts) {
       [ANSWER_PENDING_KEY]: {
         answerId,
         questionId,
+        // CCEXT-37: the post the Question was minted against. Carried here
+        // because this stash outlives the popup — it is what lets the finished
+        // answer be attributed to the right post on a resumed poll.
+        jobPostId: jobPostId || null,
         prompt: selection,
         // CCEXT-33: same page-scoping as the finished-answer stash — an
         // in-flight generation must not surface on a different posting if

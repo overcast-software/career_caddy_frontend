@@ -837,6 +837,68 @@
       .quick-copy-edit:hover {
         text-decoration: underline;
       }
+
+      /* CCEXT-38: collapsed quick copy — one row of icon buttons instead of
+         one full row per item. Theme vars only, so every palette and both
+         modes are covered without a per-theme pass. */
+      .quick-copy-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .quick-copy-toggle {
+        padding: 0;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent-500);
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+      .quick-copy-toggle:hover {
+        text-decoration: underline;
+      }
+      .quick-copy-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px 12px 10px;
+      }
+      .qc-chip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 28px;
+        padding: 0;
+        background: var(--bg);
+        border: 1px solid var(--border-strong);
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .qc-chip:hover {
+        background: var(--bg-soft);
+        border-color: var(--accent-500);
+      }
+      .qc-chip:hover .qc-icon {
+        color: var(--text);
+      }
+      .qc-chip.copied {
+        border-color: var(--success);
+      }
+      /* The confirmation has to be a badge, not a color change: the custom
+         items render as native-color emoji, which don't take currentColor. */
+      .qc-chip.copied::after {
+        content: '✓';
+        position: absolute;
+        right: -2px;
+        bottom: -4px;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--success);
+      }
       .qc-icon {
         flex: 0 0 auto;
         width: 16px;
@@ -1116,15 +1178,30 @@
       <div id="quick-copy-card" class="quick-copy-card hidden">
         <div class="quick-copy-head">
           <span class="quick-copy-title">Quick copy</span>
-          <a
-            id="quick-copy-edit"
-            class="quick-copy-edit"
-            href="https://careercaddy.online/settings/profile/edit"
-            target="_blank"
-            rel="noopener"
-          >Edit</a>
+          <span class="quick-copy-actions">
+            <!-- CCEXT-38: the list cost a full row per item on a tab that also
+                 carries the tracked card, the applications list and the answer
+                 surface. Collapsed is the default; the bar below copies in one
+                 click, and this reveals the labelled rows when the icon alone
+                 isn't enough to tell two items apart. -->
+            <button
+              id="quick-copy-toggle"
+              class="quick-copy-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="quick-copy-fields"
+            >Expand</button>
+            <a
+              id="quick-copy-edit"
+              class="quick-copy-edit"
+              href="https://careercaddy.online/settings/profile/edit"
+              target="_blank"
+              rel="noopener"
+            >Edit</a>
+          </span>
         </div>
-        <div id="quick-copy-fields" class="profile-fields"></div>
+        <div id="quick-copy-bar" class="quick-copy-bar"></div>
+        <div id="quick-copy-fields" class="profile-fields hidden"></div>
       </div>
 
       <p id="applications-empty" class="helper hidden">
