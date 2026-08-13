@@ -5,135 +5,229 @@ Career Caddy Sender — Chrome Web Store Privacy Practices answers
 ------------------------------------------------------------
 Single purpose
 ------------------------------------------------------------
-Career Caddy Sender has a single purpose: capture the active tab's
-job posting (URL, title, and full page text) and send it to the
-user's Career Caddy account at https://careercaddy.online when
-the user clicks the Send button in the popup. The extension does
-not perform any other function.
+Career Caddy Sender has a single purpose: to help the user apply
+for a job from the page they are already on, using their own
+Career Caddy account at https://careercaddy.online.
+
+That one workflow is:
+
+  1. capture the job posting the user is looking at (URL, title,
+     page text) and save it to their account,
+  2. record that they applied to it, and
+  3. draft an answer to an application question they highlight,
+     and place that answer into the form field it belongs to.
+
+Every feature in the extension serves that workflow. The extension
+does not browse, index, or act on pages the user has not opened and
+invoked it on, and it sends data to no destination other than the
+user's own Career Caddy account.
 
 
 ------------------------------------------------------------
 activeTab — justification
 ------------------------------------------------------------
-activeTab grants the temporary, gesture-bound host permission needed
-to read the active tab's URL and body text on the user's Send click.
-The user's click on the extension's toolbar action is the consent
-gesture; activeTab only takes effect for that tab and only while the
-gesture is active. The extension never reads page content at any
-other time.
+activeTab grants the temporary, gesture-bound host access needed to
+read the active tab's URL, page text, and the user's current text
+selection.
+
+The consent gesture is the user's click on the extension's toolbar
+action, which is also the only way to open the popup. activeTab
+takes effect only for that tab and only for that invocation.
+
+The extension reads the active tab at two moments inside that
+grant, and at no other time:
+
+  1. when the popup opens — to determine whether this page is
+     already saved to the user's account, and to read the user's
+     current text selection so that a highlighted application
+     question can be answered; and
+  2. when the user clicks Send — to read the full page text of the
+     posting being captured.
+
+There is no content script, no background page access, and no
+access to tabs the user has not invoked the extension on. When the
+popup is closed the extension has no page access at all.
 
 
 ------------------------------------------------------------
 scripting — justification
 ------------------------------------------------------------
 scripting is required to call chrome.scripting.executeScript on the
-user's Send click, in order to read the active tab's URL and
-document.body.innerText (and same-origin subframes via
-allFrames: true) so that the page text can be POSTed to the user's
-Career Caddy account. The injected function is bundled inside the
-extension (an inline `func` parameter, not a remote code string).
-The extension does not inject code at any time other than the user's
-explicit Send click.
+active tab, under the activeTab grant described above. Every injected
+function is bundled inside the extension as an inline `func`
+parameter — never a remote or user-supplied code string.
+
+Reads:
+  - the page URL, title and document.body.innerText, so the posting
+    can be POSTed to the user's Career Caddy account on Send
+    (allFrames: true, so postings inside an embedded applicant-
+    tracking-system frame are captured);
+  - the user's current text selection, so a highlighted application
+    question can be answered;
+  - the form control that a highlighted question labels, so a
+    generated answer can be placed in the right field;
+  - document.referrer, to help identify which saved job posting an
+    application page belongs to;
+  - on a careercaddy.online tab only, the user's saved theme accent
+    from localStorage, so the popup matches their web-app theme.
+
+Write:
+  - when the user clicks "Insert into the field", the extension
+    writes the generated answer into that one form control. This is
+    the only write the extension performs. It happens only on that
+    explicit click, only into the field the user's own highlight
+    identified, and it never submits a form.
 
 
 ------------------------------------------------------------
 storage — justification
 ------------------------------------------------------------
-storage (browser.storage.local) is required to persist:
-  1. the user's Career Caddy API key + key id (returned by the
-     Career Caddy API on Connect),
-  2. the user's username (for display in the popup),
-  3. the user's "Also score against career data" checkbox preference,
-  4. theme + palette preferences (light/dark mode + accent color),
-  5. an in-flight "Sending..." marker so that re-opening the popup
-     during a fetch shows the correct state.
+storage (browser.storage.local) is required to persist, locally:
 
-storage.session is also used by the service worker to remember
-notification click-targets and to track scrape/score polling state.
-All values are stored locally in the browser; nothing is synced to
-any remote server other than the user's own Career Caddy account.
+  1. the user's Career Caddy API key + key id (returned by the
+     Career Caddy API on Connect) and their username,
+  2. display preferences: theme, accent palette, and the "Also score
+     against career data" checkbox,
+  3. an in-flight "Sending..." marker, so re-opening the popup during
+     a request shows the correct state,
+  4. short-lived records of pages the user has recently saved,
+     applied to, or viewed, keyed by URL and expired automatically
+     (15 minutes to 7 days depending on the record). An MV3 popup is
+     destroyed the moment it loses focus, so without these the user
+     would lose their place every time they clicked back to the page,
+  5. the most recent answer the extension generated for the user, so
+     that it survives the popup closing while they look at the form,
+  6. a cached copy of the user's own profile and of the page-selector
+     rules their Career Caddy instance publishes.
+
+storage.session is used by the service worker to track polling state
+and notification click-targets.
+
+Everything above is stored locally in the browser. Nothing is synced
+anywhere except to the user's own Career Caddy account.
+
+Disconnect deletes everything that belongs to the signed-in user —
+credentials, cached profile, and every record in (3), (4), (5) and
+(6). What survives is only what is not tied to an account: the
+display preferences in (2), and a flag remembering that the user
+dismissed the optional-permission prompt.
 
 
 ------------------------------------------------------------
 notifications — justification
 ------------------------------------------------------------
-notifications is required to deliver OS-level feedback when the
-user's Send action terminates: "added" when the JobPost is created,
-"scored N" when an optional fit-score completes, "could not parse"
-on failure, and "session expired" if the API key has been revoked.
-Each notification carries a click-through link to the corresponding
-Career Caddy detail page. Notifications are only fired in response
-to a user-initiated Send click.
+notifications is required to deliver OS-level feedback when work the
+user started finishes after the popup has closed — which is the norm,
+because an MV3 popup is destroyed as soon as the user clicks back to
+the page.
+
+Notifications fire for: a posting saved, a posting already in the
+user's library, an optional fit-score completing, a job posting
+matched to an application, and the failure cases for each (could not
+parse, scoring unavailable, session expired). Each carries a
+click-through to the corresponding Career Caddy page.
+
+Every notification is the terminal step of an action the user
+initiated in the popup. The extension never notifies unprompted.
 
 
 ------------------------------------------------------------
 alarms — justification
 ------------------------------------------------------------
-alarms is required because the work triggered by Send outlasts the
-popup. After the user clicks Send, the popup may close before the
-API finishes parsing the submitted page. The MV3 service worker
-uses chrome.alarms.create to poll the user's Career Caddy
-/scrapes/<id>/ endpoint at 30-second intervals (capped at 20 polls)
-and to poll the optional /scores/<id>/ endpoint similarly, so that
-the result notification can fire whenever the work completes. alarms
-is the documented MV3 mechanism for scheduling work in a service
-worker that may go idle.
+alarms is required because the work the user triggers outlasts the
+popup that triggered it. The MV3 service worker uses
+chrome.alarms.create to poll the user's own Career Caddy account for
+three kinds of result, each with a bounded poll count:
+
+  1. /scrapes/<id>/  — has the submitted page finished parsing,
+  2. /scores/<id>/   — has the optional fit-score finished,
+  3. /job-applications/<id>/ — has the requested job-posting match
+     finished.
+
+Each alarm is created only in response to a user action, is cleared
+as soon as that work reaches a terminal state, and polls no host
+other than the user's Career Caddy instance. alarms is the documented
+MV3 mechanism for scheduling work in a service worker that may go
+idle.
+
+
+------------------------------------------------------------
+tabs (optional permission) — justification
+------------------------------------------------------------
+tabs is declared as an OPTIONAL permission. It is not requested at
+install time, the extension is fully functional without it, and the
+user is asked for it only in the one situation where it helps.
+
+An application form is very often on a different URL from the job
+posting it belongs to, so the extension frequently cannot tell which
+saved posting the user is applying to. If the user grants tabs, the
+extension can read the URLs and titles of their open tabs to find the
+posting they came from, and offer it.
+
+It is used only for that lookup, only while the popup is open, and
+only to match against job postings already saved in the user's own
+account. The user can decline, dismiss the prompt permanently, or
+revoke the permission afterwards, and everything else keeps working.
 
 
 ------------------------------------------------------------
 host permission — justification
 ------------------------------------------------------------
-(NOTE: apex-corrected for the 2.0.0 build; the full store-listing
-justification pass is deferred to actual publish time.)
-
 host_permissions is intentionally narrow — a single host:
 
   https://careercaddy.online/*
 
-This does NOT include <all_urls>. It is the minimum needed to
-operate, and it serves two same-origin needs:
+This does NOT include <all_urls>. It serves two same-origin needs:
 
-  1. careercaddy.online/api/v1/ — required so the popup and the service
-     worker can fetch /api/v1/token/, /api/v1/api-keys/,
-     /api/v1/scrapes/, /api/v1/scores/, and /api/v1/job-posts/ on
-     the user's behalf (the API is served same-origin under the apex).
-  2. careercaddy.online — required so the popup can read
-     theme-palette from a Career Caddy tab's localStorage (via a
-     small scripting.executeScript injection on a CC-origin tab)
-     so the popup's accent color matches the user's chosen palette
-     in the web app.
+  1. careercaddy.online/api/v1/ — so the popup and the service worker
+     can call the user's own account API on their behalf: /token/,
+     /api-keys/, /me/, /scrapes/, /scrape-profiles/, /scores/,
+     /job-posts/, /job-applications/, /questions/ and /answers/. The
+     API is served same-origin under the apex.
+  2. careercaddy.online — so the popup can read the user's chosen
+     theme accent from a Career Caddy tab's localStorage and match it.
 
-The activeTab permission (separately declared) covers reading
-job-posting page content on the user's Send click. host_permissions
-does not need to enumerate job sites because the body-read happens
-under the user-gesture-bound activeTab grant, not host_permissions.
+The extension deliberately does NOT enumerate job sites in
+host_permissions. Reading a job posting happens under the
+gesture-bound activeTab grant instead, which is narrower: it applies
+only to the tab the user invoked the extension on, and only for that
+invocation.
 
 
 ------------------------------------------------------------
 Remote code
 ------------------------------------------------------------
 No. The extension does not load or execute remote code. All
-JavaScript is bundled in the published .zip and runs in the popup
-or service worker. Network activity is limited to:
+JavaScript is bundled in the published .zip and runs in the popup or
+the service worker. Network activity is limited to:
 
-  1. fetch() calls (JSON request/response) to the user's Career
-     Caddy account at https://careercaddy.online,
+  1. fetch() calls (JSON request/response) to the user's Career Caddy
+     account at https://careercaddy.online,
   2. chrome.scripting.executeScript calls that inject an inline
-     `func` (bundled in popup.js, NOT a remote-code string) into
-     the active tab's frames on the user's Send click.
+     `func` bundled in popup.js — never a remote-code string — into
+     the active tab, under the activeTab grant.
 
-No script tags, no eval(), no dynamic import, no remote-hosted
-code paths.
+No script tags, no eval(), no dynamic import, no remote-hosted code
+paths. Text returned to the extension from the Career Caddy API
+(including generated answers) is handled as text and inserted using
+value setters and document.execCommand('insertText'); it is never
+evaluated as code or written as HTML.
 
 
 ------------------------------------------------------------
 Data usage certification
 ------------------------------------------------------------
-[ Tick the box. ] The extension does not collect or use data for
-any purpose other than the single purpose stated above. Specifically:
+[ Tick the box. ] The extension does not collect or use data for any
+purpose other than the single purpose stated above. Specifically:
 
   - Data is NOT sold or transferred to third parties.
   - Data is NOT used or transferred for purposes unrelated to the
     extension's single purpose.
   - Data is NOT used or transferred to determine creditworthiness
     or for lending purposes.
+
+Data handled: the content of job-posting and application pages the
+user invokes the extension on, the user's text selection on those
+pages, and the profile/career data held in their Career Caddy
+account. All of it is transmitted only to that account, which the
+user controls, and which may be self-hosted.
