@@ -4614,8 +4614,38 @@ async function maybeOfferFromLadder(tab, apiKey) {
 // Show / hide the "Enable tab matching" affordance in the Applications empty
 // state. Shown only when: tabs is NOT granted, the user hasn't dismissed the
 // prompt, and there's no offer already on screen.
+// CCEXT-43: Firefox opens permissions.request() as a separate doorhanger
+// ANCHORED TO THE TOOLBAR, which sits on top of the browser-action popup — and
+// under a Wayland compositor it lands squarely over it. Worse, on Firefox
+// requesting a permission from a popup typically tears the popup down, so the
+// grant handler below (re-run the ladder, hide the affordance) never runs and
+// the user is left staring at a covered, half-dead panel.
+//
+// The tabs permission only powers ladder tiers T1 (opener tab) and T2
+// (open-tabs scan). T3-T6 — referrer, id-tokens, page title, viewed trail —
+// work without it, so matching degrades rather than breaks. A quietly weaker
+// ladder beats an affordance that clobbers the UI and half-completes.
+//
+// Not a fix for Firefox, a withdrawal: doing this properly means requesting
+// from an options page or a real tab, where a doorhanger has somewhere to live.
+function isFirefox() {
+  try {
+    return (
+      typeof browser !== 'undefined' &&
+      browser.runtime &&
+      typeof browser.runtime.getBrowserInfo === 'function'
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function refreshTabsOptin(tab, apiKey) {
   if (!tabsOptinEl) return;
+  if (isFirefox()) {
+    tabsOptinEl.classList.add('hidden');
+    return;
+  }
   const granted = await hasTabsPermission();
   let dismissed = false;
   try {
