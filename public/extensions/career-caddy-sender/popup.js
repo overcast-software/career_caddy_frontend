@@ -5213,7 +5213,7 @@ function clearAnswerPending() {
 // CCEXT-29: persist a FINISHED answer so it survives the popup being torn
 // down on blur. Carries the resolved field target too, so Insert still works
 // after a reopen — the data-cc-field stamp is left on the page deliberately.
-async function saveAnswerResult(prompt, content, target) {
+async function saveAnswerResult(prompt, content, target, source) {
   if (!content) return;
   // CCEXT-33: record WHICH PAGE this answer belongs to. Without it the
   // restore path will happily show an answer captured on one company's
@@ -5232,6 +5232,11 @@ async function saveAnswerResult(prompt, content, target) {
         content: content,
         target: target || null,
         url: url,
+        // CCEXT-34: provenance rides with the answer so a RESTORED one is
+        // guarded the same way a freshly-matched one is. A fresh generation
+        // passes no source — it was written for this page by definition.
+        sourceCompanyId: (source && source.sourceCompanyId) || null,
+        sourceCompany: (source && source.sourceCompany) || null,
         at: Date.now(),
       },
     });
@@ -5721,7 +5726,38 @@ async function findExistingAnswer(selection, apiKey) {
     if (withContent.length === 0) return null;
     const fav = withContent.find((r) => r?.attributes?.favorite === true);
     const chosen = fav || withContent[0];
-    return { id: chosen.id, content: chosen.attributes.content };
+
+    // CCEXT-34: carry the answer's PROVENANCE — which company it was written
+    // for. Saved answers are matched on question TEXT, and question text
+    // repeats across employers ("Tell us about a project you're proud of" is
+    // identical everywhere), so a reused answer can name the wrong company.
+    // The included question already rides in this response; reading its
+    // company relationship costs nothing.
+    const included = Array.isArray(body?.included) ? body.included : [];
+    const questions = {};
+    const companies = {};
+    for (const inc of included) {
+      if (!inc || !inc.type) continue;
+      if (inc.type === 'question') questions[String(inc.id)] = inc;
+      if (inc.type === 'company' || inc.type === 'companies') {
+        companies[String(inc.id)] = inc;
+      }
+    }
+    const qRel = chosen.relationships?.question?.data;
+    const q = qRel ? questions[String(qRel.id)] : null;
+    const cRel = q?.relationships?.company?.data;
+    const sourceCompanyId = cRel ? String(cRel.id) : null;
+    const sourceCompany =
+      sourceCompanyId && companies[sourceCompanyId]
+        ? companies[sourceCompanyId].attributes?.name || null
+        : null;
+
+    return {
+      id: chosen.id,
+      content: chosen.attributes.content,
+      sourceCompanyId,
+      sourceCompany,
+    };
   } catch {
     return null;
   }
@@ -5908,9 +5944,9 @@ async function handleAnswerSelected(opts) {
     setStatus(answerStatus, 'Looking for a saved answer…');
     const match = await findExistingAnswer(selection, saved.ccApiKey);
     if (match && match.content) {
-      await saveAnswerResult(selection, match.content, answerFieldTarget);
+      await saveAnswerResult(selection, match.content, answerFieldTarget, match);
       showAnswerResult(match.content, 'Matched a saved answer.');
-      await autoDeliverAnswer(match.content);
+      await autoDeliverAnswer(match.content, match);
       setAnswerBusy(false);
       return;
     }
@@ -6050,7 +6086,10 @@ async function primeAnswerSelection() {
       setAnswerFieldTarget(target);
       showAnswerPrompt(selection);
       showAnswerResult(stash.content, 'Your last answer for this question.');
-      await autoDeliverAnswer(stash.content);
+      await autoDeliverAnswer(stash.content, {
+        sourceCompanyId: stash.sourceCompanyId || null,
+        sourceCompany: stash.sourceCompany || null,
+      });
       return;
     }
   } catch {
@@ -6071,9 +6110,9 @@ async function primeAnswerSelection() {
     // Bail if the user left the tab or a generation began while we waited.
     if (activeTab !== 'applications' || answerPolling) return;
     if (match && match.content) {
-      await saveAnswerResult(selection, match.content, answerFieldTarget);
+      await saveAnswerResult(selection, match.content, answerFieldTarget, match);
       showAnswerResult(match.content, 'Matched a saved answer.');
-      await autoDeliverAnswer(match.content);
+      await autoDeliverAnswer(match.content, match);
       return;
     }
   }
@@ -6090,9 +6129,64 @@ async function primeAnswerSelection() {
 // popup over the same field doesn't write repeatedly.
 let autoDeliveredToken = null;
 
-async function autoDeliverAnswer(content) {
+// CCEXT-34: decide whether a REUSED answer is safe to place without being
+// read. Saved answers match on question text, and question text repeats across
+// employers — so the answer that comes back may have been written for someone
+// else. Auto-insert is what makes that dangerous: without it the user reads
+// the answer before using it; with it, another company's name can land in this
+// company's form and be submitted.
+//
+// Provenance, not text-scanning. Comparing the answer's own company to the
+// current one is exact. Scanning the prose for company names would flag "a
+// golden opportunity" and — worse — would flag the user's OWN employers, which
+// are exactly what a good answer is supposed to name ("At Uber I automated
+// vulnerability testing"). Mentioning where you worked is the point; mentioning
+// where you applied last week is the bug.
+//
+// Returns { ok, reason, note }.
+function answerReuseVerdict(source) {
+  const from = (source && source.sourceCompanyId) || null;
+  const fromName = (source && source.sourceCompany) || null;
+  const here = trackedJobPost ? trackedJobPost.companyId : null;
+
+  if (from && here && String(from) === String(here)) {
+    return { ok: true, reason: 'same-company' };
+  }
+  if (from && here && String(from) !== String(here)) {
+    return {
+      ok: false,
+      reason: 'different-company',
+      note: fromName
+        ? `That saved answer was written for ${fromName}. Read it before using it here — Insert when you're happy.`
+        : 'That saved answer was written for a different company. Read it before using it here — Insert when you\'re happy.',
+    };
+  }
+  if (from && !here) {
+    // It was written for someone specific and we cannot tell where we are.
+    return {
+      ok: false,
+      reason: 'unknown-current-company',
+      note: fromName
+        ? `That saved answer was written for ${fromName}, and this page isn't matched to a job post. Check it fits before inserting.`
+        : 'That saved answer was written for a specific company. Check it fits before inserting.',
+    };
+  }
+  // No provenance recorded — most answers predate company attribution. Placing
+  // it is still the streamlined behaviour, but say it is reused so a
+  // company-specific line is visible rather than silent.
+  return { ok: true, reason: 'unknown-provenance', note: 'Reused a saved answer — worth a read before you submit.' };
+}
+
+async function autoDeliverAnswer(content, source) {
   const value = (content || '').trim();
   if (!value) return;
+
+  // CCEXT-34: the reuse guard runs BEFORE any writing decision.
+  const verdict = answerReuseVerdict(source);
+  if (!verdict.ok) {
+    setStatus(answerStatus, verdict.note, 'error');
+    return;
+  }
   if (!answerFieldTarget || !answerFieldTarget.token) {
     // No writable field — a dropdown, a radio group, or nothing resolved.
     // Copy is the honest path, and it's already on screen.
@@ -6113,7 +6207,7 @@ async function autoDeliverAnswer(content) {
   }
   if (autoDeliveredToken === answerFieldTarget.token) return;
   autoDeliveredToken = answerFieldTarget.token;
-  await insertAnswerIntoField({ auto: true });
+  await insertAnswerIntoField({ auto: true, note: verdict.note });
 }
 
 // Resume a pending generation after a popup close/reopen. Reads the stash;
@@ -6198,7 +6292,11 @@ async function insertAnswerIntoField(opts) {
       setStatus(
         answerStatus,
         auto
-          ? 'Your saved answer is in the form — Answer again for a new one.'
+          ? // CCEXT-34: when provenance is unknown, say the answer is reused
+            // rather than letting a possibly company-specific line land
+            // silently. Placement is still automatic; visibility is the guard.
+            (opts && opts.note) ||
+              'Your saved answer is in the form — Answer again for a new one.'
           : 'Inserted into the page.',
         'success',
       );
