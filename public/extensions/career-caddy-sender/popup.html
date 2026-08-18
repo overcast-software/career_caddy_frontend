@@ -531,44 +531,9 @@
         word-break: break-all;
       }
 
-      /* Selected-text readout + Sharpen step-trace (staff Tools tab).
-         Introspection surfaces — echo exactly what the extension reads from
-         the page selection, and log each step of a Sharpen run so a staff
-         user can SEE what happened. Reuse theme vars for free dark mode. */
-      .sel-readout {
-        margin-top: 8px;
-        max-height: 120px;
-        overflow-y: auto;
-        padding: 8px;
-        font-size: 12px;
-        line-height: 1.5;
-        color: var(--text);
-        white-space: pre-wrap;
-        word-break: break-word;
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-      }
-      .sel-readout.empty {
-        color: var(--text-faint);
-        font-style: italic;
-      }
-      .sel-meta {
-        margin-top: 6px;
-        font-size: 11px;
-        color: var(--text-faint);
-        font-variant-numeric: tabular-nums;
-      }
-      .sel-jp {
-        margin-top: 8px;
-        font-size: 11px;
-        line-height: 1.45;
-        color: var(--text-muted);
-      }
-      .sel-jp a {
-        color: var(--accent-600);
-        text-decoration: underline;
-      }
+      /* Sharpen step-trace (staff Tools tab) — logs each step of a Sharpen run
+         so a staff user can SEE what happened. Reuses theme vars for free dark
+         mode. */
       .enrich-trace {
         margin: 10px 0 0;
         padding-left: 16px;
@@ -1426,22 +1391,6 @@
       <!-- STAFF tools — the tab button renders only for staff; this section
            gate (toggled by showToolsScreen) is defense in depth. -->
       <div id="staff-tools-section" class="hidden">
-
-      <!-- Selection introspection — echoes the exact text the extension reads
-           from the active page's highlight, so you can verify the selection is
-           picked up, and see whether this page maps to a job post an AI answer
-           could reference. Populated on open + on Re-check. -->
-      <div class="tool-card">
-        <div class="pp-head">
-          <p class="tool-title">Selected text</p>
-          <button id="sel-reread" class="linkbtn" type="button">Re-read</button>
-        </div>
-        <div id="sel-readout" class="sel-readout empty">
-          (nothing highlighted — select text on the page, then Re-read)
-        </div>
-        <div id="sel-meta" class="sel-meta hidden"></div>
-        <div id="sel-jp" class="sel-jp"></div>
-      </div>
 
       <div class="tool-card">
         <p class="tool-title">Sharpen ScrapeProfile</p>

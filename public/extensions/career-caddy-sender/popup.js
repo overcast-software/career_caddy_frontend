@@ -332,10 +332,6 @@ const enrichBtn = $('enrich-btn');
 const enrichStatus = $('enrich-status');
 const enrichLinkEl = $('enrich-link');
 const enrichTraceEl = $('enrich-trace');
-const selReadoutEl = $('sel-readout');
-const selMetaEl = $('sel-meta');
-const selJpEl = $('sel-jp');
-const selRereadBtn = $('sel-reread');
 const whoToolsEl = $('who-tools');
 const disconnectToolsBtn = $('disconnect-tools');
 const themeToggleToolsBtn = $('theme-toggle-tools');
@@ -855,7 +851,6 @@ async function showToolsScreen() {
     enrichBtn.disabled = !host;
   }
   populateDevHints();
-  populateSelectionReadout();
 }
 
 function hideEnrichLink() {
@@ -894,126 +889,6 @@ function pushEnrichTrace(msg, kind) {
   enrichTraceEl.appendChild(li);
   enrichTraceEl.classList.remove('hidden');
 }
-
-// --- Selection readout (staff introspection) -----------------------
-// Echo the EXACT text the extension reads from the active page's highlight,
-// how many frames it came from, and whether this page maps to a job post an
-// AI answer could use as context. This is the "prove it can see my
-// selection" surface.
-async function readSelectionDetails() {
-  let tab;
-  try {
-    [tab] = await api.tabs.query({ active: true, currentWindow: true });
-  } catch {
-    return { text: '', frames: 0, hitFrames: 0 };
-  }
-  if (!tab || tab.id == null) return { text: '', frames: 0, hitFrames: 0 };
-  try {
-    const results = await api.scripting.executeScript({
-      target: { tabId: tab.id, allFrames: true },
-      func: () => (window.getSelection ? window.getSelection().toString() : ''),
-    });
-    const arr = Array.isArray(results) ? results : [];
-    let text = '';
-    let hitFrames = 0;
-    for (const r of arr) {
-      const s = r && r.result ? String(r.result).trim() : '';
-      if (s) {
-        hitFrames++;
-        if (!text) text = s; // first non-empty frame wins (matches the answer path)
-      }
-    }
-    return { text, frames: arr.length, hitFrames };
-  } catch {
-    return { text: '', frames: 0, hitFrames: 0 };
-  }
-}
-
-async function populateSelectionReadout() {
-  if (!selReadoutEl) return;
-  selReadoutEl.textContent = 'Reading the page selection…';
-  selReadoutEl.classList.remove('empty');
-  if (selMetaEl) selMetaEl.classList.add('hidden');
-  const { text, frames, hitFrames } = await readSelectionDetails();
-  if (!text) {
-    selReadoutEl.textContent =
-      '(nothing highlighted — select text on the page, then Re-read)';
-    selReadoutEl.classList.add('empty');
-    if (selMetaEl) selMetaEl.classList.add('hidden');
-  } else {
-    selReadoutEl.textContent = text;
-    selReadoutEl.classList.remove('empty');
-    if (selMetaEl) {
-      selMetaEl.textContent = `${text.length.toLocaleString()} chars · read from ${hitFrames} of ${frames} frame(s)`;
-      selMetaEl.classList.remove('hidden');
-    }
-  }
-  // CCEXT-37: the selection is what decides whether we can name a QUESTION,
-  // so it has to travel with the lookup rather than be re-read there.
-  populateSelectionJpStatus(text);
-}
-
-// Independent library lookup for the active URL (the Tools tab discards the
-// Send-path lookup, so we run our own) — reports whether an AI answer here
-// would have a job post as context. Server-provided strings only, set via
-// textContent, so page/JP data can never inject markup.
-async function populateSelectionJpStatus(selection) {
-  if (!selJpEl) return;
-  selJpEl.textContent = 'Checking your library…';
-  let saved;
-  let tab;
-  try {
-    saved = await api.storage.local.get(['ccApiKey']);
-    [tab] = await api.tabs.query({ active: true, currentWindow: true });
-  } catch {
-    selJpEl.textContent = '';
-    return;
-  }
-  if (!saved.ccApiKey || !tab || !tab.url) {
-    selJpEl.textContent = '';
-    return;
-  }
-  let found = null;
-  try {
-    found = await lookupExistingJobPost(tab.url, saved.ccApiKey);
-  } catch {
-    found = null;
-  }
-  selJpEl.textContent = '';
-  if (found && found.id) {
-    // CCEXT-37: this readout is where you check that the extension sees what
-    // you highlighted — so its link should land on the Question that text
-    // became, not on the post it hangs off. resolveAnsweredQuestion returns an
-    // id only for a Question minted for THIS post from THIS selection; the
-    // question list is the honest answer for everything else.
-    const questionId = await resolveAnsweredQuestion(
-      found.id,
-      selection,
-      tab.url,
-    );
-    selJpEl.appendChild(
-      document.createTextNode(
-        `In your library: “${found.title || 'untitled post'}” (#${found.id}). An AI answer here references this post — `,
-      ),
-    );
-    const link = document.createElement('a');
-    link.href = jobPostQuestionUrl(found.id, questionId);
-    link.target = '_blank';
-    link.rel = 'noopener';
-    // Say where it goes. "view it" was true of a link to anywhere.
-    link.textContent = questionId
-      ? 'view the question you answered'
-      : 'view its questions';
-    selJpEl.appendChild(link);
-    selJpEl.appendChild(document.createTextNode('.'));
-  } else {
-    selJpEl.textContent =
-      'Not in your library yet — Send this page first so an AI answer can use this job as context.';
-  }
-}
-
-if (selRereadBtn)
-  selRereadBtn.addEventListener('click', populateSelectionReadout);
 
 // Resolve the active host (and parent-domain fallbacks) to a
 // ScrapeProfile id via the staff-only list filter. Mirrors the api's
@@ -1315,17 +1190,6 @@ function jobPostUrl(jobPostId, { withScores = false } = {}) {
   return withScores
     ? `${FRONTEND_ORIGIN}/job-posts/${jobPostId}/scores`
     : `${FRONTEND_ORIGIN}/job-posts/${jobPostId}`;
-}
-
-// CCEXT-37 (deep-link the answered question): the post is the wrong landing
-// place when what you want is the question you just answered. Both routes are
-// real — frontend/app/router.js nests `questions` and `questions/:question_id`
-// under `job-posts.show` — so go as deep as the evidence allows and fall back
-// to the post's question list, never past it to a guess.
-function jobPostQuestionUrl(jobPostId, questionId) {
-  const base = jobPostUrl(jobPostId);
-  if (!base) return null;
-  return questionId ? `${base}/questions/${questionId}` : `${base}/questions`;
 }
 
 // CCEXT-36: every card that proposes a job post must let the user LOOK at
@@ -5543,50 +5407,6 @@ async function saveAnswerResult(prompt, content, target, source, question) {
 
 function clearAnswerResult() {
   return api.storage.local.remove(ANSWER_RESULT_KEY).catch(() => {});
-}
-
-// CCEXT-37 (deep-link the answered question): which Question, if any, may be
-// named in a link for THIS post and THIS highlighted text.
-//
-// Read from the stashes rather than an in-memory variable on purpose — the
-// popup dies the moment it loses focus, and looking at the page is exactly the
-// gesture that kills it, so anything held only in memory is gone by the time
-// the user comes back to click the link.
-//
-// Three conditions, all load-bearing:
-//   * jobPostId must match — the frontend resolves a question by id alone, so
-//     a wrong id renders someone else's question under this post's URL rather
-//     than 404ing, which is worse than not linking.
-//   * prompt must match the current selection — otherwise the link claims to
-//     point at "the question you answered" while you have different text
-//     highlighted.
-//   * url must match — the CCEXT-33 rule; a stash from another posting is not
-//     evidence about this page.
-// A saved-answer MATCH deliberately stashes no questionId: that Question was
-// written for another post (the CCEXT-34 provenance case), so it must not be
-// linked as if it belonged here.
-async function resolveAnsweredQuestion(jobPostId, selection, here) {
-  if (!jobPostId) return null;
-  const text = (selection || '').trim();
-  if (!text) return null;
-  let saved;
-  try {
-    saved = await api.storage.local.get([ANSWER_PENDING_KEY, ANSWER_RESULT_KEY]);
-  } catch {
-    return null;
-  }
-  // Pending first: a generation in flight is more current than a finished one,
-  // and its Question already exists (it is minted before the answer is asked
-  // for), so it is linkable while the answer is still being written.
-  const stashes = [saved?.[ANSWER_PENDING_KEY], saved?.[ANSWER_RESULT_KEY]];
-  for (const stash of stashes) {
-    if (!stash || !stash.questionId || !stash.jobPostId) continue;
-    if (String(stash.jobPostId) !== String(jobPostId)) continue;
-    if ((stash.prompt || '').trim() !== text) continue;
-    if (stash.url && here && stash.url !== here) continue;
-    return String(stash.questionId);
-  }
-  return null;
 }
 
 // Restore the last finished answer on popup open. Only re-arms Insert when
