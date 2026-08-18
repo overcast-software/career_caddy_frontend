@@ -531,44 +531,9 @@
         word-break: break-all;
       }
 
-      /* Selected-text readout + Sharpen step-trace (staff Tools tab).
-         Introspection surfaces — echo exactly what the extension reads from
-         the page selection, and log each step of a Sharpen run so a staff
-         user can SEE what happened. Reuse theme vars for free dark mode. */
-      .sel-readout {
-        margin-top: 8px;
-        max-height: 120px;
-        overflow-y: auto;
-        padding: 8px;
-        font-size: 12px;
-        line-height: 1.5;
-        color: var(--text);
-        white-space: pre-wrap;
-        word-break: break-word;
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-      }
-      .sel-readout.empty {
-        color: var(--text-faint);
-        font-style: italic;
-      }
-      .sel-meta {
-        margin-top: 6px;
-        font-size: 11px;
-        color: var(--text-faint);
-        font-variant-numeric: tabular-nums;
-      }
-      .sel-jp {
-        margin-top: 8px;
-        font-size: 11px;
-        line-height: 1.45;
-        color: var(--text-muted);
-      }
-      .sel-jp a {
-        color: var(--accent-600);
-        text-decoration: underline;
-      }
+      /* Sharpen step-trace (staff Tools tab) — logs each step of a Sharpen run
+         so a staff user can SEE what happened. Reuses theme vars for free dark
+         mode. */
       .enrich-trace {
         margin: 10px 0 0;
         padding-left: 16px;
@@ -836,6 +801,68 @@
       }
       .quick-copy-edit:hover {
         text-decoration: underline;
+      }
+
+      /* CCEXT-38: collapsed quick copy — one row of icon buttons instead of
+         one full row per item. Theme vars only, so every palette and both
+         modes are covered without a per-theme pass. */
+      .quick-copy-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .quick-copy-toggle {
+        padding: 0;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent-500);
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+      .quick-copy-toggle:hover {
+        text-decoration: underline;
+      }
+      .quick-copy-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px 12px 10px;
+      }
+      .qc-chip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 28px;
+        padding: 0;
+        background: var(--bg);
+        border: 1px solid var(--border-strong);
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .qc-chip:hover {
+        background: var(--bg-soft);
+        border-color: var(--accent-500);
+      }
+      .qc-chip:hover .qc-icon {
+        color: var(--text);
+      }
+      .qc-chip.copied {
+        border-color: var(--success);
+      }
+      /* The confirmation has to be a badge, not a color change: the custom
+         items render as native-color emoji, which don't take currentColor. */
+      .qc-chip.copied::after {
+        content: '✓';
+        position: absolute;
+        right: -2px;
+        bottom: -4px;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--success);
       }
       .qc-icon {
         flex: 0 0 auto;
@@ -1116,15 +1143,30 @@
       <div id="quick-copy-card" class="quick-copy-card hidden">
         <div class="quick-copy-head">
           <span class="quick-copy-title">Quick copy</span>
-          <a
-            id="quick-copy-edit"
-            class="quick-copy-edit"
-            href="https://careercaddy.online/settings/quick-copy"
-            target="_blank"
-            rel="noopener"
-          >Edit</a>
+          <span class="quick-copy-actions">
+            <!-- CCEXT-38: the list cost a full row per item on a tab that also
+                 carries the tracked card, the applications list and the answer
+                 surface. Collapsed is the default; the bar below copies in one
+                 click, and this reveals the labelled rows when the icon alone
+                 isn't enough to tell two items apart. -->
+            <button
+              id="quick-copy-toggle"
+              class="quick-copy-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="quick-copy-fields"
+            >Expand</button>
+            <a
+              id="quick-copy-edit"
+              class="quick-copy-edit"
+              href="https://careercaddy.online/settings/profile/edit"
+              target="_blank"
+              rel="noopener"
+            >Edit</a>
+          </span>
         </div>
-        <div id="quick-copy-fields" class="profile-fields"></div>
+        <div id="quick-copy-bar" class="quick-copy-bar"></div>
+        <div id="quick-copy-fields" class="profile-fields hidden"></div>
       </div>
 
       <p id="applications-empty" class="helper hidden">
@@ -1170,6 +1212,16 @@
         <div class="tracked-title" id="match-result-title"></div>
         <div class="tracked-company" id="match-result-company"></div>
         <div class="status" id="match-result-status"></div>
+        <!-- CCEXT-36: the matched post itself must be inspectable — a
+             confident wrong match (CC-240) is only catchable if the user
+             can look at what was matched, not just the application row. -->
+        <a
+          id="match-result-view"
+          class="tracked-open hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >View job post</a>
         <a
           id="match-result-link"
           class="result-link hidden"
@@ -1181,9 +1233,19 @@
 
       <div id="applications-body" class="hidden">
         <div class="tracked-card">
+          <span class="tracked-score hidden" id="app-jp-score"></span>
           <div class="tracked-title" id="app-jp-title"></div>
           <div class="tracked-company" id="app-jp-company"></div>
         </div>
+        <!-- CCEXT-36: the card proposes a post the user must judge — give
+             them a way to actually look at it before acting on it. -->
+        <a
+          id="app-jp-open"
+          class="tracked-open hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >View job post</a>
 
         <!-- CC #46: Track application (jp -> ja). Creates the JobApplication
              in-place and confirms inline — never opens a tab; swaps to an
@@ -1209,7 +1271,17 @@
            trackedJobPost is null exactly when you need this. Visibility is
            now independent of a match; the JobPost is still passed as context
            whenever one exists (Question.job_post is nullable server-side). -->
-      <details id="answer-card" class="profile-card" style="margin-top: 12px;">
+      <!-- CCEXT-39: open by default. This is the flagship feature, and the
+           only instruction a first-time user gets ("Highlight a question on
+           the page…") is written into #answer-status, which lives INSIDE this
+           body — so collapsed, a new user saw a grey strip and no explanation
+           of what it was for. -->
+      <details
+        id="answer-card"
+        class="profile-card"
+        style="margin-top: 12px;"
+        open
+      >
         <summary class="profile-summary">Answer the selected text</summary>
         <div class="answer-body">
           <button id="answer-btn" class="primary" type="button">
@@ -1255,6 +1327,14 @@
         <div class="tracked-company">Track your application for</div>
         <div class="tracked-title" id="apply-attr-title"></div>
         <div class="tracked-company" id="apply-attr-company"></div>
+        <!-- CCEXT-36: inspect the proposed post before acting on it. -->
+        <a
+          id="apply-attr-view"
+          class="tracked-open hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >View job post</a>
         <button id="apply-attr-btn" class="primary" type="button" style="margin-top: 10px;">
           <span class="btn-label">Track application</span>
           <span class="spinner" aria-hidden="true"></span>
@@ -1279,6 +1359,14 @@
         <div class="tracked-company" id="ladder-offer-lead">Applying to</div>
         <div class="tracked-title" id="ladder-offer-title"></div>
         <div class="tracked-company" id="ladder-offer-company"></div>
+        <!-- CCEXT-36: inspect the candidate before accepting the offer. -->
+        <a
+          id="ladder-offer-view"
+          class="tracked-open hidden"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >View job post</a>
         <button id="ladder-offer-btn" class="primary" type="button" style="margin-top: 10px;">
           <span class="btn-label">Track application</span>
           <span class="spinner" aria-hidden="true"></span>
@@ -1303,22 +1391,6 @@
       <!-- STAFF tools — the tab button renders only for staff; this section
            gate (toggled by showToolsScreen) is defense in depth. -->
       <div id="staff-tools-section" class="hidden">
-
-      <!-- Selection introspection — echoes the exact text the extension reads
-           from the active page's highlight, so you can verify the selection is
-           picked up, and see whether this page maps to a job post an AI answer
-           could reference. Populated on open + on Re-check. -->
-      <div class="tool-card">
-        <div class="pp-head">
-          <p class="tool-title">Selected text</p>
-          <button id="sel-reread" class="linkbtn" type="button">Re-read</button>
-        </div>
-        <div id="sel-readout" class="sel-readout empty">
-          (nothing highlighted — select text on the page, then Re-read)
-        </div>
-        <div id="sel-meta" class="sel-meta hidden"></div>
-        <div id="sel-jp" class="sel-jp"></div>
-      </div>
 
       <div class="tool-card">
         <p class="tool-title">Sharpen ScrapeProfile</p>

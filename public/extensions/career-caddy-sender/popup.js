@@ -72,6 +72,44 @@ const MATCH_APP_STASH_TTL_MS = 30 * 60 * 1000; // 30m
 // background alarm (popup lifetime is short). Cap ~24 polls * 2.5s ≈ 60s.
 const MATCH_APP_POLL_INTERVAL_MS = 2500;
 const MATCH_APP_POLL_MAX = 24;
+// CCEXT-37 — which stored keys belong to the SIGNED-IN USER.
+//
+// This knowledge had no home. handleDisconnect hard-coded its own wipe list,
+// so every stash added after it (applies, viewed trail, match apps, and the
+// generated ANSWER TEXT) was never cleared — user A's answer stayed
+// restorable, and autoDeliverAnswer would place it into user B's form on the
+// same page. Adding a key and forgetting the wipe list was the default.
+//
+// Now the list is the definition, and disconnect asks it. A new user-scoped
+// stash gets added HERE, next to nothing else, and disconnect follows.
+//
+// Deliberately EXCLUDED — device preferences, not user data. Clearing these
+// would reset the user's theme on sign-out, which is a regression, not a fix:
+//   ccTheme, ccPalette, ccAutoScore, ccTabsOptinDismissed, ccQuickCopyExpanded
+const USER_SCOPED_STORAGE_KEYS = [
+  // identity + credential
+  'ccApiKey',
+  'ccKeyId',
+  'ccUsername',
+  'ccIsStaff',
+  'ccMe',
+  // caches keyed to this user's instance/profile
+  'ccExtensionSelectorCache',
+  'ccPending',
+  // per-user work stashes
+  CC_TRACKED_PAGES_KEY,
+  CC_SENT_PAGES_KEY,
+  CC_PENDING_APPLIES_KEY,
+  CC_VIEWED_POSTS_KEY,
+  CC_MATCH_APPS_KEY,
+  // generated answer text — the most sensitive of the lot. Spelled as
+  // literals, NOT as ANSWER_PENDING_KEY/ANSWER_RESULT_KEY: those consts are
+  // declared far below in the answer section, so naming them here would read
+  // them in their temporal dead zone and throw at load. Values verified equal.
+  'ccAnswerPending',
+  'ccAnswerResult',
+];
+
 // Client-side excerpt cap. The api re-truncates to 8000 at write; we cap here
 // too so the POST body stays small.
 const MATCH_APP_EXCERPT_MAX = 8000;
@@ -147,11 +185,23 @@ const onCcOpenEl = $('on-cc-open');
 const quickCopyCardEl = $('quick-copy-card');
 const quickCopyFieldsEl = $('quick-copy-fields');
 const quickCopyEditEl = $('quick-copy-edit');
+// CCEXT-38: the collapsed icon bar and the control that swaps it for the
+// labelled rows.
+const quickCopyBarEl = $('quick-copy-bar');
+const quickCopyToggleEl = $('quick-copy-toggle');
+// Device preference, deliberately NOT user-scoped — see the excluded list on
+// USER_SCOPED_STORAGE_KEYS. Default collapsed: the whole point is height.
+const QUICK_COPY_EXPANDED_KEY = 'ccQuickCopyExpanded';
+let quickCopyExpanded = false;
 // CCEXT-21: point the Applications-tab "Edit" anchor at the CC quick-copy
 // settings page (opens in a new tab). Set from FRONTEND_ORIGIN so it follows
 // the origin repoint, matching the onCcOpenEl / result-link anchor pattern.
 if (quickCopyEditEl) {
-  quickCopyEditEl.href = `${FRONTEND_ORIGIN}/settings/quick-copy`;
+  // CCEXT-36: /settings/quick-copy DOES NOT EXIST on main — router.js:291-298
+  // registers only settings.profile{.edit}/data/appearance/ai-spend, so this
+  // fell through to the not-found glob. The links editor these items come from
+  // lives on settings/profile/edit (templates/settings/profile/edit.hbs:58-135).
+  quickCopyEditEl.href = `${FRONTEND_ORIGIN}/settings/profile/edit`;
 }
 const answerCardEl = $('answer-card'); // CC #47: answer-the-selection tool
 const answerBtn = $('answer-btn');
@@ -162,6 +212,9 @@ const answerTextEl = $('answer-text');
 const answerCopyBtn = $('answer-copy');
 const answerInsertBtn = $('answer-insert'); // CCEXT-26: write into the page field
 const answerFieldNoteEl = $('answer-field-note');
+// CCEXT-32: true once an answer is on screen. The Answer button then means
+// "answer again" — a second button for that was one control too many.
+let answerIsShown = false;
 const versionEl = $('version');
 
 const openSigninBtn = $('open-signin');
@@ -215,6 +268,7 @@ const applyAttrCompanyEl = $('apply-attr-company');
 const applyAttrBtn = $('apply-attr-btn');
 const applyAttrStatus = $('apply-attr-status');
 const applyAttrLinkEl = $('apply-attr-link');
+const applyAttrViewEl = $('apply-attr-view'); // CCEXT-36
 // The stash record currently surfaced on the attribution card (so the
 // click handler knows which JobPost to attribute and which stash entry to
 // clear). Null when no offer is showing.
@@ -229,6 +283,7 @@ const ladderOfferBtn = $('ladder-offer-btn');
 const ladderOfferDismissBtn = $('ladder-offer-dismiss');
 const ladderOfferStatus = $('ladder-offer-status');
 const ladderOfferLinkEl = $('ladder-offer-link');
+const ladderOfferViewEl = $('ladder-offer-view'); // CCEXT-36
 const tabsOptinEl = $('tabs-optin');
 const tabsOptinBtn = $('tabs-optin-btn');
 
@@ -242,6 +297,7 @@ const matchResultTitleEl = $('match-result-title');
 const matchResultCompanyEl = $('match-result-company');
 const matchResultStatus = $('match-result-status');
 const matchResultLinkEl = $('match-result-link');
+const matchResultViewEl = $('match-result-view'); // CCEXT-36
 // True while a match-application POST/poll is in flight, so a second click
 // can't fire a second POST and the visibility gate stays quiet.
 let matchAppInFlight = false;
@@ -269,15 +325,13 @@ const applicationsEmptyEl = $('applications-empty');
 const applicationsBodyEl = $('applications-body');
 const appJpTitleEl = $('app-jp-title');
 const appJpCompanyEl = $('app-jp-company');
+const appJpScoreEl = $('app-jp-score'); // CCEXT-36
+const appJpOpenEl = $('app-jp-open'); // CCEXT-36
 const toolHostEl = $('tool-host');
 const enrichBtn = $('enrich-btn');
 const enrichStatus = $('enrich-status');
 const enrichLinkEl = $('enrich-link');
 const enrichTraceEl = $('enrich-trace');
-const selReadoutEl = $('sel-readout');
-const selMetaEl = $('sel-meta');
-const selJpEl = $('sel-jp');
-const selRereadBtn = $('sel-reread');
 const whoToolsEl = $('who-tools');
 const disconnectToolsBtn = $('disconnect-tools');
 const themeToggleToolsBtn = $('theme-toggle-tools');
@@ -491,6 +545,7 @@ function buildQuickCopyIcon(icon) {
 function renderQuickCopy(attrs) {
   if (!quickCopyCardEl || !quickCopyFieldsEl) return;
   quickCopyFieldsEl.replaceChildren();
+  if (quickCopyBarEl) quickCopyBarEl.replaceChildren();
   const items = composeQuickCopyItems(attrs);
   if (!items.length) {
     quickCopyCardEl.classList.add('hidden');
@@ -498,9 +553,95 @@ function renderQuickCopy(attrs) {
   }
   for (const item of items) {
     quickCopyFieldsEl.appendChild(buildProfileRow(item));
+    // CCEXT-38: both views are built from the same items, so they can never
+    // disagree about what you have — only about how much room it takes.
+    if (quickCopyBarEl) quickCopyBarEl.appendChild(buildQuickCopyChip(item));
   }
+  applyQuickCopyExpanded();
   quickCopyCardEl.classList.remove('hidden');
 }
+
+// CCEXT-38: one collapsed-bar button — the item's icon, and nothing else.
+// The name rides on title/aria-label because several custom items can share
+// the same ⛳ glyph; without it the bar is a guessing game for anyone who
+// can't see the value, and Expand is the answer for anyone who can't tell
+// two of them apart at a glance.
+function buildQuickCopyChip(item) {
+  const { name, value, icon } = item;
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'qc-chip';
+  chip.title = `Copy ${name}`;
+  chip.setAttribute('aria-label', `Copy ${name}`);
+  chip.appendChild(buildQuickCopyIcon(icon));
+  chip.addEventListener('click', () => copyQuickCopyChip(chip, name, value));
+  return chip;
+}
+
+// A chip has no label to swap for "Copied", so the confirmation is a badge
+// (CSS .qc-chip.copied) plus the tooltip — same 1.2s beat as the rows.
+function copyQuickCopyChip(chip, name, value) {
+  copyToClipboard(value)
+    .then(() => {
+      chip.classList.add('copied');
+      chip.title = `Copied ${name}`;
+      setTimeout(() => {
+        chip.classList.remove('copied');
+        chip.title = `Copy ${name}`;
+      }, 1200);
+    })
+    .catch(() => {
+      chip.title = `Copy failed — ${name}`;
+      setTimeout(() => {
+        chip.title = `Copy ${name}`;
+      }, 1200);
+    });
+}
+
+// CCEXT-38: the bar and the rows are two views of one list — exactly one is
+// on screen, so the card never shows two ways to copy the same value.
+function applyQuickCopyExpanded() {
+  if (quickCopyBarEl) {
+    quickCopyBarEl.classList.toggle('hidden', quickCopyExpanded);
+  }
+  if (quickCopyFieldsEl) {
+    quickCopyFieldsEl.classList.toggle('hidden', !quickCopyExpanded);
+  }
+  if (quickCopyToggleEl) {
+    quickCopyToggleEl.textContent = quickCopyExpanded ? 'Collapse' : 'Expand';
+    quickCopyToggleEl.setAttribute(
+      'aria-expanded',
+      quickCopyExpanded ? 'true' : 'false',
+    );
+  }
+}
+
+// A layout preference belongs to the DEVICE, not the signed-in user — which is
+// why this key is on the excluded side of USER_SCOPED_STORAGE_KEYS. Collapsed
+// is the default, so a slow read can only ever settle INTO the taller state,
+// never flash out of it.
+function loadQuickCopyExpanded() {
+  return api.storage.local
+    .get([QUICK_COPY_EXPANDED_KEY])
+    .then((saved) => {
+      quickCopyExpanded = saved?.[QUICK_COPY_EXPANDED_KEY] === true;
+      applyQuickCopyExpanded();
+    })
+    .catch(() => {});
+}
+
+function toggleQuickCopyExpanded() {
+  quickCopyExpanded = !quickCopyExpanded;
+  applyQuickCopyExpanded();
+  api.storage.local
+    .set({ [QUICK_COPY_EXPANDED_KEY]: quickCopyExpanded })
+    .catch(() => {});
+}
+
+if (quickCopyToggleEl) {
+  quickCopyToggleEl.addEventListener('click', toggleQuickCopyExpanded);
+}
+loadQuickCopyExpanded();
 
 // One quick-copy row: icon + label + truncated value + a Copy button.
 function buildProfileRow(item) {
@@ -526,12 +667,17 @@ function buildProfileRow(item) {
   return row;
 }
 
-// CC #1: copy a profile value to the clipboard with a brief affordance. The
-// write happens from a user gesture in the popup, so no clipboard permission
-// is needed. Uses .then/.catch (not async/await) per the extension idiom.
+// The one place quick copy touches the clipboard. The write happens from a
+// user gesture in the popup, so no clipboard permission is needed. Kept as a
+// promise (not async/await) per the extension idiom — the two callers differ
+// only in how they confirm, not in how they write.
+function copyToClipboard(value) {
+  return navigator.clipboard.writeText(value);
+}
+
+// CC #1: copy a profile value to the clipboard with a brief affordance.
 function copyProfileValue(btn, value, copyLabel = 'Copy') {
-  navigator.clipboard
-    .writeText(value)
+  copyToClipboard(value)
     .then(() => {
       btn.textContent = 'Copied';
       btn.classList.add('copied');
@@ -662,9 +808,20 @@ function showApplicationsScreen() {
   if (appJpTitleEl) {
     appJpTitleEl.textContent = trackedJobPost.title || '(untitled job post)';
   }
+  // CCEXT-36: identity + a way to inspect. The title alone can't tell the
+  // user whether this is the right post ("this might be the job-post… but
+  // there isn't enough information and no way for me to look at it").
   if (appJpCompanyEl) {
-    appJpCompanyEl.textContent = trackedJobPost.company || '';
+    appJpCompanyEl.textContent =
+      trackedJobPost.company || hostLabel(trackedJobPost.link);
   }
+  if (appJpScoreEl) {
+    const score = trackedJobPost.topScore;
+    const hasScore = typeof score === 'number';
+    appJpScoreEl.textContent = hasScore ? String(score) : '';
+    appJpScoreEl.classList.toggle('hidden', !hasScore);
+  }
+  showJobPostViewLink(appJpOpenEl, trackedJobPostId);
   refreshApplicationState();
 }
 
@@ -694,7 +851,6 @@ async function showToolsScreen() {
     enrichBtn.disabled = !host;
   }
   populateDevHints();
-  populateSelectionReadout();
 }
 
 function hideEnrichLink() {
@@ -733,111 +889,6 @@ function pushEnrichTrace(msg, kind) {
   enrichTraceEl.appendChild(li);
   enrichTraceEl.classList.remove('hidden');
 }
-
-// --- Selection readout (staff introspection) -----------------------
-// Echo the EXACT text the extension reads from the active page's highlight,
-// how many frames it came from, and whether this page maps to a job post an
-// AI answer could use as context. This is the "prove it can see my
-// selection" surface.
-async function readSelectionDetails() {
-  let tab;
-  try {
-    [tab] = await api.tabs.query({ active: true, currentWindow: true });
-  } catch {
-    return { text: '', frames: 0, hitFrames: 0 };
-  }
-  if (!tab || tab.id == null) return { text: '', frames: 0, hitFrames: 0 };
-  try {
-    const results = await api.scripting.executeScript({
-      target: { tabId: tab.id, allFrames: true },
-      func: () => (window.getSelection ? window.getSelection().toString() : ''),
-    });
-    const arr = Array.isArray(results) ? results : [];
-    let text = '';
-    let hitFrames = 0;
-    for (const r of arr) {
-      const s = r && r.result ? String(r.result).trim() : '';
-      if (s) {
-        hitFrames++;
-        if (!text) text = s; // first non-empty frame wins (matches the answer path)
-      }
-    }
-    return { text, frames: arr.length, hitFrames };
-  } catch {
-    return { text: '', frames: 0, hitFrames: 0 };
-  }
-}
-
-async function populateSelectionReadout() {
-  if (!selReadoutEl) return;
-  selReadoutEl.textContent = 'Reading the page selection…';
-  selReadoutEl.classList.remove('empty');
-  if (selMetaEl) selMetaEl.classList.add('hidden');
-  const { text, frames, hitFrames } = await readSelectionDetails();
-  if (!text) {
-    selReadoutEl.textContent =
-      '(nothing highlighted — select text on the page, then Re-read)';
-    selReadoutEl.classList.add('empty');
-    if (selMetaEl) selMetaEl.classList.add('hidden');
-  } else {
-    selReadoutEl.textContent = text;
-    selReadoutEl.classList.remove('empty');
-    if (selMetaEl) {
-      selMetaEl.textContent = `${text.length.toLocaleString()} chars · read from ${hitFrames} of ${frames} frame(s)`;
-      selMetaEl.classList.remove('hidden');
-    }
-  }
-  populateSelectionJpStatus();
-}
-
-// Independent library lookup for the active URL (the Tools tab discards the
-// Send-path lookup, so we run our own) — reports whether an AI answer here
-// would have a job post as context. Server-provided strings only, set via
-// textContent, so page/JP data can never inject markup.
-async function populateSelectionJpStatus() {
-  if (!selJpEl) return;
-  selJpEl.textContent = 'Checking your library…';
-  let saved;
-  let tab;
-  try {
-    saved = await api.storage.local.get(['ccApiKey']);
-    [tab] = await api.tabs.query({ active: true, currentWindow: true });
-  } catch {
-    selJpEl.textContent = '';
-    return;
-  }
-  if (!saved.ccApiKey || !tab || !tab.url) {
-    selJpEl.textContent = '';
-    return;
-  }
-  let found = null;
-  try {
-    found = await lookupExistingJobPost(tab.url, saved.ccApiKey);
-  } catch {
-    found = null;
-  }
-  selJpEl.textContent = '';
-  if (found && found.id) {
-    selJpEl.appendChild(
-      document.createTextNode(
-        `In your library: “${found.title || 'untitled post'}” (#${found.id}). An AI answer here references this post — `,
-      ),
-    );
-    const link = document.createElement('a');
-    link.href = `${FRONTEND_ORIGIN}/job-posts/${found.id}`;
-    link.target = '_blank';
-    link.rel = 'noopener';
-    link.textContent = 'view it';
-    selJpEl.appendChild(link);
-    selJpEl.appendChild(document.createTextNode('.'));
-  } else {
-    selJpEl.textContent =
-      'Not in your library yet — Send this page first so an AI answer can use this job as context.';
-  }
-}
-
-if (selRereadBtn)
-  selRereadBtn.addEventListener('click', populateSelectionReadout);
 
 // Resolve the active host (and parent-domain fallbacks) to a
 // ScrapeProfile id via the staff-only list filter. Mirrors the api's
@@ -1141,6 +1192,33 @@ function jobPostUrl(jobPostId, { withScores = false } = {}) {
     : `${FRONTEND_ORIGIN}/job-posts/${jobPostId}`;
 }
 
+// CCEXT-36: every card that proposes a job post must let the user LOOK at
+// it before acting on it — "this might be the post" with no way to inspect
+// it forces a blind decision. One populate path for every card's view link.
+function showJobPostViewLink(el, jobPostId) {
+  if (!el) return;
+  const url = jobPostUrl(jobPostId);
+  if (!url) {
+    el.classList.add('hidden');
+    el.removeAttribute('href');
+    return;
+  }
+  el.href = url;
+  el.classList.remove('hidden');
+}
+
+// CCEXT-36: identity fallback for a proposed post whose JobPost carries no
+// company — the posting link's host says WHERE it came from, which beats an
+// empty line for telling two same-title posts apart.
+function hostLabel(url) {
+  if (!url) return '';
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
 function hideResultLink() {
   resultLinkEl.classList.add('hidden');
   resultLinkEl.removeAttribute('href');
@@ -1156,12 +1234,33 @@ function showResultLink(jobPostId, { withScores = false, label } = {}) {
     label || (withScores ? 'View score' : 'View job post');
   resultLinkEl.classList.remove('hidden');
   if (dismissBtn) dismissBtn.classList.remove('hidden');
+  // CCEXT-42: a result means this page resolved to a post. Nothing to link.
+  setLinkJobCardVisible(false);
+}
+
+// CCEXT-42: "Link this page to a job post" is the FIND half of find-or-create
+// — it exists for pages the library does NOT resolve (ATS apply flows,
+// cross-domain applies). It was rendered unconditionally on the Send screen
+// and never hidden (its only wiring was a lazy-populate `toggle` listener), so
+// it sat there directly under "Sent ✓ — scoring now."
+//
+// That is the panel contradicting itself: you just turned this page INTO a job
+// post, and the same screen offers to link it to a different one. Doug, seeing
+// it on the Nintendo posting: "it IS a job post."
+//
+// Rule: offer it only while the page is unsent and unresolved. Once a send is
+// in flight or done, this page's identity is settled.
+function setLinkJobCardVisible(visible) {
+  if (!linkJobCardEl) return;
+  linkJobCardEl.classList.toggle('hidden', !visible);
+  if (!visible) linkJobCardEl.open = false; // collapse so it doesn't reopen expanded
 }
 
 function setSendingState(sending) {
   if (sending) {
     sendBtn.dataset.state = 'sending';
     sendBtn.disabled = true;
+    setLinkJobCardVisible(false); // CCEXT-42: this page is becoming a post
   } else {
     delete sendBtn.dataset.state;
     sendBtn.disabled = false;
@@ -1594,6 +1693,7 @@ function showConnected(name, incompleteTarget = null) {
   sendBtn.classList.remove('hidden');
   if (autoScoreRow) autoScoreRow.classList.remove('hidden');
   if (recheckBtn) recheckBtn.classList.add('hidden');
+  setLinkJobCardVisible(true); // CCEXT-42: idle state — offering to link is fair
   resetApplyAttributionCard(); // CC #46: hidden unless a stash match offers it
   resetLadderOfferCard(); // CC-138: hidden unless the signal ladder offers it
   syncTabState();
@@ -1904,6 +2004,9 @@ function showSending(name) {
 // page" here — show a processing state with a manual Re-check.
 function showSentProcessing(name) {
   showConnected(name);
+  // CCEXT-42: same reasoning as the "never re-offer Send" rule below — this
+  // page is already becoming a post, so do not offer to link it to another.
+  setLinkJobCardVisible(false);
   const headingEl = document.getElementById('connected-heading');
   if (headingEl) headingEl.textContent = 'Sent to Career Caddy';
   sendBtn.classList.add('hidden');
@@ -2132,16 +2235,8 @@ async function handleDisconnect() {
       console.warn('[cc-sender] revoke best-effort failed', err);
     }
   }
-  await api.storage.local.remove([
-    'ccApiKey',
-    'ccKeyId',
-    'ccUsername',
-    'ccIsStaff',
-    'ccMe',
-    'ccExtensionSelectorCache',
-    CC_TRACKED_PAGES_KEY,
-    CC_SENT_PAGES_KEY,
-  ]);
+  // CCEXT-37: ask the list, don't restate it — see USER_SCOPED_STORAGE_KEYS.
+  await api.storage.local.remove(USER_SCOPED_STORAGE_KEYS);
   isStaff = false;
   if (disconnectBtn) disconnectBtn.disabled = false;
   if (disconnectTrackedBtn) disconnectTrackedBtn.disabled = false;
@@ -2922,9 +3017,6 @@ sendBtn.addEventListener('click', async () => {
       url: payload.url,
       autoScore: wantsScore,
       frontendOrigin: FRONTEND_ORIGIN,
-      // Popup already fired the "added" notification; bg should only
-      // notify on the score-completion event (or terminal failure).
-      skipAddedNotification: true,
     })
     .catch((err) => {
       console.warn('[cc-sender] background handoff failed', err);
@@ -3190,6 +3282,24 @@ async function startScore(btn, statusEl) {
   const scoreId = body?.data?.id;
   btn.classList.add('hidden');
   if (scoreId) {
+    // CCEXT-37: hand the scoreId to the background so it polls and notifies,
+    // the same as a send-with-score does. Without this a manual score was
+    // fire-and-forget: no notification, no badge, nothing until the user went
+    // looking. The popup is about to close, so this must be the background's
+    // job, not a poll in here.
+    try {
+      api.runtime.sendMessage({
+        type: 'cc-score-queued',
+        scoreId: String(scoreId),
+        origin: ORIGIN,
+        apiKey: saved.ccApiKey,
+        jobPostId: String(trackedJobPostId),
+        jobTitle: (trackedJobPost && trackedJobPost.title) || '',
+        frontendOrigin: FRONTEND_ORIGIN,
+      });
+    } catch (err) {
+      console.warn('[cc-sender] score poll handoff failed', err);
+    }
     const url = `${FRONTEND_ORIGIN}/job-posts/${trackedJobPostId}/scores/${scoreId}`;
     statusEl.innerHTML = '';
     const label = document.createElement('span');
@@ -3314,15 +3424,6 @@ async function postJobApplication({ jobPostId, trackingUrl, apiKey }) {
 
 // --- Track-application card (tracked screen) -----------------------
 
-function setTrackApplyLabel() {
-  if (!trackApplyBtn) return;
-  const lbl = trackApplyBtn.querySelector('.btn-label');
-  // The button creates the JobApplication in-place and confirms inline — it
-  // never navigates — so the label is always "Track application" regardless
-  // of whether the post carries an apply_url.
-  if (lbl) lbl.textContent = 'Track application';
-}
-
 function setTrackApplySending(sending) {
   if (!trackApplyBtn) return;
   trackApplyBtn.disabled = sending;
@@ -3361,7 +3462,6 @@ function showTrackApplyOpenLink(appId, label) {
 async function refreshApplicationState() {
   if (!trackApplyBtn) return;
   resetTrackApplyCard();
-  setTrackApplyLabel();
   if (!trackedJobPostId) return;
   if (trackedJobPost && trackedJobPost.appId) {
     showTrackApplyOpenLink(trackedJobPost.appId, 'Already tracked');
@@ -3871,6 +3971,7 @@ function resetApplyAttributionCard() {
     delete applyAttrBtn.dataset.state;
   }
   if (applyAttrLinkEl) applyAttrLinkEl.classList.add('hidden');
+  if (applyAttrViewEl) applyAttrViewEl.classList.add('hidden'); // CCEXT-36
   if (applyAttrStatus) setStatus(applyAttrStatus, '');
 }
 
@@ -3906,7 +4007,10 @@ async function maybeOfferApplyAttribution(tabUrl, name) {
   if (applyAttrTitleEl) {
     applyAttrTitleEl.textContent = match.jpTitle || '(untitled job post)';
   }
-  if (applyAttrCompanyEl) applyAttrCompanyEl.textContent = match.company || '';
+  if (applyAttrCompanyEl) {
+    applyAttrCompanyEl.textContent = match.company || hostLabel(match.jpLink);
+  }
+  showJobPostViewLink(applyAttrViewEl, match.jobPostId); // CCEXT-36
   applyAttrCard.classList.remove('hidden');
   // v0 tab landing (state-based): a pending-apply match means the user is
   // mid-application — land on the Applications tab, where the card lives.
@@ -4375,6 +4479,7 @@ function resetLadderOfferCard() {
   }
   if (ladderOfferDismissBtn) ladderOfferDismissBtn.classList.remove('hidden');
   if (ladderOfferLinkEl) ladderOfferLinkEl.classList.add('hidden');
+  if (ladderOfferViewEl) ladderOfferViewEl.classList.add('hidden'); // CCEXT-36
   if (ladderOfferStatus) setStatus(ladderOfferStatus, '');
 }
 
@@ -4405,8 +4510,9 @@ function renderLadderOffer(offer, tabUrl) {
     ladderOfferTitleEl.textContent = found.title || '(untitled job post)';
   }
   if (ladderOfferCompanyEl) {
-    ladderOfferCompanyEl.textContent = found.company || '';
+    ladderOfferCompanyEl.textContent = found.company || hostLabel(found.link);
   }
+  showJobPostViewLink(ladderOfferViewEl, found.id); // CCEXT-36
   ladderOfferCard.classList.remove('hidden');
   // An application moment — land on the Applications tab where the card lives.
   setActiveTab('applications');
@@ -4564,8 +4670,38 @@ async function maybeOfferFromLadder(tab, apiKey) {
 // Show / hide the "Enable tab matching" affordance in the Applications empty
 // state. Shown only when: tabs is NOT granted, the user hasn't dismissed the
 // prompt, and there's no offer already on screen.
+// CCEXT-43: Firefox opens permissions.request() as a separate doorhanger
+// ANCHORED TO THE TOOLBAR, which sits on top of the browser-action popup — and
+// under a Wayland compositor it lands squarely over it. Worse, on Firefox
+// requesting a permission from a popup typically tears the popup down, so the
+// grant handler below (re-run the ladder, hide the affordance) never runs and
+// the user is left staring at a covered, half-dead panel.
+//
+// The tabs permission only powers ladder tiers T1 (opener tab) and T2
+// (open-tabs scan). T3-T6 — referrer, id-tokens, page title, viewed trail —
+// work without it, so matching degrades rather than breaks. A quietly weaker
+// ladder beats an affordance that clobbers the UI and half-completes.
+//
+// Not a fix for Firefox, a withdrawal: doing this properly means requesting
+// from an options page or a real tab, where a doorhanger has somewhere to live.
+function isFirefox() {
+  try {
+    return (
+      typeof browser !== 'undefined' &&
+      browser.runtime &&
+      typeof browser.runtime.getBrowserInfo === 'function'
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function refreshTabsOptin(tab, apiKey) {
   if (!tabsOptinEl) return;
+  if (isFirefox()) {
+    tabsOptinEl.classList.add('hidden');
+    return;
+  }
   const granted = await hasTabsPermission();
   let dismissed = false;
   try {
@@ -4778,6 +4914,7 @@ function buildJpFromIncluded(jpId, included) {
 function resetMatchResultCard() {
   if (matchResultCard) matchResultCard.classList.add('hidden');
   if (matchResultLinkEl) matchResultLinkEl.classList.add('hidden');
+  if (matchResultViewEl) matchResultViewEl.classList.add('hidden'); // CCEXT-36
   if (matchResultStatus) setStatus(matchResultStatus, '');
   if (matchResultTitleEl) matchResultTitleEl.textContent = '';
   if (matchResultCompanyEl) matchResultCompanyEl.textContent = '';
@@ -4813,7 +4950,12 @@ async function renderMatchResult(result, jaId, tabUrl, apiKey) {
     if (matchResultTitleEl) {
       matchResultTitleEl.textContent = found.title || '(untitled job post)';
     }
-    if (matchResultCompanyEl) matchResultCompanyEl.textContent = found.company || '';
+    if (matchResultCompanyEl) {
+      matchResultCompanyEl.textContent = found.company || hostLabel(found.link);
+    }
+    // CCEXT-36: a confident wrong match (CC-240) is only catchable when the
+    // user can inspect the matched POST, not just the application row.
+    showJobPostViewLink(matchResultViewEl, found.id);
     if (matchResultLinkEl) {
       matchResultLinkEl.href = jaOpenHref(found.id);
       matchResultLinkEl.classList.remove('hidden');
@@ -4832,6 +4974,7 @@ async function renderMatchResult(result, jaId, tabUrl, apiKey) {
     if (matchResultLeadEl) matchResultLeadEl.textContent = 'Tracked';
     if (matchResultTitleEl) matchResultTitleEl.textContent = 'No matching job post found';
     if (matchResultCompanyEl) matchResultCompanyEl.textContent = '';
+    if (matchResultViewEl) matchResultViewEl.classList.add('hidden'); // CCEXT-36
     if (matchResultLinkEl) {
       matchResultLinkEl.href = jaOpenHref(null);
       matchResultLinkEl.classList.remove('hidden');
@@ -4851,6 +4994,7 @@ async function renderMatchResult(result, jaId, tabUrl, apiKey) {
   if (matchResultLeadEl) matchResultLeadEl.textContent = 'Tracked';
   if (matchResultTitleEl) matchResultTitleEl.textContent = 'Lookup failed';
   if (matchResultCompanyEl) matchResultCompanyEl.textContent = '';
+  if (matchResultViewEl) matchResultViewEl.classList.add('hidden'); // CCEXT-36
   if (matchResultLinkEl) {
     matchResultLinkEl.href = jaOpenHref(null);
     matchResultLinkEl.classList.remove('hidden');
@@ -5102,6 +5246,19 @@ function setAnswerBusy(busy) {
   else delete answerBtn.dataset.state;
 }
 
+// CCEXT-32: the single Answer button carries both meanings — generate the
+// first answer, then generate a different one. Relabelling is what makes the
+// second meaning discoverable without adding a control.
+function setAnswerButtonLabel() {
+  if (!answerBtn) return;
+  const label = answerBtn.querySelector('.btn-label');
+  if (label) {
+    label.textContent = answerIsShown
+      ? 'Answer again'
+      : 'Answer the selected text';
+  }
+}
+
 function resetAnswerResult() {
   if (answerTextEl) {
     answerTextEl.value = '';
@@ -5112,6 +5269,8 @@ function resetAnswerResult() {
     answerInsertBtn.classList.add('hidden');
     answerInsertBtn.textContent = 'Insert into the field';
   }
+  answerIsShown = false;
+  setAnswerButtonLabel();
   hideAnswerPrompt();
 }
 
@@ -5130,11 +5289,18 @@ function setAnswerFieldTarget(target) {
     answerFieldNoteEl.textContent = `Will fill the ${answerFieldTarget.kind} matched via ${answerFieldTarget.how}.`;
     answerFieldNoteEl.classList.remove('hidden');
   } else if (target && target.kind === 'choice') {
+    const names = {
+      select: 'dropdown',
+      combobox: 'dropdown',
+      radio: 'multiple-choice question',
+      checkbox: 'set of checkboxes',
+    };
+    const what = names[target.control] || 'choice field';
     const opts =
       target.options && target.options.length
-        ? ` Options: ${target.options.join(' / ')}.`
+        ? ` Your options: ${target.options.join(' / ')}.`
         : '';
-    answerFieldNoteEl.textContent = `That's a ${target.control === 'select' ? 'dropdown' : 'choice field'}, not a text box — Insert can't fill it.${opts} Answer below is for reference.`;
+    answerFieldNoteEl.textContent = `That's a ${what}, not a text box — Insert can't fill it.${opts} The answer below is for reference.`;
     answerFieldNoteEl.classList.remove('hidden');
   } else {
     answerFieldNoteEl.textContent = '';
@@ -5170,9 +5336,23 @@ function showAnswerResult(content, message) {
   if (answerCopyBtn) answerCopyBtn.classList.remove('hidden');
   // CCEXT-26: Insert is offered only when the selection actually resolved to
   // a writable control. No target -> Copy remains the honest path.
-  if (answerInsertBtn && answerFieldTarget && (content || '').trim()) {
-    answerInsertBtn.classList.remove('hidden');
+  const canInsert = !!(answerInsertBtn && answerFieldTarget && (content || '').trim());
+  if (canInsert) answerInsertBtn.classList.remove('hidden');
+  // CCEXT-40: when Insert is available it is THE action — putting the answer
+  // in the box is the whole point. Copy carried the same `primary` styling and
+  // sat beside it with equal weight, quietly presenting the clipboard (the
+  // thesis's own failure mode) as an equal choice. Demote it to a secondary
+  // control when Insert is present; promote it back when Insert is not
+  // possible, because then copying really is the best available action.
+  if (answerCopyBtn) {
+    answerCopyBtn.classList.toggle('primary', !canInsert);
+    answerCopyBtn.classList.toggle('linkbtn', canInsert);
   }
+  // CCEXT-32: once there IS an answer, the same button becomes "answer
+  // again". Whether it came from the AI or matched a saved answer, "this
+  // isn't the one I want" is a normal reaction and needs a way out.
+  answerIsShown = !!(content || '').trim();
+  setAnswerButtonLabel();
   setStatus(answerStatus, message || '', 'success');
 }
 
@@ -5183,18 +5363,46 @@ function clearAnswerPending() {
 // CCEXT-29: persist a FINISHED answer so it survives the popup being torn
 // down on blur. Carries the resolved field target too, so Insert still works
 // after a reopen — the data-cc-field stamp is left on the page deliberately.
-function saveAnswerResult(prompt, content, target) {
-  if (!content) return Promise.resolve();
-  return api.storage.local
-    .set({
+//
+// CCEXT-37: `question` ({questionId, jobPostId}) is passed ONLY by the
+// generation path, where we minted the Question against the tracked post. The
+// saved-answer match path passes nothing — its Question belongs to whichever
+// post it was originally written for, and stashing it here would let the Tools
+// tab link to it as though it were this post's.
+async function saveAnswerResult(prompt, content, target, source, question) {
+  if (!content) return;
+  // CCEXT-33: record WHICH PAGE this answer belongs to. Without it the
+  // restore path will happily show an answer captured on one company's
+  // application form while you're reading a different company's posting.
+  let url = '';
+  try {
+    const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+    url = (tab && tab.url) || '';
+  } catch {
+    url = '';
+  }
+  try {
+    await api.storage.local.set({
       [ANSWER_RESULT_KEY]: {
         prompt: prompt || '',
         content: content,
         target: target || null,
+        url: url,
+        // CCEXT-34: provenance rides with the answer so a RESTORED one is
+        // guarded the same way a freshly-matched one is. A fresh generation
+        // passes no source — it was written for this page by definition.
+        sourceCompanyId: (source && source.sourceCompanyId) || null,
+        sourceCompany: (source && source.sourceCompany) || null,
+        // CCEXT-37: what this answer was written FOR, so the Tools tab can
+        // link to the question after the popup has been torn down.
+        questionId: (question && question.questionId) || null,
+        jobPostId: (question && question.jobPostId) || null,
         at: Date.now(),
       },
-    })
-    .catch(() => {});
+    });
+  } catch {
+    /* storage full or unavailable — the answer is still on screen */
+  }
 }
 
 function clearAnswerResult() {
@@ -5225,14 +5433,22 @@ async function maybeRestoreAnswer() {
     return false;
   }
 
+  // CCEXT-33: an answer belongs to the page it was written for. Restoring it
+  // onto a DIFFERENT posting is worse than showing nothing — it puts another
+  // company's answer in front of you on a page where you might paste it.
+  // Only restore on the same URL.
+  let tab = null;
+  try {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  } catch {
+    tab = null;
+  }
+  const here = (tab && tab.url) || '';
+  if (!stash.url || !here || stash.url !== here) return false;
+
   let target = stash.target || null;
-  if (target && target.tabId != null) {
-    try {
-      const [tab] = await api.tabs.query({ active: true, currentWindow: true });
-      if (!tab || tab.id !== target.tabId) target = null;
-    } catch {
-      target = null;
-    }
+  if (target && target.tabId != null && (!tab || tab.id !== target.tabId)) {
+    target = null;
   }
 
   answerCardEl.open = true;
@@ -5244,32 +5460,6 @@ async function maybeRestoreAnswer() {
     target ? 'Your last answer — still insertable.' : 'Your last answer.',
   );
   return true;
-}
-
-// Read the active tab's selection. allFrames so a selection inside an
-// embedded ATS iframe is captured; first non-empty frame result wins.
-async function readSelectionFromActiveTab() {
-  let tab;
-  try {
-    [tab] = await api.tabs.query({ active: true, currentWindow: true });
-  } catch {
-    return '';
-  }
-  if (!tab || tab.id == null) return '';
-  try {
-    const results = await api.scripting.executeScript({
-      target: { tabId: tab.id, allFrames: true },
-      func: () => (window.getSelection ? window.getSelection().toString() : ''),
-    });
-    if (!Array.isArray(results)) return '';
-    for (const r of results) {
-      const s = r && r.result ? String(r.result).trim() : '';
-      if (s) return s;
-    }
-    return '';
-  } catch {
-    return '';
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -5304,7 +5494,22 @@ function ccResolveFieldInPage(attr) {
   const WRITABLE =
     'input, textarea, [contenteditable="true"], [contenteditable=""]';
   const FIELDS = WRITABLE + ', select, [role="combobox"], [role="listbox"]';
-  const SKIP_TYPES = ['hidden', 'submit', 'button', 'reset', 'image', 'file'];
+  // CCEXT-38: 'password' is in this list deliberately. Nothing tells the
+  // extension it is on a job application — the popup opens on whatever tab is
+  // active — so without this a credential field on any site classifies as a
+  // writable text input. It is not reachable today (the only door is a
+  // deliberate highlight, and nobody highlights their password box), but an
+  // extension that can enumerate and write to password fields is a thing you
+  // do not want to own, and the store filing says it only reads job postings.
+  const SKIP_TYPES = [
+    'hidden',
+    'submit',
+    'button',
+    'reset',
+    'image',
+    'file',
+    'password',
+  ];
   const CHOICE_TYPES = ['checkbox', 'radio'];
 
   // null = not a field at all. 'choice' = a constrained-value control that
@@ -5314,14 +5519,22 @@ function ccResolveFieldInPage(attr) {
     const tag = el.tagName;
     const type = (el.type || '').toLowerCase();
     if (tag === 'INPUT' && SKIP_TYPES.indexOf(type) !== -1) return null;
-    const r = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
-    if (r && r.width === 0 && r.height === 0) return null;
 
+    // CLASSIFY CHOICE CONTROLS *BEFORE* THE VISIBILITY CHECK. Custom-styled
+    // radios and checkboxes are routinely rendered 0x0 (or opacity:0) with a
+    // styled span painted on top — Rippling's ATS does exactly this. If the
+    // size check ran first they'd come back null, meaning "not a field", and
+    // the ancestor walk would step straight over the question and match an
+    // unrelated textarea further up the tree. That is not a cosmetic miss:
+    // it is how an answer to a Yes/No question gets offered into someone
+    // else's essay box. A hidden choice control still answers the question
+    // "can free text go here?" — and the answer is still no.
     if (tag === 'SELECT') return 'choice';
     if (tag === 'INPUT' && CHOICE_TYPES.indexOf(type) !== -1) return 'choice';
-    // Custom comboboxes (react-select, Workday, Ashby) render a real <input>
-    // but only accept values from a popup listbox — typing free text into one
-    // either does nothing or leaves the form in an invalid state.
+    // Custom comboboxes (react-select, Workday, Ashby, Rippling) render a
+    // real <input> or a div[role=combobox] but only accept values from a
+    // popup listbox — typing free text into one either does nothing or
+    // leaves the form in an invalid state.
     const role = (el.getAttribute && el.getAttribute('role')) || '';
     if (role === 'combobox' || role === 'listbox') return 'choice';
     if (el.getAttribute && el.getAttribute('aria-haspopup') === 'listbox') {
@@ -5334,7 +5547,12 @@ function ccResolveFieldInPage(attr) {
     if (el.closest && el.closest('[role="combobox"], [role="listbox"]')) {
       return 'choice';
     }
+
+    // From here down we're deciding whether free text can actually be typed,
+    // so an invisible or read-only control genuinely is not a candidate.
     if (el.readOnly) return null;
+    const r = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+    if (r && r.width === 0 && r.height === 0) return null;
 
     if (tag === 'INPUT' || tag === 'TEXTAREA') return 'text';
     if (el.isContentEditable) return 'text';
@@ -5443,18 +5661,62 @@ function ccResolveFieldInPage(attr) {
   const kind = fieldKind(field);
   if (kind === 'choice') {
     const options = [];
+    const fieldType = (field.type || '').toLowerCase();
+    let control = field.tagName.toLowerCase();
+
     if (field.tagName === 'SELECT' && field.options) {
+      control = 'select';
       for (let i = 0; i < field.options.length && i < 8; i++) {
         const label = (field.options[i].label || field.options[i].text || '').trim();
         if (label) options.push(label);
       }
+    } else if (fieldType === 'radio' || fieldType === 'checkbox') {
+      control = fieldType;
+      // Radio groups carry the human-readable choices on the `value` of each
+      // sibling sharing the group name — which is where the real answer is
+      // (e.g. "Yes - I currently live in the Bellevue/Seattle area"), not on
+      // any label element. Fall back to the aria-labelledby target's text.
+      if (field.name) {
+        let sibs = [];
+        try {
+          sibs = document.querySelectorAll(
+            field.tagName.toLowerCase() +
+              '[name="' +
+              CSS.escape(field.name) +
+              '"]',
+          );
+        } catch {
+          sibs = [];
+        }
+        for (let i = 0; i < sibs.length && i < 8; i++) {
+          let v = (sibs[i].value || '').trim();
+          if (!v || v === 'on') {
+            const lid = sibs[i].getAttribute('aria-labelledby');
+            const lab = lid ? document.getElementById(lid) : null;
+            v = lab ? (lab.textContent || '').trim() : '';
+          }
+          if (v && options.indexOf(v) === -1) options.push(v);
+        }
+      }
+    } else {
+      const fieldRole =
+        (field.getAttribute && field.getAttribute('role')) || '';
+      if (
+        fieldRole === 'combobox' ||
+        fieldRole === 'listbox' ||
+        (field.getAttribute &&
+          field.getAttribute('aria-haspopup') === 'listbox')
+      ) {
+        control = 'combobox';
+      }
     }
+
     return {
       text: text,
       token: null,
       how: how,
       kind: 'choice',
-      control: field.tagName.toLowerCase(),
+      control: control,
       options: options,
       existing: '',
     };
@@ -5553,6 +5815,46 @@ function ccWriteFieldInPage(attr, token, value) {
   return { ok: true };
 }
 
+// CCEXT-41: `activeTab` grants a temporary host permission scoped to the
+// ACTIVE TAB'S TOP-LEVEL ORIGIN. A cross-origin subframe is NOT covered, so
+// `allFrames: true` reaches same-origin frames only — the extension's own
+// store filing says exactly this ("same-origin subframes via allFrames").
+//
+// That matters because the classic Greenhouse setup is job-boards.greenhouse.io
+// embedded in company.com/careers. There, the resolver legitimately finds
+// nothing, and the card used to say "Highlight a question on the page" — which
+// reads as "you did it wrong" when the truth is "this form is somewhere I am
+// not allowed to look". Same words for user error and a hard permission
+// boundary is the worst possible diagnostic.
+//
+// We cannot fix the boundary without a broad host permission (re-consent, a
+// scarier install screen, a harder store review). We CAN stop misreporting it.
+// Returns the number of cross-origin frames on the page, or 0.
+async function countUnreachableFrames(tabId) {
+  try {
+    const results = await api.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        let blocked = 0;
+        const frames = document.querySelectorAll('iframe');
+        for (let i = 0; i < frames.length; i++) {
+          try {
+            // Touching contentDocument on a cross-origin frame throws.
+            if (!frames[i].contentDocument) blocked++;
+          } catch {
+            blocked++;
+          }
+        }
+        return blocked;
+      },
+    });
+    const n = results && results[0] ? results[0].result : 0;
+    return typeof n === 'number' ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
 // Popup-side wrapper. Keeps the frameId alongside the token so the write goes
 // back into the SAME frame the selection came from — ATS forms are often
 // embedded (Greenhouse especially) and the main frame has no such field.
@@ -5577,6 +5879,9 @@ async function resolveSelectionTarget() {
       const hit = Object.assign({}, r.result, {
         tabId: tab.id,
         frameId: r.frameId,
+        // CCEXT-33: carried so an answer can be scoped to the page it was
+        // written for, on both the finished and in-flight stashes.
+        url: tab.url || '',
       });
       if (hit.token) return hit; // a frame that resolved a field wins outright
       if (!selectionOnly) selectionOnly = hit;
@@ -5610,7 +5915,38 @@ async function findExistingAnswer(selection, apiKey) {
     if (withContent.length === 0) return null;
     const fav = withContent.find((r) => r?.attributes?.favorite === true);
     const chosen = fav || withContent[0];
-    return { id: chosen.id, content: chosen.attributes.content };
+
+    // CCEXT-34: carry the answer's PROVENANCE — which company it was written
+    // for. Saved answers are matched on question TEXT, and question text
+    // repeats across employers ("Tell us about a project you're proud of" is
+    // identical everywhere), so a reused answer can name the wrong company.
+    // The included question already rides in this response; reading its
+    // company relationship costs nothing.
+    const included = Array.isArray(body?.included) ? body.included : [];
+    const questions = {};
+    const companies = {};
+    for (const inc of included) {
+      if (!inc || !inc.type) continue;
+      if (inc.type === 'question') questions[String(inc.id)] = inc;
+      if (inc.type === 'company' || inc.type === 'companies') {
+        companies[String(inc.id)] = inc;
+      }
+    }
+    const qRel = chosen.relationships?.question?.data;
+    const q = qRel ? questions[String(qRel.id)] : null;
+    const cRel = q?.relationships?.company?.data;
+    const sourceCompanyId = cRel ? String(cRel.id) : null;
+    const sourceCompany =
+      sourceCompanyId && companies[sourceCompanyId]
+        ? companies[sourceCompanyId].attributes?.name || null
+        : null;
+
+    return {
+      id: chosen.id,
+      content: chosen.attributes.content,
+      sourceCompanyId,
+      sourceCompany,
+    };
   } catch {
     return null;
   }
@@ -5721,6 +6057,20 @@ async function pollAnswerUntilTerminal(answerId, apiKey) {
     const status = attrs?.status || null;
     if (status === 'completed') {
       answerPolling = false;
+      // CCEXT-37: read which Question this generation was for BEFORE clearing
+      // the pending stash. Taking it from storage rather than an in-memory
+      // variable is what makes a RESUMED poll (popup reopened mid-generation)
+      // record the question too — in-memory state did not survive the reopen.
+      let question = null;
+      try {
+        const pend = await api.storage.local.get([ANSWER_PENDING_KEY]);
+        const p = pend && pend[ANSWER_PENDING_KEY];
+        if (p && p.questionId) {
+          question = { questionId: p.questionId, jobPostId: p.jobPostId || null };
+        }
+      } catch {
+        question = null;
+      }
       await clearAnswerPending();
       // CCEXT-29: persist BEFORE rendering — the popup can be torn down at
       // any moment and the DOM is not storage.
@@ -5728,6 +6078,8 @@ async function pollAnswerUntilTerminal(answerId, apiKey) {
         answerPromptTextEl ? answerPromptTextEl.textContent : '',
         attrs.content || '',
         answerFieldTarget,
+        null,
+        question,
       );
       showAnswerResult(attrs.content || '', 'Generated.');
       setAnswerBusy(false);
@@ -5747,7 +6099,21 @@ async function pollAnswerUntilTerminal(answerId, apiKey) {
   setAnswerBusy(false);
 }
 
-async function handleAnswerSelected() {
+// CCEXT-32: the last question we minted, so "Answer again" can hang another
+// Answer off the SAME Question instead of creating a duplicate Question with
+// identical content. One Question with several Answers is the shape the api
+// already expects — it is what makes favouriting the good one meaningful.
+let lastAnswered = { prompt: '', questionId: null };
+
+// `opts.force` skips the saved-answer lookup. Without it there is no way to
+// get a second opinion: findExistingAnswer matches on the selection text, so
+// once any answer exists for this question, clicking Answer returns that same
+// answer forever.
+async function handleAnswerSelected(opts) {
+  // CCEXT-32: an answer already on screen means this click is "answer again",
+  // so skip the saved-answer lookup that would just hand back what's already
+  // there. `opts.force` stays available for callers that need it explicitly.
+  const force = !!(opts && opts.force === true) || answerIsShown;
   if (answerPolling) return;
   // CCEXT-23: a JobPost is CONTEXT, not a precondition. Application forms
   // usually live on a different URL than the job description, so requiring a
@@ -5764,9 +6130,21 @@ async function handleAnswerSelected() {
   const target = await resolveSelectionTarget();
   const selection = target && target.text ? target.text : '';
   if (!selection) {
+    // CCEXT-41: same distinction on the click path — a cross-origin frame is
+    // a permission boundary, not a mistake the user can correct by trying
+    // harder.
+    let blocked = 0;
+    try {
+      const [t] = await api.tabs.query({ active: true, currentWindow: true });
+      if (t && t.id != null) blocked = await countUnreachableFrames(t.id);
+    } catch {
+      blocked = 0;
+    }
     setStatus(
       answerStatus,
-      'Select a question on the page first, then click Answer.',
+      blocked > 0
+        ? "This form is inside an embedded frame the extension can't read. Selecting inside it won't reach me — paste the question into Career Caddy instead."
+        : 'Select a question on the page first, then click Answer.',
       'error',
     );
     return;
@@ -5779,13 +6157,16 @@ async function handleAnswerSelected() {
   await clearAnswerResult();
   showAnswerPrompt(selection); // CCEXT-10: echo the highlighted text
   setAnswerBusy(true);
-  setStatus(answerStatus, 'Looking for a saved answer…');
-  const match = await findExistingAnswer(selection, saved.ccApiKey);
-  if (match && match.content) {
-    await saveAnswerResult(selection, match.content, answerFieldTarget);
-    showAnswerResult(match.content, 'Matched a saved answer.');
-    setAnswerBusy(false);
-    return;
+  if (!force) {
+    setStatus(answerStatus, 'Looking for a saved answer…');
+    const match = await findExistingAnswer(selection, saved.ccApiKey);
+    if (match && match.content) {
+      await saveAnswerResult(selection, match.content, answerFieldTarget, match);
+      showAnswerResult(match.content, 'Matched a saved answer.');
+      await autoDeliverAnswer(match.content, match);
+      setAnswerBusy(false);
+      return;
+    }
   }
   // Tie the Question to the tracked post's application when one exists, so
   // the answer is recorded in the application's Q&A context too. CCEXT-23:
@@ -5804,26 +6185,37 @@ async function handleAnswerSelected() {
   // that dominate application forms. Say what IS being used, not what isn't.
   setStatus(
     answerStatus,
-    jobPostId
-      ? 'Generating from your career data and this job post…'
-      : 'Generating from your career data and past answers…',
+    force
+      ? 'Writing a fresh answer…'
+      : jobPostId
+        ? 'Generating from your career data and this job post…'
+        : 'Generating from your career data and past answers…',
   );
   // CCEXT-28: companyId rides from the tracked-post lookup when we have one.
   // On the no-post path this is null today — resolving a company from the
   // page domain is CCEXT-27.
   const companyId = trackedJobPost ? trackedJobPost.companyId : null;
-  const questionId = await mintQuestion(
-    selection,
-    saved.ccApiKey,
-    jobPostId,
-    applicationId,
-    companyId,
-  );
+  // CCEXT-32: on a re-answer of the SAME question, reuse the Question we
+  // already minted rather than creating a second one with identical content.
+  let questionId =
+    force && lastAnswered.questionId && lastAnswered.prompt === selection
+      ? lastAnswered.questionId
+      : null;
+  if (!questionId) {
+    questionId = await mintQuestion(
+      selection,
+      saved.ccApiKey,
+      jobPostId,
+      applicationId,
+      companyId,
+    );
+  }
   if (!questionId) {
     setStatus(answerStatus, 'Could not create the question.', 'error');
     setAnswerBusy(false);
     return;
   }
+  lastAnswered = { prompt: selection, questionId: questionId };
   const answerId = await requestAiAnswer(questionId, saved.ccApiKey);
   if (!answerId) {
     setStatus(answerStatus, 'Could not start answer generation.', 'error');
@@ -5835,7 +6227,15 @@ async function handleAnswerSelected() {
       [ANSWER_PENDING_KEY]: {
         answerId,
         questionId,
+        // CCEXT-37: the post the Question was minted against. Carried here
+        // because this stash outlives the popup — it is what lets the finished
+        // answer be attributed to the right post on a resumed poll.
+        jobPostId: jobPostId || null,
         prompt: selection,
+        // CCEXT-33: same page-scoping as the finished-answer stash — an
+        // in-flight generation must not surface on a different posting if
+        // the user navigates away while it runs.
+        url: (target && target.url) || '',
         startedAt: Date.now(),
       },
     })
@@ -5874,7 +6274,28 @@ async function primeAnswerSelection() {
   // page — which is what CLOSED the popup and cleared the highlight. Showing
   // an empty card here is the bug Doug hit; bring the last answer back.
   if (!selection) {
-    await maybeRestoreAnswer();
+    const restored = await maybeRestoreAnswer();
+    // Nothing to restore for THIS page (CCEXT-33 keeps answers on the page
+    // they were written for). Say what to do rather than show an empty card.
+    if (!restored && answerCardEl) {
+      resetAnswerResult();
+      setAnswerFieldTarget(null);
+      // CCEXT-41: distinguish "you haven't highlighted anything" from "this
+      // form lives in a frame I'm not permitted to read".
+      let blocked = 0;
+      try {
+        const [t] = await api.tabs.query({ active: true, currentWindow: true });
+        if (t && t.id != null) blocked = await countUnreachableFrames(t.id);
+      } catch {
+        blocked = 0;
+      }
+      setStatus(
+        answerStatus,
+        blocked > 0
+          ? "This form is inside an embedded frame the extension can't read, so highlighting won't reach it. Generate the answer here and copy it across."
+          : 'Highlight a question on the page, then reopen this tab.',
+      );
+    }
     return;
   }
   // The read is async; bail if the user has since left the Applications tab
@@ -5897,6 +6318,10 @@ async function primeAnswerSelection() {
       setAnswerFieldTarget(target);
       showAnswerPrompt(selection);
       showAnswerResult(stash.content, 'Your last answer for this question.');
+      await autoDeliverAnswer(stash.content, {
+        sourceCompanyId: stash.sourceCompanyId || null,
+        sourceCompany: stash.sourceCompany || null,
+      });
       return;
     }
   } catch {
@@ -5908,8 +6333,8 @@ async function primeAnswerSelection() {
   setAnswerFieldTarget(target);
   showAnswerPrompt(selection);
   // Free saved-answer match on open: if you've answered this exact question
-  // before, surface it instantly (copy-ready) — no AI call, no writes. Novel
-  // questions fall through to the click-to-generate path (handleAnswerSelected).
+  // before, surface it instantly — no AI call. Novel questions fall through
+  // to the click-to-generate path (handleAnswerSelected).
   const apiKey = saved && saved.ccApiKey;
   if (apiKey) {
     setStatus(answerStatus, 'Looking for a saved answer…');
@@ -5917,12 +6342,104 @@ async function primeAnswerSelection() {
     // Bail if the user left the tab or a generation began while we waited.
     if (activeTab !== 'applications' || answerPolling) return;
     if (match && match.content) {
-      await saveAnswerResult(selection, match.content, answerFieldTarget);
-      showAnswerResult(match.content, 'Matched a saved answer — copy it below.');
+      await saveAnswerResult(selection, match.content, answerFieldTarget, match);
+      showAnswerResult(match.content, 'Matched a saved answer.');
+      await autoDeliverAnswer(match.content, match);
       return;
     }
   }
   setStatus(answerStatus, 'Highlighted — click Answer to respond.');
+}
+
+// CCEXT-32: when an answer is ALREADY available for the highlighted question,
+// put it in the box. Making the user click Insert to receive something we
+// already had is a step with no decision in it.
+//
+// Only fires for an answer we already had (a saved match or the restored
+// stash) — never for a freshly generated one, which the user should read
+// before it lands in their application. Guarded per token so re-opening the
+// popup over the same field doesn't write repeatedly.
+let autoDeliveredToken = null;
+
+// CCEXT-34: decide whether a REUSED answer is safe to place without being
+// read. Saved answers match on question text, and question text repeats across
+// employers — so the answer that comes back may have been written for someone
+// else. Auto-insert is what makes that dangerous: without it the user reads
+// the answer before using it; with it, another company's name can land in this
+// company's form and be submitted.
+//
+// Provenance, not text-scanning. Comparing the answer's own company to the
+// current one is exact. Scanning the prose for company names would flag "a
+// golden opportunity" and — worse — would flag the user's OWN employers, which
+// are exactly what a good answer is supposed to name ("At Uber I automated
+// vulnerability testing"). Mentioning where you worked is the point; mentioning
+// where you applied last week is the bug.
+//
+// Returns { ok, reason, note }.
+function answerReuseVerdict(source) {
+  const from = (source && source.sourceCompanyId) || null;
+  const fromName = (source && source.sourceCompany) || null;
+  const here = trackedJobPost ? trackedJobPost.companyId : null;
+
+  if (from && here && String(from) === String(here)) {
+    return { ok: true, reason: 'same-company' };
+  }
+  if (from && here && String(from) !== String(here)) {
+    return {
+      ok: false,
+      reason: 'different-company',
+      note: fromName
+        ? `That saved answer was written for ${fromName}. Read it before using it here — Insert when you're happy.`
+        : 'That saved answer was written for a different company. Read it before using it here — Insert when you\'re happy.',
+    };
+  }
+  if (from && !here) {
+    // It was written for someone specific and we cannot tell where we are.
+    return {
+      ok: false,
+      reason: 'unknown-current-company',
+      note: fromName
+        ? `That saved answer was written for ${fromName}, and this page isn't matched to a job post. Check it fits before inserting.`
+        : 'That saved answer was written for a specific company. Check it fits before inserting.',
+    };
+  }
+  // No provenance recorded — most answers predate company attribution. Placing
+  // it is still the streamlined behaviour, but say it is reused so a
+  // company-specific line is visible rather than silent.
+  return { ok: true, reason: 'unknown-provenance', note: 'Reused a saved answer — worth a read before you submit.' };
+}
+
+async function autoDeliverAnswer(content, source) {
+  const value = (content || '').trim();
+  if (!value) return;
+
+  // CCEXT-34: the reuse guard runs BEFORE any writing decision.
+  const verdict = answerReuseVerdict(source);
+  if (!verdict.ok) {
+    setStatus(answerStatus, verdict.note, 'error');
+    return;
+  }
+  if (!answerFieldTarget || !answerFieldTarget.token) {
+    // No writable field — a dropdown, a radio group, or nothing resolved.
+    // Copy is the honest path, and it's already on screen.
+    setStatus(answerStatus, 'Saved answer ready — copy it below.', 'success');
+    return;
+  }
+  // NEVER overwrite something already in the field. It may be your own
+  // typing, or an edit you made to a previous insert — silently replacing
+  // either is unforgivable in a form you're about to submit. A non-empty
+  // field means Insert stays a deliberate click.
+  if (answerFieldTarget.existing) {
+    setStatus(
+      answerStatus,
+      'Saved answer ready — that field already has text, so Insert to replace it.',
+      'success',
+    );
+    return;
+  }
+  if (autoDeliveredToken === answerFieldTarget.token) return;
+  autoDeliveredToken = answerFieldTarget.token;
+  await insertAnswerIntoField({ auto: true, note: verdict.note });
 }
 
 // Resume a pending generation after a popup close/reopen. Reads the stash;
@@ -5943,6 +6460,17 @@ async function maybeResumeAnswer() {
   if (Date.now() - (pending.startedAt || 0) > ANSWER_PENDING_MAX_AGE_MS) {
     await clearAnswerPending();
     return;
+  }
+  // CCEXT-33: only resume on the page the generation was started from.
+  // Stashes written before this field existed have no url — resume those
+  // rather than stranding an in-flight answer.
+  if (pending.url) {
+    try {
+      const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+      if (!tab || tab.url !== pending.url) return;
+    } catch {
+      return;
+    }
   }
   answerCardEl.open = true;
   showAnswerPrompt(pending.prompt); // CCEXT-10: echo the stashed selection
@@ -5971,7 +6499,8 @@ function copyAnswerToClipboard() {
 // CCEXT-26 (form-fill M1): write the answer straight into the page field the
 // selection came from, in the frame it came from. The user edits the textarea
 // first if they want — we send whatever is in it, not the original generation.
-async function insertAnswerIntoField() {
+async function insertAnswerIntoField(opts) {
+  const auto = !!(opts && opts.auto === true);
   if (!answerTextEl || !answerInsertBtn) return;
   const value = answerTextEl.value || '';
   if (!value.trim()) return;
@@ -5992,7 +6521,17 @@ async function insertAnswerIntoField() {
     const outcome = Array.isArray(results) && results[0] ? results[0].result : null;
     if (outcome && outcome.ok) {
       answerInsertBtn.textContent = 'Inserted ✓';
-      setStatus(answerStatus, 'Inserted into the page.', 'success');
+      setStatus(
+        answerStatus,
+        auto
+          ? // CCEXT-34: when provenance is unknown, say the answer is reused
+            // rather than letting a possibly company-specific line land
+            // silently. Placement is still automatic; visibility is the guard.
+            (opts && opts.note) ||
+              'Your saved answer is in the form — Answer again for a new one.'
+          : 'Inserted into the page.',
+        'success',
+      );
       setTimeout(() => {
         answerInsertBtn.textContent = 'Insert into the field';
       }, 1600);
@@ -6014,7 +6553,8 @@ async function insertAnswerIntoField() {
   }
 }
 
-if (answerBtn) answerBtn.addEventListener('click', handleAnswerSelected);
+if (answerBtn)
+  answerBtn.addEventListener('click', () => handleAnswerSelected());
 if (answerCopyBtn)
   answerCopyBtn.addEventListener('click', copyAnswerToClipboard);
 if (answerInsertBtn)

@@ -99,11 +99,18 @@ api.notifications.onClicked.addListener((notificationId) => {
   });
 });
 
-function jobPostUrl(frontendOrigin, jobPostId, withScores) {
+// CCEXT-40: go as deep as the id in hand allows. A notification that names a
+// specific result ("scored 87 ✓") and then lands on a LIST makes the user hunt
+// for the thing it just told them — and this builder is the one the user
+// actually clicks, since the notification exists precisely because the popup
+// closed. `/job-posts/:id/scores/:score_id` is a real route (app/router.js:
+// 118-119) and popup.js:3439 already builds it for the same event when the
+// popup happens to be open; this is what stops the two surfaces disagreeing.
+function jobPostUrl(frontendOrigin, jobPostId, withScores, scoreId) {
   if (!jobPostId || !frontendOrigin) return null;
-  return withScores
-    ? `${frontendOrigin}/job-posts/${jobPostId}/scores`
-    : `${frontendOrigin}/job-posts/${jobPostId}`;
+  const base = `${frontendOrigin}/job-posts/${jobPostId}`;
+  if (scoreId) return `${base}/scores/${scoreId}`;
+  return withScores ? `${base}/scores` : base;
 }
 
 api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -116,7 +123,6 @@ api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       url: msg.url,
       autoScore: !!msg.autoScore,
       frontendOrigin: msg.frontendOrigin || 'https://careercaddy.online',
-      skipAddedNotification: !!msg.skipAddedNotification,
       pollCount: 0,
     };
     const key = `scrape-${ctx.scrapeId}`;
@@ -130,6 +136,38 @@ api.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       )
       .catch((err) => {
         console.warn('[cc-sender bg] queue failed', err);
+      });
+    if (typeof sendResponse === 'function') sendResponse({ ok: true });
+    return false;
+  }
+  if (msg.type === 'cc-score-queued') {
+    // CCEXT-37: a score started from the POPUP's "Score this post" button had
+    // no background poll at all — beginScorePoll is only reachable from the
+    // send-with-score path (background.js:341). So a manual score never
+    // notified and never updated; the user watched a link and had to go look
+    // for the result themselves. The score is already POSTed by the popup
+    // here, so we register the poll for an EXISTING scoreId rather than
+    // creating another one.
+    const scoreCtx = {
+      scoreId: String(msg.scoreId),
+      origin: msg.origin,
+      apiKey: msg.apiKey,
+      url: msg.url || '',
+      jobTitle: msg.jobTitle || '',
+      jobPostId: String(msg.jobPostId || ''),
+      frontendOrigin: msg.frontendOrigin || 'https://careercaddy.online',
+      pollCount: 0,
+    };
+    api.storage.session
+      .set({ [`score-${scoreCtx.scoreId}`]: scoreCtx })
+      .then(() =>
+        api.alarms.create(`${SCORE_PREFIX}${scoreCtx.scoreId}`, {
+          periodInMinutes: POLL_INTERVAL_MIN,
+          when: Date.now() + 3000,
+        }),
+      )
+      .catch((err) => {
+        console.warn('[cc-sender bg] manual score poll queue failed', err);
       });
     if (typeof sendResponse === 'function') sendResponse({ ok: true });
     return false;
@@ -339,16 +377,22 @@ async function pollScrapeOnce(scrapeId) {
     //   - autoScore off → fire "added ✓" now (unless popup already did).
     if (ctx.autoScore && jobPostId) {
       const ok = await beginScorePoll(ctx, jobPostId, jobTitle);
-      if (!ok && !ctx.skipAddedNotification) {
-        // Score POST failed (e.g. no career data) — fall back to the
-        // creation notification so the user still hears something.
-        notify('Career Caddy — added ✓', jobTitle, postUrl);
+      if (!ok) {
+        // CCEXT-38: the score POST failed (e.g. no career data), so no poll
+        // exists and no terminal notification will ever fire. The popup
+        // already told the user "added ✓ — scoring…", so silence here leaves
+        // that promise hanging forever. Say scoring didn't start; do NOT
+        // re-fire a bare "added ✓" — they have already heard that one.
+        notify(
+          'Career Caddy — added ✓ (scoring unavailable)',
+          jobTitle,
+          postUrl,
+        );
       }
       return;
     }
-    if (!ctx.skipAddedNotification) {
-      notify('Career Caddy — added ✓', jobTitle, postUrl);
-    }
+    // autoScore off: the popup's cc-notify-created already fired "added ✓"
+    // unconditionally, so there is nothing left to announce here.
     return;
   }
 
@@ -424,9 +468,13 @@ async function pollScoreOnce(scoreId) {
   if (ctx.pollCount >= MAX_POLLS) {
     await api.alarms.clear(`${SCORE_PREFIX}${scoreId}`);
     await api.storage.session.remove(key);
+    // CCEXT-40: "check Career Caddy" with nothing to click, while jobPostId is
+    // right here on the context. There is no score to open yet, so the scores
+    // list is the honest destination.
     notify(
       'Career Caddy — score still pending',
       `${ctx.jobTitle} added; score is taking a while. Check Career Caddy.`,
+      jobPostUrl(ctx.frontendOrigin, ctx.jobPostId, true),
     );
     return;
   }
@@ -464,9 +512,21 @@ async function pollScoreOnce(scoreId) {
   if (status && TERMINAL_SCORE.has(status)) {
     await api.alarms.clear(`${SCORE_PREFIX}${scoreId}`);
     await api.storage.session.remove(key);
-    // Score-completion notifications always link to /scores when the
-    // user opted in (UX5) — that's where the meaningful detail lives.
-    const scoreUrl = jobPostUrl(ctx.frontendOrigin, ctx.jobPostId, true);
+    // CCEXT-40: when we announce a specific score, open THAT score. The old
+    // comment here ("always link to /scores — that's where the detail lives")
+    // was written when nothing built the deeper URL; popup.js:3439 has since
+    // made it stale, and the index was making the user find a result they had
+    // just been handed.
+    //
+    // The failure branch deliberately keeps the index: there is no result to
+    // open, and the list is where a retry starts.
+    const scoreUrl = jobPostUrl(
+      ctx.frontendOrigin,
+      ctx.jobPostId,
+      true,
+      ctx.scoreId,
+    );
+    const scoresUrl = jobPostUrl(ctx.frontendOrigin, ctx.jobPostId, true);
     if (SUCCESS_SCORE.has(status) && typeof value === 'number') {
       notify(`Career Caddy — scored ${value} ✓`, ctx.jobTitle, scoreUrl);
     } else if (SUCCESS_SCORE.has(status)) {
@@ -475,7 +535,7 @@ async function pollScoreOnce(scoreId) {
       notify(
         'Career Caddy — added ✓ (score failed)',
         ctx.jobTitle,
-        scoreUrl,
+        scoresUrl,
       );
     }
     return;
