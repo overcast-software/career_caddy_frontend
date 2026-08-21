@@ -1,11 +1,13 @@
 {{yield}}
 <PowerSelect
   @options={{this.postByCompany}}
-  @selected={{this.selectedJobPost}}
+  @selected={{this.selected}}
   @onChange={{this.updateJobPost}}
+  @onOpen={{this.loadDefaultOptions}}
   @searchEnabled={{true}}
   @search={{this.searchJobPosts}}
-  @placeholder="Search job posts by title or company…"
+  @allowClear={{@allowClear}}
+  @placeholder={{this.placeholder}}
   as |jobPost|
 >
   {{jobPost.title}}
