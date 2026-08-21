@@ -8,7 +8,7 @@
     draft answers.</p>
   <form class="questions-form builder-form two-col" {{on "submit" this.save}}>
 
-    <div class="field">
+    <div class="field" data-test-company-field>
       <label class="field-label">Company
         <span class="required">*</span></label>
       {{#if this.hasLockedContext}}
@@ -33,10 +33,13 @@
     </div>
 
     {{#if this.isLoadingRelated}}
-      <p class="loading-hint">Loading job posts and applications…</p>
+      <p class="loading-hint">Loading applications…</p>
     {{/if}}
 
-    <div class="field">
+    {{! Company is optional here, not a gate. Both pickers search the
+        api directly, so you can reach a job post or an application
+        without first remembering how its company got recorded. }}
+    <div class="field" data-test-job-post-field>
       <label class="field-label">Job Post</label>
       {{#if this.hasLockedContext}}
         <input
@@ -46,25 +49,16 @@
           aria-label="Job Post"
         />
       {{else}}
-        <PowerSelect
-          @options={{this.loadedJobPosts}}
-          @onChange={{this.updateJobPost}}
+        <JobPosts::Selector
+          @companyId={{this.selectedCompany.id}}
           @selected={{this.selectedJobPost}}
-          @placeholder={{if
-            this.selectedCompany
-            "Select a job post (optional)"
-            "Select a company first"
-          }}
+          @jobPostCallback={{this.updateJobPost}}
           @allowClear={{true}}
-          @disabled={{not this.selectedCompany}}
-          as |jobPost|
-        >
-          {{jobPost.title}}
-        </PowerSelect>
+        />
       {{/if}}
     </div>
 
-    <div class="field">
+    <div class="field" data-test-job-app-field>
       <label class="field-label">Job Application</label>
       {{#if this.jobAppLocked}}
         <input
@@ -82,13 +76,10 @@
           @options={{this.filteredJobAppOptions}}
           @onChange={{this.updateJobApplication}}
           @selected={{this.selectedJobAppOption}}
-          @placeholder={{if
-            this.selectedCompany
-            "Select an application (optional)"
-            "Select a company first"
-          }}
+          @searchEnabled={{true}}
+          @search={{this.searchJobApplications}}
+          @placeholder="Search applications by job title or company…"
           @allowClear={{true}}
-          @disabled={{not this.selectedCompany}}
           as |opt|
         >
           {{opt.label}}
