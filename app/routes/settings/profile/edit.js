@@ -14,9 +14,6 @@ export default class SettingsProfileEditRoute extends Route {
     controller.linkedin = model.linkedin ?? '';
     controller.github = model.github ?? '';
     controller.address = model.address ?? '';
-    controller.links = Array.isArray(model.links)
-      ? model.links.map((l) => ({ ...l }))
-      : [];
     const onboarding = model.onboarding || {};
     controller.wizardEnabled = onboarding.wizard_enabled !== false;
   }

@@ -292,6 +292,7 @@ Router.map(function () {
     this.route('profile', function () {
       this.route('edit');
     });
+    this.route('quick-copy');
     this.route('data');
     this.route('appearance');
     this.route('ai-spend');
