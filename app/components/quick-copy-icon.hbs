@@ -31,7 +31,8 @@
   {{! golf emoji — flag (default) | golfer | trophy | target | finish. Decorative
       (aria-hidden); the button/label carries the accessible text. }}
   <span
-    class="{{if @class @class 'size-5 shrink-0'}} inline-flex items-center justify-center leading-none"
+    class="{{if @class @class 'size-5 shrink-0'}}
+      inline-flex items-center justify-center leading-none"
     aria-hidden="true"
   >{{icon-emoji @icon}}</span>
 {{/if}}

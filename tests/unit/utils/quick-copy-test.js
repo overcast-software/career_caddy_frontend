@@ -24,7 +24,11 @@ module('Unit | Utility | quick-copy', function () {
       ['linkedin', 'github', 'flag', 'golfer', 'trophy', 'target', 'finish'],
       'ICONS is brand + golf',
     );
-    assert.strictEqual(DEFAULT_CUSTOM_ICON, 'flag', 'new custom item defaults to flag');
+    assert.strictEqual(
+      DEFAULT_CUSTOM_ICON,
+      'flag',
+      'new custom item defaults to flag',
+    );
     assert.strictEqual(ICON_EMOJI.flag, '⛳');
     assert.strictEqual(ICON_EMOJI.golfer, '🏌️');
     assert.strictEqual(ICON_EMOJI.trophy, '🏆');
@@ -35,7 +39,11 @@ module('Unit | Utility | quick-copy', function () {
   test('normalizeCustomIcon: valid golf keys pass, legacy maps, junk defaults', function (assert) {
     // Valid golf keys pass through.
     for (const key of CUSTOM_ICONS) {
-      assert.strictEqual(normalizeCustomIcon(key), key, `${key} passes through`);
+      assert.strictEqual(
+        normalizeCustomIcon(key),
+        key,
+        `${key} passes through`,
+      );
     }
     // Legacy pre-hybrid values map to golf keys.
     assert.strictEqual(normalizeCustomIcon('globe'), 'flag', 'globe -> flag');
@@ -68,7 +76,12 @@ module('Unit | Utility | quick-copy', function () {
       { name: 'Bare', url: 'no-icon-field' },
     ]);
     assert.deepEqual(out, [
-      { name: 'Portfolio', value: 'https://me.dev', icon: 'flag', pinned: false },
+      {
+        name: 'Portfolio',
+        value: 'https://me.dev',
+        icon: 'flag',
+        pinned: false,
+      },
       {
         name: 'Pitch',
         value: 'I build reliable systems.',
@@ -166,7 +179,11 @@ module('Unit | Utility | quick-copy', function () {
     });
     assert.strictEqual(items.length, 1);
     assert.strictEqual(items[0].name, 'Real');
-    assert.strictEqual(items[0].icon, 'flag', 'a value-only item defaults to flag');
+    assert.strictEqual(
+      items[0].icon,
+      'flag',
+      'a value-only item defaults to flag',
+    );
   });
 
   test('composeQuickCopyItems returns [] for a null user', function (assert) {

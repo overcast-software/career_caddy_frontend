@@ -18,8 +18,8 @@
         <LinkTo
           @route="settings.profile"
           class="text-blue-600 dark:text-blue-400 hover:underline"
-        >profile</LinkTo>; add a portfolio link, reusable prompts, taglines, etc.
-        Use the up/down arrows to reorder.</p>
+        >profile</LinkTo>; add a portfolio link, reusable prompts, taglines,
+        etc. Use the up/down arrows to reorder.</p>
 
       <fieldset disabled={{this.isSubmitting}}>
         <form {{on "submit" this.save}}>
@@ -104,7 +104,11 @@
                         <button
                           type="button"
                           aria-label={{choice}}
-                          aria-pressed={{if (eq item.icon choice) "true" "false"}}
+                          aria-pressed={{if
+                            (eq item.icon choice)
+                            "true"
+                            "false"
+                          }}
                           class="p-1.5 rounded border text-base leading-none
                             {{if
                               (eq item.icon choice)
@@ -125,7 +129,10 @@
                     <span
                       class="inline-flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500"
                     >
-                      <QuickCopyIcon @icon={{item.icon}} @class="size-4 shrink-0" />
+                      <QuickCopyIcon
+                        @icon={{item.icon}}
+                        @class="size-4 shrink-0"
+                      />
                       Pinned
                     </span>
                   {{else}}
