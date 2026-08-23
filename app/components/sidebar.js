@@ -3,6 +3,7 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { getProfession } from 'career-caddy-frontend/utils/wizard-storage';
+import { composeQuickCopyItems } from 'career-caddy-frontend/utils/quick-copy';
 
 export default class SidebarComponent extends Component {
   @service currentUser;
@@ -38,20 +39,16 @@ export default class SidebarComponent extends Component {
     return this.router.currentRouteName?.startsWith('docs');
   }
 
+  // CCEXT-18: the unified quick-copy list. composeQuickCopyItems is the shared
+  // seed source of truth (LinkedIn + GitHub + normalized `links` items, each
+  // carrying an `icon`); the settings read/edit views and the extension use the
+  // same composer. Map `name` → `label` to keep the existing template markup.
   get clipboardItems() {
-    const user = this.currentUser.user;
-    if (!user) return [];
-    const items = [];
-    if (user.linkedin) items.push({ label: 'LinkedIn', value: user.linkedin });
-    if (user.github) items.push({ label: 'GitHub', value: user.github });
-    if (user.links) {
-      const links = Array.isArray(user.links) ? user.links : [];
-      links.forEach((link) => {
-        if (link.url)
-          items.push({ label: link.name || link.url, value: link.url });
-      });
-    }
-    return items;
+    return composeQuickCopyItems(this.currentUser.user).map((item) => ({
+      label: item.name || item.value,
+      value: item.value,
+      icon: item.icon,
+    }));
   }
 
   @action
