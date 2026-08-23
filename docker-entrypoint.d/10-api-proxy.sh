@@ -63,6 +63,12 @@ API_UPSTREAM=${API_UPSTREAM%/}
 EVENTS_UPSTREAM=${EVENTS_UPSTREAM%/}
 MCP_UPSTREAM=${MCP_UPSTREAM%/}
 
+# NOTE: this heredoc is UNQUOTED, because it has to expand ${API_UPSTREAM} and
+# friends. That means backticks and bare $ inside it are executed by the shell,
+# including inside comment lines. A markdown-style `word` in a comment here
+# becomes command substitution: the text vanishes from the emitted config and
+# the container logs "line NN: word: not found" on every start. Write comments
+# in plain prose, and escape any literal $ as \$.
 cat > "$PROXY_FILE" <<EOF
 # Same-origin reverse proxy (emitted by docker-entrypoint.d/10-api-proxy.sh
 # because API_UPSTREAM is set). Most specific prefix first. Upstreams are
@@ -75,17 +81,17 @@ cat > "$PROXY_FILE" <<EOF
 # /healthz, so a POST here against that app is a 404.
 #
 # This block exists because the stream location below USED TO BE the plain
-# prefix `location /api/v1/events`, which also matched /api/v1/events/token/
+# prefix "location /api/v1/events", which also matched /api/v1/events/token/
 # and sent it to the events service. Every token mint 404'd, SSE never came
 # up anywhere, and the client's reconnect loop turned that into ~70% of all
 # production traffic.
 #
-# Anchored regex rather than `= /api/v1/events/token/`: an exact location
-# ending in a slash makes nginx 301 the slashless form to the slashed one,
-# and a 301 on a POST is a footgun -- redirect-following clients downgrade it
-# to GET. The regex serves both forms directly. Regex locations are matched
-# before the plain `/api/` prefix, and this one cannot overlap the stream
-# regex below, so their relative order is not load-bearing.
+# Anchored regex rather than an exact "= /api/v1/events/token/" location: an
+# exact location ending in a slash makes nginx 301 the slashless form to the
+# slashed one, and a 301 on a POST is a footgun -- redirect-following clients
+# downgrade it to GET. The regex serves both forms directly. Regex locations
+# are matched before the plain /api/ prefix, and this one cannot overlap the
+# stream regex below, so their relative order is not load-bearing.
 location ~ ^/api/v1/events/token/?$ {
     proxy_pass ${API_UPSTREAM};
     proxy_ssl_server_name on;
@@ -98,7 +104,7 @@ location ~ ^/api/v1/events/token/?$ {
 
 # SSE event stream. ANCHORED regex, not a prefix: it must match the stream
 # itself (with or without the trailing slash) and nothing beneath it. Regex
-# locations outrank the plain `/api/` prefix below, so ordering still holds.
+# locations outrank the plain /api/ prefix below, so ordering still holds.
 # Buffering off + HTTP/1.1 + long read timeout so the stream passes through
 # live.
 location ~ ^/api/v1/events/?$ {
