@@ -16,6 +16,12 @@ module.exports = [
       'coverage/**',
       'node_modules/**',
       'public/extensions/**',
+      // Agent worktrees + agent memory. These hold full checkouts (with their
+      // own dist/ and node_modules/), and the globs above are root-anchored so
+      // they do NOT match nested copies. Without this, `dagger call
+      // build-frontend` — which copies the WORKING TREE, not HEAD — lints
+      // whatever worktree happens to be parked here and fails the gate.
+      '.claude/**',
     ],
   },
 
