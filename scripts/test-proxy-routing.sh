@@ -110,6 +110,23 @@ docker exec ccproxyfront nginx -t 2>&1 || exit 1
 echo
 
 fail=0
+
+# The heredoc that emits proxy.conf is UNQUOTED (it must expand the upstream
+# vars), so a backtick or bare $ anywhere inside it -- including in a comment
+# -- is executed by the shell. The text silently disappears from the emitted
+# config and the container logs "line NN: <word>: not found" on every start.
+# Caught in review once already; assert on it rather than trusting eyes.
+echo "===== entrypoint emitted no shell errors ====="
+if docker logs ccproxyfront 2>&1 | grep -q "not found"; then
+  echo "FAIL  the entrypoint produced command-not-found errors:"
+  docker logs ccproxyfront 2>&1 | grep "not found" | sed 's/^/        /'
+  echo "      -> almost certainly a backtick or bare \$ inside the heredoc."
+  fail=1
+else
+  echo "PASS  no command substitution leaked out of the heredoc"
+fi
+echo
+
 check() {
   local method="$1" path="$2" expect="$3" label="$4" got
   got=$(docker run --rm --network "$NET" curlimages/curl:latest \
