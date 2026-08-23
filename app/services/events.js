@@ -25,8 +25,21 @@ import { tracked } from '@glimmer/tracking';
  * store + reachable by id.
  */
 
+// Reconnect backoff.
+//
+// RECONNECT_MAX_MS is deliberately long. In 2026-08 a proxy misroute made
+// /api/v1/events/token/ return 404 on every call; the loop below retried it
+// roughly every 6 seconds per open tab, which came to ~70% of all production
+// traffic, kept services that should have scaled to zero awake around the
+// clock, and produced a budget alert. A ceiling of 30s is still ~2,900
+// requests/day/tab against an endpoint that is never coming back. Five
+// minutes costs ~290 and is indistinguishable to a user, because the ONLY
+// case that reaches the ceiling is one where SSE is already broken.
+//
+// STABLE_CONNECTION_MS is the other half. See _armStableReset.
 const RECONNECT_INITIAL_MS = 1000;
-const RECONNECT_MAX_MS = 30_000;
+const RECONNECT_MAX_MS = 300_000;
+const STABLE_CONNECTION_MS = 60_000;
 
 // Types that the api emits on the cc_events channel. Pinned here so a
 // silent rename on the backend surfaces as a known event we just don't
@@ -73,6 +86,12 @@ export default class EventsService extends Service {
   _reconnectMs = RECONNECT_INITIAL_MS;
   _stopped = false;
   _retryTimer = null;
+  // In-flight _connect(). Distinct from _eventSource, which is only set once
+  // the token round-trip has already succeeded — so on a failing token
+  // endpoint _eventSource stays null forever and cannot guard anything.
+  _connecting = false;
+  // Fires once a connection has stayed open long enough to count as healthy.
+  _stableTimer = null;
   // Listeners notified AFTER a record reload completes. Pollable
   // subscribes here to fire onComplete / onFailed without timer-
   // polling when the SSE channel is healthy. Set rather than array
@@ -85,7 +104,15 @@ export default class EventsService extends Service {
    *  connected is a no-op. Call from the application route after auth
    *  succeeds. */
   async start() {
-    if (this._eventSource) return;
+    // Three states mean "a connection is already being handled": streaming,
+    // mid-connect, or waiting out a backoff.
+    //
+    // Guarding on _eventSource ALONE is what made the 2026-08 retry storm
+    // possible. When the token fetch fails, _eventSource is never assigned,
+    // so every subsequent start() re-entered _connect() immediately and
+    // skipped the pending _retryTimer entirely — the backoff existed but
+    // nothing was subject to it.
+    if (this._eventSource || this._connecting || this._retryTimer) return;
     this._stopped = false;
     await this._connect();
   }
@@ -97,10 +124,12 @@ export default class EventsService extends Service {
       clearTimeout(this._retryTimer);
       this._retryTimer = null;
     }
+    this._clearStableTimer();
     if (this._eventSource) {
       this._eventSource.close();
       this._eventSource = null;
     }
+    this._connecting = false;
     this.connected = false;
     this._reconnectMs = RECONNECT_INITIAL_MS;
   }
@@ -113,7 +142,17 @@ export default class EventsService extends Service {
   async _connect() {
     if (this._stopped) return;
     if (!this.session.isAuthenticated) return;
+    if (this._connecting || this._eventSource) return;
 
+    this._connecting = true;
+    try {
+      await this._openStream();
+    } finally {
+      this._connecting = false;
+    }
+  }
+
+  async _openStream() {
     let token;
     try {
       const resp = await fetch(this.api.url('/api/v1/events/token/'), {
@@ -141,13 +180,21 @@ export default class EventsService extends Service {
 
     es.onopen = () => {
       this.connected = true;
-      // Reset backoff on a clean connect — exponential pressure should
-      // only build during sustained outages, not reset every successful
-      // tick.
-      this._reconnectMs = RECONNECT_INITIAL_MS;
+      // Deliberately NOT resetting the backoff here.
+      //
+      // "Opened" is not "healthy". A stream that opens and dies a second
+      // later is flapping, and resetting on every open means the backoff can
+      // never accumulate — the ceiling becomes unreachable and a broken
+      // endpoint is retried forever at the floor delay. Only a connection
+      // that STAYS open is evidence the pipe works, so the reset is armed on
+      // a timer and cancelled if the stream drops first.
+      this._armStableReset();
     };
 
     es.onmessage = (e) => {
+      // A real frame is stronger proof than elapsed time: the token was
+      // accepted, the stream is up, and the hub is fanning out to us.
+      this._reconnectMs = RECONNECT_INITIAL_MS;
       this._handleMessage(e);
     };
 
@@ -156,6 +203,7 @@ export default class EventsService extends Service {
       // re-fetch the token — once our 5-minute signed token expires,
       // the next reconnect would 401 forever. Close, refetch, restart.
       this.connected = false;
+      this._clearStableTimer();
       es.close();
       if (this._eventSource === es) {
         this._eventSource = null;
@@ -173,6 +221,25 @@ export default class EventsService extends Service {
       this._connect();
     }, delay);
     this._reconnectMs = Math.min(delay * 2, RECONNECT_MAX_MS);
+  }
+
+  /** Arm the backoff reset. Fires only if the stream stays open for
+   *  STABLE_CONNECTION_MS; onerror cancels it. This is what makes the
+   *  backoff monotonic across a flapping endpoint while still letting a
+   *  genuinely healthy reconnect start from the floor again. */
+  _armStableReset() {
+    this._clearStableTimer();
+    this._stableTimer = setTimeout(() => {
+      this._stableTimer = null;
+      this._reconnectMs = RECONNECT_INITIAL_MS;
+    }, STABLE_CONNECTION_MS);
+  }
+
+  _clearStableTimer() {
+    if (this._stableTimer) {
+      clearTimeout(this._stableTimer);
+      this._stableTimer = null;
+    }
   }
 
   _handleMessage(event) {
