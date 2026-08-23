@@ -70,9 +70,38 @@ cat > "$PROXY_FILE" <<EOF
 # host so Cloud Run can route (only the frontend is mapped to the public
 # host). X-Forwarded-* preserved so Django builds correct absolute URLs.
 
-# SSE event stream -- must come before the generic /api/ block. Buffering off
-# + HTTP/1.1 + long read timeout so the stream is passed through live.
-location /api/v1/events {
+# Token mint for the SSE stream. Django/gunicorn owns this, NOT the events
+# service -- job_hunting/sse_asgi.py routes only GET /api/v1/events/ and
+# /healthz, so a POST here against that app is a 404.
+#
+# This block exists because the stream location below USED TO BE the plain
+# prefix `location /api/v1/events`, which also matched /api/v1/events/token/
+# and sent it to the events service. Every token mint 404'd, SSE never came
+# up anywhere, and the client's reconnect loop turned that into ~70% of all
+# production traffic.
+#
+# Anchored regex rather than `= /api/v1/events/token/`: an exact location
+# ending in a slash makes nginx 301 the slashless form to the slashed one,
+# and a 301 on a POST is a footgun -- redirect-following clients downgrade it
+# to GET. The regex serves both forms directly. Regex locations are matched
+# before the plain `/api/` prefix, and this one cannot overlap the stream
+# regex below, so their relative order is not load-bearing.
+location ~ ^/api/v1/events/token/?$ {
+    proxy_pass ${API_UPSTREAM};
+    proxy_ssl_server_name on;
+    proxy_set_header Host ${API_HOST};
+    proxy_http_version 1.1;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP \$remote_addr;
+}
+
+# SSE event stream. ANCHORED regex, not a prefix: it must match the stream
+# itself (with or without the trailing slash) and nothing beneath it. Regex
+# locations outrank the plain `/api/` prefix below, so ordering still holds.
+# Buffering off + HTTP/1.1 + long read timeout so the stream passes through
+# live.
+location ~ ^/api/v1/events/?$ {
     proxy_pass ${EVENTS_UPSTREAM};
     proxy_ssl_server_name on;
     proxy_set_header Host ${EVENTS_HOST};
@@ -116,6 +145,7 @@ location /mcp {
 EOF
 
 echo "10-api-proxy.sh: API_UPSTREAM set -> reverse proxy enabled"
-echo "  /api/v1/events -> ${EVENTS_UPSTREAM} (Host ${EVENTS_HOST})"
-echo "  /api/          -> ${API_UPSTREAM} (Host ${API_HOST})"
-echo "  /mcp           -> ${MCP_UPSTREAM} (Host ${MCP_HOST})"
+echo "  /api/v1/events/token/ -> ${API_UPSTREAM} (Host ${API_HOST})"
+echo "  /api/v1/events[/]     -> ${EVENTS_UPSTREAM} (Host ${EVENTS_HOST})"
+echo "  /api/                 -> ${API_UPSTREAM} (Host ${API_HOST})"
+echo "  /mcp                  -> ${MCP_UPSTREAM} (Host ${MCP_HOST})"

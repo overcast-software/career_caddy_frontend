@@ -23,6 +23,9 @@ notes.org
 # ...but the prod nginx image's entrypoint scripts must ship (Dockerfile COPYs them).
 !docker-entrypoint.d/
 !docker-entrypoint.d/*.sh
+# ...and so must the checked-in dev/verification scripts (npm run verify:*).
+!scripts/
+!scripts/*.sh
 # CI/CD needs package-lock.json
 
 # Docker overrides

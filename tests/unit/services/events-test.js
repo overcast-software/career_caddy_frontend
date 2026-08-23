@@ -186,4 +186,158 @@ module('Unit | Service | events', function (hooks) {
     assert.false(this.service.connected);
     assert.strictEqual(this.service._eventSource, null);
   });
+
+  // ── Reconnect backoff ──────────────────────────────────────────────
+  //
+  // Regression cover for the 2026-08 retry storm. A proxy misroute made
+  // /api/v1/events/token/ return 404 on every call. The backoff existed but
+  // nothing was subject to it: start() guarded only on _eventSource, which
+  // is never assigned when the token fetch fails, so each call re-entered
+  // _connect() immediately. The result was a request every few seconds per
+  // open tab — ~70% of all production traffic and a budget alert.
+  //
+  // These tests pin the two properties that make that impossible: start()
+  // respects a pending backoff, and the backoff only resets on evidence the
+  // stream actually works.
+
+  module('reconnect backoff', function (hooks) {
+    class FakeEventSource {
+      static last = null;
+      constructor(url) {
+        this.url = url;
+        this.closed = false;
+        FakeEventSource.last = this;
+      }
+      close() {
+        this.closed = true;
+      }
+    }
+
+    hooks.beforeEach(function () {
+      this.origFetch = globalThis.fetch;
+      this.origEventSource = globalThis.EventSource;
+      FakeEventSource.last = null;
+      globalThis.EventSource = FakeEventSource;
+
+      this.service.session = { isAuthenticated: true };
+      this.service.api = { url: (p) => p, headers: () => ({}) };
+
+      this.fetchCalls = 0;
+      this.tokenOk = false;
+      globalThis.fetch = async () => {
+        this.fetchCalls += 1;
+        return this.tokenOk
+          ? { ok: true, json: async () => ({ token: 'tok' }) }
+          : { ok: false, status: 404 };
+      };
+    });
+
+    hooks.afterEach(function () {
+      this.service.stop();
+      globalThis.fetch = this.origFetch;
+      globalThis.EventSource = this.origEventSource;
+    });
+
+    // Drain one backoff step without waiting on a real timer.
+    function stepBackoff(service) {
+      service._scheduleReconnect();
+      clearTimeout(service._retryTimer);
+      service._retryTimer = null;
+    }
+
+    test('repeated start() calls do not bypass a pending backoff', async function (assert) {
+      await this.service.start();
+      assert.strictEqual(this.fetchCalls, 1, 'first start mints once');
+      assert.ok(this.service._retryTimer, 'a retry is pending after the 404');
+
+      await this.service.start();
+      await this.service.start();
+      await this.service.start();
+
+      assert.strictEqual(
+        this.fetchCalls,
+        1,
+        'further start() calls are absorbed by the pending backoff',
+      );
+    });
+
+    test('backoff grows monotonically while the endpoint keeps failing', function (assert) {
+      const seen = [];
+      for (let i = 0; i < 5; i++) {
+        seen.push(this.service._reconnectMs);
+        stepBackoff(this.service);
+      }
+      assert.deepEqual(
+        seen,
+        [1000, 2000, 4000, 8000, 16000],
+        'each failure doubles the delay',
+      );
+    });
+
+    test('backoff is capped so a dead endpoint cannot be hammered', function (assert) {
+      for (let i = 0; i < 40; i++) stepBackoff(this.service);
+      assert.strictEqual(
+        this.service._reconnectMs,
+        300_000,
+        'ceiling is 5 minutes, not 30 seconds',
+      );
+    });
+
+    test('a connection that opens then drops does NOT reset the backoff', async function (assert) {
+      this.tokenOk = true;
+      await this.service.start();
+      const es = FakeEventSource.last;
+      assert.ok(es, 'stream opened');
+
+      // Back the service off as if several attempts had already failed.
+      this.service._reconnectMs = 16_000;
+
+      es.onopen();
+      assert.strictEqual(
+        this.service._reconnectMs,
+        16_000,
+        'opening alone is not evidence of health',
+      );
+
+      es.onerror();
+      assert.strictEqual(
+        this.service._reconnectMs,
+        32_000,
+        'a flap before the stability window ADVANCES the backoff, never resets it — this is the exact case the old onopen reset defeated',
+      );
+      assert.strictEqual(this.service._eventSource, null, 'stream cleared');
+    });
+
+    test('a delivered frame resets the backoff', async function (assert) {
+      this.tokenOk = true;
+      await this.service.start();
+      const es = FakeEventSource.last;
+
+      this.service._reconnectMs = 16_000;
+      es.onopen();
+      es.onmessage({ data: JSON.stringify({ type: 'score', id: 1 }) });
+
+      assert.strictEqual(
+        this.service._reconnectMs,
+        1000,
+        'a real frame proves the pipe works end to end',
+      );
+    });
+
+    test('the token is minted against the api path, not the stream path', async function (assert) {
+      // The 404 came from /api/v1/events/token/ being proxied to the events
+      // service. Pin the path the client asks for so a rename here has to be
+      // matched deliberately in docker-entrypoint.d/10-api-proxy.sh.
+      let requested = null;
+      this.service.api = {
+        url: (p) => {
+          if (!requested) requested = p;
+          return p;
+        },
+        headers: () => ({}),
+      };
+      await this.service.start();
+      assert.strictEqual(requested, '/api/v1/events/token/');
+    });
+  });
 });

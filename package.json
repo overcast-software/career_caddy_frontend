@@ -27,6 +27,7 @@
     "test": "concurrently \"npm:lint\" \"npm:test:*\" --names \"lint,test:\" --prefixColors auto",
     "test:ember": "ember test",
     "test:ember:watch": "ember test --server",
+    "verify:proxy-routing": "./scripts/test-proxy-routing.sh",
     "tailwind:build": "npx tailwindcss -i ./tailwind-input.css -o ./public/assets/tailwind.css",
     "tailwind:watch": "npx tailwindcss -i ./tailwind-input.css -o ./public/assets/tailwind.css --watch"
   },
