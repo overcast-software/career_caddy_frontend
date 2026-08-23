@@ -9,6 +9,13 @@ export default class QuestionsFormComponent extends Component {
   @tracked selectedJobAppOption = null;
   @tracked loadedJobAppOptions = [];
   @tracked isLoadingRelated = false;
+  // FRON-126. True only once we have POSITIVELY established that the
+  // chosen application and its job post both carry no company — not
+  // merely that we couldn't see one in the store. Drives the notice
+  // under the Company field and turns the next company pick into a
+  // repair of the job post itself.
+  @tracked companyDeadEnd = false;
+  @tracked attachingCompany = false;
 
   @service store;
   @service flashMessages;
@@ -102,6 +109,22 @@ export default class QuestionsFormComponent extends Component {
 
   get jobAppLocked() {
     return this._initialJobAppLocked;
+  }
+
+  /**
+   * FRON-126 — the chain resolved but nothing in it carries a company,
+   * so the blank Company field is a fact about the record rather than
+   * something the user forgot. The notice says so; the picker directly
+   * above it stays live, so the fix is one selection away.
+   *
+   * Gated on the fields actually being editable. Arriving from
+   * job-posts/:id/questions/new sets hasLockedContext, which renders
+   * Company as a disabled input — there would be nothing to repair
+   * with, so that path keeps the old silence. A known limit of this
+   * pass, not a special case for the lock.
+   */
+  get showCompanyDeadEnd() {
+    return this.companyDeadEnd && !this.hasLockedContext;
   }
 
   @action
@@ -219,10 +242,18 @@ export default class QuestionsFormComponent extends Component {
   }
 
   @action async updateCompany(company) {
+    // FRON-126 repair path. While the notice is up, choosing a company
+    // is an ANSWER to "this job post has no company" — the post and
+    // application the user already picked have to survive it. The reset
+    // below would clear both and throw the repair away.
+    if (this.companyDeadEnd && company) {
+      return this.attachCompanyToJobPost(company);
+    }
     this.selectedCompany = company;
     this.selectedJobPost = null;
     this.selectedJobAppOption = null;
     this.loadedJobAppOptions = [];
+    this.companyDeadEnd = false;
     this.args.question.company = company;
     this.args.question.jobPost = null;
     this.args.question.jobApplication = null;
@@ -241,23 +272,36 @@ export default class QuestionsFormComponent extends Component {
     }
   }
 
-  @action async addCompanyToQuestion(companyName) {
+  @action addCompanyToQuestion(companyName) {
     const company = this.store.createRecord('company', { name: companyName });
-    try {
-      await company.save();
-      this.selectedCompany = company;
-      this.args.question.company = company;
-      this.flashMessages.success('Company created: ' + company.name + '.');
-    } catch (error) {
-      if (error?.status !== 403) {
-        this.flashMessages.danger('Failed to create company.');
-      }
-    }
+    return company
+      .save()
+      .then(() => {
+        this.flashMessages.success('Company created: ' + company.name + '.');
+        // A company created while the dead-end notice is up is being
+        // created FOR the job post — attach it there too, same as
+        // picking an existing one.
+        if (this.companyDeadEnd) {
+          return this.attachCompanyToJobPost(company);
+        }
+        this.selectedCompany = company;
+        this.args.question.company = company;
+        return null;
+      })
+      .catch((error) => {
+        if (error?.status !== 403) {
+          this.flashMessages.danger('Failed to create company.');
+        }
+        return null;
+      });
   }
 
   @action updateJobPost(jobPost) {
     this.selectedJobPost = jobPost;
     this.selectedJobAppOption = null;
+    // A hand-picked job post supersedes whatever the previous chain
+    // said, including any no-company finding about it.
+    this.companyDeadEnd = false;
     this.args.question.jobPost = jobPost;
     this.args.question.jobApplication = null;
   }
@@ -272,6 +316,9 @@ export default class QuestionsFormComponent extends Component {
    */
   @action updateJobApplication(option) {
     this.selectedJobAppOption = option;
+    // Any previous finding belongs to the previous chain; the back-fill
+    // below re-derives it for this one.
+    this.companyDeadEnd = false;
     const jobApp = option?.record ?? null;
     this.args.question.jobApplication = jobApp;
     if (!jobApp) return;
@@ -301,7 +348,98 @@ export default class QuestionsFormComponent extends Component {
     if (company) {
       this.selectedCompany = company;
       this.args.question.company = company;
+      return;
     }
+    // FRON-126. Neither side has a company IN THE STORE, which is not
+    // yet a dead end — a linked-but-unloaded company reads exactly the
+    // same through .value(). Ask for the ids before saying anything:
+    // announcing "this post has no company" about a post that has one
+    // we simply didn't fetch would be worse than the silence.
+    const linkedCompanyId =
+      option.record.belongsTo('company').id() ??
+      jobPost.belongsTo('company').id();
+    if (linkedCompanyId) {
+      this._resolveLinkedCompany(option, jobPost);
+      return;
+    }
+    this.companyDeadEnd = true;
+  }
+
+  /**
+   * One side claims a company by id but it isn't loaded. Resolve it and
+   * back-fill; only a resolution that comes back EMPTY is a dead end. A
+   * failed fetch is not — the link exists, we just couldn't follow it,
+   * so we stay quiet rather than assert something we don't know.
+   */
+  _resolveLinkedCompany(option, jobPost) {
+    const source = option.record.belongsTo('company').id()
+      ? option.record
+      : jobPost;
+    source.company
+      .then((company) => {
+        // The user may have moved on to another application meanwhile.
+        if (this.selectedJobAppOption !== option) return;
+        if (this.selectedCompany) return;
+        if (company) {
+          this.selectedCompany = company;
+          this.args.question.company = company;
+        } else {
+          this.companyDeadEnd = true;
+        }
+      })
+      .catch(() => {});
+  }
+
+  /**
+   * Write the company onto the JOB POST, not just the question.
+   *
+   * This is the whole point of the repair: setting it on the question
+   * labels this one answer and leaves the post companyless for every
+   * future use of it. Writing it to the post fixes the record.
+   *
+   * Plain Ember Data PATCH, deliberately — `company` is a writable
+   * relationship on the api's JobPostSerializer (`relationship_fks`
+   * maps it to `company_id`), so this is ordinary CRUD, not one of the
+   * four non-CRUD patterns in CLAUDE.md. There is no attach-company
+   * verb on JobPostViewSet to reach with apiAction, and <JobPosts::Form>
+   * already performs exactly this write from the edit page.
+   */
+  attachCompanyToJobPost(company) {
+    this.selectedCompany = company;
+    this.args.question.company = company;
+
+    const jobPost = this.selectedJobPost;
+    if (!jobPost) {
+      this.companyDeadEnd = false;
+      return Promise.resolve(null);
+    }
+
+    const previousCompany = jobPost.belongsTo('company').value();
+    jobPost.company = company;
+    this.attachingCompany = true;
+    return jobPost
+      .save()
+      .then((saved) => {
+        this.attachingCompany = false;
+        this.companyDeadEnd = false;
+        this.flashMessages.success(
+          `Attached ${company.name} to the job post — not just this question.`,
+        );
+        return saved;
+      })
+      .catch((error) => {
+        this.attachingCompany = false;
+        // Put the relationship back rather than leaving the form
+        // claiming a link the server refused. The notice stays up
+        // (the post is still companyless) so the pick can be retried.
+        jobPost.company = previousCompany;
+        if (error?.status !== 403) {
+          this.flashMessages.danger(
+            'Failed to attach the company to the job post.',
+          );
+        }
+        return null;
+      });
   }
 
   @action async save(event) {
