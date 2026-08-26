@@ -41,41 +41,61 @@ const RECONNECT_INITIAL_MS = 1000;
 const RECONNECT_MAX_MS = 300_000;
 const STABLE_CONNECTION_MS = 60_000;
 
-// Types that the api emits on the cc_events channel. Pinned here so a
-// silent rename on the backend surfaces as a known event we just don't
-// know how to handle, rather than mysterious store divergence.
-const HANDLED_TYPES = new Set([
-  'score',
-  'summary',
-  'cover_letter',
-  'answer',
-  'resume',
-  'scrape',
+// The complete specification of what SSE keeps fresh — one row per
+// event type the api emits on the cc_events channel. This used to be
+// three parallel constants (a handled-types Set, a type→model map and
+// a sparse sideload map); a type could be handled while silently
+// having no sideload decision recorded anywhere, which is exactly the
+// shape of "the event arrived, the template is reactive, and the data
+// is still stale". One row per type makes that omission impossible to
+// write by accident: `include` is a required key, and `null` is an
+// audited answer rather than a gap.
+//
+// Pinned rather than derived so a silent rename on the backend
+// surfaces as a known-unknown event we drop, not as mysterious store
+// divergence. The api's own list is job_hunting/lib/events.py
+// `EventType`.
+//
+//   model   — Ember Data model name. Mostly direct; snake_case →
+//             dasherized for cover_letter.
+//   include — JSON:API `?include=` passed to record.reload(), or null
+//             for "reload the record alone". A non-null value means
+//             the api's terminal write for this type ALSO mutates a
+//             related record that the event never mentions; Ember Data
+//             auto-pushes those from the compound document's
+//             `included[]`, so one round-trip keeps both fresh.
+//
+// The `include` column below was audited against the api's terminal
+// writes on 2026-08-26 (job_hunting/lib/tasks.py, lib/scraper.py):
+//
+//   score / summary / cover_letter / answer — the task writes only its
+//     own row (`<Model>.objects.filter(pk=...).update(...)`). Nothing
+//     else in the store goes stale, so a bare reload is complete.
+//     jp.index's Score column reads `JobPost#topScoreValue`, derived
+//     off the live `scores` ManyArray this reload refreshes — NOT the
+//     `topScore` belongsTo — so it updates without a sideload.
+//   scrape — parse writes back to the parent JobPost (title,
+//     description, company, link, apply_url) while emitting only a
+//     `scrape` event. Without the sideload, jp.show keeps rendering
+//     the old description until the user navigates away.
+//   resume — the only unsettled row. Ingest creates CHILD records
+//     (experiences, educations, projects, certifications, skills,
+//     summaries) rather than mutating a parent, so a hasMany that was
+//     already materialized empty stays empty. Left null deliberately:
+//     the fix is a multi-relationship include whose api support is
+//     unverified, and speculatively sideloading six relationships on
+//     every resume event is not a change to make blind. Tracked
+//     separately — do not "tidy" this into a guess.
+const EVENT_TYPES = new Map([
+  ['score', { model: 'score', include: null }],
+  ['summary', { model: 'summary', include: null }],
+  ['cover_letter', { model: 'cover-letter', include: null }],
+  ['answer', { model: 'answer', include: null }],
+  ['resume', { model: 'resume', include: null }],
+  ['scrape', { model: 'scrape', include: 'job-post' }],
 ]);
 
-// Map backend event type → Ember Data model name. Most are direct;
-// snake_case → dasherized for cover_letter.
-const TYPE_TO_MODEL = {
-  score: 'score',
-  summary: 'summary',
-  cover_letter: 'cover-letter',
-  answer: 'answer',
-  resume: 'resume',
-  scrape: 'scrape',
-};
-
-// Per-type sideload spec for the post-event reload. When the api
-// finishes a scrape it also writes back to the parent JobPost
-// (description, title, company, link), but the SSE channel only
-// emits a `scrape` event — without ?include=job-post the JobPost in
-// the store stays stale and jp.show keeps rendering the old
-// description until the user navigates away. The JSON:API compound
-// document Ember Data gets back from a `?include=job-post` reload
-// auto-pushes the JobPost from `included[]`, every template reading
-// model.description re-renders, and we avoid a second round-trip.
-const RELOAD_INCLUDE = {
-  scrape: 'job-post',
-};
+export { EVENT_TYPES };
 
 export default class EventsService extends Service {
   @service api;
@@ -252,9 +272,13 @@ export default class EventsService extends Service {
     }
     const type = payload?.type;
     const id = payload?.id;
-    if (!HANDLED_TYPES.has(type) || id == null) return;
+    // Map lookup, not a plain object — an event type off the wire that
+    // happens to name an Object.prototype member ('constructor',
+    // 'toString') must miss, not resolve to a function.
+    const spec = EVENT_TYPES.get(type);
+    if (!spec || id == null) return;
 
-    const modelName = TYPE_TO_MODEL[type];
+    const modelName = spec.model;
     const record = this.store.peekRecord(modelName, String(id));
     if (!record) {
       // Record not in this user's store — they haven't visited a page
@@ -272,15 +296,15 @@ export default class EventsService extends Service {
     // gets notified so the spinner ends and the user sees terminal
     // state on next interaction or page reload.
     //
-    // For types in RELOAD_INCLUDE, ask the api to sideload the
-    // related record(s) via JSON:API ?include=. Ember Data parses
-    // the compound document and auto-pushes any related records
-    // from `included[]` into the store — no manual cascade, no
-    // peekRecord, no second round-trip. Default JSONAPIAdapter
-    // buildQuery reads snapshot.include (set from reload options)
-    // and serializes it as `?include=<value>`.
-    const include = RELOAD_INCLUDE[type];
-    const reloadOptions = include ? { include } : undefined;
+    // When the type declares an `include`, ask the api to sideload the
+    // related record(s) via JSON:API ?include=. Ember Data parses the
+    // compound document and auto-pushes any related records from
+    // `included[]` into the store — no manual cascade, no peekRecord,
+    // no second round-trip. Default JSONAPIAdapter buildQuery reads
+    // snapshot.include (set from reload options) and serializes it as
+    // `?include=<value>`. A null `include` is an audited "this type's
+    // terminal write touches nothing else" — see EVENT_TYPES.
+    const reloadOptions = spec.include ? { include: spec.include } : undefined;
     record
       .reload(reloadOptions)
       .catch((e) => console.warn('[events] reload failed:', e))
