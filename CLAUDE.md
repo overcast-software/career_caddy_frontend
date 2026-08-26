@@ -203,7 +203,24 @@ headers and handles `401 → token refresh → retry` automatically.
 Every HTTP call from the frontend should fall into one of these four
 buckets. Drop into raw `fetch()` only for file download/upload or
 pre-auth flows — and leave a `KEEP raw fetch: <why>` comment when
-you do.
+you do. A `KEEP raw fetch:` note is a claim with a timestamp, not a
+permanent exemption: if the reason it states has stopped being true,
+migrate the call and delete the note.
+
+The buckets are named by URL shape, but what actually decides the
+choice is whether the call goes through `ApplicationAdapter.ajax`:
+
+- **Buckets 1, 2, 3** go through it and inherit the whole pipeline —
+  `ensureFreshToken` preflight on writes, `401 → refresh → retry once`,
+  the 403 flash, `buildURL`'s trailing-slash convention, and sparse
+  fieldsets via `adapterOptions.fields`.
+- **Bucket 4 and raw `fetch`** are bare `window.fetch` + `api.headers()`
+  and inherit none of it. In particular an expired JWT yields a 401 that
+  `reportFetch` reports as `error: 'failed'` — indistinguishable from a
+  server error, with no refresh and no redirect to login.
+
+So a call that _could_ be bucket 1/2/3 and isn't doesn't just look
+inconsistent; it silently opts out of token refresh.
 
 1. **Verbs on a resource** — `POST /resources/:id/<verb>/`.
    Use [`apiAction(this, { method, path, data })`][api-action] from a
@@ -225,9 +242,25 @@ you do.
    compound document with `included` for related resources is the
    norm). Read `result.meta` directly off the query result for any
    denormalized metadata.
-   Examples: `app/adapters/job-post-duplicate-candidate.js`,
+   The shape is always the same: pull the parent key off `query`,
+   `delete` it so it can't leak into the query string, and return
+   `buildURL(parent, id) + '<children>/'` — falling through to
+   `super.urlForQuery` when the key is absent, so the flat collection
+   query stays untouched.
+   All five: `app/adapters/job-post-duplicate-candidate.js`,
    `app/adapters/scrape-status.js` (graph-trace),
-   `app/adapters/screenshot.js`.
+   `app/adapters/screenshot.js`, `app/adapters/score.js`
+   (`/job-posts/:id/scores/`), and `app/adapters/job-post.js`
+   (`/users/:username/job-posts/federated/` — keyed on `username`
+   rather than an id, and the one endpoint `_isPublicEndpoint`
+   whitelists past the logged-out short-circuit).
+   Not this pattern: `career-data.js`, `onboarding.js` and `user.js`
+   override `urlForQueryRecord` for singleton reads.
+   Also note `app/adapters/job-post.js` still carries
+   `resolveAndDedupe` / `nuclearDelete` adapter methods left over from
+   before the bucket-1 migration. Every live call site goes through
+   `JobPost#resolveAndDedupe` / `#nuclearDelete` → `apiAction`. Adapter
+   methods are **not** a fifth pattern; don't copy them.
 
 4. **Reports / non-resource GETs** — denormalized aggregates that
    don't fit an Ember Data model class.

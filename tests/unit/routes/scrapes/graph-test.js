@@ -15,9 +15,13 @@ module('Unit | Route | scrapes/graph', function (hooks) {
   hooks.beforeEach(function () {
     this.origFetch = globalThis.fetch;
 
+    // reportFetch composes `${api.baseUrl}${path}/` — baseUrl, not
+    // api.url(). Keep url() on the stub anyway so the fixture matches
+    // the real service's surface.
     this.owner.register(
       'service:api',
       class extends Service {
+        baseUrl = 'http://test/api/v1/';
         url(path) {
           return `http://test${path}`;
         }
@@ -76,20 +80,36 @@ module('Unit | Route | scrapes/graph', function (hooks) {
   }
 
   test('composes trace POJOs from the iterable record array', async function (assert) {
-    stubFetch(() => ({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          data: {
-            nodes: [{ id: 'StartScrape' }, { id: 'LoadProfile' }],
-            edges: [{ from: 'StartScrape', to: 'LoadProfile' }],
-          },
-        }),
-    }));
+    const requested = [];
+    globalThis.fetch = (url, opts) => {
+      requested.push(url);
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            data: {
+              nodes: [{ id: 'StartScrape' }, { id: 'LoadProfile' }],
+              edges: [{ from: 'StartScrape', to: 'LoadProfile' }],
+            },
+          }),
+        _opts: opts,
+      });
+    };
 
     const route = this.owner.lookup('route:scrapes/graph');
     const result = await route.model({ scrape_id: '496' });
 
+    // The structure GET goes through reportFetch (bucket 4) now. It used
+    // to be a raw fetch behind a `KEEP raw fetch:` note whose stated
+    // reason — "would need a typed report client" — was already obsolete
+    // when it was written: reportFetch IS that client, and
+    // app/routes/admin/scrape-graph.js calls this same endpoint through it.
+    assert.deepEqual(
+      requested,
+      ['http://test/api/v1/admin/graph-structure/'],
+      'one GET, composed from api.baseUrl by reportFetch',
+    );
     assert.strictEqual(result.scrapeId, '496', 'scrapeId passed through');
     assert.strictEqual(result.trace.length, 2, 'trace not silently empty');
     assert.deepEqual(
@@ -139,5 +159,31 @@ module('Unit | Route | scrapes/graph', function (hooks) {
 
     assert.deepEqual(result.trace, [], 'trace is empty on query rejection');
     assert.deepEqual(result.chain, [], 'chain is empty on query rejection');
+  });
+
+  // The structure panel degrades to an empty graph rather than failing
+  // the whole route — the trace is the point of this page and it comes
+  // from a different request. reportFetch covers the non-ok half
+  // (returns {data: null}); the .catch in the route covers the network
+  // rejection half, which reportFetch lets through.
+
+  test('empty structure when the admin endpoint returns non-ok', async function (assert) {
+    stubFetch(() => ({ ok: false, status: 500 }));
+
+    const route = this.owner.lookup('route:scrapes/graph');
+    const result = await route.model({ scrape_id: '496' });
+
+    assert.deepEqual(result.structure, { nodes: [], edges: [] });
+    assert.strictEqual(result.trace.length, 2, 'the trace still renders');
+  });
+
+  test('empty structure when the structure request rejects outright', async function (assert) {
+    globalThis.fetch = () => Promise.reject(new Error('offline'));
+
+    const route = this.owner.lookup('route:scrapes/graph');
+    const result = await route.model({ scrape_id: '496' });
+
+    assert.deepEqual(result.structure, { nodes: [], edges: [] });
+    assert.strictEqual(result.trace.length, 2, 'the trace still renders');
   });
 });
