@@ -1,5 +1,6 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'career-caddy-frontend/tests/helpers';
+import { EVENT_TYPES } from 'career-caddy-frontend/services/events';
 
 module('Unit | Service | events', function (hooks) {
   setupTest(hooks);
@@ -153,9 +154,13 @@ module('Unit | Service | events', function (hooks) {
   });
 
   test('_handleMessage reload passes no options for non-scrape events', function (assert) {
-    // Score / summary / cover_letter / answer / resume don't have a
-    // known parent the api known-mutates on transition, so reload
-    // stays a bare GET — no speculative include payload, no extra
+    // Audited against the api's terminal writes (2026-08-26):
+    // score / summary / cover_letter / answer each write only their own
+    // row, so nothing else in the store goes stale and a bare GET is a
+    // complete reload. jp.index's Score column reads the derived
+    // `JobPost#topScoreValue` off the live `scores` ManyArray this
+    // reload refreshes, not the `topScore` belongsTo — so it updates
+    // without a sideload. No speculative include payload, no extra
     // sideload work on the api.
     const reloadOptions = [];
     const rec = makeRecord(this.reloads, reloadOptions);
@@ -176,6 +181,50 @@ module('Unit | Service | events', function (hooks) {
       undefined,
       'reload called without options for non-scrape types',
     );
+  });
+
+  // ── EVENT_TYPES is the whole spec of what SSE keeps fresh ─────────
+  //
+  // The three constants this replaced (handled-types Set, type→model
+  // map, sparse sideload map) let a type be handled while no sideload
+  // decision existed for it anywhere — the omission was invisible.
+  // These two tests are the enforcement: a new row cannot be added
+  // without answering both questions, and a hostile `type` off the
+  // wire cannot resolve through Object.prototype.
+
+  test('every handled event type declares both a model and an explicit sideload decision', function (assert) {
+    for (const [type, spec] of EVENT_TYPES) {
+      assert.strictEqual(
+        typeof spec.model,
+        'string',
+        `${type} declares an Ember Data model name`,
+      );
+      assert.true(
+        'include' in spec,
+        `${type} declares include — null is an audited "nothing else goes stale", a missing key is a gap`,
+      );
+      const includeKind = spec.include === null ? 'null' : typeof spec.include;
+      assert.ok(
+        ['null', 'string'].includes(includeKind),
+        `${type} include is null or a JSON:API include string (got ${includeKind})`,
+      );
+    }
+  });
+
+  test('_handleMessage ignores event types that name Object.prototype members', function (assert) {
+    // EVENT_TYPES is a Map for this reason. As a plain object,
+    // `EVENT_TYPES['constructor']` is a truthy function and the guard
+    // would wave the frame through into peekRecord(undefined, ...).
+    const rec = makeRecord(this.reloads);
+    this.records.set('constructor:1', rec);
+
+    for (const type of ['constructor', 'toString', '__proto__']) {
+      this.service._handleMessage({
+        data: JSON.stringify({ type, id: 1, status: 'completed' }),
+      });
+    }
+
+    assert.strictEqual(this.reloads.length, 0, 'no reload, no throw');
   });
 
   test('stop() is idempotent and clears state', function (assert) {
