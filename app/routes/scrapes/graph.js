@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import { reportFetch } from 'career-caddy-frontend/utils/report-fetch';
 
 export default class ScrapesGraphRoute extends Route {
   @service api;
@@ -10,14 +11,20 @@ export default class ScrapesGraphRoute extends Route {
       this.store
         .query('scrape-status', { scrape_id })
         .catch(() => ({ meta: { chain: [] } })),
-      // KEEP raw fetch: /admin/graph-structure/ is a non-resource admin
-      // endpoint with no underlying Ember Data model. Migrating it would
-      // need a typed report client (separate plan).
-      fetch(this.api.url('/api/v1/admin/graph-structure/'), {
-        headers: this.api.headers(),
-      })
-        .then((r) => (r.ok ? r.json() : { data: { nodes: [], edges: [] } }))
-        .catch(() => ({ data: { nodes: [], edges: [] } })),
+      // Bucket 4 (non-resource GET). This carried a `KEEP raw fetch:`
+      // note saying a typed report client would be needed — that client
+      // shipped as reportFetch the same day the note was written, and
+      // app/routes/admin/scrape-graph.js:10 has been calling THIS EXACT
+      // endpoint through it ever since. The exception documented history,
+      // not a constraint.
+      //
+      // The .catch stays: reportFetch maps a non-ok response to
+      // {error:'failed', data:null} but lets a network-level rejection
+      // through, and this panel degrades to an empty graph rather than
+      // failing the whole route.
+      reportFetch(this.api, 'admin/graph-structure').catch(() => ({
+        data: null,
+      })),
     ]);
     // Trace consumer (ScrapeGraph::Dagre) wants flat dicts shaped like
     // {scrape_id, graph_node, graph_payload, note, created_at}. Compose
