@@ -1,0 +1,90 @@
+{{! Application-level error substate (CC-121) — the universal safety net.
+
+  Any route whose model() rejects without being handled closer in lands here
+  instead of white-screening the SPA. It renders into the application route's
+  outlet, which application.hbs puts inside <MainApplication> (the
+  `chromeless` getter only fires for 'profile', and during the substate the
+  current route is 'error'), so the sidebar and top-bar survive — the visible
+  difference between "the app broke" and "that thing isn't there".
+
+  Deliberately NOT wrapped in <RouteLayout>: that renders <Breadcrumbs />,
+  which derives its trail from the current route, and during an error substate
+  there is no meaningful trail to draw. The dashed-border card below is the
+  same one profile.hbs uses for its not-found state.
+
+  404 vs everything-else is decided by ErrorController#is404 → isNotFound
+  (app/utils/is-not-found.js), which reads ember-data's typed NotFoundError.
+  A 5xx or a network drop falls to the else branch.
+
+  This header uses the LONG comment form on purpose. The short form ends at
+  the first closing pair of braces it meets, so a comment that mentions a
+  mustache by name — as this one did in its first draft — terminates early and
+  spills the remaining prose into the template as live markup. That is a build
+  error, not a lint warning: it read as an unclosed <RouteLayout> element. }}
+{{page-title (if this.is404 "Not found — Career Caddy" "Error — Career Caddy")}}
+
+<div class="fairway">
+  {{#if this.is404}}
+    <div
+      class="rounded-lg border border-dashed border-gray-300 px-6 py-16 text-center dark:border-gray-700"
+      data-test-error-404
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="mx-auto size-12 text-gray-400 dark:text-gray-500"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <h1 class="mt-4 text-base font-medium text-gray-700 dark:text-gray-300">
+        We couldn't find that
+      </h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        The record you asked for doesn't exist, or it isn't yours. Check the id
+        in the address bar — ids from one section don't resolve in another.
+      </p>
+      <LinkTo @route="index" class="btn small mt-6 inline-flex">
+        Back to the clubhouse
+      </LinkTo>
+    </div>
+  {{else}}
+    <div
+      class="rounded-lg border border-dashed border-gray-300 px-6 py-16 text-center dark:border-gray-700"
+      data-test-error-5xx
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="mx-auto size-12 text-gray-400 dark:text-gray-500"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+        />
+      </svg>
+      <h1 class="mt-4 text-base font-medium text-gray-700 dark:text-gray-300">
+        Something went wrong
+      </h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        That request didn't come back cleanly. Try again in a moment — if it
+        keeps happening, the server is having a bad time.
+      </p>
+      <LinkTo @route="index" class="btn small mt-6 inline-flex">
+        Back to the clubhouse
+      </LinkTo>
+    </div>
+  {{/if}}
+</div>

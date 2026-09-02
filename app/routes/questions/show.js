@@ -1,22 +1,21 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
-import { action } from '@ember/object';
+
 export default class QuestionsShowRoute extends Route {
   @service store;
-  @service router;
-  @service flashMessages;
+
   async model({ question_id }) {
     return this.store.findRecord('question', question_id, {
       include: 'answers',
     });
   }
 
-  // Matches routes/job-posts/show.js pattern — surface a soft flash
-  // and land the user back on the list rather than the raw error page.
-  @action
-  error() {
-    this.flashMessages.danger('Question not found.');
-    this.router.transitionTo('questions.index');
-    return false;
-  }
+  // CC-121: the `error()` action that used to live here flashed "Question not
+  // found." and redirected to questions.index with `return false`. That
+  // `return false` swallowed the error, so the app-level `error` substate
+  // (app/templates/error.hbs) could never fire for this subtree — and it made
+  // questions behave differently from every other show route, which now stays
+  // on the URL and renders the substate with chrome intact. Removed on
+  // purpose; do not reintroduce it. `router` / `flashMessages` went with it,
+  // as nothing else in this route used them.
 }
