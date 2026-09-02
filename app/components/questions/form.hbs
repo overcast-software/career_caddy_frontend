@@ -27,10 +27,72 @@
           @selected={{this.selectedCompany}}
           as |company|
         >
+          {{! Name AND display name, because near-duplicate company rows
+              exist and they collapse under one label: "Toptal, LLC"
+              displays as "Toptal", indistinguishable from the "Toptal"
+              row next to it. Attaching the WRONG company to a job post
+              is worse than attaching none, so show both whenever they
+              disagree. (Dedupe of those rows is a separate concern.) }}
           {{company.name}}
+          {{#if
+            (and company.displayName (not-eq company.displayName company.name))
+          }}
+            <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">
+              displays as “{{company.displayName}}”
+            </span>
+          {{/if}}
         </PowerSelectWithCreate>
       {{/if}}
     </div>
+
+    {{! FRON-126. Choosing a job application fills in its job post, but
+        when neither carries a company the Company field just stays
+        blank — indistinguishable from "not picked yet". State the fact,
+        and keep the picker above live so it can be repaired here.
+
+        Not offered on the locked arrival paths (job-posts/:id/questions/new
+        and friends), where Company renders as a disabled input and there
+        is nothing to repair with. }}
+    {{#if this.showCompanyDeadEnd}}
+      <div
+        class="rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
+        data-test-company-dead-end
+      >
+        <div class="flex items-start gap-2">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            class="size-5 shrink-0 text-amber-600 dark:text-amber-300 mt-0.5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+            />
+          </svg>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
+              This job post has no company on it.
+            </p>
+            <p class="mt-1 text-sm text-amber-800 dark:text-amber-200">
+              Neither the application you picked nor
+              <span class="font-medium">{{this.selectedJobPost.title}}</span>
+              carries one — that is why Company is blank. Choose or create a
+              company above and it will be saved to the job post itself, not
+              just this question.
+            </p>
+            {{#if this.attachingCompany}}
+              <p
+                class="mt-1 text-sm text-amber-700 dark:text-amber-300"
+                data-test-attaching-company
+              >Attaching to the job post…</p>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    {{/if}}
 
     {{#if this.isLoadingRelated}}
       <p class="loading-hint">Loading applications…</p>

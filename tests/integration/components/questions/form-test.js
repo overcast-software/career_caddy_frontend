@@ -47,6 +47,46 @@ module('Integration | Component | questions/form', function (hooks) {
     });
   }
 
+  // FRON-126: the real dead-end shape. An application links its job
+  // post, the post exists — and NEITHER carries a company. That is the
+  // observed state of JA sZMa2qMpE8 → JP H753taz3fT, an extension-created
+  // post the ingestion path couldn't attach a company to.
+  function seedCompanyless(store) {
+    store.push({
+      data: [
+        {
+          type: 'job-post',
+          id: 'jp9',
+          attributes: { title: 'Senior Rails Engineer' },
+        },
+        {
+          type: 'job-application',
+          id: 'ja9',
+          attributes: { status: 'Applied' },
+          relationships: {
+            jobPost: { data: { type: 'job-post', id: 'jp9' } },
+          },
+        },
+      ],
+    });
+  }
+
+  // Two rows that both READ as "Toptal" — Company#__str__ is
+  // `display_name or name`, so the second one displays as the first.
+  // Attaching the wrong one to a job post is worse than attaching none.
+  function seedNearDuplicateCompanies(store) {
+    store.push({
+      data: [
+        { type: 'company', id: 'c1', attributes: { name: 'Toptal' } },
+        {
+          type: 'company',
+          id: 'c2',
+          attributes: { name: 'Toptal, LLC', displayName: 'Toptal' },
+        },
+      ],
+    });
+  }
+
   // Stand in for the api so the typeahead resolves without a backend,
   // and capture what was actually asked for.
   function stubQuery(store, resultsByModel) {
@@ -303,5 +343,215 @@ module('Integration | Component | questions/form', function (hooks) {
         'Backend Engineer (Ruby on Rails) — Applied',
         'the application itself stays locked',
       );
+  });
+
+  // ── FRON-126: the chain resolves but carries no company ──────────────
+
+  test('an application whose job post has no company says so instead of going blank', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    seedCompanyless(store);
+    stubQuery(store, {
+      'job-application': [store.peekRecord('job-application', 'ja9')],
+    });
+    this.question = store.createRecord('question', {});
+
+    await render(hbs`<Questions::Form @question={{this.question}} />`);
+
+    await clickTrigger('[data-test-job-app-field]');
+    await typeInSearch('Rails');
+    await settled();
+    await click(findContains('.ember-power-select-option', 'Senior Rails'));
+
+    assert.strictEqual(
+      this.question.belongsTo('jobPost').id(),
+      'jp9',
+      'the job post still comes along for free',
+    );
+    assert
+      .dom('[data-test-company-dead-end]')
+      .exists('the blank Company field is explained rather than left silent');
+    assert
+      .dom('[data-test-company-dead-end]')
+      .includesText(
+        'Senior Rails Engineer',
+        'the notice names the post that is missing a company',
+      );
+    assert
+      .dom('[data-test-company-field] .ember-power-select-trigger')
+      .exists('the company picker stays live so the repair is reachable here');
+  });
+
+  test('an application whose job post already has a company back-fills with no new messaging', async function (assert) {
+    // Regression guard: the notice must assert a fact about the record,
+    // so it may never appear on the ordinary path.
+    const store = this.owner.lookup('service:store');
+    seed(store);
+    stubQuery(store, {
+      'job-application': [store.peekRecord('job-application', 'ja1')],
+    });
+    this.question = store.createRecord('question', {});
+
+    await render(hbs`<Questions::Form @question={{this.question}} />`);
+
+    await clickTrigger('[data-test-job-app-field]');
+    await typeInSearch('Backend');
+    await settled();
+    await click(
+      findContains('.ember-power-select-option', 'Backend Engineer (Ruby'),
+    );
+
+    assert.strictEqual(this.question.belongsTo('company').id(), 'c1');
+    assert
+      .dom('[data-test-company-dead-end]')
+      .doesNotExist('a post that has a company gets no notice');
+  });
+
+  test('choosing a company in that state writes it to the JOB POST, not just the question', async function (assert) {
+    // The load-bearing assertion. Setting the company only on the
+    // question labels this one answer and leaves the post broken for
+    // every future use of it.
+    const store = this.owner.lookup('service:store');
+    seedCompanyless(store);
+    seedNearDuplicateCompanies(store);
+    stubQuery(store, {
+      'job-application': [store.peekRecord('job-application', 'ja9')],
+      company: [
+        store.peekRecord('company', 'c1'),
+        store.peekRecord('company', 'c2'),
+      ],
+    });
+    const jobPost = store.peekRecord('job-post', 'jp9');
+    let saves = 0;
+    // The store is stubbed, so this proves the PATCH was ISSUED against
+    // the job post with the right relationship — not its wire shape.
+    jobPost.save = () => {
+      saves += 1;
+      return Promise.resolve(jobPost);
+    };
+    this.question = store.createRecord('question', {});
+
+    await render(hbs`<Questions::Form @question={{this.question}} />`);
+
+    await clickTrigger('[data-test-job-app-field]');
+    await typeInSearch('Rails');
+    await settled();
+    await click(findContains('.ember-power-select-option', 'Senior Rails'));
+
+    await clickTrigger('[data-test-company-field]');
+    await typeInSearch('Top');
+    await settled();
+    await click(findContains('.ember-power-select-option', 'Toptal'));
+
+    assert.strictEqual(saves, 1, 'the job post was saved exactly once');
+    assert.strictEqual(
+      jobPost.belongsTo('company').id(),
+      'c1',
+      'the company landed on the job post itself',
+    );
+    assert.strictEqual(
+      this.question.belongsTo('company').id(),
+      'c1',
+      'and on the question',
+    );
+    assert.strictEqual(
+      this.question.belongsTo('jobPost').id(),
+      'jp9',
+      'picking a company did not throw away the job post being repaired',
+    );
+    assert.strictEqual(
+      this.question.belongsTo('jobApplication').id(),
+      'ja9',
+      'nor the application',
+    );
+    assert
+      .dom('[data-test-company-dead-end]')
+      .doesNotExist('the notice clears once the post carries a company');
+  });
+
+  test('the company picker separates rows that display under the same name', async function (assert) {
+    // Three near-duplicate "Toptal" rows exist. `Toptal, LLC` displays
+    // as "Toptal", so name alone cannot tell them apart.
+    const store = this.owner.lookup('service:store');
+    seedNearDuplicateCompanies(store);
+    stubQuery(store, {
+      company: [
+        store.peekRecord('company', 'c1'),
+        store.peekRecord('company', 'c2'),
+      ],
+    });
+    this.question = store.createRecord('question', {});
+
+    await render(hbs`<Questions::Form @question={{this.question}} />`);
+
+    await clickTrigger('[data-test-company-field]');
+    await typeInSearch('Top');
+    await settled();
+
+    assert.ok(
+      findContains('.ember-power-select-option', 'Toptal, LLC'),
+      'the row is shown by its real name',
+    );
+    assert.ok(
+      findContains('.ember-power-select-option', 'displays as'),
+      'and by the name it displays under, so the two are distinguishable',
+    );
+  });
+
+  test('a company that is linked but not loaded is never declared missing', async function (assert) {
+    // .value() reads null for "no company" and for "a company we haven't
+    // fetched" alike. Announcing "this post has no company" about a post
+    // that has one would be worse than the silence being fixed here, so
+    // the notice is withheld whenever a company id is linked.
+    //
+    // Scope: this covers the DECISION. Whether the fetch then succeeds
+    // is Ember Data's async belongsTo, which the stubbed store here does
+    // not drive — the adapter below rejects so nothing reaches the
+    // network and the failure path is exercised instead. A failed fetch
+    // must also stay quiet: the link exists, we just couldn't follow it.
+    const store = this.owner.lookup('service:store');
+    store.push({
+      data: [
+        {
+          type: 'job-post',
+          id: 'jp8',
+          attributes: { title: 'Platform Engineer' },
+          relationships: {
+            company: { data: { type: 'company', id: 'c7' } },
+          },
+        },
+        {
+          type: 'job-application',
+          id: 'ja8',
+          attributes: { status: 'Applied' },
+          relationships: {
+            jobPost: { data: { type: 'job-post', id: 'jp8' } },
+          },
+        },
+      ],
+    });
+    this.owner.lookup('adapter:application').findRecord = () =>
+      Promise.reject(new Error('company fetch failed'));
+    stubQuery(store, {
+      'job-application': [store.peekRecord('job-application', 'ja8')],
+    });
+    this.question = store.createRecord('question', {});
+
+    await render(hbs`<Questions::Form @question={{this.question}} />`);
+
+    await clickTrigger('[data-test-job-app-field]');
+    await typeInSearch('Platform');
+    await settled();
+    await click(
+      findContains('.ember-power-select-option', 'Platform Engineer'),
+    );
+
+    assert
+      .dom('[data-test-company-dead-end]')
+      .doesNotExist('an unloaded company is not a missing one');
+    assert.strictEqual(
+      this.question.belongsTo('company').id(),
+      null,
+      'and nothing was guessed onto the question in its place',
+    );
   });
 });
