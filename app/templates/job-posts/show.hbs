@@ -1,238 +1,269 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
-    {{! Phase 4 federation: origin instance broadcast an ActivityPub
-        Delete for this row, tombstoning it. The api persists the
-        retraction timestamp + originating hostname; the local rows +
-        application records (scores, applications, cover letters) all
-        remain intact and continue to render below. Local-instance
-        suppression deferred — frontend has no `CAREER_CADDY_INSTANCE`
-        config wired up yet, so we gate on `sourceDeletedAt` alone.
-        Follow-up: thread the local hostname through config/environment
-        and skip the banner when sourceInstance matches it. }}
-    {{#if this.model.sourceDeletedAt}}
+    {{#if this.model.isNotFound}}
+      {{! CC-121 layer 2 — inline not-found degradation. The route resolves
+        model() with a { isNotFound, requestedId } sentinel on a 404 instead
+        of rejecting, so we stay on the URL the user typed, keep the full app
+        chrome, and can say something useful about WHY the id missed. The
+        common real-world case (the one that filed this ticket) is a scrape id
+        pasted into a job-post URL, so that hint is called out by name. }}
       <div
-        class="rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
-        data-test-source-withdrawn
-        role="status"
+        class="rounded-lg border border-dashed border-gray-300 px-6 py-16 text-center dark:border-gray-700"
+        data-test-jp-not-found
       >
-        <p class="text-sm text-amber-800 dark:text-amber-200">
-          <span class="font-medium">Original posting withdrawn.</span>
-          The job post
-          {{#if this.model.sourceInstance}}
-            on
-            <span class="font-medium">{{this.model.sourceInstance}}</span>
-          {{/if}}
-          was retracted on
-          {{format-date this.model.sourceDeletedAt "MMM D, YYYY"}}. Your
-          application records remain intact.
+        <h1 class="text-base font-medium text-gray-700 dark:text-gray-300">
+          No job post with that id
+        </h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Nothing here matches
+          <code
+            class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs dark:bg-gray-800"
+          >{{this.model.requestedId}}</code>.
         </p>
+        <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+          If you pasted this from a scrape, it's probably a
+          <strong>scrape id</strong>, not a job-post id — those live under
+          <LinkTo @route="scrapes" class="underline">Scrapes</LinkTo>.
+        </p>
+        <LinkTo @route="job-posts" class="btn small mt-6 inline-flex">
+          Back to job posts
+        </LinkTo>
       </div>
-    {{/if}}
-
-    <div class="panel-card space-y-3 pb-4">
-      {{! Title/meta row, then actions row below — full width on every
-          viewport. Earlier we pinned actions to the right of the title
-          (sm:justify-between), which with a short title left a big
-          empty gap and floated "Run scrape" far from the content. A
-          dedicated row keeps the action cluster close to what it acts
-          on, and long triage chips can wrap in place without dragging
-          the rest to a new line. }}
-      <div class="flex flex-col gap-3">
-        <div class="min-w-0">
-          <p class="text-xs text-gray-500">
-            {{~#if this.model.company.name~}}
-              {{this.model.company.name}}
-            {{~else~}}
-              <span class="italic text-amber-500">Company missing</span>
-            {{~/if~}}
+    {{else}}
+      {{! Phase 4 federation: origin instance broadcast an ActivityPub
+          Delete for this row, tombstoning it. The api persists the
+          retraction timestamp + originating hostname; the local rows +
+          application records (scores, applications, cover letters) all
+          remain intact and continue to render below. Local-instance
+          suppression deferred — frontend has no `CAREER_CADDY_INSTANCE`
+          config wired up yet, so we gate on `sourceDeletedAt` alone.
+          Follow-up: thread the local hostname through config/environment
+          and skip the banner when sourceInstance matches it. }}
+      {{#if this.model.sourceDeletedAt}}
+        <div
+          class="rounded-md bg-amber-50 p-3 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/30"
+          data-test-source-withdrawn
+          role="status"
+        >
+          <p class="text-sm text-amber-800 dark:text-amber-200">
+            <span class="font-medium">Original posting withdrawn.</span>
+            The job post
+            {{#if this.model.sourceInstance}}
+              on
+              <span class="font-medium">{{this.model.sourceInstance}}</span>
+            {{/if}}
+            was retracted on
+            {{format-date this.model.sourceDeletedAt "MMM D, YYYY"}}. Your
+            application records remain intact.
           </p>
-          <h1 class="text-lg font-semibold text-gray-900 break-words">
-            {{this.model.title}}
-            {{#if this.model.link}}
-              <a
-                href={{this.model.link}}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-accent-500 text-sm ml-1"
-              >↗</a>
-            {{/if}}
-          </h1>
-          <div
-            class="flex flex-wrap items-center gap-3 text-xs text-gray-400 mt-0.5"
-          >
-            {{#if (if this.model.postedDate true this.model.createdAt)}}
-              <span>Posted:
-                {{format-date
-                  (if
-                    this.model.postedDate
-                    this.model.postedDate
-                    this.model.createdAt
-                  )
-                  "MMM D, YYYY"
-                }}</span>
-            {{/if}}
-            {{#if this.model.createdAt}}
-              <span>Added:
-                {{format-date this.model.createdAt "MMM D, YYYY"}}</span>
-            {{/if}}
-            {{#if this.model.source}}
-              <span
-                class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700"
-                title="How this job-post entered Career Caddy"
-              >
-                Source:
-                {{this.model.source}}
-              </span>
-            {{/if}}
-            {{! Visibility chip: only rendered for non-public posts.
-                Public is the default + the overwhelming majority case,
-                so a "Public" pill would just be noise on every header.
-                Private is the exception, so it earns the chip. The
-                shape mirrors the other gray meta chips on this row.
-                Phase 4 will key federation dispatch off this same
-                audience field; today it just drives this badge. }}
-            {{#unless this.model.isPublic}}
-              <span
-                data-test-private-badge
-                class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700"
-                title="This post is private — not addressed to the ActivityStreams public collection"
-              >
-                Private
-              </span>
-            {{/unless}}
-          </div>
-          {{#if this.model.duplicateOfId}}
-            <LinkTo
-              @route="job-posts.show"
-              @model={{this.model.duplicateOfId}}
-              class="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30"
-            >
-              Duplicate of #{{this.model.duplicateOfId}}
-            </LinkTo>
-          {{/if}}
-          {{#if this.model.repostedFromId}}
-            <LinkTo
-              @route="job-posts.show"
-              @model={{this.model.repostedFromId}}
-              class="mt-1 ml-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-500/30"
-              data-test-reposted-from
-            >
-              Reposted from #{{this.model.repostedFromId}}
-            </LinkTo>
-          {{/if}}
-          {{#if this.model.repostsCount}}
-            <span
-              class="mt-1 ml-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-500/30"
-              title="This posting has been re-listed elsewhere"
-              data-test-reposts-count
-            >
-              {{this.model.repostsCount}}
-              {{if (eq this.model.repostsCount 1) "repost" "reposts"}}
-              of this
-            </span>
-          {{/if}}
-          {{#if (eq this.model.postingStatus "closed")}}
-            <span
-              class="mt-1 ml-1 inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/30"
-              title="Extracted text indicates this posting is no longer accepting applications"
-            >
-              Closed
-            </span>
-          {{/if}}
-          <ApplyDestination @jobPost={{this.model}} />
         </div>
-        {{! All header actions — Run scrape / Copy / Edit / Vetted Good /
-            Vetted Bad (+ reason picker) — flow in a single wrapping
-            row directly under the title, left-aligned. }}
-        <div class="flex flex-wrap items-center gap-2">
-          {{#if (and this.model.link this.model.isStub)}}
-            {{! Only surface Scrape & Score on stubs — a full-description
-                post already has enough to score in isolation, and the
-                combined action rescrapes the whole page for no gain. }}
-            <button
-              type="button"
-              class="btn small primary"
-              disabled={{or this.scrapeSubmitting this.scoreSubmitting}}
-              {{on "click" this.scrapeAndScore}}
+      {{/if}}
+
+      <div class="panel-card space-y-3 pb-4">
+        {{! Title/meta row, then actions row below — full width on every
+            viewport. Earlier we pinned actions to the right of the title
+            (sm:justify-between), which with a short title left a big
+            empty gap and floated "Run scrape" far from the content. A
+            dedicated row keeps the action cluster close to what it acts
+            on, and long triage chips can wrap in place without dragging
+            the rest to a new line. }}
+        <div class="flex flex-col gap-3">
+          <div class="min-w-0">
+            <p class="text-xs text-gray-500">
+              {{~#if this.model.company.name~}}
+                {{this.model.company.name}}
+              {{~else~}}
+                <span class="italic text-amber-500">Company missing</span>
+              {{~/if~}}
+            </p>
+            <h1 class="text-lg font-semibold text-gray-900 break-words">
+              {{this.model.title}}
+              {{#if this.model.link}}
+                <a
+                  href={{this.model.link}}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-accent-500 text-sm ml-1"
+                >↗</a>
+              {{/if}}
+            </h1>
+            <div
+              class="flex flex-wrap items-center gap-3 text-xs text-gray-400 mt-0.5"
             >
-              {{if
-                this.scoreSubmitting
-                "Scoring…"
-                (if this.scrapeSubmitting "Scraping…" "Scrape & Score")
-              }}
-            </button>
-          {{/if}}
-          <LinkTo
-            class="btn small"
-            @route="job-posts.edit"
-            @model={{this.model}}
-          >Edit</LinkTo>
-          <JobPosts::PublishToggle @jobPost={{this.model}} />
-          <JobPosts::TriageActions @jobPost={{this.model}} />
+              {{#if (if this.model.postedDate true this.model.createdAt)}}
+                <span>Posted:
+                  {{format-date
+                    (if
+                      this.model.postedDate
+                      this.model.postedDate
+                      this.model.createdAt
+                    )
+                    "MMM D, YYYY"
+                  }}</span>
+              {{/if}}
+              {{#if this.model.createdAt}}
+                <span>Added:
+                  {{format-date this.model.createdAt "MMM D, YYYY"}}</span>
+              {{/if}}
+              {{#if this.model.source}}
+                <span
+                  class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700"
+                  title="How this job-post entered Career Caddy"
+                >
+                  Source:
+                  {{this.model.source}}
+                </span>
+              {{/if}}
+              {{! Visibility chip: only rendered for non-public posts.
+                  Public is the default + the overwhelming majority case,
+                  so a "Public" pill would just be noise on every header.
+                  Private is the exception, so it earns the chip. The
+                  shape mirrors the other gray meta chips on this row.
+                  Phase 4 will key federation dispatch off this same
+                  audience field; today it just drives this badge. }}
+              {{#unless this.model.isPublic}}
+                <span
+                  data-test-private-badge
+                  class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700"
+                  title="This post is private — not addressed to the ActivityStreams public collection"
+                >
+                  Private
+                </span>
+              {{/unless}}
+            </div>
+            {{#if this.model.duplicateOfId}}
+              <LinkTo
+                @route="job-posts.show"
+                @model={{this.model.duplicateOfId}}
+                class="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30"
+              >
+                Duplicate of #{{this.model.duplicateOfId}}
+              </LinkTo>
+            {{/if}}
+            {{#if this.model.repostedFromId}}
+              <LinkTo
+                @route="job-posts.show"
+                @model={{this.model.repostedFromId}}
+                class="mt-1 ml-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-500/30"
+                data-test-reposted-from
+              >
+                Reposted from #{{this.model.repostedFromId}}
+              </LinkTo>
+            {{/if}}
+            {{#if this.model.repostsCount}}
+              <span
+                class="mt-1 ml-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-500/30"
+                title="This posting has been re-listed elsewhere"
+                data-test-reposts-count
+              >
+                {{this.model.repostsCount}}
+                {{if (eq this.model.repostsCount 1) "repost" "reposts"}}
+                of this
+              </span>
+            {{/if}}
+            {{#if (eq this.model.postingStatus "closed")}}
+              <span
+                class="mt-1 ml-1 inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/30"
+                title="Extracted text indicates this posting is no longer accepting applications"
+              >
+                Closed
+              </span>
+            {{/if}}
+            <ApplyDestination @jobPost={{this.model}} />
+          </div>
+          {{! All header actions — Run scrape / Copy / Edit / Vetted Good /
+              Vetted Bad (+ reason picker) — flow in a single wrapping
+              row directly under the title, left-aligned. }}
+          <div class="flex flex-wrap items-center gap-2">
+            {{#if (and this.model.link this.model.isStub)}}
+              {{! Only surface Scrape & Score on stubs — a full-description
+                  post already has enough to score in isolation, and the
+                  combined action rescrapes the whole page for no gain. }}
+              <button
+                type="button"
+                class="btn small primary"
+                disabled={{or this.scrapeSubmitting this.scoreSubmitting}}
+                {{on "click" this.scrapeAndScore}}
+              >
+                {{if
+                  this.scoreSubmitting
+                  "Scoring…"
+                  (if this.scrapeSubmitting "Scraping…" "Scrape & Score")
+                }}
+              </button>
+            {{/if}}
+            <LinkTo
+              class="btn small"
+              @route="job-posts.edit"
+              @model={{this.model}}
+            >Edit</LinkTo>
+            <JobPosts::PublishToggle @jobPost={{this.model}} />
+            <JobPosts::TriageActions @jobPost={{this.model}} />
+          </div>
         </div>
       </div>
-    </div>
 
-    {{! `duplicateCandidatesList` is the JobPost getter that unwraps
-        the async hasMany PromiseManyArray (not JS-iterable) into the
-        underlying record array. The route's model() awaits
-        .hasMany('duplicateCandidates').reload() so by first paint the
-        relationship is loaded and the getter returns a real array. }}
-    <JobPosts::DuplicateCandidates
-      @candidates={{this.model.duplicateCandidatesList}}
-      @jobPost={{this.model}}
-    />
+      {{! `duplicateCandidatesList` is the JobPost getter that unwraps
+          the async hasMany PromiseManyArray (not JS-iterable) into the
+          underlying record array. The route's model() awaits
+          .hasMany('duplicateCandidates').reload() so by first paint the
+          relationship is loaded and the getter returns a real array. }}
+      <JobPosts::DuplicateCandidates
+        @candidates={{this.model.duplicateCandidatesList}}
+        @jobPost={{this.model}}
+      />
 
-    {{#if this.model.description}}
-      <Panel::Card @title="About the job">
-        <:top>
-          <div class="flex items-center gap-3">
-            <button
-              type="button"
-              class="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              {{on "click" this.copyDescription}}
-            >
-              {{this.copyButtonText}}
-            </button>
-            <button
-              type="button"
-              class="text-xs font-medium text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300"
-              {{on "click" this.toggleDescription}}
-            >
-              {{if this.descriptionExpanded "Collapse" "Expand"}}
-            </button>
-          </div>
-        </:top>
-        <:default>
-          {{! whitespace-pre-line preserves paragraph breaks from the source
-              posting. line-clamp-[8] caps collapsed height. max-w-prose
-              keeps measure readable on wide viewports. }}
-          <p
-            class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line break-words max-w-prose
-              {{unless this.descriptionExpanded 'line-clamp-[8]'}}"
-          >{{this.model.description}}</p>
-        </:default>
+      {{#if this.model.description}}
+        <Panel::Card @title="About the job">
+          <:top>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                class="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                {{on "click" this.copyDescription}}
+              >
+                {{this.copyButtonText}}
+              </button>
+              <button
+                type="button"
+                class="text-xs font-medium text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300"
+                {{on "click" this.toggleDescription}}
+              >
+                {{if this.descriptionExpanded "Collapse" "Expand"}}
+              </button>
+            </div>
+          </:top>
+          <:default>
+            {{! whitespace-pre-line preserves paragraph breaks from the source
+                posting. line-clamp-[8] caps collapsed height. max-w-prose
+                keeps measure readable on wide viewports. }}
+            <p
+              class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line break-words max-w-prose
+                {{unless this.descriptionExpanded 'line-clamp-[8]'}}"
+            >{{this.model.description}}</p>
+          </:default>
+        </Panel::Card>
+      {{/if}}
+
+      <JobPosts::AliasesPanel @jobPost={{this.model}} />
+
+      <Panel::Card>
+        <JobPosts::Tabs @jobPost={{this.model}} />
+        <div role="tabpanel" class="mt-4 relative overflow-hidden">
+          <AnimatedContainer class="w-full">
+            {{#animated-each
+              (array this.activeTabKey)
+              key="@identity"
+              use=this.tabTransition
+              duration=350
+            }}
+              <div class="w-full">
+                {{outlet}}
+              </div>
+            {{/animated-each}}
+          </AnimatedContainer>
+        </div>
       </Panel::Card>
     {{/if}}
-
-    <JobPosts::AliasesPanel @jobPost={{this.model}} />
-
-    <Panel::Card>
-      <JobPosts::Tabs @jobPost={{this.model}} />
-      <div role="tabpanel" class="mt-4 relative overflow-hidden">
-        <AnimatedContainer class="w-full">
-          {{#animated-each
-            (array this.activeTabKey)
-            key="@identity"
-            use=this.tabTransition
-            duration=350
-          }}
-            <div class="w-full">
-              {{outlet}}
-            </div>
-          {{/animated-each}}
-        </AnimatedContainer>
-      </div>
-    </Panel::Card>
   </:main>
 </RouteLayout>
