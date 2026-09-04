@@ -1465,8 +1465,22 @@ a.landing-btn-primary:hover {
   height: 100vh;
 }
 
+/* A section boundary, not a call to action. The old filled accent pill
+   (bg-accent-100 / text-accent-900 / border) read as a button and fought the
+   dark form; a weighted heading over a hairline rule states the boundary
+   honestly and still toggles (the chevron carries the affordance). */
 .builder-section-header {
-  padding: 0.75rem 1rem 0.75rem 1.25rem;
+  padding: 0.5rem 0.25rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.builder-section-header:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .builder-section-body {
@@ -1481,6 +1495,37 @@ a.landing-btn-primary:hover {
 
 .builder-divider {
   border-color: var(--border);
+}
+
+/* Resume/builder editor — phone density pass. Placed after every .builder-*
+   base rule above so these overrides win (a media query adds no specificity). */
+/* Boundary is 767px, not 640: the builder is a dense two-up form, and 640-768
+   (a phone landscape, or a window at half a 1440 monitor) is too narrow for
+   two columns + the 10% gutters + split view without going janky. Below md the
+   whole editor goes single-column and full-bleed; the field grids use md: to
+   match. */
+@media (width <= 767px) {
+  /* The builder centers itself with a 10% side margin — ~20% of a narrow
+     window spent on empty gutters. Reclaim it; the panes carry small padding. */
+  .fairway.builder-page {
+    margin: 0;
+  }
+
+  /* The preview is a fixed 8.5in document; the desktop pane padding (p-8) plus
+     the wrap's 3.5rem/2.5rem frame crushed it to a one-to-two-word column.
+     Give the document back its width. */
+  .builder-preview {
+    padding: 0.5rem;
+  }
+
+  .builder-preview-wrap {
+    padding: 1rem;
+  }
+
+  /* Split view has no meaning at phone width. */
+  .builder-control-split {
+    display: none;
+  }
 }
 
 .builder-label-hint {

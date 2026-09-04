@@ -29,7 +29,11 @@
         class="btn"
         {{on "click" this.exportToWord}}
       >Export</button>
-      <button type="button" class="btn" {{on "click" this.toggleLayout}}>
+      <button
+        type="button"
+        class="btn builder-control-split"
+        {{on "click" this.toggleLayout}}
+      >
         {{#if this.sideBySide}}
           <svg
             xmlns="http://www.w3.org/2000/svg"
