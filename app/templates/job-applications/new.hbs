@@ -12,7 +12,7 @@
       <div class="field-row">
         <div class="field">
           <label class="field-label">Resume</label>
-          <PowerSelect
+          <CcSelect
             @options={{this.resumes}}
             @onChange={{this.updateResume}}
             @selected={{this.selectedResume}}
@@ -22,14 +22,14 @@
             as |resume|
           >
             {{resume.name}}{{#if resume.notes}} - {{resume.notes}}{{/if}}
-          </PowerSelect>
+          </CcSelect>
         </div>
       </div>
 
       <div class="field-row">
         <div class="field">
           <label class="field-label">Cover letter</label>
-          <PowerSelect
+          <CcSelect
             @options={{this.coverLetters}}
             @onChange={{this.updateCoverLetter}}
             @selected={{this.selectedCoverLetter}}
@@ -41,11 +41,11 @@
             {{coverLetter.jobPost.title}}
             -
             {{format-date coverLetter.createdAt}}
-          </PowerSelect>
+          </CcSelect>
         </div>
         <div class="field">
           <label class="field-label">Status</label>
-          <PowerSelect
+          <CcSelect
             @options={{this.statusOptions}}
             @onChange={{this.updateStatus}}
             @selected={{this.selectedStatus}}
@@ -53,7 +53,7 @@
             as |status|
           >
             {{status}}
-          </PowerSelect>
+          </CcSelect>
         </div>
       </div>
 

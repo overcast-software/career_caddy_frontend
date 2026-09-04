@@ -93,7 +93,8 @@
     </button>
     {{#if this.showReasonPicker}}
       <div class="w-40 text-xs">
-        <PowerSelectWithCreate
+        <CcSelect
+          @withCreate={{true}}
           @options={{this.reasonOptions}}
           @searchField="label"
           @searchEnabled={{true}}
@@ -108,7 +109,7 @@
           as |reason|
         >
           {{reason.label}}
-        </PowerSelectWithCreate>
+        </CcSelect>
       </div>
     {{/if}}
   </div>

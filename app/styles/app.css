@@ -2481,6 +2481,20 @@ pre {
   visibility: hidden;
 }
 
+/* CC-271: mobile picker dropdown inset. <CcSelect>'s calculatePosition pins
+   the wormholed dropdown to a 12px gutter each side below the md breakpoint;
+   this is the belt-and-suspenders cap so a full-width trigger's dropdown can
+   never run to the viewport edge even if EPS applies its own min-width. Keyed
+   on the @dropdownClass <CcSelect> sets. Placed AFTER the .ember-power-select-*
+   / .ember-basic-dropdown-content overrides above so it wins the equal-
+   specificity cascade (a media query adds none). */
+@media (width <= 767px) {
+  .cc-select-dropdown {
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+  }
+}
+
 .nav-link {
   color: var(--muted);
   text-decoration: none;
