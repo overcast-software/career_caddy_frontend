@@ -1076,7 +1076,7 @@ a.btn.primary:active {
   min-height: calc(2 * var(--space-3) + 1lh + 2px);
 }
 
-@media (width <= 640px) {
+@media (width <= 767px) {
   .builder-form.two-col {
     grid-template-columns: 1fr;
   }
@@ -2137,7 +2137,7 @@ pre {
   text-decoration: underline;
 }
 
-@media (width <= 639px) {
+@media (width <= 767px) {
   .breadcrumbs {
     display: none;
   }
@@ -2562,6 +2562,23 @@ pre {
   .cc-select-dropdown {
     min-width: 0;
     max-width: calc(100vw - 24px);
+  }
+}
+
+/* CC-280: one container rule — below md, pages stop spending a generous
+   slice of a narrow viewport on side gutters. Same principle as the
+   .fairway.builder-page { margin: 0 } reclaim above, applied app-wide.
+   Placed after every .fairway / .builder-page .container base rule so it
+   wins the cascade (a media query adds no specificity). Two-class
+   selectors like .fairway.login-main still outrank this and are untouched. */
+@media (width <= 767px) {
+  .fairway {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+
+  .builder-page .container {
+    max-width: 100%;
   }
 }
 
