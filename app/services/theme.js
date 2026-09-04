@@ -76,6 +76,19 @@ export default class ThemeService extends Service {
     const el = document.documentElement;
     el.dataset.theme = this.isDark ? 'dark' : '';
     el.dataset.palette = this.palette === DEFAULT_PALETTE ? '' : this.palette;
+    this._syncThemeColorMeta(el);
+  }
+
+  // Keep the browser/PWA status-bar colour (`<meta name="theme-color">`) in
+  // step with the active mode × palette. Reading `--card` after the datasets
+  // are stamped picks up whichever palette/dark override now wins the cascade,
+  // so all 3 modes × 6 palettes track for free. The meta is absent in the test
+  // DOM, hence the guard.
+  _syncThemeColorMeta(el) {
+    const meta = document.getElementById('theme-color-meta');
+    if (!meta) return;
+    const card = getComputedStyle(el).getPropertyValue('--card').trim();
+    if (card) meta.setAttribute('content', card);
   }
 
   _migrateOldKey() {
