@@ -345,8 +345,11 @@ body {
 }
 
 /* ===== APP SHELL ===== */
+/* dvh, not vh: mobile browsers size 100vh to the viewport with the URL bar
+   *hidden*, so a 100vh shell overflows behind the bar until the user
+   scrolls. The drawer and chat sheet below already use dvh. */
 .course {
-  height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template:
     "header header header" auto
@@ -1118,7 +1121,7 @@ a.btn.primary:active {
 .landing-hero {
   position: relative;
   width: 100%;
-  min-height: calc(100vh - 4lh - 21px);
+  min-height: calc(100dvh - 4lh - 21px);
   background-image: url("/images/ian_finnis.webp");
   background-size: cover;
   background-position: top center;
@@ -1546,7 +1549,7 @@ a.landing-btn-primary:hover {
 .builder-page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .builder-page .container {
@@ -2418,7 +2421,10 @@ pre {
   list-style: none;
   margin: 0;
   padding: var(--space-1) 0;
-  max-height: 240px;
+  /* Cap against the *visual* viewport, not a fixed 240px: on a phone the
+     on-screen keyboard opens the moment the search field takes focus, and
+     a 240px list below a mid-page trigger lands underneath it. */
+  max-height: min(240px, 40dvh);
   overflow-y: auto;
   background: var(--card) !important;
   color: var(--text) !important;
@@ -2479,6 +2485,30 @@ pre {
 }
 .ember-basic-dropdown-content:not([style]) {
   visibility: hidden;
+}
+
+/* Touch ergonomics for the two search surfaces (the subnav input and the
+   picker's own search) plus picker options.
+   Placement is load-bearing: a media query adds no specificity, so this
+   block must come *after* .subnav-search-input and the .ember-power-select-*
+   rules above or it loses the cascade to them.
+   font-size:1rem is not cosmetic — iOS Safari zooms the entire page when a
+   focused input's font-size is under 16px, and both inputs sit at 0.875rem
+   for desktop. */
+@media (width <= 767px) {
+  .subnav-search-input {
+    min-width: 140px;
+    font-size: 1rem;
+  }
+
+  .ember-power-select-search-input {
+    font-size: 1rem;
+  }
+
+  /* 12px + 1lh + 12px ≈ 48px, clearing the 44px touch-target floor. */
+  .ember-power-select-option {
+    padding: var(--space-3) var(--space-4);
+  }
 }
 
 .nav-link {
