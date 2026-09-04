@@ -3,21 +3,20 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
-const CAREER_DATA_OPTION = { id: '0', name: 'Career Data (internal)' };
-
 export default class CoverLettersNewController extends Controller {
   @service store;
   @service flashMessages;
   @service router;
   @service spinner;
 
-  @tracked selectedResume = CAREER_DATA_OPTION;
+  // No selection = use Career Data (the placeholder says so). Matches
+  // scores/form and every other resume picker; "Career Data" is the empty
+  // state, not a synthetic entry mixed into the resume list.
+  @tracked selectedResume = null;
   @tracked instructions = '';
 
   get resumeOptions() {
-    const resumes = this.store.peekAll('resume');
-    if (!resumes?.length) return [CAREER_DATA_OPTION];
-    return [CAREER_DATA_OPTION, ...Array.from(resumes)];
+    return Array.from(this.store.peekAll('resume'));
   }
 
   get jobPosts() {
@@ -26,7 +25,7 @@ export default class CoverLettersNewController extends Controller {
 
   @action updateResume(resume) {
     this.selectedResume = resume;
-    this.model.resume = this.store.peekRecord('resume', resume.id);
+    this.model.resume = resume ?? null;
   }
 
   @action addJobPostToCoverLetter(jobPost) {
@@ -44,8 +43,7 @@ export default class CoverLettersNewController extends Controller {
 
   @action saveCoverLetter() {
     if (this.model.isSaving) return;
-    const resumeId = this.selectedResume?.id;
-    this.model.resume = this.store.peekRecord('resume', resumeId);
+    this.model.resume = this.selectedResume ?? null;
     this.model.instructions = this.instructions;
     this.spinner.wrap(
       this.model
