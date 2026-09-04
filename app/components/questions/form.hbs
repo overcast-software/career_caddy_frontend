@@ -19,7 +19,8 @@
           aria-label="Company"
         />
       {{else}}
-        <PowerSelectWithCreate
+        <CcSelect
+          @withCreate={{true}}
           @search={{this.searchCompanies}}
           @placeholder="Search or create a company…"
           @onCreate={{this.addCompanyToQuestion}}
@@ -41,7 +42,7 @@
               displays as “{{company.displayName}}”
             </span>
           {{/if}}
-        </PowerSelectWithCreate>
+        </CcSelect>
       {{/if}}
     </div>
 
@@ -134,7 +135,7 @@
           aria-label="Job Application"
         />
       {{else}}
-        <PowerSelect
+        <CcSelect
           @options={{this.filteredJobAppOptions}}
           @onChange={{this.updateJobApplication}}
           @selected={{this.selectedJobAppOption}}
@@ -145,7 +146,7 @@
           as |opt|
         >
           {{opt.label}}
-        </PowerSelect>
+        </CcSelect>
       {{/if}}
     </div>
 

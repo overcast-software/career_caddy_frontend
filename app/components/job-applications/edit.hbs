@@ -9,7 +9,7 @@
     <div class="field">
       <label class="field-label" for="ja-edit-job-post">Job Post</label>
       {{#if @jobPostOptions}}
-        <PowerSelect
+        <CcSelect
           @options={{@jobPostOptions}}
           @selected={{@jobApplication.jobPost}}
           @onChange={{this.updateJobPost}}
@@ -19,7 +19,7 @@
           as |jobPost|
         >
           {{jobPost.title}}
-        </PowerSelect>
+        </CcSelect>
       {{else}}
         <input
           id="ja-edit-job-post"
@@ -32,7 +32,7 @@
 
     <div class="field">
       <label class="field-label">Resume</label>
-      <PowerSelect
+      <CcSelect
         @options={{this.resumes}}
         @onChange={{this.updateResume}}
         @searchEnabled={{true}}
@@ -42,12 +42,12 @@
         as |resume|
       >
         {{resume.name}}
-      </PowerSelect>
+      </CcSelect>
     </div>
 
     <div class="field">
       <label class="field-label">Cover Letter</label>
-      <PowerSelect
+      <CcSelect
         @options={{this.coverLetters}}
         @onChange={{this.updateCoverLetter}}
         @searchEnabled={{true}}
@@ -60,7 +60,7 @@
         {{coverLetter.jobPost.title}}
         -
         {{format-date coverLetter.createdAt}}
-      </PowerSelect>
+      </CcSelect>
     </div>
 
     <div class="field">

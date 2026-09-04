@@ -2533,13 +2533,13 @@ pre {
 }
 
 /* Touch ergonomics for the two search surfaces (the subnav input and the
-   picker's own search) plus picker options.
-   Placement is load-bearing: a media query adds no specificity, so this
-   block must come *after* .subnav-search-input and the .ember-power-select-*
-   rules above or it loses the cascade to them.
-   font-size:1rem is not cosmetic — iOS Safari zooms the entire page when a
-   focused input's font-size is under 16px, and both inputs sit at 0.875rem
-   for desktop. */
+   picker's own search) plus picker options, and the CC-271 picker-dropdown
+   inset cap. Placement is load-bearing: a media query adds no specificity, so
+   this block must come *after* .subnav-search-input and the
+   .ember-power-select-* / .ember-basic-dropdown-content rules above or it loses
+   the cascade to them. font-size:1rem is not cosmetic — iOS Safari zooms the
+   whole page when a focused input's font-size is under 16px, and both inputs
+   sit at 0.875rem for desktop. */
 @media (width <= 767px) {
   .subnav-search-input {
     min-width: 140px;
@@ -2553,6 +2553,15 @@ pre {
   /* 12px + 1lh + 12px ≈ 48px, clearing the 44px touch-target floor. */
   .ember-power-select-option {
     padding: var(--space-3) var(--space-4);
+  }
+
+  /* CC-271: belt-and-suspenders cap so a full-width trigger's wormholed
+     dropdown can never run to the viewport edge even if EPS applies its own
+     min-width. <CcSelect>'s calculatePosition already insets to a 12px gutter
+     each side below md; this backstops it, keyed on the @dropdownClass. */
+  .cc-select-dropdown {
+    min-width: 0;
+    max-width: calc(100vw - 24px);
   }
 }
 

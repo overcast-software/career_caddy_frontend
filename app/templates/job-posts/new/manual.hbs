@@ -1,13 +1,14 @@
 <form class="builder-form" {{on "submit" this.submitJobPost}}>
   <div class="field-full">
     <label class="field-label">Company</label>
-    <PowerSelectWithCreate
+    <CcSelect
+      @withCreate={{true}}
       @search={{this.searchCompanies}}
       @onCreate={{this.addCompanyToJobPost}}
       @onChange={{this.updateCompany}}
       @selected={{this.selectedCompany}}
       as |company|
-    >{{company.name}}</PowerSelectWithCreate>
+    >{{company.name}}</CcSelect>
   </div>
   <div class="field-row">
     <div class="field">

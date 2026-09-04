@@ -1,0 +1,56 @@
+{{#if @withCreate}}
+  <PowerSelectWithCreate
+    @options={{@options}}
+    @selected={{@selected}}
+    @onChange={{@onChange}}
+    @onCreate={{@onCreate}}
+    @onOpen={{@onOpen}}
+    @onInput={{@onInput}}
+    @onKeydown={{@onKeydown}}
+    @search={{@search}}
+    @searchEnabled={{@searchEnabled}}
+    @searchField={{@searchField}}
+    @showCreateWhen={{@showCreateWhen}}
+    @buildSuggestion={{@buildSuggestion}}
+    @placeholder={{@placeholder}}
+    @placeHolder={{@placeHolder}}
+    @labelText={{@labelText}}
+    @disabled={{@disabled}}
+    @allowClear={{@allowClear}}
+    @renderInPlace={{@renderInPlace}}
+    @triggerClass={{@triggerClass}}
+    @searchMessage={{or @searchMessage "Type to search…"}}
+    @dropdownClass={{this.dropdownClass}}
+    @calculatePosition={{this.calculatePosition}}
+    ...attributes
+    as |item extra|
+  >
+    {{yield item extra}}
+  </PowerSelectWithCreate>
+{{else}}
+  <PowerSelect
+    @options={{@options}}
+    @selected={{@selected}}
+    @onChange={{@onChange}}
+    @onOpen={{@onOpen}}
+    @onInput={{@onInput}}
+    @onKeydown={{@onKeydown}}
+    @search={{@search}}
+    @searchEnabled={{@searchEnabled}}
+    @searchField={{@searchField}}
+    @placeholder={{@placeholder}}
+    @placeHolder={{@placeHolder}}
+    @labelText={{@labelText}}
+    @disabled={{@disabled}}
+    @allowClear={{@allowClear}}
+    @renderInPlace={{@renderInPlace}}
+    @triggerClass={{@triggerClass}}
+    @searchMessage={{or @searchMessage "Type to search…"}}
+    @dropdownClass={{this.dropdownClass}}
+    @calculatePosition={{this.calculatePosition}}
+    ...attributes
+    as |item extra|
+  >
+    {{yield item extra}}
+  </PowerSelect>
+{{/if}}
