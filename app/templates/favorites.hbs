@@ -37,48 +37,52 @@
 
   <div class="tab-content">
     {{#if (eq this.activeTab "resumes")}}
-      <div class="table-container">
+      <div class="mb-6">
         <h2>Resumes</h2>
         {{#if this.filteredResumes.length}}
-          <table class="favorites-table">
-            <thead>
-              <tr>
-                <th>Favorite</th>
-                <th>Name</th>
-                <th>Notes</th>
-                <th>Job Applications</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each this.filteredResumes as |resume|}}
+          <div
+            class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+          >
+            <table class="min-w-full text-sm">
+              <thead>
                 <tr>
-                  <td>
-                    <Buttons::Favorite
-                      @model={{resume}}
-                      @onToggle={{fn this.toggleFavorite resume}}
-                    />
-                  </td>
-                  <td>
-                    <LinkTo @route="resumes.show" @model={{resume}}>
-                      {{resume.name}}
-                    </LinkTo>
-                  </td>
-                  <td>{{or resume.notes "N/A"}}</td>
-                  <td>{{resume.jobApplications.length}}</td>
-                  <td>
-                    <LinkTo
-                      @route="resumes.edit"
-                      @model={{resume}}
-                      class="btn small"
-                    >
-                      Edit
-                    </LinkTo>
-                  </td>
+                  <th>Favorite</th>
+                  <th>Name</th>
+                  <th>Notes</th>
+                  <th>Job Applications</th>
+                  <th>Actions</th>
                 </tr>
-              {{/each}}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {{#each this.filteredResumes as |resume|}}
+                  <tr>
+                    <td>
+                      <Buttons::Favorite
+                        @model={{resume}}
+                        @onToggle={{fn this.toggleFavorite resume}}
+                      />
+                    </td>
+                    <td>
+                      <LinkTo @route="resumes.show" @model={{resume}}>
+                        {{resume.name}}
+                      </LinkTo>
+                    </td>
+                    <td>{{or resume.notes "N/A"}}</td>
+                    <td>{{resume.jobApplications.length}}</td>
+                    <td>
+                      <LinkTo
+                        @route="resumes.edit"
+                        @model={{resume}}
+                        class="btn small"
+                      >
+                        Edit
+                      </LinkTo>
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
         {{else}}
           <EmptyState @message="No resumes found." />
         {{/if}}
@@ -86,52 +90,59 @@
     {{/if}}
 
     {{#if (eq this.activeTab "coverLetters")}}
-      <div class="table-container">
+      <div class="mb-6">
         <h2>Cover Letters</h2>
         {{#if this.filteredCoverLetters.length}}
-          <table class="favorites-table">
-            <thead>
-              <tr>
-                <th>Favorite</th>
-                <th>Name</th>
-                <th>Content Preview</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each this.filteredCoverLetters as |coverLetter|}}
+          <div
+            class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+          >
+            <table class="min-w-full text-sm">
+              <thead>
                 <tr>
-                  <td>
-                    <Buttons::Favorite
-                      @model={{coverLetter}}
-                      @onToggle={{fn this.toggleFavorite coverLetter}}
-                    />
-                  </td>
-                  <td>
-                    <LinkTo @route="cover-letters.show" @model={{coverLetter}}>
-                      {{coverLetter.name}}
-                    </LinkTo>
-                  </td>
-                  <td class="preview-text">
-                    {{#if coverLetter.content}}
-                      {{truncate coverLetter.content 100}}
-                    {{else}}
-                      N/A
-                    {{/if}}
-                  </td>
-                  <td>
-                    <LinkTo
-                      @route="cover-letters.edit"
-                      @model={{coverLetter}}
-                      class="btn small"
-                    >
-                      Edit
-                    </LinkTo>
-                  </td>
+                  <th>Favorite</th>
+                  <th>Name</th>
+                  <th>Content Preview</th>
+                  <th>Actions</th>
                 </tr>
-              {{/each}}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {{#each this.filteredCoverLetters as |coverLetter|}}
+                  <tr>
+                    <td>
+                      <Buttons::Favorite
+                        @model={{coverLetter}}
+                        @onToggle={{fn this.toggleFavorite coverLetter}}
+                      />
+                    </td>
+                    <td>
+                      <LinkTo
+                        @route="cover-letters.show"
+                        @model={{coverLetter}}
+                      >
+                        {{coverLetter.name}}
+                      </LinkTo>
+                    </td>
+                    <td class="preview-text">
+                      {{#if coverLetter.content}}
+                        {{truncate coverLetter.content 100}}
+                      {{else}}
+                        N/A
+                      {{/if}}
+                    </td>
+                    <td>
+                      <LinkTo
+                        @route="cover-letters.edit"
+                        @model={{coverLetter}}
+                        class="btn small"
+                      >
+                        Edit
+                      </LinkTo>
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
         {{else}}
           <EmptyState @message="No cover letters found." />
         {{/if}}
@@ -139,59 +150,63 @@
     {{/if}}
 
     {{#if (eq this.activeTab "answers")}}
-      <div class="table-container">
+      <div class="mb-6">
         <h2>Answers</h2>
         {{#if this.filteredAnswers.length}}
-          <table class="favorites-table">
-            <thead>
-              <tr>
-                <th>Favorite</th>
-                <th>Question</th>
-                <th>Answer Preview</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each this.filteredAnswers as |answer|}}
+          <div
+            class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+          >
+            <table class="min-w-full text-sm">
+              <thead>
                 <tr>
-                  <td>
-                    <Buttons::Favorite
-                      @model={{answer}}
-                      @onToggle={{fn this.toggleFavorite answer}}
-                    />
-                  </td>
-                  <td>
-                    {{#if answer.question}}
-                      <LinkTo
-                        @route="questions.show"
-                        @model={{answer.question}}
-                      >
-                        {{truncate answer.question.text 50}}
-                      </LinkTo>
-                    {{else}}
-                      N/A
-                    {{/if}}
-                  </td>
-                  <td class="preview-text">
-                    {{#if answer.text}}
-                      {{truncate answer.text 100}}
-                    {{else}}
-                      N/A
-                    {{/if}}
-                  </td>
-                  <td>
-                    <LinkTo
-                      @route="answers.edit"
-                      @model={{answer}}
-                      class="btn small"
-                    >
-                      Edit
-                    </LinkTo>
-                  </td>
+                  <th>Favorite</th>
+                  <th>Question</th>
+                  <th>Answer Preview</th>
+                  <th>Actions</th>
                 </tr>
-              {{/each}}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {{#each this.filteredAnswers as |answer|}}
+                  <tr>
+                    <td>
+                      <Buttons::Favorite
+                        @model={{answer}}
+                        @onToggle={{fn this.toggleFavorite answer}}
+                      />
+                    </td>
+                    <td>
+                      {{#if answer.question}}
+                        <LinkTo
+                          @route="questions.show"
+                          @model={{answer.question}}
+                        >
+                          {{truncate answer.question.text 50}}
+                        </LinkTo>
+                      {{else}}
+                        N/A
+                      {{/if}}
+                    </td>
+                    <td class="preview-text">
+                      {{#if answer.text}}
+                        {{truncate answer.text 100}}
+                      {{else}}
+                        N/A
+                      {{/if}}
+                    </td>
+                    <td>
+                      <LinkTo
+                        @route="answers.edit"
+                        @model={{answer}}
+                        class="btn small"
+                      >
+                        Edit
+                      </LinkTo>
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
         {{else}}
           <EmptyState @message="No answers found." />
         {{/if}}

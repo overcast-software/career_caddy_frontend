@@ -88,134 +88,139 @@
 
   <Panel::Card>
     <h2 class="text-xl font-semibold text-gray-800 mb-4">Resources at a Glance</h2>
-    <table class="w-full text-sm text-left text-gray-600">
-      <thead>
-        <tr class="border-b border-gray-200">
-          <th class="pb-2 font-semibold text-gray-700 w-36">Resource</th>
-          <th class="pb-2 font-semibold text-gray-700">What it does</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100">
-        <tr class="py-2">
-          <td class="py-2 font-medium">
-            <LinkTo @route="docs.career-data" class="text-accent-600">Career
-              Data</LinkTo>
-          </td>
-          <td class="py-2">Your professional background in markdown — the AI
-            reads this for everything</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo @route="docs.job-posts" class="text-accent-600">Job Posts</LinkTo>
-          </td>
-          <td class="py-2">Stored job listings — the root resource everything
-            else attaches to</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo
-              @route="docs.job-applications"
-              class="text-accent-600"
-            >Applications</LinkTo>
-          </td>
-          <td class="py-2">Your record of applying — tracks status, dates,
-            notes, and linked Q&A</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo
-              @route="docs.resumes"
-              class="text-accent-600"
-            >Resumes</LinkTo>
-          </td>
-          <td class="py-2">Structured resume data — importable, editable, used
-            to supplement AI context</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo @route="docs.cover-letters" class="text-accent-600">Cover
-              Letters</LinkTo>
-          </td>
-          <td class="py-2">AI-generated letters in your voice, tied to a
-            specific job post</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo
-              @route="docs.companies"
-              class="text-accent-600"
-            >Companies</LinkTo>
-          </td>
-          <td class="py-2">Employer profiles that group related posts,
-            applications, and Q&A</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo
-              @route="docs.questions"
-              class="text-accent-600"
-            >Questions</LinkTo>
-          </td>
-          <td class="py-2">Application questions captured from postings — AI can
-            draft answers</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo
-              @route="docs.answers"
-              class="text-accent-600"
-            >Answers</LinkTo>
-          </td>
-          <td class="py-2">Your responses — multiple drafts per question,
-            favorites feed back to AI</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo @route="docs.scores" class="text-accent-600">Scores</LinkTo>
-          </td>
-          <td class="py-2">AI fit score (0–100) of your profile vs. a job
-            description with gap analysis</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo
-              @route="docs.summaries"
-              class="text-accent-600"
-            >Summaries</LinkTo>
-          </td>
-          <td class="py-2">AI-generated executive summaries tailored to a
-            specific role</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo
-              @route="docs.scrapes"
-              class="text-accent-600"
-            >Scrapes</LinkTo>
-          </td>
-          <td class="py-2">Raw webpage captures of job listings — the input that
-            becomes a Job Post</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo @route="docs.extension" class="text-accent-600">Browser
-              Extension</LinkTo>
-          </td>
-          <td class="py-2">Career Caddy Sender — install, connect, and use the
-            one-click capture extension for Chrome and Firefox</td>
-        </tr>
-        <tr>
-          <td class="py-2 font-medium">
-            <LinkTo
-              @route="docs.extension-privacy"
-              class="text-accent-600"
-            >Extension Privacy</LinkTo>
-          </td>
-          <td class="py-2">Privacy policy for the Career Caddy Sender browser
-            extension — what's read, when, and where it goes</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left text-gray-600">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th class="pb-2 font-semibold text-gray-700 w-36">Resource</th>
+            <th class="pb-2 font-semibold text-gray-700">What it does</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr class="py-2">
+            <td class="py-2 font-medium">
+              <LinkTo @route="docs.career-data" class="text-accent-600">Career
+                Data</LinkTo>
+            </td>
+            <td class="py-2">Your professional background in markdown — the AI
+              reads this for everything</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo @route="docs.job-posts" class="text-accent-600">Job Posts</LinkTo>
+            </td>
+            <td class="py-2">Stored job listings — the root resource everything
+              else attaches to</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo
+                @route="docs.job-applications"
+                class="text-accent-600"
+              >Applications</LinkTo>
+            </td>
+            <td class="py-2">Your record of applying — tracks status, dates,
+              notes, and linked Q&A</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo
+                @route="docs.resumes"
+                class="text-accent-600"
+              >Resumes</LinkTo>
+            </td>
+            <td class="py-2">Structured resume data — importable, editable, used
+              to supplement AI context</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo @route="docs.cover-letters" class="text-accent-600">Cover
+                Letters</LinkTo>
+            </td>
+            <td class="py-2">AI-generated letters in your voice, tied to a
+              specific job post</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo
+                @route="docs.companies"
+                class="text-accent-600"
+              >Companies</LinkTo>
+            </td>
+            <td class="py-2">Employer profiles that group related posts,
+              applications, and Q&A</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo
+                @route="docs.questions"
+                class="text-accent-600"
+              >Questions</LinkTo>
+            </td>
+            <td class="py-2">Application questions captured from postings — AI
+              can draft answers</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo
+                @route="docs.answers"
+                class="text-accent-600"
+              >Answers</LinkTo>
+            </td>
+            <td class="py-2">Your responses — multiple drafts per question,
+              favorites feed back to AI</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo
+                @route="docs.scores"
+                class="text-accent-600"
+              >Scores</LinkTo>
+            </td>
+            <td class="py-2">AI fit score (0–100) of your profile vs. a job
+              description with gap analysis</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo
+                @route="docs.summaries"
+                class="text-accent-600"
+              >Summaries</LinkTo>
+            </td>
+            <td class="py-2">AI-generated executive summaries tailored to a
+              specific role</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo
+                @route="docs.scrapes"
+                class="text-accent-600"
+              >Scrapes</LinkTo>
+            </td>
+            <td class="py-2">Raw webpage captures of job listings — the input
+              that becomes a Job Post</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo @route="docs.extension" class="text-accent-600">Browser
+                Extension</LinkTo>
+            </td>
+            <td class="py-2">Career Caddy Sender — install, connect, and use the
+              one-click capture extension for Chrome and Firefox</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">
+              <LinkTo
+                @route="docs.extension-privacy"
+                class="text-accent-600"
+              >Extension Privacy</LinkTo>
+            </td>
+            <td class="py-2">Privacy policy for the Career Caddy Sender browser
+              extension — what's read, when, and where it goes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </Panel::Card>
 
 </div>
