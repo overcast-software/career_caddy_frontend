@@ -1,5 +1,5 @@
 <div class="grid gap-3">
-  <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+  <FieldGrid>
     <label class="flex flex-col gap-1">
       <span class="text-xs text-gray-400 uppercase tracking-wide">Job Title</span>
       <input
@@ -21,7 +21,7 @@
         {{on "input" this.updateName}}
       />
     </label>
-  </div>
+  </FieldGrid>
   <label class="flex flex-col gap-1">
     <span
       class="text-xs text-gray-400 uppercase tracking-wide"
