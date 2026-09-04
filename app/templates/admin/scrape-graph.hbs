@@ -44,26 +44,28 @@
           Edge traffic (last 7 days)
         </h2>
         {{#if this.model.aggregate.length}}
-          <table class="min-w-full text-sm">
-            <thead>
-              <tr class="text-left text-xs uppercase text-gray-500">
-                <th class="pb-2 pr-4">From</th>
-                <th class="pb-2 pr-4">To</th>
-                <th class="pb-2 pr-4 text-right">Count</th>
-                <th class="pb-2 pr-4 text-right">Success rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each this.model.aggregate as |edge|}}
-                <tr class="border-t border-gray-200 dark:border-gray-700">
-                  <td class="py-1 pr-4 font-mono">{{edge.from}}</td>
-                  <td class="py-1 pr-4 font-mono">{{edge.to}}</td>
-                  <td class="py-1 pr-4 text-right">{{edge.count}}</td>
-                  <td class="py-1 pr-4 text-right">{{edge.success_rate}}</td>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead>
+                <tr class="text-left text-xs uppercase text-gray-500">
+                  <th class="pb-2 pr-4">From</th>
+                  <th class="pb-2 pr-4">To</th>
+                  <th class="pb-2 pr-4 text-right">Count</th>
+                  <th class="pb-2 pr-4 text-right">Success rate</th>
                 </tr>
-              {{/each}}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {{#each this.model.aggregate as |edge|}}
+                  <tr class="border-t border-gray-200 dark:border-gray-700">
+                    <td class="py-1 pr-4 font-mono">{{edge.from}}</td>
+                    <td class="py-1 pr-4 font-mono">{{edge.to}}</td>
+                    <td class="py-1 pr-4 text-right">{{edge.count}}</td>
+                    <td class="py-1 pr-4 text-right">{{edge.success_rate}}</td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
         {{else}}
           <p class="text-sm text-gray-500">No graph traffic yet — shadow mode
             hasn't run any scrapes, or the feature flag is still off.</p>

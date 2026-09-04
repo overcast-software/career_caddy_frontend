@@ -7,6 +7,7 @@
           @options={{this.resumeOptions}}
           @onChange={{this.updateResume}}
           @selected={{this.selectedResume}}
+          @placeholder="Career Data (no resume)"
           as |resume|
         >
           {{or resume.name resume.title}}
