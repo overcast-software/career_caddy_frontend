@@ -23,9 +23,9 @@
   {{/if}}
   <div class="panel-body">
     <dl class="stagger-rows -my-3 divide-y divide-gray-200 text-sm">
-      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
         <dt class="font-medium text-gray-900">Resume</dt>
-        <dd class="text-gray-700 sm:col-span-2">
+        <dd class="text-gray-700 md:col-span-2">
           {{#if @score.resume.id}}
             <LinkTo
               @route="resumes.show"
@@ -41,9 +41,9 @@
         </dd>
       </div>
 
-      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
         <dt class="font-medium text-gray-900">Score</dt>
-        <dd class="text-gray-700 sm:col-span-2">
+        <dd class="text-gray-700 md:col-span-2">
           {{#if @score.score}}
             <span class="font-semibold">{{@score.score}}</span>
           {{else}}
@@ -53,18 +53,18 @@
       </div>
 
       {{#if (eq @score.status "pending")}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
           <dt class="font-medium text-gray-900">Status</dt>
-          <dd class="text-gray-700 sm:col-span-2">
+          <dd class="text-gray-700 md:col-span-2">
             <span
               class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20"
             >Pending</span>
           </dd>
         </div>
       {{else if (eq @score.status "failed")}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
           <dt class="font-medium text-gray-900">Status</dt>
-          <dd class="text-gray-700 sm:col-span-2">
+          <dd class="text-gray-700 md:col-span-2">
             <span
               class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20"
             >Failed</span>
@@ -73,18 +73,18 @@
       {{/if}}
 
       {{#if @score.createdAt}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
           <dt class="font-medium text-gray-900">Created</dt>
-          <dd class="text-gray-700 sm:col-span-2">{{format-date
+          <dd class="text-gray-700 md:col-span-2">{{format-date
               @score.createdAt
             }}</dd>
         </div>
       {{/if}}
 
       {{#if @score.explanation}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
           <dt class="font-medium text-gray-900">Explanation</dt>
-          <dd class="text-gray-700 sm:col-span-2">
+          <dd class="text-gray-700 md:col-span-2">
             <MarkdownToHtml @markdown={{@score.explanation}} />
           </dd>
         </div>

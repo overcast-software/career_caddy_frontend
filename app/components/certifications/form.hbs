@@ -3,7 +3,7 @@
       class="text-xs text-red-400"
     >{{this.errorMessage}}</p>{{/if}}
 
-  <div class="grid grid-cols-2 gap-3">
+  <FieldGrid>
     <label class="flex flex-col gap-1">
       <span class="text-xs text-gray-400 uppercase tracking-wide">Issuer</span>
       <input
@@ -22,7 +22,7 @@
         {{on "input" (fn this.updateField "title")}}
       />
     </label>
-  </div>
+  </FieldGrid>
 
   <label class="flex flex-col gap-1">
     <span class="text-xs text-gray-400 uppercase tracking-wide">Issue Date</span>

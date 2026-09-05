@@ -15,7 +15,7 @@
     />
   </label>
 
-  <div class="grid grid-cols-2 gap-3">
+  <FieldGrid>
     <label class="flex flex-col gap-1">
       <span class="text-xs text-gray-400 uppercase tracking-wide">Issue Date</span>
       <input
@@ -34,9 +34,9 @@
         {{on "input" (fn this.updateField "degree")}}
       />
     </label>
-  </div>
+  </FieldGrid>
 
-  <div class="grid grid-cols-2 gap-3">
+  <FieldGrid>
     <label class="flex flex-col gap-1">
       <span class="text-xs text-gray-400 uppercase tracking-wide">Major</span>
       <input
@@ -55,5 +55,5 @@
         {{on "input" (fn this.updateField "minor")}}
       />
     </label>
-  </div>
+  </FieldGrid>
 </div>
