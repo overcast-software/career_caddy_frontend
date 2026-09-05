@@ -32,8 +32,8 @@
     </div>
   </div>
 
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <div class="px-4 py-5 sm:px-6">
+  <div class="bg-white shadow overflow-hidden md:rounded-lg">
+    <div class="px-4 py-5 md:px-6">
       <h3 class="text-lg leading-6 font-medium text-gray-900">API Key Details</h3>
       <p class="mt-1 max-w-2xl text-sm text-gray-500">
         Information about this API key and its permissions.
@@ -42,24 +42,24 @@
     <div class="border-t border-gray-200">
       <dl>
         <div
-          class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+          class="bg-gray-50 px-4 py-5 md:grid md:grid-cols-3 md:gap-4 md:px-6"
         >
           <dt class="text-sm font-medium text-gray-500">Name</dt>
           <dd
-            class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"
+            class="mt-1 text-sm text-gray-900 md:mt-0 md:col-span-2"
           >{{this.model.name}}</dd>
         </div>
-        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <div class="bg-white px-4 py-5 md:grid md:grid-cols-3 md:gap-4 md:px-6">
           <dt class="text-sm font-medium text-gray-500">Key Prefix</dt>
           <dd
-            class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 font-mono"
+            class="mt-1 text-sm text-gray-900 md:mt-0 md:col-span-2 font-mono"
           >{{this.model.keyPrefix}}...</dd>
         </div>
         <div
-          class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+          class="bg-gray-50 px-4 py-5 md:grid md:grid-cols-3 md:gap-4 md:px-6"
         >
           <dt class="text-sm font-medium text-gray-500">Status</dt>
-          <dd class="mt-1 text-sm sm:mt-0 sm:col-span-2">
+          <dd class="mt-1 text-sm md:mt-0 md:col-span-2">
             <span
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                 {{this.model.statusClass}}"
@@ -68,37 +68,37 @@
             </span>
           </dd>
         </div>
-        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <div class="bg-white px-4 py-5 md:grid md:grid-cols-3 md:gap-4 md:px-6">
           <dt class="text-sm font-medium text-gray-500">Created</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <dd class="mt-1 text-sm text-gray-900 md:mt-0 md:col-span-2">
             {{moment-format this.model.createdAt "MMMM DD, YYYY [at] h:mm A"}}
           </dd>
         </div>
         {{#if this.model.expiresAt}}
           <div
-            class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+            class="bg-gray-50 px-4 py-5 md:grid md:grid-cols-3 md:gap-4 md:px-6"
           >
             <dt class="text-sm font-medium text-gray-500">Expires</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <dd class="mt-1 text-sm text-gray-900 md:mt-0 md:col-span-2">
               {{moment-format this.model.expiresAt "MMMM DD, YYYY [at] h:mm A"}}
             </dd>
           </div>
         {{/if}}
         {{#if this.model.revokedAt}}
           <div
-            class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+            class="bg-white px-4 py-5 md:grid md:grid-cols-3 md:gap-4 md:px-6"
           >
             <dt class="text-sm font-medium text-gray-500">Revoked</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <dd class="mt-1 text-sm text-gray-900 md:mt-0 md:col-span-2">
               {{moment-format this.model.revokedAt "MMMM DD, YYYY [at] h:mm A"}}
             </dd>
           </div>
         {{/if}}
         <div
-          class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+          class="bg-gray-50 px-4 py-5 md:grid md:grid-cols-3 md:gap-4 md:px-6"
         >
           <dt class="text-sm font-medium text-gray-500">Scopes</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <dd class="mt-1 text-sm text-gray-900 md:mt-0 md:col-span-2">
             <div class="flex flex-wrap gap-2">
               {{#each this.model.scopes as |scope|}}
                 <span
