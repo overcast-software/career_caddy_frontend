@@ -1,132 +1,118 @@
-{{#if @scrapes.length}}
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b border-gray-200">
-        <tr>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">URL</th>
-          {{#unless (eq @showCompany false)}}
-            <th
-              class="px-4 py-3 text-left font-semibold text-gray-600"
-            >Company</th>
-          {{/unless}}
-          {{#unless (eq @showJobPost false)}}
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
-          {{/unless}}
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Status</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Scraped At</th>
-          <th
-            class="px-4 py-3 text-right font-semibold text-gray-600"
-          >Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100 stagger-rows">
-        {{#each @scrapes as |scrape|}}
-          <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-gray-900 max-w-xs truncate">
-              {{#if scrape.url}}
-                <a
-                  href={{scrape.url}}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="hover:underline"
-                >{{scrape.url}}</a>
-              {{else}}
-                <span class="text-gray-400">&mdash;</span>
-              {{/if}}
-            </td>
-            {{#unless (eq @showCompany false)}}
-              <td class="px-4 py-3 text-gray-600">
-                {{#if scrape.company.name}}
-                  <LinkTo @route="companies.show" @model={{scrape.company}}>
-                    {{scrape.company.name}}
-                  </LinkTo>
-                {{else}}
-                  <span class="text-gray-400">&mdash;</span>
-                {{/if}}
-              </td>
-            {{/unless}}
-            {{#unless (eq @showJobPost false)}}
-              <td class="px-4 py-3 text-gray-600">
-                {{#if scrape.jobPost.id}}
-                  <LinkTo
-                    @route="job-posts.show.scrapes.show"
-                    @models={{array scrape.jobPost scrape}}
-                  >{{scrape.jobPost.title}}</LinkTo>
-                {{else}}
-                  <span class="text-gray-400">&mdash;</span>
-                {{/if}}
-              </td>
-            {{/unless}}
-            <td class="px-4 py-3">
-              {{#if scrape.isPending}}
-                <SpinnerInline
-                  @label="Scraping…"
-                  @title="Scraping — this page auto-refreshes when ready"
-                />
-              {{else}}
-                <span
-                  class="px-2 py-0.5 rounded-full text-xs font-medium
-                    {{if
-                      (eq scrape.status 'completed')
-                      'bg-green-100 text-green-700'
-                    }}
-                    {{if
-                      (eq scrape.status 'done')
-                      'bg-green-100 text-green-700'
-                    }}
-                    {{if (eq scrape.status 'failed') 'bg-red-100 text-red-700'}}
-                    {{if (eq scrape.status 'error') 'bg-red-100 text-red-700'}}
-                    {{if
-                      (eq scrape.status 'pending')
-                      'bg-yellow-100 text-yellow-700'
-                    }}
-                    {{if
-                      (eq scrape.status 'running')
-                      'bg-accent-100 text-accent-700'
-                    }}
-                    "
-                >{{or scrape.status "unknown"}}</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3 text-gray-600">
-              {{#if scrape.scrapedAt}}
-                {{moment-format scrape.scrapedAt "MMM D, YYYY h:mm a"}}
-              {{else}}
-                <span class="text-gray-400">&mdash;</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3 text-right">
-              <div class="flex items-center justify-end gap-2">
-                {{#if scrape.jobPost.id}}
-                  <LinkTo
-                    @route="job-posts.show.scrapes.show"
-                    @models={{array scrape.jobPost scrape}}
-                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                  >View</LinkTo>
-                {{else}}
-                  <LinkTo
-                    @route="scrapes.show"
-                    @model={{scrape}}
-                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                  >View</LinkTo>
-                {{/if}}
-                {{#if @onRetry}}
-                  <button
-                    type="button"
-                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                    title="Re-fetch the URL and run the full pipeline again (new browser capture + extract). Use this when the page itself changed or the prior capture was incomplete; use Re-parse on the detail view if only the extractor needs another pass."
-                    {{on "click" (fn @onRetry scrape)}}
-                  >Retry</button>
-                {{/if}}
-              </div>
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  </div>
-{{else}}
-  <EmptyState @message={{or @emptyMessage "No scrapes found."}} />
-{{/if}}
+<ResponsiveList
+  @items={{@scrapes}}
+  @emptyMessage={{or @emptyMessage "No scrapes found."}}
+>
+  <:header as |h|>
+    <h.col>URL</h.col>
+    <h.col @when={{not (eq @showCompany false)}}>Company</h.col>
+    <h.col @when={{not (eq @showJobPost false)}}>Job Post</h.col>
+    <h.col>Status</h.col>
+    <h.col>Scraped At</h.col>
+    <h.col @align="right">Actions</h.col>
+  </:header>
+  <:row as |scrape r|>
+    <r.cell @primary={{true}}>
+      {{#if scrape.url}}
+        <a
+          href={{scrape.url}}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="block max-w-xs truncate hover:underline"
+        >{{scrape.url}}</a>
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @secondary={{true}} @when={{not (eq @showCompany false)}}>
+      {{#if scrape.company.name}}
+        <LinkTo @route="companies.show" @model={{scrape.company}}>
+          {{scrape.company.name}}
+        </LinkTo>
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @label="Job Post" @when={{not (eq @showJobPost false)}}>
+      {{#if scrape.jobPost.id}}
+        <LinkTo
+          @route="job-posts.show.scrapes.show"
+          @models={{array scrape.jobPost scrape}}
+        >{{scrape.jobPost.title}}</LinkTo>
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @label="Status">
+      {{#if scrape.isPending}}
+        <SpinnerInline
+          @label="Scraping…"
+          @title="Scraping — this page auto-refreshes when ready"
+        />
+      {{else}}
+        <span
+          class="inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium
+            {{if
+              (eq scrape.status 'completed')
+              'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+            }}
+            {{if
+              (eq scrape.status 'done')
+              'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+            }}
+            {{if
+              (eq scrape.status 'failed')
+              'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+            }}
+            {{if
+              (eq scrape.status 'error')
+              'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+            }}
+            {{if
+              (eq scrape.status 'pending')
+              'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'
+            }}
+            {{if
+              (eq scrape.status 'running')
+              'bg-accent-100 text-accent-700 dark:bg-accent-900/40 dark:text-accent-200'
+            }}
+            "
+        >{{or scrape.status "unknown"}}</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @label="Scraped At">
+      {{#if scrape.scrapedAt}}
+        {{moment-format scrape.scrapedAt "MMM D, YYYY h:mm a"}}
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @actions={{true}}>
+      {{#if scrape.jobPost.id}}
+        <LinkTo
+          @route="job-posts.show.scrapes.show"
+          @models={{array scrape.jobPost scrape}}
+          class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+        >View</LinkTo>
+      {{else}}
+        <LinkTo
+          @route="scrapes.show"
+          @model={{scrape}}
+          class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+        >View</LinkTo>
+      {{/if}}
+      {{#if @onRetry}}
+        <button
+          type="button"
+          class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          title="Re-fetch the URL and run the full pipeline again (new browser capture + extract). Use this when the page itself changed or the prior capture was incomplete; use Re-parse on the detail view if only the extractor needs another pass."
+          {{on "click" (fn @onRetry scrape)}}
+        >Retry</button>
+      {{/if}}
+    </r.cell>
+  </:row>
+</ResponsiveList>
