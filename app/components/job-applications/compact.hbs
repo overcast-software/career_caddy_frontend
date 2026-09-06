@@ -1,71 +1,87 @@
-<tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-  <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
+{{! Row content shared by the three job-application list views (CC-266).
+    Renders <ResponsiveList> cells (the <:row> cell hash is handed in as
+    @r) so the SAME row logic — title link, company, status pill, applied
+    date, and the delete action in compact.js — draws as a table row at
+    ≥md and as a stacked card below the md/768 breakpoint.
+
+    @jobApplication  the row's JobApplication
+    @r               the ResponsiveList <:row> cell hash (from the route)
+    @showCompany     false on companies/show/* (the company IS the page):
+                     drops the company cell in BOTH trees, paired with the
+                     omitted <h.col> in that route's <:header>
+    @onDelete        called after a successful delete/discard (compact.js) }}
+{{#let @r as |r|}}
+  <r.cell @primary={{true}}>
     {{#if this.jobPost.id}}
       <LinkTo
         @route="job-posts.show.job-applications.show"
         @models={{array this.jobPost @jobApplication}}
       >{{this.jobPost.title}}</LinkTo>
     {{else}}
-      <span class="text-gray-400">&mdash;</span>
+      <span class="text-gray-400 dark:text-gray-600">&mdash;</span>
     {{/if}}
-  </td>
-  {{#unless (eq @showCompany false)}}
-    <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
-      {{~#if this.jobPost.company.name~}}
-        {{this.jobPost.company.name}}
-      {{~else~}}
-        <span class="italic text-amber-500 dark:text-amber-400">missing</span>
-      {{~/if~}}
-    </td>
-  {{/unless}}
-  <td class="px-4 py-3">
+  </r.cell>
+
+  <r.cell @secondary={{true}} @when={{not (eq @showCompany false)}}>
+    {{~#if this.jobPost.company.name~}}
+      {{this.jobPost.company.name}}
+    {{~else~}}
+      <span class="italic text-amber-500 dark:text-amber-400">missing</span>
+    {{~/if~}}
+  </r.cell>
+
+  <r.cell @label="Status">
     <span class={{job-application-status-class @jobApplication.status}}>
       {{or @jobApplication.status "—"}}
     </span>
-  </td>
-  <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+  </r.cell>
+
+  <r.cell
+    @label="Applied"
+    @value={{@jobApplication.appliedAt}}
+    @dropIfEmpty={{true}}
+  >
     {{#if @jobApplication.appliedAt}}
       {{moment-format @jobApplication.appliedAt "MMM D, YYYY"}}
     {{else}}
       <span class="text-gray-400 dark:text-gray-600">—</span>
     {{/if}}
-  </td>
-  <td class="px-4 py-3 text-right">
-    <div class="flex items-center justify-end gap-2">
-      {{#if @jobApplication.isNew}}
-        {{! Orphan draft — never saved. Route back into the create
-            flow on this job-post so the user can finish filling it
-            out (or discard) rather than landing on /null/edit. }}
+  </r.cell>
+
+  <r.cell @actions={{true}}>
+    {{#if @jobApplication.isNew}}
+      {{! Orphan draft — never saved. Route back into the create flow on
+          this job-post so the user can finish filling it out (or discard)
+          rather than landing on /null/edit. }}
+      <LinkTo
+        @route="job-posts.show.job-applications.new"
+        @model={{this.jobPost.id}}
+        class="rounded border border-amber-200 px-2 py-1 text-xs text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/30"
+      >Finish</LinkTo>
+    {{else}}
+      {{#if this.jobPost.id}}
         <LinkTo
-          @route="job-posts.show.job-applications.new"
-          @model={{this.jobPost.id}}
-          class="px-2 py-1 text-xs rounded border border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/30"
-        >Finish</LinkTo>
+          @route="job-posts.show.job-applications.show"
+          @models={{array this.jobPost @jobApplication}}
+          class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+        >View</LinkTo>
       {{else}}
-        {{#if this.jobPost.id}}
-          <LinkTo
-            @route="job-posts.show.job-applications.show"
-            @models={{array this.jobPost @jobApplication}}
-            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-          >View</LinkTo>
-        {{else}}
-          <LinkTo
-            @route="job-applications.show"
-            @model={{@jobApplication}}
-            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-          >View</LinkTo>
-        {{/if}}
         <LinkTo
-          @route="job-applications.edit"
-          @model={{@jobApplication.id}}
-          class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-        >Edit</LinkTo>
+          @route="job-applications.show"
+          @model={{@jobApplication}}
+          class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+        >View</LinkTo>
       {{/if}}
-      <button
-        type="button"
-        class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
-        {{on "click" this.delete}}
-      >Delete</button>
-    </div>
-  </td>
-</tr>
+      <LinkTo
+        @route="job-applications.edit"
+        @model={{@jobApplication.id}}
+        class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+      >Edit</LinkTo>
+    {{/if}}
+    <button
+      type="button"
+      class="rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+      {{on "click" this.delete}}
+    >Delete</button>
+  </r.cell>
+{{/let}}
