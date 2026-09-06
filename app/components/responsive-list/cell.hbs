@@ -1,0 +1,55 @@
+{{! One cell, rendered in whichever tree its `@mode` names — the SAME
+  <:row> block is yielded once per tree, so a cell must know how to draw
+  itself both as a table <td> and as a card fragment.
+
+  @mode     "table" | "card" (curried in by <ResponsiveList>, not the caller)
+  @primary  card: the title line; table: the font-medium first cell
+  @actions  the action row — right-aligned <td>, or a bottom card row
+  @label    card: the <dt> for this <dd> value (labeled dl pair)
+  @align    "right" to right-align a plain cell
+  @when     default true; false drops the cell in BOTH trees (pair it with
+            the matching <h.col @when>) }}
+{{#unless (eq @when false)}}
+  {{#if (eq @mode "table")}}
+    {{#if @actions}}
+      <td class="px-4 py-3 text-right">
+        <div class="flex items-center justify-end gap-2">{{yield}}</div>
+      </td>
+    {{else}}
+      <td
+        class="px-4 py-3
+          {{if (eq @align 'right') 'text-right'}}
+          {{if
+            @primary
+            'font-medium text-gray-900 dark:text-gray-100'
+            'text-gray-600 dark:text-gray-300'
+          }}"
+      >
+        {{yield}}
+      </td>
+    {{/if}}
+  {{else}}
+    {{! card mode }}
+    {{#if @primary}}
+      <div class="col-span-2 mb-1 font-medium text-gray-900 dark:text-gray-100">
+        {{yield}}
+      </div>
+    {{else if @actions}}
+      <div
+        class="col-span-2 mt-2 flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-700"
+      >
+        {{yield}}
+      </div>
+    {{else if @label}}
+      <dt class="font-medium text-gray-500 dark:text-gray-400">{{@label}}</dt>
+      <dd
+        class="text-gray-700 dark:text-gray-200
+          {{if (eq @align 'right') 'text-right'}}"
+      >
+        {{yield}}
+      </dd>
+    {{else}}
+      <dd class="col-span-2 text-gray-700 dark:text-gray-200">{{yield}}</dd>
+    {{/if}}
+  {{/if}}
+{{/unless}}

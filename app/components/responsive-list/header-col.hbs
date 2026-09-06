@@ -1,0 +1,13 @@
+{{!-- A single <th>. `@when` (default true) gates the column in ONE place
+  for the header; write the matching `@when` on the paired <r.cell> so the
+  {{#unless}} thead/tbody duplication dies. `@align="right"` right-aligns the
+  header cell (pair it with the cell's own @align). --}}
+{{#unless (eq @when false)}}
+  <th
+    scope="col"
+    class="px-4 py-3 font-semibold text-gray-600 dark:text-gray-300
+      {{if (eq @align 'right') 'text-right' 'text-left'}}"
+  >
+    {{yield}}
+  </th>
+{{/unless}}
