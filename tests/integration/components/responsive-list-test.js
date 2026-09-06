@@ -111,9 +111,9 @@ module('Integration | Component | responsive-list', function (hooks) {
       </ResponsiveList>
     `);
 
-    // Card: primary renders as a full-width title line, not a dt/dd pair.
+    // Card: primary renders as a full-width bold title line, not a dt/dd pair.
     assert
-      .dom('ul.md\\:hidden li:first-child .col-span-2.font-medium')
+      .dom('ul.md\\:hidden li:first-child .col-span-2.font-semibold')
       .hasText('Alpha', 'primary is the card title line');
     // Card: actions render in a bordered bottom row holding the button.
     assert
@@ -130,6 +130,60 @@ module('Integration | Component | responsive-list', function (hooks) {
     assert
       .dom('table tbody tr:first-child td:last-child button.act')
       .exists('actions render inside the table row');
+  });
+
+  test('@secondary is a card subtitle (no dt/dd) + plain table cell; @dropIfEmpty omits an empty card row but keeps the table cell', async function (assert) {
+    this.set('rows', [
+      { id: '1', title: 'Alpha', company: 'Acme', score: null },
+    ]);
+    await render(hbs`
+      <ResponsiveList @items={{this.rows}}>
+        <:header as |h|>
+          <h.col>Title</h.col>
+          <h.col>Company</h.col>
+          <h.col>Score</h.col>
+        </:header>
+        <:row as |item r|>
+          <r.cell @primary={{true}}>{{item.title}}</r.cell>
+          <r.cell @secondary={{true}}>{{item.company}}</r.cell>
+          <r.cell @label="Score" @dropIfEmpty={{true}} @value={{item.score}}>
+            {{if item.score item.score "—"}}
+          </r.cell>
+        </:row>
+      </ResponsiveList>
+    `);
+
+    // @secondary: the value shows on the card as a line, with no <dt> label,
+    // and stays a plain <td> in the table.
+    assert
+      .dom('ul.md\\:hidden li:first-child')
+      .containsText('Acme', 'secondary value shows on the card');
+    assert
+      .dom('ul.md\\:hidden li:first-child dt')
+      .doesNotExist(
+        'secondary has no dt label (it is a subtitle, not a dl row)',
+      );
+    assert
+      .dom('table tbody tr:first-child')
+      .containsText('Acme', 'secondary is a plain table cell');
+
+    // @dropIfEmpty + empty @value: the card omits the whole row; the table
+    // still renders its cell (the "—") so columns stay aligned.
+    assert
+      .dom('ul.md\\:hidden li:first-child')
+      .doesNotContainText('Score', 'empty droppable label omitted on the card');
+    assert
+      .dom('table tbody tr:first-child td')
+      .exists({ count: 3 }, 'table keeps all three cells');
+    assert
+      .dom('table tbody tr:first-child')
+      .containsText('—', 'table keeps the empty value for alignment');
+
+    // With a value present, the card row comes back.
+    this.set('rows', [{ id: '1', title: 'Alpha', company: 'Acme', score: 87 }]);
+    assert
+      .dom('ul.md\\:hidden li:first-child')
+      .containsText('Score', 'droppable row returns when @value is present');
   });
 
   test('empty @items renders the EmptyState message and neither tree', async function (assert) {

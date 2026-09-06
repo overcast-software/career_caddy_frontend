@@ -43,7 +43,7 @@
       {{/if}}
     </r.cell>
 
-    <r.cell @label="Company" @when={{not (eq @showCompany false)}}>
+    <r.cell @secondary={{true}} @when={{not (eq @showCompany false)}}>
       {{~#if jobPost.company.name~}}
         {{jobPost.company.name}}
       {{~else~}}
@@ -69,7 +69,11 @@
       </span>
     </r.cell>
 
-    <r.cell @label="Score">
+    <r.cell
+      @label="Score"
+      @dropIfEmpty={{true}}
+      @value={{jobPost.topScoreValue}}
+    >
       {{! Reads the derived `topScoreValue` (off the live `scores`
           hasMany) rather than the `topScore` belongsTo so the cell
           live-updates when a score completes via SSE — the belongsTo
@@ -85,7 +89,11 @@
       {{/if}}
     </r.cell>
 
-    <r.cell @label="Status">
+    <r.cell
+      @label="Status"
+      @dropIfEmpty={{true}}
+      @value={{jobPost.triage.status}}
+    >
       {{#if jobPost.triage.status}}
         <span
           class="inline-flex items-center rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-200"
