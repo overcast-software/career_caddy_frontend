@@ -1,188 +1,170 @@
-{{#if this.jobPosts.length}}
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b border-gray-200">
-        <tr>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Title</th>
-          {{#unless (eq @showCompany false)}}
-            <th
-              class="px-4 py-3 text-left font-semibold text-gray-600"
-            >Company</th>
-          {{/unless}}
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Posted</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Score</th>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Status</th>
-          <th
-            class="px-4 py-3 text-right font-semibold text-gray-600"
-          >Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100 stagger-rows">
-        {{#each this.jobPosts as |jobPost|}}
-          <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 font-medium text-gray-900">
-              <LinkTo @route="job-posts.show" @model={{jobPost}}>
-                {{jobPost.title}}
-              </LinkTo>
-              {{#if jobPost.needsScrape}}
-                <span
-                  class="ml-2 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600"
-                >
-                  needs scrape
-                </span>
-              {{/if}}
-              {{#if jobPost.duplicateOfId}}
-                <LinkTo
-                  @route="job-posts.show"
-                  @model={{jobPost.duplicateOfId}}
-                  class="ml-2 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30"
-                >
-                  Duplicate of #{{jobPost.duplicateOfId}}
-                </LinkTo>
-              {{/if}}
-              {{#if (eq jobPost.postingStatus "closed")}}
-                {{! api hides closed posts by default; this chip only
-                    shows up when the user has flipped on
-                    `include_closed=true` (FilterPill at the top of
-                    /job-posts/), so they need a clear at-a-glance
-                    signal for which rows are no-longer-accepting. }}
-                <span
-                  class="ml-2 inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/30"
-                  title="Posting is no longer accepting applications"
-                >
-                  Closed
-                </span>
-              {{/if}}
-            </td>
-            {{#unless (eq @showCompany false)}}
-              <td class="px-4 py-3 text-gray-600">
-                {{~#if jobPost.company.name~}}
-                  {{jobPost.company.name}}
-                {{~else~}}
-                  <span class="italic text-amber-500">missing</span>
-                {{~/if~}}
-              </td>
-            {{/unless}}
-            <td class="px-4 py-3 text-gray-600">
-              {{! format-date routes calendar strings (postedDate) through
-                  TZ-free rendering and ISO instants (createdAt fallback)
-                  through Intl.DateTimeFormat locked to LOCAL_TZ (PST),
-                  so neither path depends on browser TZ. }}
-              <span
-                title={{concat
-                  "created: "
-                  (format-date jobPost.createdAt "MMM D, YYYY h:mm A")
-                }}
-              >
-                {{format-date
-                  (if jobPost.postedDate jobPost.postedDate jobPost.createdAt)
-                  "MMM D, YYYY"
-                }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-gray-600">
-              {{! Reads the derived `topScoreValue` (off the live `scores`
-                  hasMany) rather than the `topScore` belongsTo so the cell
-                  live-updates when a score completes via SSE — the belongsTo
-                  linkage only refreshes on a full JobPost reload. }}
-              {{#if jobPost.topScoreValue}}
-                <span class="font-medium text-accent-600">
-                  <LinkTo @route="job-posts.show.scores" @model={{jobPost}}>
-                    {{jobPost.topScoreValue}}
-                  </LinkTo>
-                </span>
-              {{else}}
-                <span class="text-gray-300">—</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3">
-              {{#if jobPost.triage.status}}
-                <span
-                  class="inline-flex items-center rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-200"
-                >{{jobPost.triage.status}}</span>
-              {{else}}
-                <span class="text-gray-300">—</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3 text-right">
-              <div class="flex items-center justify-end gap-2">
-                <JobPosts::TriageActions
-                  @jobPost={{jobPost}}
-                  @compact={{true}}
-                />
-                {{#if jobPost.isWorking}}
-                  {{! Work already in flight for this post (scrape or
-                      score). Disable the button and tell the user what's
-                      happening — don't offer a second action. }}
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-1.5 px-2 py-1 text-xs whitespace-nowrap rounded border border-accent-200 text-accent-600 opacity-70 cursor-not-allowed dark:border-accent-700 dark:text-accent-300"
-                    disabled
-                    aria-label={{concat jobPost.busyPhase " in progress"}}
-                  >
-                    <svg
-                      class="animate-spin size-3.5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        class="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        stroke-width="4"
-                      ></circle>
-                      <path
-                        class="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                    {{or jobPost.busyPhase "Working…"}}
-                  </button>
-                {{else if
-                  (and jobPost.isStub jobPost.link (not jobPost.hasAnyScore))
-                }}
-                  {{! Stub + scrapable link + not yet scored: the most
-                      useful action is to enrich via scrape and then
-                      score against career-data. }}
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-1.5 px-2 py-1 text-xs whitespace-nowrap rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
-                    {{on "click" (fn this.scrapeAndScore jobPost)}}
-                  >
-                    Scrape & Score
-                  </button>
-                {{else if (not jobPost.hasAnyScore)}}
-                  {{! Scorable post that hasn't been scored yet — runs
-                      career-data scoring in-place with a poll rather
-                      than routing away. }}
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-1.5 px-2 py-1 text-xs whitespace-nowrap rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
-                    {{on "click" (fn this.scoreWithCareerData jobPost)}}
-                  >
-                    Score
-                  </button>
-                {{else}}
-                  {{! Post already has at least one score — the Score
-                      column already shows + links the top score, so
-                      don't offer a redundant action here. }}
-                {{/if}}
-              </div>
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  </div>
-{{else}}
-  <EmptyState @message="No job posts found." />
-{{/if}}
+<ResponsiveList @items={{this.jobPosts}} @emptyMessage="No job posts found.">
+  <:header as |h|>
+    <h.col>Title</h.col>
+    <h.col @when={{not (eq @showCompany false)}}>Company</h.col>
+    <h.col>Posted</h.col>
+    <h.col>Score</h.col>
+    <h.col>Status</h.col>
+    <h.col @align="right">Actions</h.col>
+  </:header>
+  <:row as |jobPost r|>
+    <r.cell @primary={{true}}>
+      <LinkTo @route="job-posts.show" @model={{jobPost}}>
+        {{jobPost.title}}
+      </LinkTo>
+      {{#if jobPost.needsScrape}}
+        <span
+          class="ml-2 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+        >
+          needs scrape
+        </span>
+      {{/if}}
+      {{#if jobPost.duplicateOfId}}
+        <LinkTo
+          @route="job-posts.show"
+          @model={{jobPost.duplicateOfId}}
+          class="ml-2 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30"
+        >
+          Duplicate of #{{jobPost.duplicateOfId}}
+        </LinkTo>
+      {{/if}}
+      {{#if (eq jobPost.postingStatus "closed")}}
+        {{! api hides closed posts by default; this chip only
+            shows up when the user has flipped on
+            `include_closed=true` (FilterPill at the top of
+            /job-posts/), so they need a clear at-a-glance
+            signal for which rows are no-longer-accepting. }}
+        <span
+          class="ml-2 inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/30"
+          title="Posting is no longer accepting applications"
+        >
+          Closed
+        </span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @secondary={{true}} @when={{not (eq @showCompany false)}}>
+      {{~#if jobPost.company.name~}}
+        {{jobPost.company.name}}
+      {{~else~}}
+        <span class="italic text-amber-500">missing</span>
+      {{~/if~}}
+    </r.cell>
+
+    <r.cell @label="Posted">
+      {{! format-date routes calendar strings (postedDate) through
+          TZ-free rendering and ISO instants (createdAt fallback)
+          through Intl.DateTimeFormat locked to LOCAL_TZ (PST),
+          so neither path depends on browser TZ. }}
+      <span
+        title={{concat
+          "created: "
+          (format-date jobPost.createdAt "MMM D, YYYY h:mm A")
+        }}
+      >
+        {{format-date
+          (if jobPost.postedDate jobPost.postedDate jobPost.createdAt)
+          "MMM D, YYYY"
+        }}
+      </span>
+    </r.cell>
+
+    <r.cell
+      @label="Score"
+      @dropIfEmpty={{true}}
+      @value={{jobPost.topScoreValue}}
+    >
+      {{! Reads the derived `topScoreValue` (off the live `scores`
+          hasMany) rather than the `topScore` belongsTo so the cell
+          live-updates when a score completes via SSE — the belongsTo
+          linkage only refreshes on a full JobPost reload. }}
+      {{#if jobPost.topScoreValue}}
+        <span class="font-medium text-accent-600">
+          <LinkTo @route="job-posts.show.scores" @model={{jobPost}}>
+            {{jobPost.topScoreValue}}
+          </LinkTo>
+        </span>
+      {{else}}
+        <span class="text-gray-300">—</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell
+      @label="Status"
+      @dropIfEmpty={{true}}
+      @value={{jobPost.triage.status}}
+    >
+      {{#if jobPost.triage.status}}
+        <span
+          class="inline-flex items-center rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/40 dark:text-accent-200"
+        >{{jobPost.triage.status}}</span>
+      {{else}}
+        <span class="text-gray-300">—</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @actions={{true}}>
+      <JobPosts::TriageActions @jobPost={{jobPost}} @compact={{true}} />
+      {{#if jobPost.isWorking}}
+        {{! Work already in flight for this post (scrape or
+            score). Disable the button and tell the user what's
+            happening — don't offer a second action. }}
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 px-2 py-1 text-xs whitespace-nowrap rounded border border-accent-200 text-accent-600 opacity-70 cursor-not-allowed dark:border-accent-700 dark:text-accent-300"
+          disabled
+          aria-label={{concat jobPost.busyPhase " in progress"}}
+        >
+          <svg
+            class="animate-spin size-3.5"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            ></path>
+          </svg>
+          {{or jobPost.busyPhase "Working…"}}
+        </button>
+      {{else if (and jobPost.isStub jobPost.link (not jobPost.hasAnyScore))}}
+        {{! Stub + scrapable link + not yet scored: the most
+            useful action is to enrich via scrape and then
+            score against career-data. }}
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 px-2 py-1 text-xs whitespace-nowrap rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
+          {{on "click" (fn this.scrapeAndScore jobPost)}}
+        >
+          Scrape & Score
+        </button>
+      {{else if (not jobPost.hasAnyScore)}}
+        {{! Scorable post that hasn't been scored yet — runs
+            career-data scoring in-place with a poll rather
+            than routing away. }}
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 px-2 py-1 text-xs whitespace-nowrap rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
+          {{on "click" (fn this.scoreWithCareerData jobPost)}}
+        >
+          Score
+        </button>
+      {{else}}
+        {{! Post already has at least one score — the Score
+            column already shows + links the top score, so
+            don't offer a redundant action here. }}
+      {{/if}}
+    </r.cell>
+  </:row>
+</ResponsiveList>

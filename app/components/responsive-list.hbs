@@ -1,0 +1,81 @@
+{{!-- ResponsiveList — the shared table/card primitive (CC-263, first
+    "mobile pattern" under CC-260).
+
+    ONE list definition renders as labeled stacked cards below the md
+    (768px) breakpoint and as the existing table shell at/above it. The
+    breakpoint matches <FieldGrid> deliberately (md/768, CC-280) — this
+    is the table analog of that form primitive.
+
+    Author against two named blocks:
+
+      <ResponsiveList @items={{this.rows}} @emptyMessage="Nothing yet.">
+        <:header as |h|>
+          <h.col>Title</h.col>
+          <h.col @when={{this.showCompany}}>Company</h.col>
+          <h.col @align="right">Actions</h.col>
+        </:header>
+        <:row as |item r|>
+          <r.cell @primary={{true}}>{{item.title}}</r.cell>
+          <r.cell @label="Company" @when={{this.showCompany}}>…</r.cell>
+          <r.cell @actions={{true}}>…</r.cell>
+        </:row>
+      </ResponsiveList>
+
+    Both trees are always in the DOM by design — CSS (`md:hidden` /
+    `hidden md:block`) picks one. Iterate `@items` directly: it is a live
+    Ember Data / ember-infinity array; a `.slice()`/`.toArray()` here would
+    sever reactivity. The double render of ≤50 rows is negligible, and
+    <InfinityLoader> stays in the ROUTE template, outside this component. --}}
+{{#if @items.length}}
+  {{! --- Cards (< md): labeled dl idiom --- }}
+  <ul class="space-y-3 md:hidden">
+    {{#each @items as |item index|}}
+      <li
+        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+      >
+        <dl
+          class="grid grid-cols-[max-content_1fr] items-baseline gap-x-4 gap-y-1 text-sm"
+        >
+          {{yield
+            item
+            (hash cell=(component "responsive-list/cell" mode="card"))
+            index
+            to="row"
+          }}
+        </dl>
+      </li>
+    {{/each}}
+  </ul>
+
+  {{! --- Table (≥ md): the shell the 7 list components copy today --- }}
+  <div
+    class="hidden overflow-x-auto rounded-lg border border-gray-200 bg-white md:block dark:border-gray-700 dark:bg-gray-800"
+  >
+    <table class="min-w-full text-sm">
+      <thead
+        class="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40"
+      >
+        <tr>
+          {{yield
+            (hash col=(component "responsive-list/header-col"))
+            to="header"
+          }}
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 stagger-rows dark:divide-gray-700">
+        {{#each @items as |item index|}}
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+            {{yield
+              item
+              (hash cell=(component "responsive-list/cell" mode="table"))
+              index
+              to="row"
+            }}
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <EmptyState @message={{@emptyMessage}} />
+{{/if}}

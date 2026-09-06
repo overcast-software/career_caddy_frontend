@@ -1,0 +1,77 @@
+{{! One cell, rendered in whichever tree its `@mode` names — the SAME
+  <:row> block is yielded once per tree, so a cell must know how to draw
+  itself both as a table <td> and as a card fragment.
+
+  @mode        "table" | "card" (curried in by <ResponsiveList>, not the caller)
+  @primary     card: the bold title line; table: the font-medium first cell
+  @secondary   card: a muted subtitle line under the title (e.g. Company);
+               table: a normal cell (it's just another column)
+  @actions     the action row — right-aligned <td>, or a bottom card row whose
+               controls get ≥40px tap targets on cards
+  @label       card: the <dt> for this <dd> value (labeled dl pair)
+  @value       raw value behind the cell; used with @dropIfEmpty
+  @dropIfEmpty card only: omit this label/value row when @value is empty (the
+               table still shows the block's "—" so columns stay aligned)
+  @align       "right" to right-align a plain cell
+  @when        default true; false drops the cell in BOTH trees (pair it with
+               the matching <h.col @when>) }}
+{{#unless (eq @when false)}}
+  {{#if (eq @mode "table")}}
+    {{#if @actions}}
+      <td class="px-4 py-3 text-right">
+        <div class="flex items-center justify-end gap-2">{{yield}}</div>
+      </td>
+    {{else}}
+      <td
+        class="px-4 py-3
+          {{if (eq @align 'right') 'text-right'}}
+          {{if
+            @primary
+            'font-medium text-gray-900 dark:text-gray-100'
+            'text-gray-600 dark:text-gray-300'
+          }}"
+      >
+        {{yield}}
+      </td>
+    {{/if}}
+  {{else}}
+    {{! card mode — read title-first: a bold title, a muted subtitle, then a
+        quiet label/value dl, then a full-tap-target action row. }}
+    {{#if @primary}}
+      <div
+        class="col-span-2 mb-0.5 text-base font-semibold text-gray-900 dark:text-gray-100"
+      >
+        {{yield}}
+      </div>
+    {{else if @secondary}}
+      {{! subtitle line under the title (e.g. Company); a plain <td> in the
+          table (@secondary is not @primary, so it falls to the normal cell). }}
+      <div class="col-span-2 mb-2 text-sm text-gray-500 dark:text-gray-400">
+        {{yield}}
+      </div>
+    {{else if @actions}}
+      <div
+        class="col-span-2 mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-700 [&_button]:min-h-[40px] [&_button]:min-w-[40px] [&_button]:justify-center"
+      >
+        {{yield}}
+      </div>
+    {{else if @label}}
+      {{! Drop the row entirely on cards when @dropIfEmpty is set and @value is
+          empty — the table still renders the block (its "—") for column
+          alignment; the card just omits the dead line. }}
+      {{#if (or (not @dropIfEmpty) @value)}}
+        <dt class="text-xs text-gray-400 dark:text-gray-500">{{@label}}</dt>
+        <dd
+          class="text-sm text-gray-700 dark:text-gray-200
+            {{if (eq @align 'right') 'text-right'}}"
+        >
+          {{yield}}
+        </dd>
+      {{/if}}
+    {{else}}
+      <dd
+        class="col-span-2 text-sm text-gray-700 dark:text-gray-200"
+      >{{yield}}</dd>
+    {{/if}}
+  {{/if}}
+{{/unless}}
