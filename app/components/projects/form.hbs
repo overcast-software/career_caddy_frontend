@@ -20,7 +20,7 @@
     >{{@project.description}}</textarea>
   </label>
 
-  <div class="grid grid-cols-2 gap-3">
+  <FieldGrid>
     <label class="flex flex-col gap-1">
       <span class="text-xs text-gray-400 uppercase tracking-wide">Start Date</span>
       <input
@@ -39,7 +39,7 @@
         {{on "input" (fn this.updateField "endDate")}}
       />
     </label>
-  </div>
+  </FieldGrid>
 
   <label class="flex items-center gap-2 text-sm text-gray-300">
     <input

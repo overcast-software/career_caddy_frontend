@@ -2,9 +2,9 @@
   <div class="flow-root p-4">
     <dl class="stagger-rows -my-3 divide-y divide-gray-200 text-sm">
       {{#if this.showQuestion}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
           <dt class="font-medium text-gray-900">Question</dt>
-          <dd class="text-gray-700 sm:col-span-2">
+          <dd class="text-gray-700 md:col-span-2">
             {{#if this.questionId}}
               <LinkTo
                 @route="questions.show.answers.show"
@@ -18,9 +18,9 @@
         </div>
       {{/if}}
 
-      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
         <dt class="font-medium text-gray-900">Answer</dt>
-        <dd class="text-gray-700 sm:col-span-2">
+        <dd class="text-gray-700 md:col-span-2">
           {{#if @answer.content}}
             <MarkdownToHtml @markdown={{@answer.content}} />
           {{else if (eq @answer.status "pending")}}
@@ -31,9 +31,9 @@
         </dd>
       </div>
 
-      <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+      <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
         <dt class="font-medium text-gray-900">Favorite</dt>
-        <dd class="text-gray-700 sm:col-span-2">
+        <dd class="text-gray-700 md:col-span-2">
           {{#if @answer.favorite}}
             <span
               class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20"
@@ -47,18 +47,18 @@
       </div>
 
       {{#if (eq @answer.status "pending")}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
           <dt class="font-medium text-gray-900">Status</dt>
-          <dd class="text-gray-700 sm:col-span-2">
+          <dd class="text-gray-700 md:col-span-2">
             <span
               class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20"
             >Pending</span>
           </dd>
         </div>
       {{else if (eq @answer.status "failed")}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
           <dt class="font-medium text-gray-900">Status</dt>
-          <dd class="text-gray-700 sm:col-span-2">
+          <dd class="text-gray-700 md:col-span-2">
             <span
               class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20"
             >Failed</span>
@@ -67,9 +67,9 @@
       {{/if}}
 
       {{#if @answer.ai_assist}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
           <dt class="font-medium text-gray-900">Source</dt>
-          <dd class="text-gray-700 sm:col-span-2">
+          <dd class="text-gray-700 md:col-span-2">
             <span
               class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20"
             >AI Generated</span>
@@ -78,9 +78,9 @@
       {{/if}}
 
       {{#if @answer.createdAt}}
-        <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
           <dt class="font-medium text-gray-900">Created</dt>
-          <dd class="text-gray-700 sm:col-span-2">{{format-date
+          <dd class="text-gray-700 md:col-span-2">{{format-date
               @answer.createdAt
             }}</dd>
         </div>

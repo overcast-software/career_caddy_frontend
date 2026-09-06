@@ -4,16 +4,16 @@
       <div class="rounded border border-gray-200 bg-white">
         <div class="flow-root p-4">
           <dl class="stagger-rows -my-3 divide-y divide-gray-200 text-sm">
-            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
               <dt class="font-medium text-gray-900">Summary</dt>
               <dd
-                class="text-gray-700 sm:col-span-2 whitespace-pre-line"
+                class="text-gray-700 md:col-span-2 whitespace-pre-line"
               >{{summary.content}}</dd>
             </div>
 
-            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
               <dt class="font-medium text-gray-900">Resume</dt>
-              <dd class="text-gray-700 sm:col-span-2">
+              <dd class="text-gray-700 md:col-span-2">
                 {{#if summary.resume.id}}
                   <LinkTo
                     @route="resumes.show"
@@ -27,9 +27,9 @@
             </div>
 
             {{#if summary.jobPost.id}}
-              <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+              <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
                 <dt class="font-medium text-gray-900">Job Post</dt>
-                <dd class="text-gray-700 sm:col-span-2">
+                <dd class="text-gray-700 md:col-span-2">
                   <LinkTo
                     @route="job-posts.show.summaries.show"
                     @models={{array summary.jobPost summary}}
@@ -39,9 +39,9 @@
               </div>
             {{/if}}
 
-            <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+            <div class="grid grid-cols-1 gap-1 py-3 md:grid-cols-3 md:gap-4">
               <dt class="font-medium text-gray-900">Status</dt>
-              <dd class="text-gray-700 sm:col-span-2">
+              <dd class="text-gray-700 md:col-span-2">
                 {{#if summary.active}}
                   <span
                     class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
