@@ -1,84 +1,67 @@
-{{#if @summaries.length}}
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b border-gray-200">
-        <tr>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Summary</th>
-          {{#unless (eq @showJobPost false)}}
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
-          {{/unless}}
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Resume</th>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Active</th>
-          <th
-            class="px-4 py-3 text-right font-semibold text-gray-600"
-          >Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100 stagger-rows">
-        {{#each @summaries as |summary|}}
-          <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-gray-900 max-w-md truncate">
-              {{summary.content}}
-            </td>
-            {{#unless (eq @showJobPost false)}}
-              <td class="px-4 py-3 text-gray-600">
-                {{#if summary.jobPost.id}}
-                  <LinkTo
-                    @route="job-posts.show.summaries.show"
-                    @models={{array summary.jobPost summary}}
-                  >{{summary.jobPost.title}}</LinkTo>
-                {{else}}
-                  <span class="text-gray-400">&mdash;</span>
-                {{/if}}
-              </td>
-            {{/unless}}
-            <td class="px-4 py-3 text-gray-600">
-              {{#if summary.resume.id}}
-                {{or summary.resume.name summary.resume.title}}
-              {{else}}
-                <span class="italic text-gray-500">Career Data</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3">
-              {{#if summary.active}}
-                <span
-                  class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
-                >Active</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3 text-right">
-              {{#if summary.isPending}}
-                <SpinnerInline
-                  @label="Generating…"
-                  @title="Generating — this page auto-refreshes when ready"
-                />
-              {{else}}
-                {{#if summary.jobPost.id}}
-                  <LinkTo
-                    @route="job-posts.show.summaries.show"
-                    @models={{array summary.jobPost summary}}
-                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                  >View</LinkTo>
-                {{else}}
-                  <LinkTo
-                    @route="summaries.show"
-                    @model={{summary}}
-                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                  >View</LinkTo>
-                {{/if}}
-              {{/if}}
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  </div>
-{{else}}
-  <EmptyState @message={{or @emptyMessage "No summaries found."}} />
-{{/if}}
+<ResponsiveList
+  @items={{@summaries}}
+  @emptyMessage={{or @emptyMessage "No summaries found."}}
+>
+  <:header as |h|>
+    <h.col>Summary</h.col>
+    <h.col @when={{not (eq @showJobPost false)}}>Job Post</h.col>
+    <h.col>Resume</h.col>
+    <h.col>Active</h.col>
+    <h.col @align="right">Actions</h.col>
+  </:header>
+  <:row as |summary r|>
+    <r.cell @primary={{true}}>
+      <span class="block max-w-md truncate">{{summary.content}}</span>
+    </r.cell>
+
+    <r.cell @secondary={{true}} @when={{not (eq @showJobPost false)}}>
+      {{#if summary.jobPost.id}}
+        <LinkTo
+          @route="job-posts.show.summaries.show"
+          @models={{array summary.jobPost summary}}
+        >{{summary.jobPost.title}}</LinkTo>
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @label="Resume">
+      {{#if summary.resume.id}}
+        {{or summary.resume.name summary.resume.title}}
+      {{else}}
+        <span class="italic text-gray-500 dark:text-gray-400">Career Data</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @label="Active" @dropIfEmpty={{true}} @value={{summary.active}}>
+      {{#if summary.active}}
+        <span
+          class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-900/40 dark:text-green-300 dark:ring-green-500/30"
+        >Active</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @actions={{true}}>
+      {{#if summary.isPending}}
+        <SpinnerInline
+          @label="Generating…"
+          @title="Generating — this page auto-refreshes when ready"
+        />
+      {{else}}
+        {{#if summary.jobPost.id}}
+          <LinkTo
+            @route="job-posts.show.summaries.show"
+            @models={{array summary.jobPost summary}}
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+          >View</LinkTo>
+        {{else}}
+          <LinkTo
+            @route="summaries.show"
+            @model={{summary}}
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+          >View</LinkTo>
+        {{/if}}
+      {{/if}}
+    </r.cell>
+  </:row>
+</ResponsiveList>

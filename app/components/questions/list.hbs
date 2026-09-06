@@ -1,104 +1,87 @@
-{{#if @questions.length}}
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b border-gray-200">
-        <tr>
-          <th
-            class="px-4 py-3 text-left font-semibold text-gray-600"
-          >Question</th>
-          {{#unless (eq @showJobPost false)}}
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
-          {{/unless}}
-          <th
-            class="px-4 py-3 text-center font-semibold text-gray-600 w-24"
-          >Answers</th>
-          <th
-            class="px-4 py-3 text-center font-semibold text-gray-600 w-16"
-          >Fav</th>
-          <th
-            class="px-4 py-3 text-right font-semibold text-gray-600 w-40"
-          >Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100 stagger-rows">
-        {{#each @questions as |question|}}
-          <tr class="hover:bg-gray-50">
-            <td
-              class="px-4 py-3 text-gray-900 whitespace-pre-wrap break-words max-w-lg"
-            >
-              {{question.content}}
-            </td>
-            {{#unless (eq @showJobPost false)}}
-              <td class="px-4 py-3 text-gray-600">
-                {{#if question.jobPost.id}}
-                  <LinkTo
-                    @route="job-posts.show.questions.show"
-                    @models={{array question.jobPost question}}
-                  >{{question.jobPost.title}}</LinkTo>
-                {{else}}
-                  <span class="text-gray-400">&mdash;</span>
-                {{/if}}
-              </td>
-            {{/unless}}
-            <td class="px-4 py-3 text-center">
-              {{#if question.answers.length}}
-                <LinkTo
-                  @route={{or @answersRoute "questions.show.answers"}}
-                  @model={{question}}
-                  class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold hover:bg-accent-200"
-                >{{question.answers.length}}</LinkTo>
-              {{else}}
-                <span class="text-gray-300 text-xs">&mdash;</span>
-              {{/if}}
-            </td>
-            <td class="px-4 py-3 text-center text-base">
-              {{if question.favorite "★" "☆"}}
-            </td>
-            <td class="px-4 py-3 text-right">
-              <div class="flex items-center justify-end gap-1.5 flex-wrap">
-                {{#if @showRoute}}
-                  {{#if question.jobPost.id}}
-                    <LinkTo
-                      @route="job-posts.show.questions.show"
-                      @models={{array question.jobPost question}}
-                      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                    >Show</LinkTo>
-                  {{else}}
-                    <LinkTo
-                      @route={{@showRoute}}
-                      @model={{question}}
-                      class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                    >Show</LinkTo>
-                  {{/if}}
-                {{/if}}
-                {{#if @editRoute}}
-                  <LinkTo
-                    @route={{@editRoute}}
-                    @model={{question}}
-                    class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                  >Edit</LinkTo>
-                {{/if}}
-                {{#if @answerRoute}}
-                  <LinkTo
-                    @route={{@answerRoute}}
-                    @model={{question}}
-                    class="px-2 py-1 text-xs rounded border border-accent-200 text-accent-600 hover:bg-accent-50"
-                  >Answer</LinkTo>
-                {{/if}}
-                {{#if @onDelete}}
-                  <button
-                    type="button"
-                    class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
-                    {{on "click" (fn @onDelete question)}}
-                  >Delete</button>
-                {{/if}}
-              </div>
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  </div>
-{{else}}
-  <EmptyState @message={{or @emptyMessage "No questions found."}} />
-{{/if}}
+<ResponsiveList
+  @items={{@questions}}
+  @emptyMessage={{or @emptyMessage "No questions found."}}
+>
+  <:header as |h|>
+    <h.col>Question</h.col>
+    <h.col @when={{not (eq @showJobPost false)}}>Job Post</h.col>
+    <h.col>Answers</h.col>
+    <h.col>Fav</h.col>
+    <h.col @align="right">Actions</h.col>
+  </:header>
+  <:row as |question r|>
+    <r.cell @primary={{true}}>
+      <span class="whitespace-pre-wrap break-words">{{question.content}}</span>
+    </r.cell>
+
+    <r.cell @secondary={{true}} @when={{not (eq @showJobPost false)}}>
+      {{#if question.jobPost.id}}
+        <LinkTo
+          @route="job-posts.show.questions.show"
+          @models={{array question.jobPost question}}
+        >{{question.jobPost.title}}</LinkTo>
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell
+      @label="Answers"
+      @dropIfEmpty={{true}}
+      @value={{question.answers.length}}
+    >
+      {{#if question.answers.length}}
+        <LinkTo
+          @route={{or @answersRoute "questions.show.answers"}}
+          @model={{question}}
+          class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold hover:bg-accent-200 dark:bg-accent-900/40 dark:text-accent-200 dark:hover:bg-accent-900/60"
+        >{{question.answers.length}}</LinkTo>
+      {{else}}
+        <span class="text-gray-300 dark:text-gray-600 text-xs">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @label="Fav">
+      <span class="text-base">{{if question.favorite "★" "☆"}}</span>
+    </r.cell>
+
+    <r.cell @actions={{true}}>
+      {{#if @showRoute}}
+        {{#if question.jobPost.id}}
+          <LinkTo
+            @route="job-posts.show.questions.show"
+            @models={{array question.jobPost question}}
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+          >Show</LinkTo>
+        {{else}}
+          <LinkTo
+            @route={{@showRoute}}
+            @model={{question}}
+            class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+          >Show</LinkTo>
+        {{/if}}
+      {{/if}}
+      {{#if @editRoute}}
+        <LinkTo
+          @route={{@editRoute}}
+          @model={{question}}
+          class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+        >Edit</LinkTo>
+      {{/if}}
+      {{#if @answerRoute}}
+        <LinkTo
+          @route={{@answerRoute}}
+          @model={{question}}
+          class="px-2 py-1 text-xs rounded border border-accent-200 text-accent-600 hover:bg-accent-50 dark:border-accent-700 dark:text-accent-300 dark:hover:bg-accent-900/30"
+        >Answer</LinkTo>
+      {{/if}}
+      {{#if @onDelete}}
+        <button
+          type="button"
+          class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+          {{on "click" (fn @onDelete question)}}
+        >Delete</button>
+      {{/if}}
+    </r.cell>
+  </:row>
+</ResponsiveList>
