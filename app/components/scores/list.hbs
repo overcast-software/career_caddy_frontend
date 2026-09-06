@@ -1,173 +1,146 @@
-{{#if @scores.length}}
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b border-gray-200">
-        <tr>
-          {{#unless (eq @showResume false)}}
-            <th
-              class="px-4 py-3 text-left font-semibold text-gray-600"
-            >Resume</th>
-          {{/unless}}
-          <th class="px-4 py-3 text-left font-semibold text-gray-600">Score</th>
-          {{#unless (eq @showJobPost false)}}
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Job Post</th>
-          {{/unless}}
-          {{#unless (eq @showStatus false)}}
-            <th
-              class="px-4 py-3 text-left font-semibold text-gray-600"
-            >Status</th>
-          {{/unless}}
-          {{#unless (eq @showCreated false)}}
-            <th
-              class="px-4 py-3 text-left font-semibold text-gray-600"
-            >Created</th>
-          {{/unless}}
-          {{#if @showExplanation}}
-            <th
-              class="px-4 py-3 text-left font-semibold text-gray-600"
-            >Explanation</th>
-          {{/if}}
-          {{#unless (eq @showActions false)}}
-            <th
-              class="px-4 py-3 text-right font-semibold text-gray-600"
-            >Actions</th>
-          {{/unless}}
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100 stagger-rows">
-        {{#each @scores as |score|}}
-          <tr class="hover:bg-gray-50">
-            {{#unless (eq @showResume false)}}
-              <td class="px-4 py-3 text-gray-900">
-                {{#if score.resume.id}}
-                  <LinkTo @route="resumes.show" @model={{score.resume}}>
-                    {{score.resume.title}}
-                  </LinkTo>
-                {{else}}
-                  <LinkTo
-                    @route="career-data"
-                    class="text-gray-500 italic hover:text-gray-700"
-                  >Career Data</LinkTo>
-                {{/if}}
-              </td>
-            {{/unless}}
-            <td class="px-4 py-3 font-medium">
-              {{#if score.isPending}}
-                <SpinnerInline
-                  @label="Scoring…"
-                  @title="Scoring — this page auto-refreshes when ready"
-                />
-              {{else if score.score}}
-                {{#if score.jobPost.id}}
-                  <LinkTo
-                    @route="job-posts.show.scores.show"
-                    @models={{array score.jobPost score}}
-                    class="text-accent-600"
-                  >{{score.score}}</LinkTo>
-                {{else}}
-                  <LinkTo
-                    @route="scores.show"
-                    @model={{score}}
-                    class="text-accent-600"
-                  >{{score.score}}</LinkTo>
-                {{/if}}
-              {{else if score.status}}
-                <span
-                  class="px-2 py-0.5 rounded-full text-xs font-medium
-                    {{if (eq score.status 'failed') 'bg-red-100 text-red-700'}}
-                    {{if (eq score.status 'error') 'bg-red-100 text-red-700'}}
-                    "
-                >{{score.status}}</span>
-              {{else}}
-                <span class="text-gray-400">&mdash;</span>
-              {{/if}}
-            </td>
-            {{#unless (eq @showJobPost false)}}
-              <td class="px-4 py-3 text-gray-600">
-                {{#if score.jobPost.id}}
-                  <LinkTo
-                    @route="job-posts.show.scores.show"
-                    @models={{array score.jobPost score}}
-                  >{{score.jobPost.title}}</LinkTo>
-                {{else}}
-                  <span class="text-gray-400">&mdash;</span>
-                {{/if}}
-              </td>
-            {{/unless}}
-            {{#unless (eq @showStatus false)}}
-              <td class="px-4 py-3">
-                <span
-                  class="inline-block whitespace-nowrap px-2 py-0.5 rounded-full text-xs font-medium
-                    {{if
-                      (eq score.status 'completed')
-                      'bg-green-100 text-green-700'
-                    }}
-                    {{if
-                      (eq score.status 'pending')
-                      'bg-yellow-100 text-yellow-700'
-                    }}
-                    {{if (eq score.status 'failed') 'bg-red-100 text-red-700'}}
-                    "
-                >
-                  {{or score.status "unknown"}}
-                </span>
-              </td>
-            {{/unless}}
-            {{#unless (eq @showCreated false)}}
-              <td class="px-4 py-3 text-gray-600">
-                {{#if score.createdAt}}
-                  {{moment-format score.createdAt "MMM D, YYYY"}}
-                {{else}}
-                  <span class="text-gray-400">&mdash;</span>
-                {{/if}}
-              </td>
-            {{/unless}}
-            {{#if @showExplanation}}
-              <td
-                class="px-4 py-3 text-gray-700 dark:text-gray-200 whitespace-pre-wrap break-words max-w-xl align-top"
-              >
-                {{#if score.explanation}}
-                  {{score.explanation}}
-                {{else}}
-                  <span class="text-gray-400">&mdash;</span>
-                {{/if}}
-              </td>
-            {{/if}}
-            {{#unless (eq @showActions false)}}
-              <td class="px-4 py-3 text-right">
-                {{#if score.isPending}}
-                  {{! pending — no actions }}
-                {{else}}
-                  <div class="flex items-center justify-end gap-2">
-                    {{#if score.jobPost.id}}
-                      <LinkTo
-                        @route="job-posts.show.scores.show"
-                        @models={{array score.jobPost score}}
-                        class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                      >View</LinkTo>
-                    {{else}}
-                      <LinkTo
-                        @route="scores.show"
-                        @model={{score}}
-                        class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100"
-                      >View</LinkTo>
-                    {{/if}}
-                    {{#if @onDelete}}
-                      <button
-                        type="button"
-                        class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50"
-                        {{on "click" (fn @onDelete score)}}
-                      >Delete</button>
-                    {{/if}}
-                  </div>
-                {{/if}}
-              </td>
-            {{/unless}}
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  </div>
-{{else}}
-  <EmptyState @message={{or @emptyMessage "No scores found."}} />
-{{/if}}
+<ResponsiveList
+  @items={{@scores}}
+  @emptyMessage={{or @emptyMessage "No scores found."}}
+>
+  <:header as |h|>
+    <h.col>Score</h.col>
+    <h.col @when={{not (eq @showJobPost false)}}>Job Post</h.col>
+    <h.col @when={{not (eq @showResume false)}}>Resume</h.col>
+    <h.col @when={{not (eq @showStatus false)}}>Status</h.col>
+    <h.col @when={{not (eq @showCreated false)}}>Created</h.col>
+    <h.col @when={{eq @showExplanation true}}>Explanation</h.col>
+    <h.col @align="right" @when={{not (eq @showActions false)}}>Actions</h.col>
+  </:header>
+  <:row as |score r|>
+    <r.cell @primary={{true}}>
+      {{#if score.isPending}}
+        <SpinnerInline
+          @label="Scoring…"
+          @title="Scoring — this page auto-refreshes when ready"
+        />
+      {{else if score.score}}
+        {{#if score.jobPost.id}}
+          <LinkTo
+            @route="job-posts.show.scores.show"
+            @models={{array score.jobPost score}}
+            class="text-accent-600 dark:text-accent-400"
+          >{{score.score}}</LinkTo>
+        {{else}}
+          <LinkTo
+            @route="scores.show"
+            @model={{score}}
+            class="text-accent-600 dark:text-accent-400"
+          >{{score.score}}</LinkTo>
+        {{/if}}
+      {{else if score.status}}
+        <span
+          class="rounded-full px-2 py-0.5 text-xs font-medium
+            {{if
+              (eq score.status 'failed')
+              'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+            }}
+            {{if
+              (eq score.status 'error')
+              'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+            }}
+            "
+        >{{score.status}}</span>
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @secondary={{true}} @when={{not (eq @showJobPost false)}}>
+      {{#if score.jobPost.id}}
+        <LinkTo
+          @route="job-posts.show.scores.show"
+          @models={{array score.jobPost score}}
+        >{{score.jobPost.title}}</LinkTo>
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @label="Resume" @when={{not (eq @showResume false)}}>
+      {{#if score.resume.id}}
+        <LinkTo @route="resumes.show" @model={{score.resume}}>
+          {{score.resume.title}}
+        </LinkTo>
+      {{else}}
+        <LinkTo
+          @route="career-data"
+          class="italic text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        >Career Data</LinkTo>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @label="Status" @when={{not (eq @showStatus false)}}>
+      <span
+        class="inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium
+          {{if
+            (eq score.status 'completed')
+            'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+          }}
+          {{if
+            (eq score.status 'pending')
+            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'
+          }}
+          {{if
+            (eq score.status 'failed')
+            'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+          }}
+          "
+      >
+        {{or score.status "unknown"}}
+      </span>
+    </r.cell>
+
+    <r.cell @label="Created" @when={{not (eq @showCreated false)}}>
+      {{#if score.createdAt}}
+        {{moment-format score.createdAt "MMM D, YYYY"}}
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell
+      @label="Explanation"
+      @when={{eq @showExplanation true}}
+      @dropIfEmpty={{true}}
+      @value={{score.explanation}}
+    >
+      {{#if score.explanation}}
+        <span
+          class="block max-w-xl whitespace-pre-wrap break-words"
+        >{{score.explanation}}</span>
+      {{else}}
+        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
+      {{/if}}
+    </r.cell>
+
+    <r.cell @actions={{true}} @when={{not (eq @showActions false)}}>
+      {{#unless score.isPending}}
+        {{#if score.jobPost.id}}
+          <LinkTo
+            @route="job-posts.show.scores.show"
+            @models={{array score.jobPost score}}
+            class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >View</LinkTo>
+        {{else}}
+          <LinkTo
+            @route="scores.show"
+            @model={{score}}
+            class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >View</LinkTo>
+        {{/if}}
+        {{#if @onDelete}}
+          <button
+            type="button"
+            class="rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+            {{on "click" (fn @onDelete score)}}
+          >Delete</button>
+        {{/if}}
+      {{/unless}}
+    </r.cell>
+  </:row>
+</ResponsiveList>
