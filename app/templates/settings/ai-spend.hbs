@@ -160,18 +160,25 @@
 
         {{! Breakdown table }}
         {{#if this.hasBuckets}}
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
+          {{! Numbers-dense breakdown (6 metric columns): stays a real
+            table at every width and scrolls sideways inside its own
+            container rather than becoming cards — the min-width is what
+            makes the overflow actually engage instead of the columns
+            squashing to unreadable at phone widths (CC-268). }}
+          <div class="-mx-2 overflow-x-auto px-2">
+            <table class="w-full min-w-[38rem] text-sm text-left">
               <thead
                 class="text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
               >
                 <tr>
-                  <th class="px-3 py-2">Period</th>
-                  <th class="px-3 py-2">{{this.groupBy}}</th>
-                  <th class="px-3 py-2 text-right">In Tokens</th>
-                  <th class="px-3 py-2 text-right">Out Tokens</th>
-                  <th class="px-3 py-2 text-right">Requests</th>
-                  <th class="px-3 py-2 text-right">Cost</th>
+                  <th class="px-3 py-2 whitespace-nowrap">Period</th>
+                  <th class="px-3 py-2 whitespace-nowrap">{{this.groupBy}}</th>
+                  <th class="px-3 py-2 text-right whitespace-nowrap">In Tokens</th>
+                  <th class="px-3 py-2 text-right whitespace-nowrap">Out Tokens</th>
+                  <th
+                    class="px-3 py-2 text-right whitespace-nowrap"
+                  >Requests</th>
+                  <th class="px-3 py-2 text-right whitespace-nowrap">Cost</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
