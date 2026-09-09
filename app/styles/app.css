@@ -8,14 +8,14 @@
  *   BASE         — html/body reset
  *   APP SHELL    — .course grid layout, sidebar, mobile drawer
  *   TAGS         — (migrated to Tailwind)
- *   BUILDER FORM — .builder-form grid, .field variants, container query
+ *   BUILDER FORM — .builder-form card chrome, .field control styling
  *   EXPERIENCE   — .experience, .desc-list, .rich-text
  *   BUTTONS      — .btn variants, tooltips, .actions, .form-actions
  *   FLASH        — ember-cli-flash alert/alert-box
  *   RESUME       — preview panel, profile, experience preview
  *   LOGIN        — login card, setup pages
  *   LANDING      — .landing-hero, landing page utilities
- *   LAYOUTS      — builder page, two-column form, collapsible
+ *   LAYOUTS      — builder page, collapsible
  *   PANEL        — .panel-card, toolbar, loader
  *   TOPBAR       — .tee-box header, subnav, breadcrumbs, spinner
  *   POWER SELECT — ember-power-select overrides
@@ -491,36 +491,35 @@ a {
 /* ===== TAGS ===== */
 /* Skill tags — replaced by Tailwind pill components */
 
-/* ===== BUILDER FORM ===== */
+/* ===== BUILDER FORM =====
+ *
+ * CC-281: .builder-form no longer does layout. It is card chrome plus the
+ * control styling (input / select / textarea / label) shared by every form
+ * in the app, and it stacks its children in ONE column. Multi-column field
+ * layout is <FieldGrid>'s job and nobody else's — that is the whole point
+ * of the CC-280 primitive, and the reason .field-row, .builder-form.two-col
+ * and the old `max-content 1fr` template are gone.
+ */
 .builder-form {
   display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: var(--space-3) var(--space-4);
-  align-items: center;
+  gap: var(--space-4);
   padding: var(--space-6);
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   min-width: 0;
-  overflow: hidden;
 }
 
-/* Non-field direct children (buttons, field-rows, etc.) span both columns */
-.builder-form > *:not(.field) {
-  grid-column: 1 / -1;
-}
-
-/* Direct .field children dissolve into the grid so label+control align */
-.builder-form > .field {
-  display: contents;
-}
-
-/* Nested .field elements (inside .field-row) stay as flex rows */
-.builder-form .field {
+/* A field cell: label stacked above its control, filling its column —
+ * whether that column is the form itself or one track of a <FieldGrid>.
+ * .field-full is the same cell; it just never sits inside a <FieldGrid>. */
+.builder-form .field,
+.builder-form .field-full {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
 .builder-form .field input:not([type="checkbox"], [type="radio"]) {
@@ -600,19 +599,6 @@ a {
   flex-shrink: 0;
 }
 
-.builder-form .field-row {
-  display: flex;
-  gap: var(--space-4);
-  grid-column: 1 / -1;
-}
-
-.builder-form .field-full {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  grid-column: 1 / -1;
-}
-
 /* field-full input/textarea styles apply globally, not just inside builder-form */
 .field-full textarea,
 .field-full input:not([type="checkbox"], [type="radio"]) {
@@ -632,55 +618,6 @@ a {
   outline: 2px solid rgb(10 102 194 / 25%);
   outline-offset: 2px;
   border-color: #4a9eda;
-}
-
-.builder-form .field-row .field {
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-/* Collapse builder-form to single column when editor panel is narrow (e.g. sidebar open) */
-@container editor (width < 420px) {
-  .builder-form {
-    grid-template-columns: 1fr;
-  }
-
-  .builder-form > .field {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .builder-form .field {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .builder-form .field-row {
-    flex-direction: column;
-  }
-
-  .builder-form .field-row .field,
-  .builder-form .field-row label.field {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .builder-form .field label,
-  .builder-form .field .field-label {
-    display: block;
-    width: 100%;
-    margin-bottom: var(--space-2);
-  }
-
-  .builder-form .field input:not([type="checkbox"], [type="radio"]),
-  .builder-form .field select,
-  .builder-form .field textarea {
-    width: 100%;
-    max-width: 100%;
-  }
 }
 
 /* ===== REORDER BUTTONS (↑/↓ stacked per row) ===== */
@@ -1054,33 +991,7 @@ a.btn.primary:active {
 /* Experience accordion header */
 /* Experience header + panel-card builder-form override — replaced by Tailwind */
 
-/* Two-column builder form variant */
-/* Two-column tile layout: equal-width fields tiling across 2 columns */
-.builder-form.two-col {
-  grid-template-columns: repeat(2, 1fr);
-  column-gap: var(--space-5);
-}
-
-/* In two-col, .field is a grid cell (label stacked above input) */
-.builder-form.two-col > .field {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-2);
-}
-
-/* Power-select triggers fill their column in two-col mode */
-.builder-form.two-col .ember-power-select-trigger {
-  width: 100%;
-  flex: unset;
-  min-height: calc(2 * var(--space-3) + 1lh + 2px);
-}
-
 @media (width <= 767px) {
-  .builder-form.two-col {
-    grid-template-columns: 1fr;
-  }
-
   .experience .job-header {
     flex-direction: column;
     align-items: flex-start;
@@ -1659,56 +1570,6 @@ a.landing-btn-primary:hover {
 .btn.lg {
   padding: 12px 18px;
   font-size: 1.05rem;
-}
-
-@media (width <= 1080px) {
-  .builder-form {
-    grid-template-columns: 1fr;
-  }
-
-  .builder-form > .field {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .builder-form .field {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  /* Stack rowed fields on small screens */
-  .builder-form .field-row {
-    flex-direction: column;
-  }
-
-  /* Ensure each field in the row takes full width when stacked */
-  .builder-form .field-row .field,
-  .builder-form .field-row label.field {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .builder-form .field label,
-  .builder-form .field .field-label {
-    display: block;
-    width: 100%;
-    margin-bottom: var(--space-2);
-  }
-
-  .builder-form .field input:not([type="checkbox"], [type="radio"]),
-  .builder-form .field select,
-  .builder-form .field textarea {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .builder-form.two-col .field input:not([type="checkbox"], [type="radio"]),
-  .builder-form.two-col .field select,
-  .builder-form.two-col .field textarea {
-    width: 100%;
-    margin: 0;
-  }
 }
 
 /* Builder layout — replaced by Tailwind grid in resumes/edit.hbs */
@@ -2422,12 +2283,15 @@ pre {
   color: var(--text);
 }
 
-/* Layout helpers inside builder-form row fields */
+/* Power-select triggers fill their field cell. `flex: none` matters: the
+ * cell is a COLUMN flex container (CC-281), so a growing trigger would
+ * stretch vertically to fill the cell instead of sizing to its content. */
 .builder-form .field .ember-power-select-trigger,
 .builder-form .field-full .ember-power-select-trigger {
-  flex: 1;
+  flex: none;
   min-width: 0;
   width: 100%;
+  min-height: calc(2 * var(--space-3) + 1lh + 2px);
 }
 
 /* Dropdown popup — HyperUI dark: bg-gray-900, text-white, border-gray-600 */

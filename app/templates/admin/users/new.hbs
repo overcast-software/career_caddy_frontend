@@ -15,45 +15,49 @@
       <h1 class="text-xl font-semibold mb-6">New User</h1>
 
       <form class="builder-form" {{on "submit" this.save}}>
-        <div class="field">
-          <label class="field-label" for="firstName">First Name</label>
-          <input
-            id="firstName"
-            type="text"
-            value={{this.firstName}}
-            {{on "input" (fn this.updateField "firstName")}}
-          />
-        </div>
+        <FieldGrid>
+          <div class="field">
+            <label class="field-label" for="firstName">First Name</label>
+            <input
+              id="firstName"
+              type="text"
+              value={{this.firstName}}
+              {{on "input" (fn this.updateField "firstName")}}
+            />
+          </div>
 
-        <div class="field">
-          <label class="field-label" for="lastName">Last Name</label>
-          <input
-            id="lastName"
-            type="text"
-            value={{this.lastName}}
-            {{on "input" (fn this.updateField "lastName")}}
-          />
-        </div>
+          <div class="field">
+            <label class="field-label" for="lastName">Last Name</label>
+            <input
+              id="lastName"
+              type="text"
+              value={{this.lastName}}
+              {{on "input" (fn this.updateField "lastName")}}
+            />
+          </div>
+        </FieldGrid>
 
-        <div class="field">
-          <label class="field-label" for="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={{this.email}}
-            {{on "input" (fn this.updateField "email")}}
-          />
-        </div>
+        <FieldGrid>
+          <div class="field">
+            <label class="field-label" for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={{this.email}}
+              {{on "input" (fn this.updateField "email")}}
+            />
+          </div>
 
-        <div class="field">
-          <label class="field-label" for="username">Username</label>
-          <input
-            id="username"
-            type="text"
-            value={{this.username}}
-            {{on "input" (fn this.updateField "username")}}
-          />
-        </div>
+          <div class="field">
+            <label class="field-label" for="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              value={{this.username}}
+              {{on "input" (fn this.updateField "username")}}
+            />
+          </div>
+        </FieldGrid>
 
         <div class="field">
           <label class="field-label" for="password">Password</label>

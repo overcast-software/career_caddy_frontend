@@ -1,5 +1,5 @@
-<div class="builder-form">
-  <div class="field companies-select-row">
+<div class="grid gap-4">
+  <div class="companies-select-row">
     <div class="grow">
       <Companies::Selector
         @companies={{this.companies}}
@@ -16,9 +16,7 @@
   </div>
 
   {{#if this.showCreate}}
-    <div class="field">
-      <Companies::FastCreate />
-    </div>
+    <Companies::FastCreate />
   {{/if}}
 </div>
 {{yield}}

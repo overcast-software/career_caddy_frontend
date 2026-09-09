@@ -11,19 +11,17 @@
   </div>
 
   {{#unless @scrape.isNew}}
-    <div class="field-row">
-      <div class="field">
-        <label class="field-label" for="scrape-external-link">External Link</label>
-        <input
-          id="scrape-external-link"
-          type="url"
-          value={{@scrape.externalLink}}
-          {{on "input" (fn this.updateField "externalLink")}}
-        />
-      </div>
+    <div class="field">
+      <label class="field-label" for="scrape-external-link">External Link</label>
+      <input
+        id="scrape-external-link"
+        type="url"
+        value={{@scrape.externalLink}}
+        {{on "input" (fn this.updateField "externalLink")}}
+      />
     </div>
 
-    <div class="field-row">
+    <FieldGrid>
       <div class="field">
         <label class="field-label" for="scrape-css-selectors">CSS Selectors</label>
         <input
@@ -42,7 +40,7 @@
           {{on "input" (fn this.updateField "parseMethod")}}
         />
       </div>
-    </div>
+    </FieldGrid>
 
     <div class="field-full">
       <label class="field-label" for="scrape-job-content">Job Content</label>

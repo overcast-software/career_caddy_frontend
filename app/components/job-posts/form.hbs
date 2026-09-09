@@ -1,24 +1,26 @@
-<form class="builder-form two-col" {{on "submit" this.submitEdit}}>
-  <div class="field">
-    <label class="field-label" for="title">Title</label>
-    <input
-      id="title"
-      type="text"
-      value={{@jobPost.title}}
-      {{on "input" (fn this.updateField "title")}}
-      required
-    />
-  </div>
+<form class="builder-form" {{on "submit" this.submitEdit}}>
+  <FieldGrid>
+    <div class="field">
+      <label class="field-label" for="title">Title</label>
+      <input
+        id="title"
+        type="text"
+        value={{@jobPost.title}}
+        {{on "input" (fn this.updateField "title")}}
+        required
+      />
+    </div>
 
-  <div class="field">
-    <label class="field-label" for="url">URL</label>
-    <input
-      id="url"
-      type="text"
-      value={{@jobPost.link}}
-      {{on "input" (fn this.updateField "link")}}
-    />
-  </div>
+    <div class="field">
+      <label class="field-label" for="url">URL</label>
+      <input
+        id="url"
+        type="text"
+        value={{@jobPost.link}}
+        {{on "input" (fn this.updateField "link")}}
+      />
+    </div>
+  </FieldGrid>
 
   <div class="field-full">
     <label class="field-label" for="canonical-link">Canonical URL</label>
@@ -39,61 +41,65 @@
     </div>
   </div>
 
-  <div class="field">
-    <label class="field-label" for="apply-url">Apply URL</label>
-    <input
-      id="apply-url"
-      type="text"
-      data-test-apply-url
-      value={{this.applyUrlInput}}
-      {{on "input" this.updateApplyUrl}}
-    />
-    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
-      Employer ATS destination. Career Caddy uses this to detect cross-platform
-      duplicates.
-    </p>
-  </div>
+  <FieldGrid>
+    <div class="field">
+      <label class="field-label" for="apply-url">Apply URL</label>
+      <input
+        id="apply-url"
+        type="text"
+        data-test-apply-url
+        value={{this.applyUrlInput}}
+        {{on "input" this.updateApplyUrl}}
+      />
+      <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+        Employer ATS destination. Career Caddy uses this to detect
+        cross-platform duplicates.
+      </p>
+    </div>
 
-  <div class="field">
-    <label class="field-label">Company</label>
-    <CcSelect
-      @withCreate={{true}}
-      @search={{this.searchCompanies}}
-      @onCreate={{this.addCompanyToJobPost}}
-      @onChange={{this.updateCompany}}
-      @selected={{this.selectedCompany}}
-      @placeholder="Search or create a company…"
-      as |company|
-    >
-      {{company.name}}
-    </CcSelect>
-  </div>
+    <div class="field">
+      <label class="field-label">Company</label>
+      <CcSelect
+        @withCreate={{true}}
+        @search={{this.searchCompanies}}
+        @onCreate={{this.addCompanyToJobPost}}
+        @onChange={{this.updateCompany}}
+        @selected={{this.selectedCompany}}
+        @placeholder="Search or create a company…"
+        as |company|
+      >
+        {{company.name}}
+      </CcSelect>
+    </div>
+  </FieldGrid>
 
-  <div class="field">
-    <label class="field-label" for="posted-date">Posted Date</label>
-    <input
-      id="posted-date"
-      type="date"
-      value={{if
-        @jobPost.postedDate
-        (moment-format @jobPost.postedDate "YYYY-MM-DD")
-        ""
-      }}
-      {{on "change" (fn this.updateDateField "postedDate")}}
-    />
-  </div>
+  <FieldGrid>
+    <div class="field">
+      <label class="field-label" for="posted-date">Posted Date</label>
+      <input
+        id="posted-date"
+        type="date"
+        value={{if
+          @jobPost.postedDate
+          (moment-format @jobPost.postedDate "YYYY-MM-DD")
+          ""
+        }}
+        {{on "change" (fn this.updateDateField "postedDate")}}
+      />
+    </div>
 
-  <div class="field">
-    <label class="field-label" for="source">Source</label>
-    <select id="source" {{on "change" (fn this.updateField "source")}}>
-      {{#each this.sourceOptions as |opt|}}
-        <option
-          value={{opt}}
-          selected={{eq @jobPost.source opt}}
-        >{{opt}}</option>
-      {{/each}}
-    </select>
-  </div>
+    <div class="field">
+      <label class="field-label" for="source">Source</label>
+      <select id="source" {{on "change" (fn this.updateField "source")}}>
+        {{#each this.sourceOptions as |opt|}}
+          <option
+            value={{opt}}
+            selected={{eq @jobPost.source opt}}
+          >{{opt}}</option>
+        {{/each}}
+      </select>
+    </div>
+  </FieldGrid>
 
   <div class="field-full">
     <label class="field-label" for="description">Description</label>

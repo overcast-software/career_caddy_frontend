@@ -85,6 +85,29 @@ module('Integration | Component | job-posts/form', function (hooks) {
       .matchesSelector('input', 'apply_url is an input element');
   });
 
+  // CC-281: this form used to tile its fields with `.builder-form.two-col`.
+  // That mechanism is gone; <FieldGrid> owns the column switch now. A stray
+  // `two-col` or `.field-row` would silently do nothing, so assert the layout
+  // is actually carried by the primitive rather than by dead class names.
+  test('field pairs are laid out by FieldGrid, not the retired two-col CSS', async function (assert) {
+    const store = this.owner.lookup('service:store');
+    this.jobPost = store.createRecord('job-post', { title: 'Engineer' });
+
+    await render(hbs`<JobPosts::Form @jobPost={{this.jobPost}} />`);
+
+    assert
+      .dom('form.builder-form')
+      .exists('the form keeps .builder-form for card + control styling');
+    assert
+      .dom('form.two-col')
+      .doesNotExist('the retired two-col variant is gone');
+    assert.dom('.field-row').doesNotExist('the retired field-row is gone');
+
+    assert
+      .dom('form.builder-form .grid.grid-cols-1.md\\:grid-cols-2')
+      .exists({ count: 3 }, 'title/url, apply-url/company and date/source');
+  });
+
   test('renders placeholder when canonicalLink is null', async function (assert) {
     const store = this.owner.lookup('service:store');
     this.jobPost = store.createRecord('job-post', {
