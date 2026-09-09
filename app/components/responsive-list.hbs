@@ -21,6 +21,11 @@
         </:row>
       </ResponsiveList>
 
+    An optional <:expansion as |item|> block draws an expanded panel for
+    ONE item at a time: pass `@expandedId` (compared against `item.id`) and
+    the panel renders below that row in the table tree and inside that card
+    in the card tree, with the row/card itself highlighted.
+
     Both trees are always in the DOM by design — CSS (`md:hidden` /
     `hidden md:block`) picks one. Iterate `@items` directly: it is a live
     Ember Data / ember-infinity array; a `.slice()`/`.toArray()` here would
@@ -31,7 +36,12 @@
   <ul class="space-y-3 md:hidden">
     {{#each @items as |item index|}}
       <li
-        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+        class="rounded-lg border p-4 shadow-sm
+          {{if
+            (and @expandedId (eq @expandedId item.id))
+            'border-accent-300 bg-accent-50 dark:border-accent-600 dark:bg-accent-900/30'
+            'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
+          }}"
       >
         <dl
           class="grid grid-cols-[max-content_1fr] items-baseline gap-x-4 gap-y-1 text-sm"
@@ -43,6 +53,15 @@
             to="row"
           }}
         </dl>
+        {{#if
+          (and (has-block "expansion") @expandedId (eq @expandedId item.id))
+        }}
+          <div
+            class="mt-3 border-t border-accent-200 pt-3 dark:border-accent-700"
+          >
+            {{yield item to="expansion"}}
+          </div>
+        {{/if}}
       </li>
     {{/each}}
   </ul>
@@ -64,7 +83,13 @@
       </thead>
       <tbody class="divide-y divide-gray-100 stagger-rows dark:divide-gray-700">
         {{#each @items as |item index|}}
-          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+          <tr
+            class="hover:bg-gray-50 dark:hover:bg-gray-700/40
+              {{if
+                (and @expandedId (eq @expandedId item.id))
+                'bg-accent-50 dark:bg-accent-900/30'
+              }}"
+          >
             {{yield
               item
               (hash cell=(component "responsive-list/cell" mode="table"))
@@ -72,6 +97,19 @@
               to="row"
             }}
           </tr>
+          {{#if
+            (and (has-block "expansion") @expandedId (eq @expandedId item.id))
+          }}
+            {{! colspan is deliberately larger than any real column count —
+                browsers clamp it to the row's actual width, which keeps the
+                primitive from having to know how many columns the caller
+                declared. }}
+            <tr class="bg-accent-50 dark:bg-accent-900/30">
+              <td colspan="99" class="px-4 pb-4 pt-3">
+                {{yield item to="expansion"}}
+              </td>
+            </tr>
+          {{/if}}
         {{/each}}
       </tbody>
     </table>

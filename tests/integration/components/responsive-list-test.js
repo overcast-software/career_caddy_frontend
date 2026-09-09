@@ -186,6 +186,86 @@ module('Integration | Component | responsive-list', function (hooks) {
       .containsText('Score', 'droppable row returns when @value is present');
   });
 
+  test('@align="center" centers the header col and the table cell', async function (assert) {
+    await render(hbs`
+      <ResponsiveList @items={{this.items}}>
+        <:header as |h|>
+          <h.col>Title</h.col>
+          <h.col @align="center">Company</h.col>
+        </:header>
+        <:row as |item r|>
+          <r.cell @primary={{true}}>{{item.title}}</r.cell>
+          <r.cell @label="Company" @align="center">{{item.company}}</r.cell>
+        </:row>
+      </ResponsiveList>
+    `);
+
+    assert
+      .dom('table thead th:last-child')
+      .hasClass('text-center', 'center header col is text-center');
+    assert
+      .dom('table thead th:last-child')
+      .doesNotHaveClass(
+        'text-left',
+        'center header col drops the left default',
+      );
+    assert
+      .dom('table tbody tr:first-child td:last-child')
+      .hasClass('text-center', 'center table cell is text-center');
+  });
+
+  test('<:expansion> renders for the @expandedId item only, in both trees', async function (assert) {
+    this.set('expandedId', '2');
+    await render(hbs`
+      <ResponsiveList @items={{this.items}} @expandedId={{this.expandedId}}>
+        <:header as |h|><h.col>Title</h.col></:header>
+        <:row as |item r|><r.cell @primary={{true}}>{{item.title}}</r.cell></:row>
+        <:expansion as |item|>
+          <p class="panel">Answering {{item.title}}</p>
+        </:expansion>
+      </ResponsiveList>
+    `);
+
+    // One panel per tree (card + table), for the matching item only.
+    assert
+      .dom('p.panel')
+      .exists({ count: 2 }, 'one expansion panel in each tree');
+    assert
+      .dom('ul.md\\:hidden li:last-child p.panel')
+      .hasText(
+        'Answering Beta',
+        'card expansion lands inside the matched card',
+      );
+    assert
+      .dom('div.hidden.md\\:block table tbody tr td[colspan="99"] p.panel')
+      .hasText('Answering Beta', 'table expansion lands in a full-width row');
+    assert
+      .dom('ul.md\\:hidden li:first-child p.panel')
+      .doesNotExist('unmatched card has no expansion');
+  });
+
+  test('<:expansion> is absent when nothing is expanded', async function (assert) {
+    this.set('expandedId', null);
+    await render(hbs`
+      <ResponsiveList @items={{this.items}} @expandedId={{this.expandedId}}>
+        <:header as |h|><h.col>Title</h.col></:header>
+        <:row as |item r|><r.cell @primary={{true}}>{{item.title}}</r.cell></:row>
+        <:expansion as |item|>
+          <p class="panel">Answering {{item.title}}</p>
+        </:expansion>
+      </ResponsiveList>
+    `);
+
+    assert
+      .dom('p.panel')
+      .doesNotExist(
+        'a null @expandedId expands nothing (no id-vs-undefined match)',
+      );
+    assert
+      .dom('table tbody tr')
+      .exists({ count: 2 }, 'table keeps exactly one row per item');
+  });
+
   test('empty @items renders the EmptyState message and neither tree', async function (assert) {
     this.set('items', []);
     await render(hbs`

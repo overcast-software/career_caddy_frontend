@@ -12,7 +12,7 @@
   @value       raw value behind the cell; used with @dropIfEmpty
   @dropIfEmpty card only: omit this label/value row when @value is empty (the
                table still shows the block's "—" so columns stay aligned)
-  @align       "right" to right-align a plain cell
+  @align       "right" / "center" to align a plain cell (table tree)
   @when        default true; false drops the cell in BOTH trees (pair it with
                the matching <h.col @when>) }}
 {{#unless (eq @when false)}}
@@ -25,6 +25,7 @@
       <td
         class="px-4 py-3
           {{if (eq @align 'right') 'text-right'}}
+          {{if (eq @align 'center') 'text-center'}}
           {{if
             @primary
             'font-medium text-gray-900 dark:text-gray-100'
@@ -51,7 +52,7 @@
       </div>
     {{else if @actions}}
       <div
-        class="col-span-2 mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-700 [&_button]:min-h-[40px] [&_button]:min-w-[40px] [&_button]:justify-center"
+        class="col-span-2 mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-700 [&_a]:inline-flex [&_a]:min-h-[40px] [&_a]:min-w-[40px] [&_a]:items-center [&_a]:justify-center [&_button]:min-h-[40px] [&_button]:min-w-[40px] [&_button]:justify-center"
       >
         {{yield}}
       </div>
