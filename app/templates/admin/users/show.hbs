@@ -15,62 +15,68 @@
       <h1 class="text-xl font-semibold mb-6">Edit User</h1>
 
       <form class="builder-form" {{on "submit" this.save}}>
-        <div class="field">
-          <label class="field-label" for="firstName">First Name</label>
-          <input
-            id="firstName"
-            type="text"
-            value={{this.firstName}}
-            {{on "input" (fn this.updateField "firstName")}}
-          />
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="lastName">Last Name</label>
-          <input
-            id="lastName"
-            type="text"
-            value={{this.lastName}}
-            {{on "input" (fn this.updateField "lastName")}}
-          />
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={{this.email}}
-            {{on "input" (fn this.updateField "email")}}
-          />
-        </div>
-
-        <div class="field">
-          <label class="field-label">Username</label>
-          <p class="text-sm text-gray-500">{{this.model.username}}</p>
-        </div>
-
-        <div class="field">
-          <label class="flex items-center gap-2 cursor-pointer">
+        <FieldGrid>
+          <div class="field">
+            <label class="field-label" for="firstName">First Name</label>
             <input
-              type="checkbox"
-              checked={{this.isStaff}}
-              {{on "change" (fn this.toggleField "isStaff")}}
+              id="firstName"
+              type="text"
+              value={{this.firstName}}
+              {{on "input" (fn this.updateField "firstName")}}
             />
-            <span class="field-label mb-0">Staff (superuser)</span>
-          </label>
-        </div>
+          </div>
 
-        <div class="field">
-          <label class="flex items-center gap-2 cursor-pointer">
+          <div class="field">
+            <label class="field-label" for="lastName">Last Name</label>
             <input
-              type="checkbox"
-              checked={{this.isActive}}
-              {{on "change" (fn this.toggleField "isActive")}}
+              id="lastName"
+              type="text"
+              value={{this.lastName}}
+              {{on "input" (fn this.updateField "lastName")}}
             />
-            <span class="field-label mb-0">Active</span>
-          </label>
-        </div>
+          </div>
+        </FieldGrid>
+
+        <FieldGrid>
+          <div class="field">
+            <label class="field-label" for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={{this.email}}
+              {{on "input" (fn this.updateField "email")}}
+            />
+          </div>
+
+          <div class="field">
+            <label class="field-label">Username</label>
+            <p class="text-sm text-gray-500">{{this.model.username}}</p>
+          </div>
+        </FieldGrid>
+
+        <FieldGrid>
+          <div class="field">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={{this.isStaff}}
+                {{on "change" (fn this.toggleField "isStaff")}}
+              />
+              <span class="field-label mb-0">Staff (superuser)</span>
+            </label>
+          </div>
+
+          <div class="field">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={{this.isActive}}
+                {{on "change" (fn this.toggleField "isActive")}}
+              />
+              <span class="field-label mb-0">Active</span>
+            </label>
+          </div>
+        </FieldGrid>
 
         <div class="form-actions">
           <button type="submit" class="btn primary">Save Changes</button>

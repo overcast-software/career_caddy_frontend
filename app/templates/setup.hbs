@@ -8,62 +8,64 @@
     <div class="error">{{this.errorMessage}}</div>
   {{/if}}
 
-  <form class="builder-form two-col" {{on "submit" this.save}}>
-    <label class="field">
-      <span class="field-label">First name</span>
-      <input
-        type="text"
-        value={{this.model.firstName}}
-        {{on "input" this.updateFirstName}}
-      />
-    </label>
+  <form class="builder-form" {{on "submit" this.save}}>
+    <FieldGrid>
+      <label class="field">
+        <span class="field-label">First name</span>
+        <input
+          type="text"
+          value={{this.model.firstName}}
+          {{on "input" this.updateFirstName}}
+        />
+      </label>
 
-    <label class="field">
-      <span class="field-label">Last name</span>
-      <input
-        type="text"
-        value={{this.model.lastName}}
-        {{on "input" this.updateLastName}}
-      />
-    </label>
+      <label class="field">
+        <span class="field-label">Last name</span>
+        <input
+          type="text"
+          value={{this.model.lastName}}
+          {{on "input" this.updateLastName}}
+        />
+      </label>
 
-    <label class="field">
-      <span class="field-label">Email</span>
-      <input
-        type="email"
-        value={{this.model.email}}
-        {{on "input" this.updateEmail}}
-      />
-    </label>
+      <label class="field">
+        <span class="field-label">Email</span>
+        <input
+          type="email"
+          value={{this.model.email}}
+          {{on "input" this.updateEmail}}
+        />
+      </label>
 
-    <label class="field">
-      <span class="field-label">Phone</span>
-      <input
-        type="tel"
-        value={{this.model.phone}}
-        {{on "input" this.updatePhone}}
-      />
-    </label>
+      <label class="field">
+        <span class="field-label">Phone</span>
+        <input
+          type="tel"
+          value={{this.model.phone}}
+          {{on "input" this.updatePhone}}
+        />
+      </label>
 
-    <label class="field">
-      <span class="field-label">Username</span>
-      <input
-        type="text"
-        value={{this.model.username}}
-        {{on "input" this.updateUsername}}
-        autocomplete="username"
-      />
-    </label>
+      <label class="field">
+        <span class="field-label">Username</span>
+        <input
+          type="text"
+          value={{this.model.username}}
+          {{on "input" this.updateUsername}}
+          autocomplete="username"
+        />
+      </label>
 
-    <label class="field">
-      <span class="field-label">Password</span>
-      <input
-        type="password"
-        value={{this.model.password}}
-        {{on "input" this.updatePassword}}
-        autocomplete="new-password"
-      />
-    </label>
+      <label class="field">
+        <span class="field-label">Password</span>
+        <input
+          type="password"
+          value={{this.model.password}}
+          {{on "input" this.updatePassword}}
+          autocomplete="new-password"
+        />
+      </label>
+    </FieldGrid>
 
     <div class="form-actions">
       <button type="submit" class="btn primary lg" disabled={{this.saving}}>

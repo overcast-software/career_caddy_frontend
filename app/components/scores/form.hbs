@@ -2,95 +2,83 @@
 <RouteLayout @flashMessages={{this.flashMessages}}>
   <:main>
     <form class="builder-form" {{on "submit" this.saveScore}}>
-      <div class="field-row">
-        <div class="field">
-          <label class="field-label">Company</label>
-          <Companies::Selector
-            @companies={{this.companies}}
-            @companyCallback={{this.updateCompany}}
-            @placeHolder="Select a company…"
-          />
-        </div>
+      <div class="field">
+        <label class="field-label">Company</label>
+        <Companies::Selector
+          @companies={{this.companies}}
+          @companyCallback={{this.updateCompany}}
+          @placeHolder="Select a company…"
+        />
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label class="field-label">Job Post</label>
-          <CcSelect
-            @options={{this.jobPosts}}
-            @selected={{this.selectedJobPost}}
-            @onChange={{this.updateJobPost}}
-            @searchEnabled={{true}}
-            @searchField="title"
-            @placeholder={{if
-              this.selectedCompany
-              "Select a job post…"
-              "Select a company first"
-            }}
-            @disabled={{unless this.selectedCompany true}}
-            as |jobPost|
-          >
-            {{jobPost.title}}
-          </CcSelect>
-        </div>
+      <div class="field">
+        <label class="field-label">Job Post</label>
+        <CcSelect
+          @options={{this.jobPosts}}
+          @selected={{this.selectedJobPost}}
+          @onChange={{this.updateJobPost}}
+          @searchEnabled={{true}}
+          @searchField="title"
+          @placeholder={{if
+            this.selectedCompany
+            "Select a job post…"
+            "Select a company first"
+          }}
+          @disabled={{unless this.selectedCompany true}}
+          as |jobPost|
+        >
+          {{jobPost.title}}
+        </CcSelect>
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label class="field-label">Resume</label>
-          <CcSelect
-            @options={{this.resumes}}
-            @selected={{this.selectedResume}}
-            @onChange={{this.updateResume}}
-            @searchEnabled={{true}}
-            @searchField="name"
-            @placeholder="Career Data (no resume)"
-            @allowClear={{true}}
-            as |resume|
-          >
-            {{resume.name}}
-          </CcSelect>
-        </div>
+      <div class="field">
+        <label class="field-label">Resume</label>
+        <CcSelect
+          @options={{this.resumes}}
+          @selected={{this.selectedResume}}
+          @onChange={{this.updateResume}}
+          @searchEnabled={{true}}
+          @searchField="name"
+          @placeholder="Career Data (no resume)"
+          @allowClear={{true}}
+          as |resume|
+        >
+          {{resume.name}}
+        </CcSelect>
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label class="field-label" for="score-value">Score</label>
-          <input
-            id="score-value"
-            type="number"
-            min="0"
-            max="100"
-            value={{this.score}}
-            {{on "input" this.updateScore}}
-            placeholder="0–100"
-          />
-        </div>
+      <div class="field">
+        <label class="field-label" for="score-value">Score</label>
+        <input
+          id="score-value"
+          type="number"
+          min="0"
+          max="100"
+          value={{this.score}}
+          {{on "input" this.updateScore}}
+          placeholder="0–100"
+        />
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label class="field-label" for="explanation">Explanation</label>
-          <textarea
-            id="explanation"
-            rows="8"
-            {{on "input" this.updateExplanation}}
-          >{{this.explanation}}</textarea>
-        </div>
+      <div class="field">
+        <label class="field-label" for="explanation">Explanation</label>
+        <textarea
+          id="explanation"
+          rows="8"
+          {{on "input" this.updateExplanation}}
+        >{{this.explanation}}</textarea>
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label class="field-label" for="score-instructions">Instructions for
-            AI (optional)</label>
-          <textarea
-            id="score-instructions"
-            class="bg-accent-50 text-gray-900 dark:bg-accent-900/20 dark:text-gray-100"
-            rows="3"
-            placeholder="Add any additional context or instructions for the AI..."
-            {{on "input" this.updateInstructions}}
-          >{{this.instructions}}</textarea>
-        </div>
+      <div class="field">
+        <label class="field-label" for="score-instructions">Instructions for AI
+          (optional)</label>
+        <textarea
+          id="score-instructions"
+          class="bg-accent-50 text-gray-900 dark:bg-accent-900/20 dark:text-gray-100"
+          rows="3"
+          placeholder="Add any additional context or instructions for the AI..."
+          {{on "input" this.updateInstructions}}
+        >{{this.instructions}}</textarea>
       </div>
 
       <div class="form-actions">

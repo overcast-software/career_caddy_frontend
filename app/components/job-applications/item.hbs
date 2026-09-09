@@ -1,11 +1,11 @@
 <Panel::Card>
   <div class="builder-form">
-    <div class="field">
+    <div class="flex flex-wrap items-baseline gap-3">
       <h1>{{@jobApplication.jobPost.title}}</h1>
     </div>
 
     <section class="job-post-description">
-      <div class="field">
+      <div class="flex flex-wrap items-baseline gap-3">
         <div class="field-label">Resume:</div>
         {{#if @jobApplication.resume}}
           {{@jobApplication.resume.name}}
@@ -16,7 +16,7 @@
     </section>
 
     <section>
-      <div class="field">
+      <div class="flex flex-wrap items-baseline gap-3">
         <div class="field-label">Cover Letter</div>
         {{#if @jobApplication.coverLetter}}
           {{@jobApplication.coverLetter.createdAt}}
@@ -27,13 +27,13 @@
     </section>
 
     <section>
-      <div class="field">
+      <div class="flex flex-wrap items-baseline gap-3">
         <div class="field-label">Applied At</div>
         {{format-date @jobApplication.appliedAt}}
       </div>
 
     </section>
-    <div class="field">
+    <div class="flex flex-wrap items-baseline gap-3">
       <div class="field-label">Status</div>
       {{#if @jobApplication.status}}
         <span class={{job-application-status-class @jobApplication.status}}>
@@ -44,7 +44,7 @@
       {{/if}}
     </div>
 
-    <div class="field">
+    <div class="flex flex-wrap items-baseline gap-3">
       <div class="field-label">Tracking URL</div>
       {{#if @jobApplication.trackingUrl}}
         <a
@@ -57,7 +57,7 @@
       {{/if}}
     </div>
 
-    <div class="field">
+    <div class="flex flex-wrap items-baseline gap-3">
       <div class="field-label">Notes</div>
       {{@jobApplication.notes}}
     </div>

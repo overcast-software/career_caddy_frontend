@@ -1,5 +1,5 @@
 <form class="builder-form" {{on "submit" this.save}}>
-  <div class="field">
+  <div class="flex">
     <button
       type="button"
       class="btn {{if this.useAI 'primary'}}"
@@ -11,9 +11,7 @@
   </div>
 
   {{#if this.isPolling}}
-    <div class="field">
-      <p><em>AI is generating your answer, please wait…</em></p>
-    </div>
+    <p><em>AI is generating your answer, please wait…</em></p>
   {{else if this.useAI}}
     <div class="field-full">
       <label class="field-label" for="answer-additional-prompt">Additional
@@ -28,14 +26,10 @@
     </div>
 
     {{#if @showQuestion}}
-      <div class="field">
-        <p><strong>Question:</strong> {{@answer.question.content.content}}</p>
-      </div>
+      <p><strong>Question:</strong> {{@answer.question.content.content}}</p>
     {{/if}}
-    <div class="field">
-      <p><em>AI will generate an answer based on the question and your
-          additional prompt.</em></p>
-    </div>
+    <p><em>AI will generate an answer based on the question and your additional
+        prompt.</em></p>
   {{else}}
     <div class="field-full">
       <label class="field-label" for="answer-content">Answer</label>
