@@ -1,0 +1,70 @@
+{{!
+  <BottomSheet> — the ONE shared mobile bottom-sheet shell (CC-260 doctrine:
+  extract a single sheet pattern, don't build one per caller; CC-271's picker
+  work is the intended second consumer).
+
+  Two positionings, same markup:
+    * below md — fixed bottom sheet + dimmed scrim, safe-area bottom padding,
+      capped at 80dvh and scrollable.
+    * md and up — the anchored popover we've always had. The CALLER must
+      provide the positioning context (`class="relative"` on its wrapper).
+
+  Z-ORDER (CC-260 landmine 10): budget is tee-box 50 < chat 60 < site-header
+  70 / route-footer 70 < mobile-overlay 75 < mobile-drawer 80. The sheet sits
+  at 72 (scrim 71) — above the sticky header and the fixed route-footer it
+  overlaps, still BELOW the drawer so the drawer always wins. At md+ it drops
+  back to the popover's original 50/40 inside the caller's stacking context.
+
+  @onClose   (required) closes the sheet — scrim tap and the mobile X.
+  @label     accessible name, also the mobile sheet heading. Default "Options".
+  @role      role for the panel element (e.g. "menu"). Optional.
+  @panelClass extra classes for the panel. Optional.
+}}
+<button
+  type="button"
+  aria-label="Close {{if @label @label 'options'}}"
+  class="fixed inset-0 z-[71] cursor-default bg-black/40 md:z-40 md:bg-transparent"
+  {{on "click" @onClose}}
+></button>
+
+<div
+  class="fixed inset-x-0 bottom-0 z-[72] max-h-[80dvh] overflow-y-auto rounded-t-2xl border-t border-gray-200 bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 shadow-2xl dark:border-gray-700 dark:bg-gray-800 md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:z-50 md:mt-2 md:max-h-none md:w-72 md:overflow-visible md:rounded-lg md:border md:p-3 md:shadow-lg
+    {{@panelClass}}"
+  role={{@role}}
+  aria-label={{@label}}
+  data-bottom-sheet
+>
+  {{! In-flow grid, not an absolutely-positioned X: the panel is the scroll
+      container below md, so an absolute child would detach from the header
+      as soon as the facet list overflowed. }}
+  <div class="mb-1 grid grid-cols-[1fr_auto_1fr] items-center md:hidden">
+    <span></span>
+    <span
+      aria-hidden="true"
+      class="block h-1 w-10 rounded-full bg-gray-300 dark:bg-gray-600"
+    ></span>
+    <button
+      type="button"
+      class="justify-self-end rounded p-1 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+      aria-label="Close {{if @label @label 'options'}}"
+      {{on "click" @onClose}}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-5"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6 18 18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+  </div>
+
+  {{yield}}
+</div>
