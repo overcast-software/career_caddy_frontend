@@ -11,6 +11,7 @@ import { hbs } from 'ember-cli-htmlbars';
 // `media="all"` because the default gate is phone-only and the test browser
 // is not a phone; the mechanics under test are the same at any width.
 const SCROLLER = hbs`
+  {{! template-lint-disable no-inline-styles }}
   <div class="course-main" style="height:100px;overflow-y:auto" data-test-scroller>
     <div class="tee-box" {{hide-on-scroll media="all"}} data-test-bar></div>
     <div style="height:2000px"></div>
@@ -84,6 +85,7 @@ module('Integration | Modifier | hide-on-scroll', function (hooks) {
 
   test('honours an explicit threshold', async function (assert) {
     await render(hbs`
+      {{! template-lint-disable no-inline-styles }}
       <div class="course-main" style="height:100px;overflow-y:auto" data-test-scroller>
         <div class="tee-box" {{hide-on-scroll threshold=300 media="all"}} data-test-bar></div>
         <div style="height:2000px"></div>
@@ -102,6 +104,7 @@ module('Integration | Modifier | hide-on-scroll', function (hooks) {
 
   test('never hides while the media query does not match', async function (assert) {
     await render(hbs`
+      {{! template-lint-disable no-inline-styles }}
       <div class="course-main" style="height:100px;overflow-y:auto" data-test-scroller>
         <div class="tee-box" {{hide-on-scroll media="not all"}} data-test-bar></div>
         <div style="height:2000px"></div>
