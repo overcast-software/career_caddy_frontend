@@ -3,7 +3,7 @@
     type="button"
     class="inline-flex items-center gap-1.5 rounded border border-gray-300 bg-white px-2.5 py-1 text-xs text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
     aria-haspopup="true"
-    aria-expanded={{this.open}}
+    aria-expanded={{if this.open "true" "false"}}
     {{on "click" this.toggle}}
   >
     <svg
