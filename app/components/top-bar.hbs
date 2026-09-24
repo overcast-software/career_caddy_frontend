@@ -27,7 +27,21 @@
       >Caddy</span></LinkTo>
   </div>
 
-  <div class="flex items-center justify-end gap-2">
+  <div class="flex min-w-0 items-center justify-end gap-2">
+    {{! Folded into the top row (CC-269): the old .topbar-spinner-row was
+        always rendered to reserve height, which cost a whole row of phone
+        chrome for a signal that is usually absent. The 2px .loading-bar
+        under the header stays the primary load cue; this is the label. }}
+    {{#if this.spinner.isShowing}}
+      <span class="spinner-status min-w-0" data-test-spinner>
+        <span class="spinner-dot"></span>
+        {{#if this.spinner.label}}
+          <span
+            class="spinner-label hidden truncate sm:inline"
+          >{{this.spinner.label}}</span>
+        {{/if}}
+      </span>
+    {{/if}}
     {{#if this.session.isAuthenticated}}
       {{#if this.currentUser.user.username}}
         <span
@@ -64,21 +78,6 @@
       >Login</LinkTo>
     {{/if}}
   </div>
-</div>
-
-{{! Always rendered so the topbar-row above doesn't shift when the
-    spinner toggles. Only the inner content is conditional. }}
-<div
-  class="topbar-spinner-row"
-  data-test-spinner
-  aria-hidden={{unless this.spinner.isShowing "true"}}
->
-  {{#if this.spinner.isShowing}}
-    <span class="spinner-dot"></span>
-    {{#if this.spinner.label}}
-      <span class="spinner-label">{{this.spinner.label}}</span>
-    {{/if}}
-  {{/if}}
 </div>
 
 {{yield}}

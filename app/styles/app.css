@@ -1816,18 +1816,9 @@ pre {
   justify-content: space-between;
 }
 
-/* Always rendered with reserved height so the topbar-row above keeps
-   the same vertical position whether or not the spinner is active. */
-.topbar-spinner-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-2);
-  min-height: 1.25rem;
-  font-size: 0.8rem;
-  color: var(--muted);
-  white-space: nowrap;
-}
+/* .topbar-spinner-row is gone (CC-269) — the spinner now renders inline in
+   .topbar-row as .spinner-status (see ~:2008), so no second row of chrome is
+   reserved for a signal that is usually absent. */
 
 .loading-bar {
   position: sticky;
@@ -1915,8 +1906,14 @@ pre {
    clipping the .tee-box itself — popover menus (e.g. filters) anchor
    to it and need to overflow downward into the page. */
 @media (width <= 767px) {
+  /* CC-269: 2.5lh (60px) was a floor the subnav's own content never
+     reached, so it padded 12px of dead space above the fold on every
+     route. 2lh (48px) still clears the 44px tap targets inside, and
+     min-height is a floor — a taller subnav still grows past it. With
+     the 49px header that puts the persistent phone chrome at ~97px,
+     down from ~150px across three rows. */
   .tee-box {
-    min-height: 2.5lh;
+    min-height: 2lh;
     grid-template-columns: auto auto auto;
     gap: var(--space-2);
   }
@@ -1925,6 +1922,30 @@ pre {
     flex-wrap: nowrap;
     white-space: nowrap;
     overflow-x: auto;
+  }
+
+  /* CC-269 — condensed phone chrome. The 4lh floor on .site-header was
+     sized for TWO stacked rows (.topbar-row + the always-reserved
+     .topbar-spinner-row); the spinner row is gone, so the floor now just
+     pads empty space above the fold. Drop the floor and let the single
+     flex row size itself off its tallest child (the 36px icon buttons).
+     CAUTION (CC-260 landmine 8): `lh` is font-size derived, so shrinking
+     .brand-title below would move a lh-stated floor implicitly — which is
+     exactly why this states `0` and lets content decide instead. */
+  .site-header {
+    padding: 6px 12px;
+    min-height: 0;
+  }
+
+  /* 2rem eats a third of a 390px row next to the hamburger and the
+     account controls. 1.25rem keeps the two-tone wordmark legible and
+     lets the header collapse to one ~48px row.
+     SCOPED to .site-header on purpose: .brand-title is also the hero
+     wordmark on the login/waitlist card (see .login-card .brand-title
+     above), where 2rem is doing its job and a bare .brand-title rule
+     here would shrink it too. */
+  .site-header .brand-title {
+    font-size: 1.25rem;
   }
 }
 
