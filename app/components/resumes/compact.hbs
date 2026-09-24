@@ -1,31 +1,45 @@
-<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-  <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
-    <LinkTo @route="resumes.show" @model={{@resume}}>
+{{! Row content for the resumes index (CC-267, phase D2 of CC-260).
+    Renders <ResponsiveList> cells — the <:row> cell hash is handed in as
+    @r — so the SAME row logic draws as a table row at ≥md and as a
+    stacked card below the md/768 breakpoint.
+
+    @resume            the row's Resume (slim: jobApplicationCount, no hasMany)
+    @r                 the ResponsiveList <:row> cell hash (from the route)
+    @onToggleFavorite  called with the resume to flip its favorite flag
+    @onDelete          called with the resume to destroy it }}
+{{#let @r as |r|}}
+  <r.cell @primary={{true}}>
+    <LinkTo @route="resumes.show" @model={{@resume.id}}>
       {{@resume.name}}
     </LinkTo>
-  </td>
-  <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-400">
+  </r.cell>
+
+  <r.cell @label="Applications" @align="center">
     {{if @resume.jobApplicationCount @resume.jobApplicationCount 0}}
-  </td>
-  <td class="px-4 py-3 text-gray-600 dark:text-gray-400 truncate max-w-xs">
-    {{or @resume.notes "—"}}
-  </td>
-  <td class="px-4 py-3 text-right">
-    <div class="flex items-center justify-end gap-2">
-      <Buttons::Favorite
-        @model={{@resume}}
-        @onToggle={{fn @onToggleFavorite @resume}}
-      />
-      <LinkTo
-        @route="resumes.edit"
-        @model={{@resume.id}}
-        class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
-      >Edit</LinkTo>
-      <button
-        type="button"
-        class="px-2 py-1 text-xs rounded border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
-        {{on "click" (fn @onDelete @resume)}}
-      >Delete</button>
-    </div>
-  </td>
-</tr>
+  </r.cell>
+
+  <r.cell @label="Notes" @value={{@resume.notes}} @dropIfEmpty={{true}}>
+    {{#if @resume.notes}}
+      {{@resume.notes}}
+    {{else}}
+      <span class="text-gray-400 dark:text-gray-600">&mdash;</span>
+    {{/if}}
+  </r.cell>
+
+  <r.cell @actions={{true}}>
+    <Buttons::Favorite
+      @model={{@resume}}
+      @onToggle={{fn @onToggleFavorite @resume}}
+    />
+    <LinkTo
+      @route="resumes.edit"
+      @model={{@resume.id}}
+      class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+    >Edit</LinkTo>
+    <button
+      type="button"
+      class="rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+      {{on "click" (fn @onDelete @resume)}}
+    >Delete</button>
+  </r.cell>
+{{/let}}

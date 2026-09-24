@@ -7,42 +7,21 @@
     </div>
   </:subnav>
   <:main>
-    {{#if this.noResumes}}
-      <EmptyState @message="No resumes yet." />
-    {{else}}
-      <div
-        class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-      >
-        <table class="min-w-full text-sm">
-          <thead
-            class="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
-          >
-            <tr>
-              <th
-                class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-              >Name</th>
-              <th
-                class="px-4 py-3 text-center font-semibold text-gray-600 dark:text-gray-300"
-              >Applications</th>
-              <th
-                class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300"
-              >Notes</th>
-              <th
-                class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300"
-              >Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-            {{#each this.model as |resume|}}
-              <Resumes::Compact
-                @resume={{resume}}
-                @onDelete={{this.deleteResume}}
-                @onToggleFavorite={{this.toggleFavorite}}
-              />
-            {{/each}}
-          </tbody>
-        </table>
-      </div>
-    {{/if}}
+    <ResponsiveList @items={{this.model}} @emptyMessage="No resumes yet.">
+      <:header as |h|>
+        <h.col>Name</h.col>
+        <h.col @align="center">Applications</h.col>
+        <h.col>Notes</h.col>
+        <h.col @align="right">Actions</h.col>
+      </:header>
+      <:row as |resume r|>
+        <Resumes::Compact
+          @resume={{resume}}
+          @r={{r}}
+          @onDelete={{this.deleteResume}}
+          @onToggleFavorite={{this.toggleFavorite}}
+        />
+      </:row>
+    </ResponsiveList>
   </:main>
 </RouteLayout>

@@ -1,216 +1,230 @@
-<div class="favorites-container">
-  <h1>Favorites</h1>
+{{page-title "Favorites"}}
+{{! CC-267: this page predated the <RouteLayout> convention and wore four
+  class names (favorites-container / favorites-controls / tabs / tab-button)
+  that app.css never defined — so at 390px it rendered edge-to-edge with a
+  run-on line of unstyled tab text. It now uses the standard layout (the
+  .fairway gutter) and HyperUI underline tabs in Tailwind, explicit dark:
+  pairs throughout. }}
+<RouteLayout @flashMessages={{this.flashMessages}}>
+  <:subnav>
+    <div class="controls">
+      <button
+        type="button"
+        class="btn {{if this.showOnlyFavorites 'primary'}}"
+        {{on "click" this.toggleFilterMode}}
+      >
+        {{if this.showOnlyFavorites "Show All" "Show Favorites Only"}}
+      </button>
+    </div>
+  </:subnav>
+  <:main>
+    <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+      <nav
+        class="-mb-px flex gap-4 overflow-x-auto"
+        aria-label="Favorites sections"
+      >
+        <button
+          type="button"
+          class="min-h-[44px] whitespace-nowrap border-b-2 px-1 text-sm font-medium
+            {{if
+              (eq this.activeTab 'resumes')
+              'border-accent-500 text-accent-600 dark:border-accent-400 dark:text-accent-300'
+              'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-200'
+            }}"
+          {{on "click" (fn this.setActiveTab "resumes")}}
+        >
+          Resumes ({{this.filteredResumes.length}})
+        </button>
+        <button
+          type="button"
+          class="min-h-[44px] whitespace-nowrap border-b-2 px-1 text-sm font-medium
+            {{if
+              (eq this.activeTab 'coverLetters')
+              'border-accent-500 text-accent-600 dark:border-accent-400 dark:text-accent-300'
+              'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-200'
+            }}"
+          {{on "click" (fn this.setActiveTab "coverLetters")}}
+        >
+          Cover Letters ({{this.filteredCoverLetters.length}})
+        </button>
+        <button
+          type="button"
+          class="min-h-[44px] whitespace-nowrap border-b-2 px-1 text-sm font-medium
+            {{if
+              (eq this.activeTab 'answers')
+              'border-accent-500 text-accent-600 dark:border-accent-400 dark:text-accent-300'
+              'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-200'
+            }}"
+          {{on "click" (fn this.setActiveTab "answers")}}
+        >
+          Answers ({{this.filteredAnswers.length}})
+        </button>
+      </nav>
+    </div>
 
-  <div class="favorites-controls">
-    <button
-      type="button"
-      class="btn {{if this.showOnlyFavorites 'primary'}}"
-      {{on "click" this.toggleFilterMode}}
-    >
-      {{if this.showOnlyFavorites "Show All" "Show Favorites Only"}}
-    </button>
-  </div>
-
-  <div class="tabs">
-    <button
-      type="button"
-      class="tab-button {{if (eq this.activeTab 'resumes') 'active'}}"
-      {{on "click" (fn this.setActiveTab "resumes")}}
-    >
-      Resumes ({{this.filteredResumes.length}})
-    </button>
-    <button
-      type="button"
-      class="tab-button {{if (eq this.activeTab 'coverLetters') 'active'}}"
-      {{on "click" (fn this.setActiveTab "coverLetters")}}
-    >
-      Cover Letters ({{this.filteredCoverLetters.length}})
-    </button>
-    <button
-      type="button"
-      class="tab-button {{if (eq this.activeTab 'answers') 'active'}}"
-      {{on "click" (fn this.setActiveTab "answers")}}
-    >
-      Answers ({{this.filteredAnswers.length}})
-    </button>
-  </div>
-
-  <div class="tab-content">
+    {{! CC-267 (phase D2 of CC-260): all three tabs render through
+      <ResponsiveList> — the real table at ≥md, labeled stacked cards below
+      768px. The favorite toggle moved from its own leading column into the
+      @actions group so it keeps a real tap target on a card and so this
+      page matches resumes/index (Resumes::Compact already grouped it with
+      Edit/Delete). }}
     {{#if (eq this.activeTab "resumes")}}
       <div class="mb-6">
-        <h2>Resumes</h2>
-        {{#if this.filteredResumes.length}}
-          <div
-            class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-          >
-            <table class="min-w-full text-sm">
-              <thead>
-                <tr>
-                  <th>Favorite</th>
-                  <th>Name</th>
-                  <th>Notes</th>
-                  <th>Job Applications</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{#each this.filteredResumes as |resume|}}
-                  <tr>
-                    <td>
-                      <Buttons::Favorite
-                        @model={{resume}}
-                        @onToggle={{fn this.toggleFavorite resume}}
-                      />
-                    </td>
-                    <td>
-                      <LinkTo @route="resumes.show" @model={{resume}}>
-                        {{resume.name}}
-                      </LinkTo>
-                    </td>
-                    <td>{{or resume.notes "N/A"}}</td>
-                    <td>{{resume.jobApplications.length}}</td>
-                    <td>
-                      <LinkTo
-                        @route="resumes.edit"
-                        @model={{resume}}
-                        class="btn small"
-                      >
-                        Edit
-                      </LinkTo>
-                    </td>
-                  </tr>
-                {{/each}}
-              </tbody>
-            </table>
-          </div>
-        {{else}}
-          <EmptyState @message="No resumes found." />
-        {{/if}}
+        <ResponsiveList
+          @items={{this.filteredResumes}}
+          @emptyMessage="No resumes found."
+        >
+          <:header as |h|>
+            {{! Same column order as resumes/index — a resume row should not
+              be laid out two different ways in the same app. }}
+            <h.col>Name</h.col>
+            <h.col @align="center">Applications</h.col>
+            <h.col>Notes</h.col>
+            <h.col @align="right">Actions</h.col>
+          </:header>
+          <:row as |resume r|>
+            <r.cell @primary={{true}}>
+              <LinkTo @route="resumes.show" @model={{resume.id}}>
+                {{resume.name}}
+              </LinkTo>
+            </r.cell>
+            {{! The server-sent count, NOT resume.jobApplications.length —
+              reading an unloaded async hasMany in a template fires one
+              extra request per row on render. }}
+            <r.cell @label="Applications" @align="center">
+              {{if resume.jobApplicationCount resume.jobApplicationCount 0}}
+            </r.cell>
+            <r.cell
+              @label="Notes"
+              @value={{resume.notes}}
+              @dropIfEmpty={{true}}
+            >
+              {{#if resume.notes}}
+                {{resume.notes}}
+              {{else}}
+                <span class="text-gray-400 dark:text-gray-600">&mdash;</span>
+              {{/if}}
+            </r.cell>
+            <r.cell @actions={{true}}>
+              <Buttons::Favorite
+                @model={{resume}}
+                @onToggle={{fn this.toggleFavorite resume}}
+              />
+              <LinkTo
+                @route="resumes.edit"
+                @model={{resume.id}}
+                class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              >Edit</LinkTo>
+            </r.cell>
+          </:row>
+        </ResponsiveList>
       </div>
     {{/if}}
 
     {{#if (eq this.activeTab "coverLetters")}}
       <div class="mb-6">
-        <h2>Cover Letters</h2>
-        {{#if this.filteredCoverLetters.length}}
-          <div
-            class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-          >
-            <table class="min-w-full text-sm">
-              <thead>
-                <tr>
-                  <th>Favorite</th>
-                  <th>Name</th>
-                  <th>Content Preview</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{#each this.filteredCoverLetters as |coverLetter|}}
-                  <tr>
-                    <td>
-                      <Buttons::Favorite
-                        @model={{coverLetter}}
-                        @onToggle={{fn this.toggleFavorite coverLetter}}
-                      />
-                    </td>
-                    <td>
-                      <LinkTo
-                        @route="cover-letters.show"
-                        @model={{coverLetter}}
-                      >
-                        {{coverLetter.name}}
-                      </LinkTo>
-                    </td>
-                    <td class="preview-text">
-                      {{#if coverLetter.content}}
-                        {{truncate coverLetter.content 100}}
-                      {{else}}
-                        N/A
-                      {{/if}}
-                    </td>
-                    <td>
-                      <LinkTo
-                        @route="cover-letters.edit"
-                        @model={{coverLetter}}
-                        class="btn small"
-                      >
-                        Edit
-                      </LinkTo>
-                    </td>
-                  </tr>
-                {{/each}}
-              </tbody>
-            </table>
-          </div>
-        {{else}}
-          <EmptyState @message="No cover letters found." />
-        {{/if}}
+        <ResponsiveList
+          @items={{this.filteredCoverLetters}}
+          @emptyMessage="No cover letters found."
+        >
+          <:header as |h|>
+            <h.col>Job Post</h.col>
+            <h.col>Content Preview</h.col>
+            <h.col @align="right">Actions</h.col>
+          </:header>
+          <:row as |coverLetter r|>
+            {{! A cover letter has no name of its own — CoverLetters::List
+              titles it by its job post, and this page follows that. }}
+            <r.cell @primary={{true}}>
+              <LinkTo @route="cover-letters.show" @model={{coverLetter.id}}>
+                {{#if coverLetter.jobPost.title}}
+                  {{coverLetter.jobPost.title}}
+                {{else}}
+                  Untitled cover letter
+                {{/if}}
+              </LinkTo>
+            </r.cell>
+            <r.cell
+              @label="Content Preview"
+              @value={{coverLetter.content}}
+              @dropIfEmpty={{true}}
+            >
+              {{#if coverLetter.content}}
+                {{truncate coverLetter.content 100}}
+              {{else}}
+                <span class="text-gray-400 dark:text-gray-600">&mdash;</span>
+              {{/if}}
+            </r.cell>
+            <r.cell @actions={{true}}>
+              <Buttons::Favorite
+                @model={{coverLetter}}
+                @onToggle={{fn this.toggleFavorite coverLetter}}
+              />
+              <LinkTo
+                @route="cover-letters.edit"
+                @model={{coverLetter.id}}
+                class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              >Edit</LinkTo>
+            </r.cell>
+          </:row>
+        </ResponsiveList>
       </div>
     {{/if}}
 
     {{#if (eq this.activeTab "answers")}}
       <div class="mb-6">
-        <h2>Answers</h2>
-        {{#if this.filteredAnswers.length}}
-          <div
-            class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-          >
-            <table class="min-w-full text-sm">
-              <thead>
-                <tr>
-                  <th>Favorite</th>
-                  <th>Question</th>
-                  <th>Answer Preview</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{#each this.filteredAnswers as |answer|}}
-                  <tr>
-                    <td>
-                      <Buttons::Favorite
-                        @model={{answer}}
-                        @onToggle={{fn this.toggleFavorite answer}}
-                      />
-                    </td>
-                    <td>
-                      {{#if answer.question}}
-                        <LinkTo
-                          @route="questions.show"
-                          @model={{answer.question}}
-                        >
-                          {{truncate answer.question.text 50}}
-                        </LinkTo>
-                      {{else}}
-                        N/A
-                      {{/if}}
-                    </td>
-                    <td class="preview-text">
-                      {{#if answer.text}}
-                        {{truncate answer.text 100}}
-                      {{else}}
-                        N/A
-                      {{/if}}
-                    </td>
-                    <td>
-                      <LinkTo
-                        @route="answers.edit"
-                        @model={{answer}}
-                        class="btn small"
-                      >
-                        Edit
-                      </LinkTo>
-                    </td>
-                  </tr>
-                {{/each}}
-              </tbody>
-            </table>
-          </div>
-        {{else}}
-          <EmptyState @message="No answers found." />
-        {{/if}}
+        <ResponsiveList
+          @items={{this.filteredAnswers}}
+          @emptyMessage="No answers found."
+        >
+          <:header as |h|>
+            <h.col>Question</h.col>
+            <h.col>Answer Preview</h.col>
+            <h.col @align="right">Actions</h.col>
+          </:header>
+          <:row as |answer r|>
+            <r.cell @primary={{true}}>
+              {{! Answer and Question both hold their body in `content`;
+                this page previously read a `text` attribute neither model
+                has, so every row rendered blank. }}
+              {{#if answer.question.id}}
+                <LinkTo @route="questions.show" @model={{answer.question.id}}>
+                  {{! DOUBLE .content is deliberate: the first resolves the
+                    async belongsTo proxy to the Question record, the second
+                    is that record's own `content` attribute. A single
+                    .content renders the proxy itself
+                    (<model::question:…>). }}
+                  {{truncate answer.question.content.content 50}}
+                </LinkTo>
+              {{else}}
+                <span class="text-gray-400 dark:text-gray-600">&mdash;</span>
+              {{/if}}
+            </r.cell>
+            <r.cell
+              @label="Answer Preview"
+              @value={{answer.content}}
+              @dropIfEmpty={{true}}
+            >
+              {{#if answer.content}}
+                {{truncate answer.content 100}}
+              {{else}}
+                <span class="text-gray-400 dark:text-gray-600">&mdash;</span>
+              {{/if}}
+            </r.cell>
+            <r.cell @actions={{true}}>
+              <Buttons::Favorite
+                @model={{answer}}
+                @onToggle={{fn this.toggleFavorite answer}}
+              />
+              <LinkTo
+                @route="answers.edit"
+                @model={{answer.id}}
+                class="rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              >Edit</LinkTo>
+            </r.cell>
+          </:row>
+        </ResponsiveList>
       </div>
     {{/if}}
-  </div>
-</div>
+  </:main>
+</RouteLayout>

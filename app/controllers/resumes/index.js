@@ -7,10 +7,6 @@ export default class ResumesIndexController extends Controller {
   @service flashMessages;
   @service spinner;
 
-  get noResumes() {
-    return !this.model?.length;
-  }
-
   @action deleteResume(resume) {
     if (!confirm('Delete this resume? This cannot be undone.')) return;
     this.spinner
