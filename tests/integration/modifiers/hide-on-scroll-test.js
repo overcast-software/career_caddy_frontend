@@ -7,9 +7,12 @@ import { hbs } from 'ember-cli-htmlbars';
 // shell makes that the scroller and the window never scrolls. So the fixture
 // has to be a REAL scroller: a fixed height with taller content, or scrollTop
 // silently stays 0 and every assertion passes for the wrong reason.
+//
+// `media="all"` because the default gate is phone-only and the test browser
+// is not a phone; the mechanics under test are the same at any width.
 const SCROLLER = hbs`
   <div class="course-main" style="height:100px;overflow-y:auto" data-test-scroller>
-    <div class="tee-box" {{hide-on-scroll}} data-test-bar></div>
+    <div class="tee-box" {{hide-on-scroll media="all"}} data-test-bar></div>
     <div style="height:2000px"></div>
   </div>
 `;
@@ -82,7 +85,7 @@ module('Integration | Modifier | hide-on-scroll', function (hooks) {
   test('honours an explicit threshold', async function (assert) {
     await render(hbs`
       <div class="course-main" style="height:100px;overflow-y:auto" data-test-scroller>
-        <div class="tee-box" {{hide-on-scroll threshold=300}} data-test-bar></div>
+        <div class="tee-box" {{hide-on-scroll threshold=300 media="all"}} data-test-bar></div>
         <div style="height:2000px"></div>
       </div>
     `);
@@ -95,6 +98,24 @@ module('Integration | Modifier | hide-on-scroll', function (hooks) {
 
     await scrollTo(scroller, 600);
     assert.dom('[data-test-bar]').hasClass(HIDDEN);
+  });
+
+  test('never hides while the media query does not match', async function (assert) {
+    await render(hbs`
+      <div class="course-main" style="height:100px;overflow-y:auto" data-test-scroller>
+        <div class="tee-box" {{hide-on-scroll media="not all"}} data-test-bar></div>
+        <div style="height:2000px"></div>
+      </div>
+    `);
+    const scroller = this.element.querySelector('[data-test-scroller]');
+
+    await scrollTo(scroller, 200);
+    assert
+      .dom('[data-test-bar]')
+      .doesNotHaveClass(
+        HIDDEN,
+        'phone-only by default: a non-matching query leaves the bar in place',
+      );
   });
 
   test('is inert when there is no scroller to listen on', async function (assert) {

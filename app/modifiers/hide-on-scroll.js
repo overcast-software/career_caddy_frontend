@@ -17,6 +17,12 @@ import { modifier } from 'ember-modifier';
 // The show/hide itself is Tailwind utilities on the element, not a new CSS
 // block: `transition-transform` (+ duration/easing) is applied once on
 // install, and `-translate-y-full` is toggled.
+//
+// PHONE-ONLY BY DEFAULT: the CC-260 epic is the mobile epic and CC-269's AC
+// is stated at 390px, so the hide only runs while `media` matches
+// (default `(max-width: 767px)`, the same boundary as the app.css phone
+// block). Above it the bar stays put; crossing back above the breakpoint
+// while hidden restores it. Pass `media="all"` to hide at every width.
 
 const DEFAULTS = {
   // Ignore sub-pixel and rubber-band jitter; only a deliberate gesture
@@ -25,6 +31,8 @@ const DEFAULTS = {
   // Never hide while the user is still near the top of the document —
   // otherwise the bar flickers away on the first flick of a short page.
   revealAbove: 24,
+  // Only hide while this media query matches (see header comment).
+  media: '(max-width: 767px)',
 };
 
 const TRANSITION_CLASSES = [
@@ -40,6 +48,7 @@ export default modifier(
     const selector = named.scroller ?? '.course-main';
     const threshold = named.threshold ?? DEFAULTS.threshold;
     const revealAbove = named.revealAbove ?? DEFAULTS.revealAbove;
+    const media = named.media ?? DEFAULTS.media;
 
     const scroller =
       element.closest(selector) ??
@@ -51,9 +60,15 @@ export default modifier(
 
     element.classList.add(...TRANSITION_CLASSES);
 
+    const mq = element.ownerDocument.defaultView.matchMedia(media);
     let last = scroller.scrollTop;
 
     const onScroll = () => {
+      if (!mq.matches) {
+        element.classList.remove(HIDDEN_CLASS);
+        return;
+      }
+
       const top = scroller.scrollTop;
       const delta = top - last;
 
@@ -67,10 +82,18 @@ export default modifier(
       }
     };
 
+    // Resizing out of the phone range while hidden must not strand the bar
+    // off-screen.
+    const onMedia = () => {
+      if (!mq.matches) element.classList.remove(HIDDEN_CLASS);
+    };
+
     scroller.addEventListener('scroll', onScroll, { passive: true });
+    mq.addEventListener('change', onMedia);
 
     return () => {
       scroller.removeEventListener('scroll', onScroll);
+      mq.removeEventListener('change', onMedia);
       element.classList.remove(HIDDEN_CLASS, ...TRANSITION_CLASSES);
     };
   },
